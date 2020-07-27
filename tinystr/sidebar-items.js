@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Enum to store the various types of errors that can cause parsing a TinyStr to fail."]],"struct":[["TinyStr16","A tiny string that is from 1 to 16 non-NUL ASCII characters."],["TinyStr4","A tiny string that is from 1 to 4 non-NUL ASCII characters."],["TinyStr8","A tiny string that is from 1 to 8 non-NUL ASCII characters."]]});

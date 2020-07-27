@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["JoinHandleExt","Unix-specific extensions to [`thread::JoinHandle`]."]],"type":[["RawPthread",""]]});

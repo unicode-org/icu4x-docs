@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["RulesSelector","An enum storing models of handling plural rules selection."]],"mod":[["cldr_resource",""],["io",""],["provider","Traits for Data Provider and a dummy Data Provider"]],"type":[["PluralRuleList","A list of tuples of ([`PluralCategory`]-[`ast::Condition`]) pairs."],["PluralRulesFn","A raw function pointer to a `PluralRulesFn`"]]});

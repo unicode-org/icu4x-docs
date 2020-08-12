@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["get_resource","Safety"],["get_rules",""]],"struct":[["DataProvider",""]]});

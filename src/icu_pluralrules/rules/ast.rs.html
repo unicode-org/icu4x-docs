@@ -411,6 +411,22 @@
 <span id="411">411</span>
 <span id="412">412</span>
 <span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! `AST` provides a set of Syntax Tree Nodes used to store</span>
 <span class="doccomment">//! the output of [`parse`] method that is used in [`test_condition`] method</span>
@@ -419,12 +435,12 @@
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! use icu_pluralrules::rules::parse;</span>
+<span class="doccomment">//! use icu_pluralrules::rules::parse_condition;</span>
 <span class="doccomment">//! use icu_pluralrules::rules::ast::*;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let input = &quot;i = 1&quot;;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let ast = parse(input.as_bytes())</span>
+<span class="doccomment">//! let ast = parse_condition(input.as_bytes())</span>
 <span class="doccomment">//!     .expect(&quot;Parsing failed.&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! assert_eq!(ast, Condition(Box::new([</span>
@@ -450,19 +466,59 @@
 <span class="doccomment">//! [`test_condition`]: ../fn.test_condition.html</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">RangeInclusive</span>;
 
+<span class="doccomment">/// A complete AST representation of a plural rule.</span>
+<span class="doccomment">/// Comprises a vector of AndConditions and optionally a set of Samples.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_pluralrules::rules::ast::*;</span>
+<span class="doccomment">/// use icu_pluralrules::rules::{parse, parse_condition};</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let condition = parse_condition(b&quot;i = 5 or v = 2&quot;)</span>
+<span class="doccomment">///     .expect(&quot;Parsing failed.&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let samples = Samples {</span>
+<span class="doccomment">///     integer: Some(SampleList {</span>
+<span class="doccomment">///         sample_ranges: Box::new([SampleRange {</span>
+<span class="doccomment">///             lower_val: DecimalValue(&quot;2&quot;.to_string()),</span>
+<span class="doccomment">///             upper_val: None,</span>
+<span class="doccomment">///         }]),</span>
+<span class="doccomment">///         ellipsis: true</span>
+<span class="doccomment">///     }),</span>
+<span class="doccomment">///     decimal: Some(SampleList {</span>
+<span class="doccomment">///         sample_ranges: Box::new([SampleRange {</span>
+<span class="doccomment">///             lower_val: DecimalValue(&quot;2.5&quot;.to_string()),</span>
+<span class="doccomment">///             upper_val: None,</span>
+<span class="doccomment">///         }]),</span>
+<span class="doccomment">///         ellipsis: false</span>
+<span class="doccomment">///     }),</span>
+<span class="doccomment">/// };</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let rule = Rule {</span>
+<span class="doccomment">///     condition,</span>
+<span class="doccomment">///     samples: Some(samples),</span>
+<span class="doccomment">/// };</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(</span>
+<span class="doccomment">///     rule,</span>
+<span class="doccomment">///     parse(&quot;i = 5 or v = 2 @integer 2, … @decimal 2.5&quot;.as_bytes())</span>
+<span class="doccomment">///          .expect(&quot;Parsing failed&quot;)</span>
+<span class="doccomment">/// )</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Rule</span> {
     <span class="kw">pub</span> <span class="ident">condition</span>: <span class="ident">Condition</span>,
     <span class="kw">pub</span> <span class="ident">samples</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Samples</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// A complete (and the only complete) AST representation of a plural rule. Comprises a vector of AndConditions.</span>
+<span class="doccomment">/// A complete AST representation of a plural rule&#39;s condition. Comprises a vector of AndConditions.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_pluralrules::rules::ast::*;</span>
-<span class="doccomment">/// use icu_pluralrules::rules::parse;</span>
+<span class="doccomment">/// use icu_pluralrules::rules::parse_condition;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let condition = Condition(Box::new([</span>
 <span class="doccomment">///     AndCondition(Box::new([Relation {</span>
@@ -485,7 +541,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(</span>
 <span class="doccomment">///     condition,</span>
-<span class="doccomment">///     parse(b&quot;i = 5 or v = 2&quot;)</span>
+<span class="doccomment">///     parse_condition(b&quot;i = 5 or v = 2&quot;)</span>
 <span class="doccomment">///          .expect(&quot;Parsing failed&quot;)</span>
 <span class="doccomment">/// )</span>
 <span class="doccomment">/// ```</span>
@@ -571,7 +627,7 @@
 <span class="doccomment">/// | Eq | &quot;=&quot; |</span>
 <span class="doccomment">/// | NotEq | &quot;!=&quot; |</span>
 <span class="doccomment">///</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Operator</span> {
     <span class="ident">Eq</span>,
     <span class="ident">NotEq</span>,
@@ -621,7 +677,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Operand::I;</span>
 <span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Operand</span> {
     <span class="doccomment">/// Absolute value of input</span>
     <span class="ident">N</span>,
@@ -720,20 +776,14 @@
 <span class="doccomment">/// Samples {</span>
 <span class="doccomment">///     integer: Some(SampleList {</span>
 <span class="doccomment">///         sample_ranges: Box::new([SampleRange {</span>
-<span class="doccomment">///             lower_val: DecimalValue {</span>
-<span class="doccomment">///                 integer: Value(2),</span>
-<span class="doccomment">///                 decimal: None</span>
-<span class="doccomment">///             },</span>
+<span class="doccomment">///             lower_val: DecimalValue(&quot;2&quot;.to_string()),</span>
 <span class="doccomment">///             upper_val: None,</span>
 <span class="doccomment">///         }]),</span>
 <span class="doccomment">///         ellipsis: true</span>
 <span class="doccomment">///     }),</span>
 <span class="doccomment">///     decimal: Some(SampleList {</span>
 <span class="doccomment">///         sample_ranges: Box::new([SampleRange {</span>
-<span class="doccomment">///             lower_val: DecimalValue {</span>
-<span class="doccomment">///                 integer: Value(2),</span>
-<span class="doccomment">///                 decimal: Some(Value(5))</span>
-<span class="doccomment">///             },</span>
+<span class="doccomment">///             lower_val: DecimalValue(&quot;2.5&quot;.to_string()),</span>
 <span class="doccomment">///             upper_val: None,</span>
 <span class="doccomment">///         }]),</span>
 <span class="doccomment">///         ellipsis: false</span>
@@ -759,14 +809,8 @@
 <span class="doccomment">/// SampleList {</span>
 <span class="doccomment">///     sample_ranges: Box::new([</span>
 <span class="doccomment">///         SampleRange {</span>
-<span class="doccomment">///             lower_val: DecimalValue {</span>
-<span class="doccomment">///                 integer: Value(0),</span>
-<span class="doccomment">///                 decimal: Some(Value(0)),</span>
-<span class="doccomment">///             },</span>
-<span class="doccomment">///             upper_val: Some(DecimalValue {</span>
-<span class="doccomment">///                 integer: Value(1),</span>
-<span class="doccomment">///                 decimal: Some(Value(5)),</span>
-<span class="doccomment">///             }),</span>
+<span class="doccomment">///             lower_val: DecimalValue(&quot;0.0&quot;.to_string()),</span>
+<span class="doccomment">///             upper_val: Some(DecimalValue(&quot;1.5&quot;.to_string())),</span>
 <span class="doccomment">///         }</span>
 <span class="doccomment">///     ]),</span>
 <span class="doccomment">///     ellipsis: true</span>
@@ -789,14 +833,8 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_pluralrules::rules::ast::*;</span>
 <span class="doccomment">/// SampleRange {</span>
-<span class="doccomment">///     lower_val: DecimalValue {</span>
-<span class="doccomment">///         integer: Value(0),</span>
-<span class="doccomment">///         decimal: Some(Value(0)),</span>
-<span class="doccomment">///     },</span>
-<span class="doccomment">///     upper_val: Some(DecimalValue {</span>
-<span class="doccomment">///         integer: Value(1),</span>
-<span class="doccomment">///         decimal: Some(Value(5)),</span>
-<span class="doccomment">///     }),</span>
+<span class="doccomment">///     lower_val: DecimalValue(&quot;0.0&quot;.to_string()),</span>
+<span class="doccomment">///     upper_val: Some(DecimalValue(&quot;1.5&quot;.to_string())),</span>
 <span class="doccomment">/// };</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
@@ -810,20 +848,14 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```text</span>
-<span class="doccomment">/// 1.5</span>
+<span class="doccomment">/// 1.00</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_pluralrules::rules::ast::*;</span>
-<span class="doccomment">/// DecimalValue {</span>
-<span class="doccomment">///     integer: Value(1),</span>
-<span class="doccomment">///     decimal: Some(Value(5)),</span>
-<span class="doccomment">/// };</span>
+<span class="doccomment">/// DecimalValue(&quot;1.00&quot;.to_string());</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DecimalValue</span> {
-    <span class="kw">pub</span> <span class="ident">integer</span>: <span class="ident">Value</span>,
-    <span class="kw">pub</span> <span class="ident">decimal</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span>,
-}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DecimalValue</span>(<span class="kw">pub</span> <span class="ident">String</span>);
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "icu_pluralrules";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error",""]],"struct":[["JsonDataProvider","A data provider reading from a JSON file."]]});

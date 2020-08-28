@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["icu_data_provider_json"] = [{"text":"impl&lt;'a&gt; <a class=\"trait\" href=\"icu_data_provider/trait.DataProvider.html\" title=\"trait icu_data_provider::DataProvider\">DataProvider</a>&lt;'a, 'a&gt; for <a class=\"struct\" href=\"icu_data_provider_json/struct.JsonDataProvider.html\" title=\"struct icu_data_provider_json::JsonDataProvider\">JsonDataProvider</a>","synthetic":false,"types":["icu_data_provider_json::JsonDataProvider"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

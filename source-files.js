@@ -1,5 +1,4 @@
 var N = null;var sourcesIndex = {};
-sourcesIndex["generate_res"] = {"name":"","files":["generate_res.rs"]};
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x_cldr_export"] = {"name":"","files":["icu4x-cldr-export.rs"]};
@@ -8,6 +7,6 @@ sourcesIndex["icu_data_provider"] = {"name":"","dirs":[{"name":"structs","files"
 sourcesIndex["icu_fs_data_provider"] = {"name":"","dirs":[{"name":"export","files":["aliasing.rs","fs_exporter.rs","mod.rs","serializers.rs"]}],"files":["error.rs","fs_data_provider.rs","lib.rs","manifest.rs"]};
 sourcesIndex["icu_locale"] = {"name":"","dirs":[{"name":"extensions","dirs":[{"name":"private","files":["key.rs","mod.rs"]},{"name":"transform","files":["fields.rs","key.rs","mod.rs","value.rs"]},{"name":"unicode","files":["attribute.rs","attributes.rs","key.rs","keywords.rs","mod.rs","value.rs"]}],"files":["mod.rs"]},{"name":"parser","files":["errors.rs","langid.rs","locale.rs","mod.rs"]},{"name":"serde","files":["langid.rs","mod.rs"]},{"name":"subtags","files":["language.rs","mod.rs","region.rs","script.rs","variant.rs","variants.rs"]}],"files":["langid.rs","lib.rs","locale.rs"]};
 sourcesIndex["icu_num_util"] = {"name":"","files":["fixed_decimal.rs","lib.rs","uint_iterator.rs"]};
-sourcesIndex["icu_pluralrules"] = {"name":"","dirs":[{"name":"data","dirs":[{"name":"io","dirs":[{"name":"bincode","files":["mod.rs"]},{"name":"json","files":["mod.rs"]}],"files":["mod.rs"]}],"files":["cldr_resource.rs","mod.rs","provider.rs"]},{"name":"rules","files":["ast.rs","lexer.rs","mod.rs","parser.rs","resolver.rs","serializer.rs"]}],"files":["lib.rs","operands.rs"]};
+sourcesIndex["icu_pluralrules"] = {"name":"","dirs":[{"name":"rules","files":["ast.rs","lexer.rs","mod.rs","parser.rs","resolver.rs","serializer.rs"]}],"files":["data.rs","error.rs","lib.rs","operands.rs"]};
 sourcesIndex["icu_unicodeset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","uniset.rs","utils.rs"]};
 createSourceSidebar();

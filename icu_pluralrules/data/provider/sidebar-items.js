@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["DataProviderError","A list of possible error outcomes for the [`DataProviderType`] trait."]],"struct":[["DummyDataProvider","A dummy implementation of the [`DataProviderType`] for use in tests and examples."]],"trait":[["DataProviderType","Trait required to be implemented by any Data Provider."]]});

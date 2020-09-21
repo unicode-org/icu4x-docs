@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["CldrError",""]],"mod":[["transform",""]],"struct":[["CldrPaths","Struct containing filesystem paths to the CLDR JSON resource directories. The fields should be Ok if present. They default to Err when not present."]]});

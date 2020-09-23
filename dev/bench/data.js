@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1600742786596,
+  "lastUpdate": 1600831372713,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16,127 +16,37 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "ab00f54f6ce0fd898a6f8a6d70e77a24926a3dcd",
-          "message": "Add subset of dates data to DataProvider (#256)\n\n* Add subset of dates data to DataProvider\r\n\r\n* Apply feedback\r\n\r\n* Make some fields mandatory\r\n\r\n* Make StandAlone Widths optional\r\n\r\n* Make short width optional as per UTS 35\r\n\r\n* Readd skipping if short width is none\r\n\r\n* Re-add default to empty values for Invariant",
-          "timestamp": "2020-09-21T19:38:12-07:00",
-          "tree_id": "2f153a1b7be0f292f81c5eb52d1028935339ebaa",
-          "url": "https://github.com/unicode-org/icu4x/commit/ab00f54f6ce0fd898a6f8a6d70e77a24926a3dcd"
+          "id": "97e53be62ec500175572a4f9588bf2bdfe99e9cd",
+          "message": "Adds support for CldrJSONDataProvider for Dates (based on #256) (#258)\n\n* Add support for Dates to CLDRJsonDataProvider\r\n\r\n* Apply feedback",
+          "timestamp": "2020-09-22T20:18:24-07:00",
+          "tree_id": "92b70d9e32b1bca60515fbc73fa21b4d9c190d28",
+          "url": "https://github.com/unicode-org/icu4x/commit/97e53be62ec500175572a4f9588bf2bdfe99e9cd"
         },
-        "date": 1600742785963,
+        "date": 1600831371955,
         "tool": "cargo",
         "benches": [
           {
-            "name": "langid/construct/langid",
-            "value": 639,
-            "range": "± 48",
+            "name": "uniset/contains/best",
+            "value": 10,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/construct/locale",
-            "value": 1094,
-            "range": "± 133",
+            "name": "uniset/contains/worst",
+            "value": 11,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/to_string/langid",
-            "value": 1979,
-            "range": "± 158",
+            "name": "uniset/contains_range/best",
+            "value": 10,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/to_string/locale",
-            "value": 1945,
-            "range": "± 164",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/langid",
-            "value": 15,
+            "name": "uniset/contains_range/worst",
+            "value": 11,
             "range": "± 1",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/locale",
-            "value": 15,
-            "range": "± 1",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/str/langid",
-            "value": 2073,
-            "range": "± 329",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/str/locale",
-            "value": 2227,
-            "range": "± 232",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/langid",
-            "value": 3210,
-            "range": "± 295",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/locale",
-            "value": 5113,
-            "range": "± 481",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/construct/locale",
-            "value": 2409,
-            "range": "± 257",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/to_string/locale",
-            "value": 3277,
-            "range": "± 445",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/struct/locale",
-            "value": 118,
-            "range": "± 9",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/str/locale",
-            "value": 3137,
-            "range": "± 315",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/canonicalize/locale",
-            "value": 6306,
-            "range": "± 1576",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "language_subtag_parse",
-            "value": 301,
-            "range": "± 34",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "script_subtag_parse",
-            "value": 111,
-            "range": "± 10",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "region_subtag_parse",
-            "value": 114,
-            "range": "± 10",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "variant_subtag_parse",
-            "value": 236,
-            "range": "± 28",
             "unit": "ns/iter"
           }
         ]

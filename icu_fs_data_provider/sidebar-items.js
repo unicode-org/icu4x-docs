@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FsDataError",""]],"mod":[["export","The `export` feature enables you to pull all data from some other data provider and persist it on the filesystem to be read by an FsDataProvider at runtime."],["manifest",""]],"struct":[["FsDataProvider","A data provider that reads ICU4X data from a filesystem directory."]]});

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1601584428040,
+  "lastUpdate": 1601584524063,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -22,37 +22,121 @@ window.BENCHMARK_DATA = {
           "tree_id": "cca4272fa893e7481952a652fd042f3698158b81",
           "url": "https://github.com/unicode-org/icu4x/commit/bd4d2a5b7057fed49717780872cbe5fb7d137d4a"
         },
-        "date": 1601584427293,
+        "date": 1601584523387,
         "tool": "cargo",
         "benches": [
           {
-            "name": "isize/smaller",
-            "value": 30496,
-            "range": "± 3306",
+            "name": "langid/construct/langid",
+            "value": 724,
+            "range": "± 43",
             "unit": "ns/iter"
           },
           {
-            "name": "isize/larger",
-            "value": 70755,
-            "range": "± 7388",
+            "name": "langid/construct/locale",
+            "value": 1150,
+            "range": "± 59",
             "unit": "ns/iter"
           },
           {
-            "name": "to_string/908070605040302010",
-            "value": 260,
-            "range": "± 16",
+            "name": "langid/to_string/langid",
+            "value": 2167,
+            "range": "± 142",
             "unit": "ns/iter"
           },
           {
-            "name": "write_to/908070605040302010",
-            "value": 122,
-            "range": "± 14",
+            "name": "langid/to_string/locale",
+            "value": 2175,
+            "range": "± 187",
             "unit": "ns/iter"
           },
           {
-            "name": "from_string/1000000001",
-            "value": 70,
-            "range": "± 5",
+            "name": "langid/compare/struct/langid",
+            "value": 16,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/struct/locale",
+            "value": 16,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/str/langid",
+            "value": 2372,
+            "range": "± 147",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/str/locale",
+            "value": 2365,
+            "range": "± 130",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/canonicalize/langid",
+            "value": 3512,
+            "range": "± 188",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/canonicalize/locale",
+            "value": 5702,
+            "range": "± 323",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/construct/locale",
+            "value": 2568,
+            "range": "± 170",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale",
+            "value": 3409,
+            "range": "± 426",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/struct/locale",
+            "value": 117,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/str/locale",
+            "value": 3530,
+            "range": "± 216",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/canonicalize/locale",
+            "value": 7206,
+            "range": "± 513",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "language_subtag_parse",
+            "value": 338,
+            "range": "± 20",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "script_subtag_parse",
+            "value": 125,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "region_subtag_parse",
+            "value": 134,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "variant_subtag_parse",
+            "value": 274,
+            "range": "± 18",
             "unit": "ns/iter"
           }
         ]

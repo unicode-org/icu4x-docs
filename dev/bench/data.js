@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1601516738318,
+  "lastUpdate": 1601516878773,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -22,31 +22,37 @@ window.BENCHMARK_DATA = {
           "tree_id": "04073ae69de74449596bfad966e09e6b336437e4",
           "url": "https://github.com/unicode-org/icu4x/commit/3c7bc2dd61855233b90d0cc75e6e6642d6c695f4"
         },
-        "date": 1601516736292,
+        "date": 1601516876730,
         "tool": "cargo",
         "benches": [
           {
-            "name": "uniset/contains/best",
-            "value": 22,
-            "range": "± 1",
+            "name": "isize/smaller",
+            "value": 31586,
+            "range": "± 2196",
             "unit": "ns/iter"
           },
           {
-            "name": "uniset/contains/worst",
-            "value": 22,
-            "range": "± 1",
+            "name": "isize/larger",
+            "value": 73983,
+            "range": "± 6540",
             "unit": "ns/iter"
           },
           {
-            "name": "uniset/contains_range/best",
-            "value": 22,
-            "range": "± 1",
+            "name": "to_string/908070605040302010",
+            "value": 270,
+            "range": "± 24",
             "unit": "ns/iter"
           },
           {
-            "name": "uniset/contains_range/worst",
-            "value": 22,
-            "range": "± 2",
+            "name": "write_to/908070605040302010",
+            "value": 123,
+            "range": "± 10",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 75,
+            "range": "± 5",
             "unit": "ns/iter"
           }
         ]

@@ -1,14 +1,14 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1600968374357,
+  "lastUpdate": 1601516738318,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
       {
         "commit": {
           "author": {
-            "email": "filmil@gmail.com",
-            "name": "Filip Filmar",
-            "username": "filmil"
+            "email": "43288204+SahandFarhoodi@users.noreply.github.com",
+            "name": "Sahand Farhoodi",
+            "username": "SahandFarhoodi"
           },
           "committer": {
             "email": "noreply@github.com",
@@ -16,127 +16,37 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "f49fdbece75590675fb1c70057c7257251e2fd2e",
-          "message": "Feature use suggestions added to the style guide (#247)\n\nAdds specific instructions about hiding new dependencies or debug code\r\nbehind new features.\r\n\r\nCloses #219",
-          "timestamp": "2020-09-24T10:17:29-07:00",
-          "tree_id": "052149a264936cd6539d120dcc147b4bfea4cf85",
-          "url": "https://github.com/unicode-org/icu4x/commit/f49fdbece75590675fb1c70057c7257251e2fd2e"
+          "id": "3c7bc2dd61855233b90d0cc75e6e6642d6c695f4",
+          "message": "Adding from_str to FixedDecimal (#270)\n\n* Implemented from_str for FixedDecimal and added two tests for it, added Syntax to enum Error for FixedDecimal\r\n\r\n* Handled the case when the input string has only 0 in it and Added tests for it. Added test for test_from_str_usize_limits\r\n\r\n* correction for clipping errors and format error\r\n\r\n* Corrections for clipping errors and format error\r\n\r\n* fixing merging issues\r\n\r\n* fixing merging issues\r\n\r\n* run cargo fmt\r\n\r\n* Fixing two clipping errors\r\n\r\n* cleaning code and adding test cases\r\n\r\n* Added explanations for Error::Syntax\r\n\r\n* resolving warnings related to my code\r\n\r\n* corrections for documentation of Error::Syntax\r\n\r\n* fixing clipping errors\r\n\r\n* fixing new clipping errors\r\n\r\n* Applied cosmetic suggestions of Shane\r\n\r\n* deleted not necessary check on length of FixedDecimal::digits\r\n\r\n* adding from_str to benches",
+          "timestamp": "2020-09-30T21:41:13-04:00",
+          "tree_id": "04073ae69de74449596bfad966e09e6b336437e4",
+          "url": "https://github.com/unicode-org/icu4x/commit/3c7bc2dd61855233b90d0cc75e6e6642d6c695f4"
         },
-        "date": 1600968373678,
+        "date": 1601516736292,
         "tool": "cargo",
         "benches": [
           {
-            "name": "langid/construct/langid",
-            "value": 717,
-            "range": "± 34",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/construct/locale",
-            "value": 1151,
-            "range": "± 93",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/to_string/langid",
-            "value": 2146,
-            "range": "± 140",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/to_string/locale",
-            "value": 2142,
-            "range": "± 173",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/langid",
-            "value": 16,
-            "range": "± 0",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/locale",
-            "value": 17,
+            "name": "uniset/contains/best",
+            "value": 22,
             "range": "± 1",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/str/langid",
-            "value": 2332,
-            "range": "± 136",
+            "name": "uniset/contains/worst",
+            "value": 22,
+            "range": "± 1",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/str/locale",
-            "value": 2344,
-            "range": "± 135",
+            "name": "uniset/contains_range/best",
+            "value": 22,
+            "range": "± 1",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/canonicalize/langid",
-            "value": 3568,
-            "range": "± 225",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/locale",
-            "value": 5419,
-            "range": "± 340",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/construct/locale",
-            "value": 2532,
-            "range": "± 159",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/to_string/locale",
-            "value": 3463,
-            "range": "± 224",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/struct/locale",
-            "value": 125,
-            "range": "± 9",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/str/locale",
-            "value": 3481,
-            "range": "± 190",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/canonicalize/locale",
-            "value": 7198,
-            "range": "± 593",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "language_subtag_parse",
-            "value": 345,
-            "range": "± 38",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "script_subtag_parse",
-            "value": 125,
-            "range": "± 6",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "region_subtag_parse",
-            "value": 130,
-            "range": "± 7",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "variant_subtag_parse",
-            "value": 265,
-            "range": "± 12",
+            "name": "uniset/contains_range/worst",
+            "value": 22,
+            "range": "± 2",
             "unit": "ns/iter"
           }
         ]

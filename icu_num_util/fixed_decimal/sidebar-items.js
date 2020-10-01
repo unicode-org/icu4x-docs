@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["FixedDecimal","A struct containing decimal digits with efficient iteration and manipulation by magnitude (power of 10). Supports a mantissa of non-zero digits and a number of leading and trailing zeros, used for formatting and plural selection."]]});

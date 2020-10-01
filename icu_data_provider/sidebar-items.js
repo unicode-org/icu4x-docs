@@ -1,1 +1,0 @@
-initSidebarItems({"macro":[["icu_data_key","Shortcut to construct a data key from a URI-like syntax."]],"mod":[["iter",""],["prelude",""],["structs",""]],"struct":[["InvariantDataProvider","A locale-invariant data provider. Sometimes useful for testing. Not intended to be used in production environments."]]});

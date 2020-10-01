@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["StyleOption",""]],"struct":[["JsonSerializer","A serializer for JavaScript Object Notation (JSON)."],["JsonSerializerOptions","Options bag for initializing a JsonSerializer."]],"trait":[["Serializer","A simple serializer trait that works on whole objects."]]});

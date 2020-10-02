@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["CldrJsonDataProvider",""],["DatesProvider","A data provider reading from CLDR JSON dates files."],["PluralsProvider","A data provider reading from CLDR JSON plural rule files."]]});

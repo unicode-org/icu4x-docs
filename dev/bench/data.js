@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1601584524063,
+  "lastUpdate": 1601604893349,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16,127 +16,37 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "bd4d2a5b7057fed49717780872cbe5fb7d137d4a",
-          "message": "Implements From<FixedDecimal> for PluralOperands (#278)\n\n* Implements From<FixedDecimal> for PluralOperands\r\n\r\nThis will allow us to convert FixedDecimal representation without loss\r\nof precision into PluralOperands, for correct plural selection.\r\n\r\nFor example, a number `25` may sometimes be pluralized differently from\r\n`25.0`.\r\n\r\nAdded the benchmarks for the conversion, though without a baseline it is\r\nnot just as useful yet.  (Until we try to reimplement.)\r\n\r\nSee issue #190.\r\n\r\n* Rewrite eq() to branchless\r\n\r\n* Adds a test for eq()\r\n\r\nWe needed to add a custom implementation for eq() to account\r\nfor loss of precision in PluralOperands.\r\n\r\n* fixup:first\r\n\r\n* Clean up the code for From\r\n\r\n* Adds more illustrative naming in From\r\n\r\n* Makes clippy happy\r\n\r\n* Pulls num_fractional_digits out of the loop\r\n\r\nIt is possible to compute it based on the low end of the magnitude\r\nrange.  No performance change per benchmark.\r\n\r\n* fixup: benchmark was wrong\r\n\r\n* fixup: moves new operand tests to json\r\n\r\nDefines new tests for the data model for conversion, and places them\r\ninto the JSON files instead of inline with the tests.\r\n\r\n* fixup: moves the benchmark loop in\r\n\r\nThis allows criterion to run the benchmark loop\r\nwith a specific time limit.\r\n\r\n* fixup: formatting\r\n\r\n* fixup: adds individual sample measurements\r\n\r\nHelps smoke out specific performance regressions.",
-          "timestamp": "2020-10-01T13:26:52-07:00",
-          "tree_id": "cca4272fa893e7481952a652fd042f3698158b81",
-          "url": "https://github.com/unicode-org/icu4x/commit/bd4d2a5b7057fed49717780872cbe5fb7d137d4a"
+          "id": "456c03bfe2bd88bad0bac25830472b1acca01834",
+          "message": "Some speed improvements to FixedDecimal parsing (#287)\n\n* Some speed improvements to FixedDecimal parsing\r\n\r\n* Change str iteration into bytes iteration.  Since the input alphabet\r\n  is only single bytes, this should be OK.\r\n\r\n* Use `FixedDecimal::default()` instead of zero for initialization.\r\n\r\nSeems to make a 7% improvement in some microbenchmarks, going roughly\r\nfrom 35ns to 31ns.\r\n\r\n```\r\nfrom_string/0012.3400   time:   [30.871 ns 30.887 ns 30.907 ns]\r\n                        change: [-9.2063% -9.1540% -9.1054%] (p = 0.00 < 0.05)\r\n                        Performance has improved.\r\nFound 5 outliers among 100 measurements (5.00%)\r\n  4 (4.00%) high mild\r\n  1 (1.00%) high severe\r\nfrom_string/00.0012216734340\r\n                        time:   [67.715 ns 67.778 ns 67.844 ns]\r\n                        change: [-1.4520% -0.4672% +0.4506%] (p = 0.35 > 0.05)\r\n                        No change in performance detected.\r\nFound 1 outliers among 100 measurements (1.00%)\r\n  1 (1.00%) high mild\r\nfrom_string/00002342561123400.0\r\n                        time:   [72.554 ns 72.708 ns 72.854 ns]\r\n                        change: [-1.1182% -0.8930% -0.6325%] (p = 0.00 < 0.05)\r\n                        Change within noise threshold.\r\nFound 2 outliers among 100 measurements (2.00%)\r\n  1 (1.00%) low mild\r\n  1 (1.00%) high mild\r\nfrom_string/-00123400   time:   [30.959 ns 30.971 ns 30.984 ns]\r\n                        change: [-10.060% -9.6862% -9.4502%] (p = 0.00 < 0.05)\r\n                        Performance has improved.\r\nFound 4 outliers among 100 measurements (4.00%)\r\n  1 (1.00%) low mild\r\n  2 (2.00%) high mild\r\n  1 (1.00%) high severe\r\nfrom_string/922337203685477580898230948203840239384.9823094820384023938423424\r\n                        time:   [215.19 ns 215.40 ns 215.63 ns]\r\n                        change: [+3.1132% +3.6683% +4.0742%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 7 outliers among 100 measurements (7.00%)\r\n  2 (2.00%) low mild\r\n  3 (3.00%) high mild\r\n  2 (2.00%) high severe\r\nfrom_string/0.000000001 time:   [29.235 ns 29.268 ns 29.308 ns]\r\n                        change: [-9.7930% -9.7035% -9.6051%] (p = 0.00 < 0.05)\r\n                        Performance has improved.\r\nFound 7 outliers among 100 measurements (7.00%)\r\n  1 (1.00%) low mild\r\n  2 (2.00%) high mild\r\n  4 (4.00%) high severe\r\nfrom_string/1000000001  time:   [60.990 ns 61.038 ns 61.088 ns]\r\n                        change: [+5.0850% +5.2075% +5.3511%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 4 outliers among 100 measurements (4.00%)\r\n  3 (3.00%) high mild\r\n  1 (1.00%) high severe\r\nfrom_string/0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000...\r\n                        time:   [71.210 us 71.251 us 71.306 us]\r\n                        change: [-1.7824% -1.7383% -1.6889%] (p = 0.00 < 0.05)\r\n                        Performance has improved.\r\nFound 13 outliers among 100 measurements (13.00%)\r\n  6 (6.00%) high mild\r\n  7 (7.00%) high severe\r\n\r\n```\r\n\r\n* fixup: remove unneeded mutability removal\r\n\r\n* fixup: remove unneeded mutability",
+          "timestamp": "2020-10-01T19:10:37-07:00",
+          "tree_id": "92776143631672e1d077216c4602e99d97c22788",
+          "url": "https://github.com/unicode-org/icu4x/commit/456c03bfe2bd88bad0bac25830472b1acca01834"
         },
-        "date": 1601584523387,
+        "date": 1601604891344,
         "tool": "cargo",
         "benches": [
           {
-            "name": "langid/construct/langid",
-            "value": 724,
-            "range": "± 43",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/construct/locale",
-            "value": 1150,
-            "range": "± 59",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/to_string/langid",
-            "value": 2167,
-            "range": "± 142",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/to_string/locale",
-            "value": 2175,
-            "range": "± 187",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/langid",
-            "value": 16,
-            "range": "± 1",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/locale",
-            "value": 16,
+            "name": "uniset/contains/best",
+            "value": 9,
             "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/str/langid",
-            "value": 2372,
-            "range": "± 147",
+            "name": "uniset/contains/worst",
+            "value": 9,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/str/locale",
-            "value": 2365,
-            "range": "± 130",
+            "name": "uniset/contains_range/best",
+            "value": 10,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/canonicalize/langid",
-            "value": 3512,
-            "range": "± 188",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/locale",
-            "value": 5702,
-            "range": "± 323",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/construct/locale",
-            "value": 2568,
-            "range": "± 170",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/to_string/locale",
-            "value": 3409,
-            "range": "± 426",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/struct/locale",
-            "value": 117,
-            "range": "± 7",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/str/locale",
-            "value": 3530,
-            "range": "± 216",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/canonicalize/locale",
-            "value": 7206,
-            "range": "± 513",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "language_subtag_parse",
-            "value": 338,
-            "range": "± 20",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "script_subtag_parse",
-            "value": 125,
-            "range": "± 7",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "region_subtag_parse",
-            "value": 134,
-            "range": "± 6",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "variant_subtag_parse",
-            "value": 274,
-            "range": "± 18",
+            "name": "uniset/contains_range/worst",
+            "value": 10,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

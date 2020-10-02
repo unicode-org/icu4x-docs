@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["DateTimeError",""]],"struct":[["Day",""],["DummyDateTime","Temporary implementation of `DateTimeType`, which is used in tests, benchmarks and examples of this component."],["Hour",""],["Minute",""],["Month",""],["Second",""],["WeekDay",""]],"trait":[["DateTimeType","Temporary trait used to represent the input data for `DateTimeFormat`."]]});

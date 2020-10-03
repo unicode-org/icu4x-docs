@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["RulesSelector","An enum storing models of handling plural rules selection."]],"struct":[["PluralRuleList","A structure holding a list of [`ast::Condition`] for a given locale and type."]],"type":[["PluralRulesFn","A raw function pointer to a `PluralRulesFn`"]]});

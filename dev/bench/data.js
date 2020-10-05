@@ -1,14 +1,14 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1601702317189,
+  "lastUpdate": 1601931219177,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
       {
         "commit": {
           "author": {
-            "email": "sffc@google.com",
-            "name": "Shane F. Carr",
-            "username": "sffc"
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
           },
           "committer": {
             "email": "noreply@github.com",
@@ -16,127 +16,37 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "d3a6cd1651e9720fbd883cfa44d78906586213ad",
-          "message": "Improve performance of From<FixedDecimal> for PluralOperands (#289)",
-          "timestamp": "2020-10-03T00:10:13-05:00",
-          "tree_id": "58b364f428c486bc366cd4364fa31063b2899079",
-          "url": "https://github.com/unicode-org/icu4x/commit/d3a6cd1651e9720fbd883cfa44d78906586213ad"
+          "id": "554b3b5669a54b7694ceea49730e71bef4c5998d",
+          "message": "Reorganize PluralRules benchmarks (#295)",
+          "timestamp": "2020-10-05T13:49:29-07:00",
+          "tree_id": "6ae9a99fa1b888b3cb8e41b674d3c99cff4a5698",
+          "url": "https://github.com/unicode-org/icu4x/commit/554b3b5669a54b7694ceea49730e71bef4c5998d"
         },
-        "date": 1601702316453,
+        "date": 1601931218477,
         "tool": "cargo",
         "benches": [
           {
-            "name": "langid/construct/langid",
-            "value": 726,
-            "range": "± 45",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/construct/locale",
-            "value": 1160,
-            "range": "± 74",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/to_string/langid",
-            "value": 2169,
-            "range": "± 160",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/to_string/locale",
-            "value": 2153,
-            "range": "± 144",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/langid",
-            "value": 16,
+            "name": "uniset/contains/best",
+            "value": 9,
             "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/struct/locale",
-            "value": 16,
+            "name": "uniset/contains/worst",
+            "value": 10,
             "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/str/langid",
-            "value": 2425,
-            "range": "± 203",
+            "name": "uniset/contains_range/best",
+            "value": 9,
+            "range": "± 0",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/str/locale",
-            "value": 2359,
-            "range": "± 166",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/langid",
-            "value": 3547,
-            "range": "± 161",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/locale",
-            "value": 5518,
-            "range": "± 665",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/construct/locale",
-            "value": 2550,
-            "range": "± 164",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/to_string/locale",
-            "value": 3408,
-            "range": "± 381",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/struct/locale",
-            "value": 116,
-            "range": "± 7",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/str/locale",
-            "value": 3541,
-            "range": "± 220",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/canonicalize/locale",
-            "value": 7306,
-            "range": "± 497",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "language_subtag_parse",
-            "value": 337,
-            "range": "± 20",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "script_subtag_parse",
-            "value": 133,
-            "range": "± 8",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "region_subtag_parse",
-            "value": 132,
-            "range": "± 7",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "variant_subtag_parse",
-            "value": 267,
-            "range": "± 26",
+            "name": "uniset/contains_range/worst",
+            "value": 9,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

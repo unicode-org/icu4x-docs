@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["icu_fs_data_provider"] = [{"text":"impl <a class=\"trait\" href=\"icu_data_provider/iter/trait.DataExporter.html\" title=\"trait icu_data_provider::iter::DataExporter\">DataExporter</a> for <a class=\"struct\" href=\"icu_fs_data_provider/export/fs_exporter/struct.FilesystemExporter.html\" title=\"struct icu_fs_data_provider::export::fs_exporter::FilesystemExporter\">FilesystemExporter</a>","synthetic":false,"types":["icu_fs_data_provider::export::fs_exporter::FilesystemExporter"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

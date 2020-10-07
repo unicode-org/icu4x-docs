@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["DateTimeError",""]],"struct":[["Day",""],["Hour",""],["Minute",""],["MockDateTime","Temporary implementation of `DateTimeType`, which is used in tests, benchmarks and examples of this component."],["Month",""],["Second",""],["WeekDay",""]],"trait":[["DateTimeType","Temporary trait used to represent the input data for `DateTimeFormat`."]]});

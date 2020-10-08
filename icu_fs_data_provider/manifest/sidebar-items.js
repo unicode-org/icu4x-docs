@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["MANIFEST_FILE","File name of the manifest. The manifest always uses JSON, even if the serializer isn't JSON."]],"enum":[["AliasOption",""],["LocalesOption",""],["SyntaxOption",""]]});

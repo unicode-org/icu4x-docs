@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1602265163079,
+  "lastUpdate": 1602265175474,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16,127 +16,43 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "e0e3dec2353613dc1e41fcb925494b905f64ecbd",
-          "message": "Add Unicode Set example (#302)",
-          "timestamp": "2020-10-09T12:30:31-05:00",
-          "tree_id": "818d2b58edadce125b1e8f540b1100bcfa454e6e",
-          "url": "https://github.com/unicode-org/icu4x/commit/e0e3dec2353613dc1e41fcb925494b905f64ecbd"
+          "id": "98f89ff9735a08379ef34d8c56d14e7aaddbf084",
+          "message": "Reorder constructor arguments in PluralRules to align with DateTimeFormat. (#305)",
+          "timestamp": "2020-10-09T12:32:47-05:00",
+          "tree_id": "e8ae0451070d5049e6e4f1c15ae5d3ada78371e3",
+          "url": "https://github.com/unicode-org/icu4x/commit/98f89ff9735a08379ef34d8c56d14e7aaddbf084"
         },
-        "date": 1602265162684,
+        "date": 1602265173387,
         "tool": "cargo",
         "benches": [
           {
-            "name": "langid/construct/langid",
-            "value": 628,
-            "range": "± 40",
+            "name": "isize/smaller",
+            "value": 30481,
+            "range": "± 1990",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/construct/locale",
-            "value": 1230,
-            "range": "± 45",
+            "name": "isize/larger",
+            "value": 69562,
+            "range": "± 6173",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/to_string/langid",
-            "value": 2268,
-            "range": "± 110",
+            "name": "to_string/908070605040302010",
+            "value": 264,
+            "range": "± 21",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/to_string/locale",
-            "value": 2263,
-            "range": "± 89",
+            "name": "write_to/908070605040302010",
+            "value": 125,
+            "range": "± 7",
             "unit": "ns/iter"
           },
           {
-            "name": "langid/compare/struct/langid",
-            "value": 18,
-            "range": "± 0",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/struct/locale",
-            "value": 18,
-            "range": "± 1",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/str/langid",
-            "value": 2534,
-            "range": "± 74",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/compare/str/locale",
-            "value": 2527,
-            "range": "± 119",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/langid",
-            "value": 3892,
-            "range": "± 254",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "langid/canonicalize/locale",
-            "value": 5822,
-            "range": "± 333",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/construct/locale",
-            "value": 2693,
-            "range": "± 173",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/to_string/locale",
-            "value": 3762,
-            "range": "± 393",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/struct/locale",
-            "value": 133,
-            "range": "± 4",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/compare/str/locale",
-            "value": 3911,
-            "range": "± 108",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "locale/canonicalize/locale",
-            "value": 8174,
-            "range": "± 272",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "language_subtag_parse",
-            "value": 369,
-            "range": "± 11",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "script_subtag_parse",
-            "value": 138,
-            "range": "± 9",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "region_subtag_parse",
-            "value": 137,
-            "range": "± 6",
-            "unit": "ns/iter"
-          },
-          {
-            "name": "variant_subtag_parse",
-            "value": 275,
-            "range": "± 16",
+            "name": "from_string/1000000001",
+            "value": 80,
+            "range": "± 13",
             "unit": "ns/iter"
           }
         ]

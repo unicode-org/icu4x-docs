@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","An Error type specifically for the Serializer that doesn't carry filenames"],["StyleOption",""]],"struct":[["JsonSerializer","A serializer for JavaScript Object Notation (JSON)."],["JsonSerializerOptions","Options bag for initializing a JsonSerializer."]],"trait":[["Serializer","A simple serializer trait that works on whole objects."]]});

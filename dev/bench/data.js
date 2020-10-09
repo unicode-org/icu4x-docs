@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1602264870569,
+  "lastUpdate": 1602265026952,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16,13 +16,13 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "e0e3dec2353613dc1e41fcb925494b905f64ecbd",
-          "message": "Add Unicode Set example (#302)",
-          "timestamp": "2020-10-09T12:30:31-05:00",
-          "tree_id": "818d2b58edadce125b1e8f540b1100bcfa454e6e",
-          "url": "https://github.com/unicode-org/icu4x/commit/e0e3dec2353613dc1e41fcb925494b905f64ecbd"
+          "id": "98f89ff9735a08379ef34d8c56d14e7aaddbf084",
+          "message": "Reorder constructor arguments in PluralRules to align with DateTimeFormat. (#305)",
+          "timestamp": "2020-10-09T12:32:47-05:00",
+          "tree_id": "e8ae0451070d5049e6e4f1c15ae5d3ada78371e3",
+          "url": "https://github.com/unicode-org/icu4x/commit/98f89ff9735a08379ef34d8c56d14e7aaddbf084"
         },
-        "date": 1602264868530,
+        "date": 1602265026478,
         "tool": "cargo",
         "benches": [
           {
@@ -33,19 +33,19 @@ window.BENCHMARK_DATA = {
           },
           {
             "name": "uniset/contains/worst",
-            "value": 9,
+            "value": 10,
             "range": "± 0",
             "unit": "ns/iter"
           },
           {
             "name": "uniset/contains_range/best",
-            "value": 9,
+            "value": 10,
             "range": "± 0",
             "unit": "ns/iter"
           },
           {
             "name": "uniset/contains_range/worst",
-            "value": 9,
+            "value": 10,
             "range": "± 0",
             "unit": "ns/iter"
           }

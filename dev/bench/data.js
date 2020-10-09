@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1602265026952,
+  "lastUpdate": 1602265046557,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16,37 +16,43 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "98f89ff9735a08379ef34d8c56d14e7aaddbf084",
-          "message": "Reorder constructor arguments in PluralRules to align with DateTimeFormat. (#305)",
-          "timestamp": "2020-10-09T12:32:47-05:00",
-          "tree_id": "e8ae0451070d5049e6e4f1c15ae5d3ada78371e3",
-          "url": "https://github.com/unicode-org/icu4x/commit/98f89ff9735a08379ef34d8c56d14e7aaddbf084"
+          "id": "e0e3dec2353613dc1e41fcb925494b905f64ecbd",
+          "message": "Add Unicode Set example (#302)",
+          "timestamp": "2020-10-09T12:30:31-05:00",
+          "tree_id": "818d2b58edadce125b1e8f540b1100bcfa454e6e",
+          "url": "https://github.com/unicode-org/icu4x/commit/e0e3dec2353613dc1e41fcb925494b905f64ecbd"
         },
-        "date": 1602265026478,
+        "date": 1602265045823,
         "tool": "cargo",
         "benches": [
           {
-            "name": "uniset/contains/best",
-            "value": 10,
-            "range": "± 0",
+            "name": "isize/smaller",
+            "value": 30321,
+            "range": "± 3007",
             "unit": "ns/iter"
           },
           {
-            "name": "uniset/contains/worst",
-            "value": 10,
-            "range": "± 0",
+            "name": "isize/larger",
+            "value": 68858,
+            "range": "± 6735",
             "unit": "ns/iter"
           },
           {
-            "name": "uniset/contains_range/best",
-            "value": 10,
-            "range": "± 0",
+            "name": "to_string/908070605040302010",
+            "value": 254,
+            "range": "± 29",
             "unit": "ns/iter"
           },
           {
-            "name": "uniset/contains_range/worst",
-            "value": 10,
-            "range": "± 0",
+            "name": "write_to/908070605040302010",
+            "value": 122,
+            "range": "± 14",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 80,
+            "range": "± 9",
             "unit": "ns/iter"
           }
         ]

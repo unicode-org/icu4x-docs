@@ -10,7 +10,7 @@ sourcesIndex["icu_datetime"] = {"name":"","dirs":[{"name":"fields","files":["len
 sourcesIndex["icu_fs_data_provider"] = {"name":"","dirs":[{"name":"export","files":["aliasing.rs","fs_exporter.rs","mod.rs","serializers.rs"]}],"files":["error.rs","fs_data_provider.rs","lib.rs","manifest.rs"]};
 sourcesIndex["icu_locale"] = {"name":"","dirs":[{"name":"extensions","dirs":[{"name":"private","files":["key.rs","mod.rs"]},{"name":"transform","files":["fields.rs","key.rs","mod.rs","value.rs"]},{"name":"unicode","files":["attribute.rs","attributes.rs","key.rs","keywords.rs","mod.rs","value.rs"]}],"files":["mod.rs"]},{"name":"parser","files":["errors.rs","langid.rs","locale.rs","mod.rs"]},{"name":"serde","files":["langid.rs","mod.rs"]},{"name":"subtags","files":["language.rs","mod.rs","region.rs","script.rs","variant.rs","variants.rs"]}],"files":["langid.rs","lib.rs","locale.rs"]};
 sourcesIndex["icu_locale_macros"] = {"name":"","files":["lib.rs","token_stream.rs"]};
-sourcesIndex["icu_pluralrules"] = {"name":"","dirs":[{"name":"rules","files":["ast.rs","lexer.rs","mod.rs","parser.rs","resolver.rs","serializer.rs"]}],"files":["data.rs","error.rs","lib.rs","operands.rs"]};
+sourcesIndex["icu_plurals"] = {"name":"","dirs":[{"name":"rules","files":["ast.rs","lexer.rs","mod.rs","parser.rs","resolver.rs","serializer.rs"]}],"files":["data.rs","error.rs","lib.rs","operands.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","test_data_provider.rs"]};
-sourcesIndex["icu_unicodeset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","uniset.rs","utils.rs"]};
+sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","uniset.rs","utils.rs"]};
 createSourceSidebar();

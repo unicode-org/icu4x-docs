@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1602372388310,
+  "lastUpdate": 1602616944913,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -215,6 +215,258 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 94,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b8b68b61b3372debda6911547f8fafd5bfcc08e2",
+          "message": "Run CI bench command per component (#328)",
+          "timestamp": "2020-10-12T12:16:42-07:00",
+          "tree_id": "1c1a87a7f25c4274b33bb9240b355444586557db",
+          "url": "https://github.com/unicode-org/icu4x/commit/b8b68b61b3372debda6911547f8fafd5bfcc08e2"
+        },
+        "date": 1602530445786,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5159,
+            "range": "± 322",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 9766,
+            "range": "± 449",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cc50a71267baf23db4b636b2f9fcc147dcc8eb38",
+          "message": "Fix locale macros to remove dependency on TinyStr (#337)",
+          "timestamp": "2020-10-13T11:42:33-05:00",
+          "tree_id": "e635af6a44159c7986364c1b293856de5518ec7a",
+          "url": "https://github.com/unicode-org/icu4x/commit/cc50a71267baf23db4b636b2f9fcc147dcc8eb38"
+        },
+        "date": 1602607595344,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 6107,
+            "range": "± 701",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 10376,
+            "range": "± 236",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dabd9f259ce3f9cddc0407ebbdaa721098d36238",
+          "message": "Use proc-macro-crate to handle icu vs icu_locale (#338)",
+          "timestamp": "2020-10-13T10:00:42-07:00",
+          "tree_id": "698bee642e47433193a1a86757f0141699f13a49",
+          "url": "https://github.com/unicode-org/icu4x/commit/dabd9f259ce3f9cddc0407ebbdaa721098d36238"
+        },
+        "date": 1602608711520,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5009,
+            "range": "± 289",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 9812,
+            "range": "± 375",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "24b22c9992e3ac8666bf6c267a07d5711d058b78",
+          "message": "remove cache step in coverage check in CI (#331)",
+          "timestamp": "2020-10-13T10:31:25-07:00",
+          "tree_id": "3698779d37499e0588c3c551ef4687511a2d242d",
+          "url": "https://github.com/unicode-org/icu4x/commit/24b22c9992e3ac8666bf6c267a07d5711d058b78"
+        },
+        "date": 1602610543543,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5399,
+            "range": "± 148",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 10602,
+            "range": "± 407",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "0db49de698fa174a86d745ec7f331639f2fefaf3",
+          "message": "Fix clippy warning",
+          "timestamp": "2020-10-13T11:20:42-07:00",
+          "tree_id": "34cae13baf2a3ff2d8ab09c8acaa0cf93fe94bff",
+          "url": "https://github.com/unicode-org/icu4x/commit/0db49de698fa174a86d745ec7f331639f2fefaf3"
+        },
+        "date": 1602613554436,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5261,
+            "range": "± 291",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 10209,
+            "range": "± 589",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f05a276e1126f330deaa014e298f9771da90696c",
+          "message": "Use langid macros everywhere. (#341)",
+          "timestamp": "2020-10-13T12:06:42-07:00",
+          "tree_id": "fe77378dc2aca94cca1d5ff1a3d2064cfac61c26",
+          "url": "https://github.com/unicode-org/icu4x/commit/f05a276e1126f330deaa014e298f9771da90696c"
+        },
+        "date": 1602616265965,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5420,
+            "range": "± 499",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 13914,
+            "range": "± 1258",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "88d531bf2d28ff57e2229fa177d68f03a41a161d",
+          "message": "temporarily disable benchmark test for utils/fixed-decimal (#344)",
+          "timestamp": "2020-10-13T12:17:48-07:00",
+          "tree_id": "838a6a93cba406411330ccb2db23ea3141a82b0d",
+          "url": "https://github.com/unicode-org/icu4x/commit/88d531bf2d28ff57e2229fa177d68f03a41a161d"
+        },
+        "date": 1602616944180,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 4707,
+            "range": "± 287",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 9085,
+            "range": "± 249",
             "unit": "ns/iter"
           }
         ]

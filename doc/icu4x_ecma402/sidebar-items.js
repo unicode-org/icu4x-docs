@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Locale","An adapter between `icu_locale` and `ecma402_traits`."]],"mod":[["pluralrules","Implements ECMA-402 [`Intl.PluralRules`][link]."]]});

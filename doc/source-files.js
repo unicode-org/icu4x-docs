@@ -3,6 +3,7 @@ sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","uint_
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x_cldr_export"] = {"name":"","files":["icu4x-cldr-export.rs"]};
+sourcesIndex["icu4x_ecma402"] = {"name":"","files":["lib.rs","pluralrules.rs"]};
 sourcesIndex["icu4x_gen_testdata"] = {"name":"","files":["icu4x-gen-testdata.rs"]};
 sourcesIndex["icu_cldr_json_data_provider"] = {"name":"","dirs":[{"name":"download","files":["cldr_paths_download.rs","error.rs","io_util.rs","mod.rs"]},{"name":"transform","files":["dates.rs","mod.rs","plurals.rs"]}],"files":["cldr_langid.rs","cldr_paths.rs","error.rs","lib.rs","reader.rs","support.rs"]};
 sourcesIndex["icu_data_provider"] = {"name":"","dirs":[{"name":"structs","files":["dates.rs","decimal.rs","mod.rs","plurals.rs"]}],"files":["cloneable_any.rs","data_entry.rs","data_key.rs","data_provider.rs","error.rs","invariant.rs","iter.rs","lib.rs"]};

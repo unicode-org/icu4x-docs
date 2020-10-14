@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1602697240185,
+  "lastUpdate": 1602700328624,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -239,6 +239,66 @@ window.BENCHMARK_DATA = {
             "name": "langid/overview",
             "value": 5673,
             "range": "± 230",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "4025a90052299ee6fa8f35465611ccf3f63fe9ae",
+          "message": "Hot-fix to benchmark",
+          "timestamp": "2020-10-14T10:50:09-07:00",
+          "tree_id": "c7cd05cbb8a9b5488ecf0ace78dcf605e6508ce3",
+          "url": "https://github.com/unicode-org/icu4x/commit/4025a90052299ee6fa8f35465611ccf3f63fe9ae"
+        },
+        "date": 1602698034567,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5614,
+            "range": "± 154",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "3aa5b0ea32d019342fddf51f6f07be0704ce57d7",
+          "message": "API docs for providers",
+          "timestamp": "2020-10-14T11:28:20-07:00",
+          "tree_id": "58626ef5c81c8b18856431f87b37501d9b90a016",
+          "url": "https://github.com/unicode-org/icu4x/commit/3aa5b0ea32d019342fddf51f6f07be0704ce57d7"
+        },
+        "date": 1602700328159,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 5544,
+            "range": "± 96",
             "unit": "ns/iter"
           }
         ]

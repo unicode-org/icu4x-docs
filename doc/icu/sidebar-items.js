@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["datetime","`icu_datetime` is one of the [`ICU4X`] components."],["locale",""],["plurals","`icu_plurals` is one of the [`ICU4X`] components."],["uniset","UnicodeSet This crate is the ICU4X implementation of the existing ICU4C UnicodeSet API."]]});
+initSidebarItems({"mod":[["datetime","`icu_datetime` is one of the [`ICU4X`] components."],["locid",""],["plurals","`icu_plurals` is one of the [`ICU4X`] components."],["uniset","UnicodeSet This crate is the ICU4X implementation of the existing ICU4C UnicodeSet API."]]});

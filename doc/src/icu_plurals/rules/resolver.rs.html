@@ -123,9 +123,9 @@
 }
 
 <span class="kw">fn</span> <span class="ident">test_relation</span>(<span class="ident">relation</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">Relation</span>, <span class="ident">operands</span>: <span class="kw-2">&amp;</span><span class="ident">PluralOperands</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="ident">calculate_expression</span>(<span class="kw-2">&amp;</span><span class="ident">relation</span>.<span class="ident">expression</span>, <span class="ident">operands</span>)
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">exp</span><span class="op">|</span> <span class="ident">test_range</span>(<span class="kw-2">&amp;</span><span class="ident">relation</span>.<span class="ident">range_list</span>, <span class="ident">exp</span>, <span class="kw-2">&amp;</span><span class="ident">relation</span>.<span class="ident">operator</span>))
-        .<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
+    <span class="ident">calculate_expression</span>(<span class="kw-2">&amp;</span><span class="ident">relation</span>.<span class="ident">expression</span>, <span class="ident">operands</span>).<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">exp</span><span class="op">|</span> {
+        <span class="ident">test_range</span>(<span class="kw-2">&amp;</span><span class="ident">relation</span>.<span class="ident">range_list</span>, <span class="ident">exp</span>, <span class="ident">relation</span>.<span class="ident">operator</span>)
+    })
 }
 
 <span class="comment">// UTS 35 Part 2 Section 5.1 specifies that CLDR rules contain only integer values.</span>
@@ -162,14 +162,14 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">test_range</span>(<span class="ident">range</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">RangeList</span>, <span class="ident">value</span>: <span class="ident">u64</span>, <span class="ident">operator</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">Operator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">test_range</span>(<span class="ident">range</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">RangeList</span>, <span class="ident">value</span>: <span class="ident">u64</span>, <span class="ident">operator</span>: <span class="ident">ast</span>::<span class="ident">Operator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="ident">range</span>
         .<span class="number">0</span>
         .<span class="ident">iter</span>()
         .<span class="ident">any</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">test_range_item</span>(<span class="ident">item</span>, <span class="ident">value</span>, <span class="ident">operator</span>))
 }
 
-<span class="kw">fn</span> <span class="ident">test_range_item</span>(<span class="ident">item</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">RangeListItem</span>, <span class="ident">value</span>: <span class="ident">u64</span>, <span class="ident">operator</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">Operator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">test_range_item</span>(<span class="ident">item</span>: <span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">RangeListItem</span>, <span class="ident">value</span>: <span class="ident">u64</span>, <span class="ident">operator</span>: <span class="ident">ast</span>::<span class="ident">Operator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">item</span> {
         <span class="ident">ast</span>::<span class="ident">RangeListItem</span>::<span class="ident">Value</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">value</span>,
         <span class="ident">ast</span>::<span class="ident">RangeListItem</span>::<span class="ident">Range</span>(<span class="ident">range</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">range</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">ast</span>::<span class="ident">Value</span>(<span class="ident">value</span>)),

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1602708708749,
+  "lastUpdate": 1602730833027,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -935,6 +935,96 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 36424299,
             "range": "± 732208",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a960563d6ad2dd5d76a5e73af7bb33f0a1877bf8",
+          "message": "Refactor the DateTime pattern parser to handle quotes. (#336)\n\n* Refactor the DateTime pattern parser to handle quotes.\r\n\r\n* Refactor Parser\r\n\r\n* Switch several places to use Self",
+          "timestamp": "2020-10-14T18:39:36-07:00",
+          "tree_id": "5505bb1791e9c3454a1afe53751fd0f42b134182",
+          "url": "https://github.com/unicode-org/icu4x/commit/a960563d6ad2dd5d76a5e73af7bb33f0a1877bf8"
+        },
+        "date": 1602726199815,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36583721,
+            "range": "± 98517",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b1fac4565d04cf5c55c689c449b359ffea10c411",
+          "message": "Add author line to LICENSE (#350)",
+          "timestamp": "2020-10-14T20:40:31-05:00",
+          "tree_id": "3dfe935bd859a464cbfc6356952d8981c6aad96e",
+          "url": "https://github.com/unicode-org/icu4x/commit/b1fac4565d04cf5c55c689c449b359ffea10c411"
+        },
+        "date": 1602726245754,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30729236,
+            "range": "± 1664513",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "16345fe929d03167a5e2dd11c6dc13a593ee1e74",
+          "message": "More clippy cleanups",
+          "timestamp": "2020-10-14T19:56:50-07:00",
+          "tree_id": "99cf4a3ad4f72ac27152dd2827ae235b0fbbe5aa",
+          "url": "https://github.com/unicode-org/icu4x/commit/16345fe929d03167a5e2dd11c6dc13a593ee1e74"
+        },
+        "date": 1602730832577,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36396623,
+            "range": "± 381433",
             "unit": "ns/iter"
           }
         ]

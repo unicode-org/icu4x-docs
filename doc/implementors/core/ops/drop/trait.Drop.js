@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["icu_provider_fs"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/ops/drop/trait.Drop.html\" title=\"trait core::ops::drop::Drop\">Drop</a> for <a class=\"struct\" href=\"icu_provider_fs/export/fs_exporter/struct.FilesystemExporter.html\" title=\"struct icu_provider_fs::export::fs_exporter::FilesystemExporter\">FilesystemExporter</a>","synthetic":false,"types":["icu_provider_fs::export::fs_exporter::FilesystemExporter"]}];
+implementors["icu_provider_fs"] = [{"text":"impl Drop for FilesystemExporter","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -187,43 +187,6 @@
 <span id="186">186</span>
 <span id="187">187</span>
 <span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -232,16 +195,19 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Write</span>;
-<span class="kw">use</span> <span class="ident">tinystr</span>::<span class="ident">TinyStr16</span>;
+<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">TinyStr16</span>, <span class="ident">TinyStr4</span>};
+
+<span class="comment">// Re-export tinystr16 for crate macro data_key!()</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">tinystr</span>::<span class="ident">tinystr16</span>;
 
 <span class="doccomment">/// A top-level collection of related data keys.</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DataCategory</span> {
     <span class="ident">Decimal</span>,
     <span class="ident">Plurals</span>,
     <span class="ident">Dates</span>,
-    <span class="ident">PrivateUse</span>(<span class="ident">TinyStr16</span>),
+    <span class="ident">PrivateUse</span>(<span class="ident">TinyStr4</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">DataCategory</span> {
@@ -271,73 +237,31 @@
 <span class="doccomment">/// The fields in a `DataKey` should generally be known at compile time.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Use `icu_data_key!` as a shortcut to create data keys in code.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataKey</span> {
     <span class="kw">pub</span> <span class="ident">category</span>: <span class="ident">DataCategory</span>,
     <span class="kw">pub</span> <span class="ident">sub_category</span>: <span class="ident">TinyStr16</span>,
     <span class="kw">pub</span> <span class="ident">version</span>: <span class="ident">u32</span>,
 }
 
-<span class="doccomment">/// Shortcut to construct a data key from a URI-like syntax.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Examples</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_provider::icu_data_key;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // Data key to request version 1 of cardinal plural rules</span>
-<span class="doccomment">/// let data_key = icu_data_key!(plurals: cardinal@1);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">icu_data_key</span> {
-    (<span class="ident">decimal</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">tt</span> @ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
-        <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">Decimal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+<span class="doccomment">/// Internal-only: Shortcut to construct a const data key.</span>
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">data_key</span> {
+    (<span class="ident">decimal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
+        <span class="macro">data_key</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">Decimal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
     };
-    (<span class="ident">plurals</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">tt</span> @ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
-        <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">Plurals</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    (<span class="ident">plurals</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
+        <span class="macro">data_key</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">Plurals</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
     };
-    (<span class="ident">dates</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">tt</span> @ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
-        <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">Dates</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    (<span class="ident">dates</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
+        <span class="macro">data_key</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">Dates</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
     };
-    (<span class="ident">x</span><span class="op">-</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">private_use</span>:<span class="ident">tt</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">tt</span> @ <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
-        <span class="macro">icu_data_key</span><span class="macro">!</span>(
-            <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataCategory</span>::<span class="ident">PrivateUse</span>(<span class="macro">stringify</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">private_use</span>).<span class="ident">parse</span>().<span class="ident">unwrap</span>()),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>,
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>
-        )
-    };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) <span class="op">=&gt;</span> {
         <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">DataKey</span> {
             <span class="ident">category</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>,
-            <span class="comment">// TODO: Parse to TinyStr at compile time</span>
-            <span class="ident">sub_category</span>: <span class="macro">stringify</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>).<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">sub_category</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">data_key</span>::<span class="macro">tinystr16</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>),
             <span class="ident">version</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>,
         }
     };
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">fn</span> <span class="ident">test_data_key_macro</span>(<span class="ident">category</span>: <span class="ident">DataCategory</span>) {
-    <span class="kw">let</span> <span class="ident">data_key_1</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">category</span> {
-        <span class="ident">DataCategory</span>::<span class="ident">Decimal</span> <span class="op">=&gt;</span> <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">decimal</span>: <span class="ident">foo</span>@<span class="number">1</span>),
-        <span class="ident">DataCategory</span>::<span class="ident">Plurals</span> <span class="op">=&gt;</span> <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>: <span class="ident">foo</span>@<span class="number">1</span>),
-        <span class="ident">DataCategory</span>::<span class="ident">Dates</span> <span class="op">=&gt;</span> <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">dates</span>: <span class="ident">foo</span>@<span class="number">1</span>),
-        <span class="ident">DataCategory</span>::<span class="ident">PrivateUse</span>(<span class="kw">_</span>) <span class="op">=&gt;</span> <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">x</span><span class="op">-</span><span class="ident">private</span>: <span class="ident">foo</span>@<span class="number">1</span>),
-    };
-    <span class="kw">let</span> <span class="ident">data_key_2</span> <span class="op">=</span> <span class="ident">DataKey</span> {
-        <span class="ident">category</span>,
-        <span class="ident">sub_category</span>: <span class="string">&quot;foo&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
-        <span class="ident">version</span>: <span class="number">1</span>,
-    };
-    <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">data_key_1</span>, <span class="ident">data_key_2</span>);
-}
-
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_all_data_key_macros</span>() {
-    <span class="ident">test_data_key_macro</span>(<span class="ident">DataCategory</span>::<span class="ident">Decimal</span>);
-    <span class="ident">test_data_key_macro</span>(<span class="ident">DataCategory</span>::<span class="ident">Plurals</span>);
-    <span class="ident">test_data_key_macro</span>(<span class="ident">DataCategory</span>::<span class="ident">Dates</span>);
-    <span class="ident">test_data_key_macro</span>(<span class="ident">DataCategory</span>::<span class="ident">PrivateUse</span>(<span class="string">&quot;private&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()));
 }
 
 <span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">DataKey</span> {
@@ -369,8 +293,9 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">/// use icu_provider::structs;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let data_key = icu_data_key!(plurals: cardinal@1);</span>
+    <span class="doccomment">/// let data_key = structs::plurals::key::CARDINAL_V1;</span>
     <span class="doccomment">/// let components = data_key.get_components();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(</span>
@@ -412,29 +337,30 @@
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_to_string</span>() {
+    <span class="kw">use</span> <span class="ident">tinystr</span>::<span class="ident">tinystr4</span>;
     <span class="kw">struct</span> <span class="ident">TestCase</span> {
         <span class="kw">pub</span> <span class="ident">data_key</span>: <span class="ident">DataKey</span>,
         <span class="kw">pub</span> <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
     }
     <span class="kw">let</span> <span class="ident">cases</span> <span class="op">=</span> [
         <span class="ident">TestCase</span> {
-            <span class="ident">data_key</span>: <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>: <span class="ident">cardinal</span>@<span class="number">1</span>),
+            <span class="ident">data_key</span>: <span class="macro">data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>, <span class="string">&quot;cardinal&quot;</span>, <span class="number">1</span>),
             <span class="ident">expected</span>: <span class="string">&quot;plurals/cardinal@1&quot;</span>,
         },
         <span class="ident">TestCase</span> {
-            <span class="ident">data_key</span>: <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">x</span><span class="op">-</span><span class="ident">private</span>: <span class="ident">cardinal</span>@<span class="number">1</span>),
-            <span class="ident">expected</span>: <span class="string">&quot;x-private/cardinal@1&quot;</span>,
+            <span class="ident">data_key</span>: <span class="ident">DataKey</span> {
+                <span class="ident">category</span>: <span class="ident">DataCategory</span>::<span class="ident">PrivateUse</span>(<span class="macro">tinystr4</span><span class="macro">!</span>(<span class="string">&quot;priv&quot;</span>)),
+                <span class="ident">sub_category</span>: <span class="macro">tinystr16</span><span class="macro">!</span>(<span class="string">&quot;cardinal&quot;</span>),
+                <span class="ident">version</span>: <span class="number">1</span>,
+            },
+            <span class="ident">expected</span>: <span class="string">&quot;x-priv/cardinal@1&quot;</span>,
         },
         <span class="ident">TestCase</span> {
-            <span class="ident">data_key</span>: <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">x</span><span class="op">-</span><span class="ident">maxlengthprivate</span>: <span class="ident">cardinal</span>@<span class="number">1</span>),
-            <span class="ident">expected</span>: <span class="string">&quot;x-maxlengthprivate/cardinal@1&quot;</span>,
-        },
-        <span class="ident">TestCase</span> {
-            <span class="ident">data_key</span>: <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>: <span class="ident">maxlengthsubcatg</span>@<span class="number">1</span>),
+            <span class="ident">data_key</span>: <span class="macro">data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>, <span class="string">&quot;maxlengthsubcatg&quot;</span>, <span class="number">1</span>),
             <span class="ident">expected</span>: <span class="string">&quot;plurals/maxlengthsubcatg@1&quot;</span>,
         },
         <span class="ident">TestCase</span> {
-            <span class="ident">data_key</span>: <span class="macro">icu_data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>: <span class="ident">cardinal</span>@<span class="number">2147483647</span>),
+            <span class="ident">data_key</span>: <span class="macro">data_key</span><span class="macro">!</span>(<span class="ident">plurals</span>, <span class="string">&quot;cardinal&quot;</span>, <span class="number">2147483647</span>),
             <span class="ident">expected</span>: <span class="string">&quot;plurals/cardinal@2147483647&quot;</span>,
         },
     ];

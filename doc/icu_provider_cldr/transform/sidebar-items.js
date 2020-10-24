@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["CldrJsonDataProvider",""],["DatesProvider","A data provider reading from CLDR JSON dates files."],["PluralsProvider","A data provider reading from CLDR JSON plural rule files."]]});
+initSidebarItems({"fn":[["get_all_data_keys","Returns a list of all DataKeys that this provider can produce."]],"struct":[["CldrJsonDataProvider",""],["DatesProvider","A data provider reading from CLDR JSON dates files."],["PluralsProvider","A data provider reading from CLDR JSON plural rule files."]]});

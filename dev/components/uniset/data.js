@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1604687669427,
+  "lastUpdate": 1604688129804,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -1469,6 +1469,66 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 33083674,
             "range": "± 1816545",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dcab5bbd27d2bf8403ee3871a7cdb7db537511cb",
+          "message": "Document the ICU and ICU4X boundary logic for UnicodeSet from a range (#377)",
+          "timestamp": "2020-11-06T12:38:49-06:00",
+          "tree_id": "f4c74f1111c3483b97db707f3bb0c037f79eb3d5",
+          "url": "https://github.com/unicode-org/icu4x/commit/dcab5bbd27d2bf8403ee3871a7cdb7db537511cb"
+        },
+        "date": 1604688090439,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36296908,
+            "range": "± 465742",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "11db1cdcfb2bb5f1c48b7993719596133702023f",
+          "message": "Remove flaky unit test of fn for remote file download (#378)",
+          "timestamp": "2020-11-06T12:39:26-06:00",
+          "tree_id": "33e88af77eb1eee501d83e73ee1371d26f638fbc",
+          "url": "https://github.com/unicode-org/icu4x/commit/11db1cdcfb2bb5f1c48b7993719596133702023f"
+        },
+        "date": 1604688126249,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 33972489,
+            "range": "± 1069953",
             "unit": "ns/iter"
           }
         ]

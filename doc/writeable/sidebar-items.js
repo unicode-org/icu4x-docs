@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["assert_writeable_eq","Testing macro for types implementing Writeable. The first argument should be a string, and the second argument should be a `&dyn Writeable`."]],"trait":[["Writeable","Writeable is an alternative to std::fmt::Display with the addition of a length function."]]});

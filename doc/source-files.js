@@ -14,4 +14,5 @@ sourcesIndex["icu_provider_cldr"] = {"name":"","dirs":[{"name":"download","files
 sourcesIndex["icu_provider_fs"] = {"name":"","dirs":[{"name":"export","dirs":[{"name":"serializers","files":["bincode.rs","json.rs","mod.rs"]}],"files":["aliasing.rs","fs_exporter.rs","mod.rs"]}],"files":["deserializer.rs","error.rs","fs_data_provider.rs","lib.rs","manifest.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","test_data_provider.rs"]};
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","uniset.rs","utils.rs"]};
+sourcesIndex["writeable"] = {"name":"","files":["lib.rs"]};
 createSourceSidebar();

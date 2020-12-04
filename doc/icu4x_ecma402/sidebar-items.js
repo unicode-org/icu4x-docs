@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Locale","An adapter between `icu_locid` and `ecma402_traits`."]],"mod":[["pluralrules","Implements ECMA-402 [`Intl.PluralRules`][link]."]]});
+initSidebarItems({"enum":[["Locale","An adapter between `icu_locid` and `ecma402_traits`."]],"mod":[["pluralrules","Implements ECMA-402 `Intl.PluralRules`."]]});

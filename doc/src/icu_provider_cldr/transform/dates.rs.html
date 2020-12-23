@@ -544,6 +544,11 @@
 <span id="541">541</span>
 <span id="542">542</span>
 <span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -640,14 +645,19 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DatesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_to_receiver</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
+        <span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">DataReceiver</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cldr_langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">data_entry</span>.<span class="ident">langid</span>.<span class="ident">clone</span>().<span class="ident">into</span>();
 
         <span class="kw">let</span> <span class="ident">dates</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_dates_for</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">data_key</span>, <span class="kw-2">&amp;</span><span class="ident">cldr_langid</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">DataResponseBuilder</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">option</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">gregory</span>::<span class="ident">DatesV1</span>::<span class="ident">from</span>(<span class="ident">dates</span>));
+        <span class="ident">receiver</span>.<span class="ident">receive_option</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">option</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">data_langid</span>: <span class="ident">req</span>.<span class="ident">data_entry</span>.<span class="ident">langid</span>.<span class="ident">clone</span>(),
-        }
-        .<span class="ident">with_owned_payload</span>(<span class="ident">gregory</span>::<span class="ident">DatesV1</span>::<span class="ident">from</span>(<span class="ident">dates</span>)))
+        })
     }
 }
 
@@ -981,8 +991,8 @@
     <span class="kw">let</span> <span class="ident">json_str</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="string">&quot;tests/testdata/cs-ca-gregorian.json&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">DatesProvider</span>::<span class="ident">try_from</span>(<span class="ident">json_str</span>.<span class="ident">as_str</span>()).<span class="ident">unwrap</span>();
 
-    <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">gregory</span>::<span class="ident">DatesV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+    <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">gregory</span>::<span class="ident">DatesV1</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">provider</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">DataProvider</span>)
+        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
             <span class="ident">data_key</span>: <span class="ident">key</span>::<span class="ident">GREGORY_V1</span>,
             <span class="ident">data_entry</span>: <span class="ident">DataEntry</span> {
                 <span class="ident">variant</span>: <span class="prelude-val">None</span>,
@@ -990,7 +1000,7 @@
             },
         })
         .<span class="ident">unwrap</span>()
-        .<span class="ident">take_payload</span>()
+        .<span class="ident">payload</span>
         .<span class="ident">unwrap</span>();
 
     <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="string">&quot;srpna&quot;</span>, <span class="ident">cs_dates</span>.<span class="ident">symbols</span>.<span class="ident">months</span>.<span class="ident">format</span>.<span class="ident">wide</span>.<span class="number">0</span>[<span class="number">7</span>]);
@@ -1011,8 +1021,8 @@
     <span class="kw">let</span> <span class="ident">json_str</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="string">&quot;tests/testdata/haw-ca-gregorian.json&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">DatesProvider</span>::<span class="ident">try_from</span>(<span class="ident">json_str</span>.<span class="ident">as_str</span>()).<span class="ident">unwrap</span>();
 
-    <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">gregory</span>::<span class="ident">DatesV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+    <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">gregory</span>::<span class="ident">DatesV1</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">provider</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">DataProvider</span>)
+        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
             <span class="ident">data_key</span>: <span class="ident">key</span>::<span class="ident">GREGORY_V1</span>,
             <span class="ident">data_entry</span>: <span class="ident">DataEntry</span> {
                 <span class="ident">variant</span>: <span class="prelude-val">None</span>,
@@ -1020,7 +1030,7 @@
             },
         })
         .<span class="ident">unwrap</span>()
-        .<span class="ident">take_payload</span>()
+        .<span class="ident">payload</span>
         .<span class="ident">unwrap</span>();
 
     <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="string">&quot;d MMM y&quot;</span>, <span class="ident">cs_dates</span>.<span class="ident">patterns</span>.<span class="ident">date</span>.<span class="ident">medium</span>);
@@ -1036,8 +1046,8 @@
     <span class="kw">let</span> <span class="ident">json_str</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="string">&quot;tests/testdata/cs-ca-gregorian.json&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">DatesProvider</span>::<span class="ident">try_from</span>(<span class="ident">json_str</span>.<span class="ident">as_str</span>()).<span class="ident">unwrap</span>();
 
-    <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">gregory</span>::<span class="ident">DatesV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+    <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">gregory</span>::<span class="ident">DatesV1</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">provider</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">DataProvider</span>)
+        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
             <span class="ident">data_key</span>: <span class="ident">key</span>::<span class="ident">GREGORY_V1</span>,
             <span class="ident">data_entry</span>: <span class="ident">DataEntry</span> {
                 <span class="ident">variant</span>: <span class="prelude-val">None</span>,
@@ -1045,7 +1055,7 @@
             },
         })
         .<span class="ident">unwrap</span>()
-        .<span class="ident">take_payload</span>()
+        .<span class="ident">payload</span>
         .<span class="ident">unwrap</span>();
 
     <span class="comment">// Czech months are not unaliased because `wide` differs.</span>

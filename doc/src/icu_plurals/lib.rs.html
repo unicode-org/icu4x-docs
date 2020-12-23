@@ -357,6 +357,9 @@
 <span id="354">354</span>
 <span id="355">355</span>
 <span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -433,7 +436,6 @@
 <span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">structs</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">operands</span>::<span class="ident">PluralOperands</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">TryInto</span>;
 
 <span class="doccomment">/// A type of a plural rule which can be associated with the [`PluralRules`] struct.</span>
@@ -636,14 +638,18 @@
             <span class="ident">PluralRuleType</span>::<span class="ident">Cardinal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">structs</span>::<span class="ident">plurals</span>::<span class="ident">key</span>::<span class="ident">CARDINAL_V1</span>,
             <span class="ident">PluralRuleType</span>::<span class="ident">Ordinal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">structs</span>::<span class="ident">plurals</span>::<span class="ident">key</span>::<span class="ident">ORDINAL_V1</span>,
         };
-        <span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">data_key</span>,
-            <span class="ident">data_entry</span>: <span class="ident">DataEntry</span> {
-                <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                <span class="ident">langid</span>: <span class="ident">langid</span>.<span class="ident">clone</span>(),
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">receiver</span> <span class="op">=</span> <span class="ident">DataReceiverForType</span>::<span class="op">&lt;</span><span class="ident">structs</span>::<span class="ident">plurals</span>::<span class="ident">PluralRuleStringsV1</span><span class="op">&gt;</span>::<span class="ident">new</span>();
+        <span class="ident">data_provider</span>.<span class="ident">load_to_receiver</span>(
+            <span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">data_key</span>,
+                <span class="ident">data_entry</span>: <span class="ident">DataEntry</span> {
+                    <span class="ident">variant</span>: <span class="prelude-val">None</span>,
+                    <span class="ident">langid</span>: <span class="ident">langid</span>.<span class="ident">clone</span>(),
+                },
             },
-        })<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">plurals_data</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">structs</span>::<span class="ident">plurals</span>::<span class="ident">PluralRuleStringsV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">response</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">receiver</span>,
+        )<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">plurals_data</span> <span class="op">=</span> <span class="ident">receiver</span>.<span class="ident">payload</span>.<span class="ident">expect</span>(<span class="string">&quot;Load was successful&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">list</span>: <span class="ident">data</span>::<span class="ident">PluralRuleList</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">plurals_data</span>).<span class="ident">try_into</span>()<span class="question-mark">?</span>;
 

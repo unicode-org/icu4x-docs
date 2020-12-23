@@ -228,6 +228,11 @@
 <span id="225">225</span>
 <span id="226">226</span>
 <span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -326,7 +331,11 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PluralsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_to_receiver</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
+        <span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">DataReceiver</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cldr_rules</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_rules_for</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">data_key</span>)<span class="question-mark">?</span>;
         <span class="comment">// TODO: Implement language fallback?</span>
         <span class="comment">// TODO: Avoid the clone</span>
@@ -335,10 +344,11 @@
             <span class="prelude-val">Ok</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">cldr_rules</span>.<span class="number">0</span>[<span class="ident">idx</span>],
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">req</span>.<span class="ident">clone</span>().<span class="ident">into</span>()),
         };
-        <span class="prelude-val">Ok</span>(<span class="ident">DataResponseBuilder</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">option</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">PluralRuleStringsV1</span>::<span class="ident">from</span>(<span class="ident">r</span>));
+        <span class="ident">receiver</span>.<span class="ident">receive_option</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">option</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">data_langid</span>: <span class="ident">req</span>.<span class="ident">data_entry</span>.<span class="ident">langid</span>.<span class="ident">clone</span>(),
-        }
-        .<span class="ident">with_owned_payload</span>(<span class="ident">PluralRuleStringsV1</span>::<span class="ident">from</span>(<span class="ident">r</span>)))
+        })
     }
 }
 
@@ -432,8 +442,8 @@
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">PluralsProvider</span>::<span class="ident">try_from</span>(<span class="ident">json_str</span>.<span class="ident">as_str</span>()).<span class="ident">unwrap</span>();
 
     <span class="comment">// Spot-check locale &#39;cs&#39; since it has some interesting entries</span>
-    <span class="kw">let</span> <span class="ident">cs_rules</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">PluralRuleStringsV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+    <span class="kw">let</span> <span class="ident">cs_rules</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">PluralRuleStringsV1</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">provider</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">DataProvider</span>)
+        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
             <span class="ident">data_key</span>: <span class="ident">key</span>::<span class="ident">CARDINAL_V1</span>,
             <span class="ident">data_entry</span>: <span class="ident">DataEntry</span> {
                 <span class="ident">variant</span>: <span class="prelude-val">None</span>,
@@ -441,7 +451,7 @@
             },
         })
         .<span class="ident">unwrap</span>()
-        .<span class="ident">take_payload</span>()
+        .<span class="ident">payload</span>
         .<span class="ident">unwrap</span>();
 
     <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">None</span>, <span class="ident">cs_rules</span>.<span class="ident">zero</span>);

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["key",""]],"struct":[["HelloWorldV1","A struct containing \"Hello World\" in the requested language."]]});

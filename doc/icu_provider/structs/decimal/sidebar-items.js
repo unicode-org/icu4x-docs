@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["get_invariant","Gets a locale-invariant default struct given a data key in this module's category."],["get_receiver","Gets a boxed DataReceiver capable of receiving a data key in this module's category."]],"mod":[["key",""]],"struct":[["SymbolsV1",""]]});

@@ -185,6 +185,10 @@
 <span id="182">182</span>
 <span id="183">183</span>
 <span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -196,6 +200,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">LocalesOption</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">Manifest</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">MANIFEST_FILE</span>;
+<span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataStruct</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">iter</span>::<span class="ident">DataExporter</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
@@ -257,23 +262,26 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DataExporter</span> <span class="kw">for</span> <span class="ident">FilesystemExporter</span> {
-    <span class="kw">fn</span> <span class="ident">put</span>(
+    <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-        <span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">erased_serde</span>::<span class="ident">Serialize</span>,
+        <span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">ErasedDataStruct</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">clone</span>();
-        <span class="ident">path_buf</span>.<span class="ident">extend</span>(<span class="ident">req</span>.<span class="ident">data_key</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>());
-        <span class="ident">path_buf</span>.<span class="ident">extend</span>(<span class="ident">req</span>.<span class="ident">data_entry</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>());
+        <span class="ident">path_buf</span>.<span class="ident">extend</span>(<span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>());
+        <span class="ident">path_buf</span>.<span class="ident">extend</span>(<span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">options</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>());
         <span class="ident">log</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;Writing: {}&quot;</span>, <span class="ident">req</span>);
-        <span class="self">self</span>.<span class="ident">write_to_path</span>(<span class="ident">path_buf</span>, <span class="ident">obj</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">write_to_path</span>(<span class="ident">path_buf</span>, <span class="ident">obj</span>.<span class="ident">as_serialize</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">includes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data_entry</span>: <span class="kw-2">&amp;</span><span class="ident">DataEntry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">include_resource_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">resc_options</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">manifest</span>.<span class="ident">locales</span> {
             <span class="ident">LocalesOption</span>::<span class="ident">IncludeAll</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="ident">LocalesOption</span>::<span class="ident">IncludeList</span>(<span class="kw-2">ref</span> <span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">list</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">data_entry</span>.<span class="ident">langid</span>),
+            <span class="ident">LocalesOption</span>::<span class="ident">IncludeList</span>(<span class="kw-2">ref</span> <span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">resc_options</span>.<span class="ident">langid</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">langid</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">list</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>),
+                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+            },
         }
     }
 }
@@ -322,7 +330,7 @@
     }
 
     <span class="doccomment">/// This function must be called before the FilesystemExporter leaves scope.</span>
-    <span class="doccomment">/// It is recommended to flush after exporting each DataKey.</span>
+    <span class="doccomment">/// It is recommended to flush after exporting each ResourceKey.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">alias_collection</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">alias_collection</span>.<span class="ident">take</span>() {
             <span class="ident">alias_collection</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;

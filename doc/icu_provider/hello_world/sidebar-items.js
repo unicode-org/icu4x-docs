@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["HelloWorldProvider","A data provider returning Hello World strings in different languages."]]});

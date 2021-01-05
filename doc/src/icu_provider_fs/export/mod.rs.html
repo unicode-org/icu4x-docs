@@ -83,59 +83,59 @@
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
+<span class="doccomment">//! use icu_locid_macros::langid;</span>
 <span class="doccomment">//! use icu_provider::prelude::*;</span>
-<span class="doccomment">//! use icu_provider::InvariantDataProvider;</span>
-<span class="doccomment">//! use icu_provider::structs;</span>
-<span class="doccomment">//! use icu_provider::iter::IterableDataProvider;</span>
+<span class="doccomment">//! use icu_provider::hello_world::{key, HelloWorldProvider, HelloWorldV1};</span>
+<span class="doccomment">//! use icu_provider::iter::DataExporter;</span>
 <span class="doccomment">//! use icu_provider_fs::FsDataProvider;</span>
 <span class="doccomment">//! use icu_provider_fs::export::fs_exporter;</span>
 <span class="doccomment">//! use icu_provider_fs::export::serializers;</span>
+<span class="doccomment">//! use std::borrow::Cow;</span>
 <span class="doccomment">//! use std::path::PathBuf;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let DEMO_PATH = std::env::temp_dir().join(&quot;icu4x_json_demo&quot;);</span>
-<span class="doccomment">//! let DATA_KEY = structs::plurals::key::CARDINAL_V1;</span>
+<span class="doccomment">//! let demo_path = std::env::temp_dir().join(&quot;icu4x_json_demo&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Set up the exporter</span>
 <span class="doccomment">//! let mut options = serializers::json::Options::default();</span>
 <span class="doccomment">//! let serializer = Box::new(serializers::json::Serializer::new(options));</span>
 <span class="doccomment">//! let mut options = fs_exporter::ExporterOptions::default();</span>
-<span class="doccomment">//! options.root = DEMO_PATH.clone();</span>
+<span class="doccomment">//! options.root = demo_path.clone();</span>
 <span class="doccomment">//! let mut exporter = fs_exporter::FilesystemExporter::try_new(serializer, options)</span>
 <span class="doccomment">//!     .expect(&quot;Should successfully initialize data output directory&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Export a key</span>
-<span class="doccomment">//! let inv_provider = InvariantDataProvider;</span>
-<span class="doccomment">//! let result = inv_provider.export_key(&amp;DATA_KEY, &amp;mut exporter);</span>
+<span class="doccomment">//! let source_provider = HelloWorldProvider::new_with_placeholder_data();</span>
+<span class="doccomment">//! let result = exporter.put_key_from_provider(&amp;key::HELLO_WORLD_V1, &amp;source_provider);</span>
 <span class="doccomment">//! // Ensure flush() is called, even when the result is an error</span>
 <span class="doccomment">//! exporter.flush().expect(&quot;Should successfully flush&quot;);</span>
 <span class="doccomment">//! result.expect(&quot;Should successfully export&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Create a filesystem provider reading from the demo directory</span>
-<span class="doccomment">//! let fs_provider = FsDataProvider::try_new(DEMO_PATH.clone())</span>
+<span class="doccomment">//! let fs_provider = FsDataProvider::try_new(demo_path.clone())</span>
 <span class="doccomment">//!     .expect(&quot;Should successfully read from filesystem&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Read the key from the filesystem and ensure it is as expected</span>
 <span class="doccomment">//! let req = DataRequest {</span>
-<span class="doccomment">//!     data_key: DATA_KEY,</span>
-<span class="doccomment">//!     data_entry: DataEntry {</span>
-<span class="doccomment">//!         variant: None,</span>
-<span class="doccomment">//!         langid: Default::default(),</span>
+<span class="doccomment">//!     resource_path: ResourcePath {</span>
+<span class="doccomment">//!         key: key::HELLO_WORLD_V1,</span>
+<span class="doccomment">//!         options: ResourceOptions {</span>
+<span class="doccomment">//!             variant: None,</span>
+<span class="doccomment">//!             langid: Some(langid!(&quot;bn&quot;)),</span>
+<span class="doccomment">//!         },</span>
 <span class="doccomment">//!     }</span>
 <span class="doccomment">//! };</span>
-<span class="doccomment">//! let inv_response = (&amp;inv_provider as &amp;DataProvider)</span>
-<span class="doccomment">//!     .load_payload::&lt;structs::plurals::PluralRuleStringsV1&gt;(&amp;req)</span>
-<span class="doccomment">//!     .unwrap();</span>
-<span class="doccomment">//! let fs_response = (&amp;fs_provider as &amp;DataProvider)</span>
-<span class="doccomment">//!     .load_payload::&lt;structs::plurals::PluralRuleStringsV1&gt;(&amp;req)</span>
-<span class="doccomment">//!     .expect(&quot;Should successfully read from filesystem&quot;);</span>
+<span class="doccomment">//! let source_response: DataResponse&lt;HelloWorldV1&gt; =</span>
+<span class="doccomment">//!     source_provider.load_payload(&amp;req).unwrap();</span>
+<span class="doccomment">//! let fs_response: DataResponse&lt;HelloWorldV1&gt; =</span>
+<span class="doccomment">//!     fs_provider.load_payload(&amp;req).unwrap();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! assert_eq!(</span>
-<span class="doccomment">//!     inv_response.payload,</span>
+<span class="doccomment">//!     source_response.payload,</span>
 <span class="doccomment">//!     fs_response.payload,</span>
 <span class="doccomment">//! );</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Clean up from demo</span>
-<span class="doccomment">//! std::fs::remove_dir_all(&amp;DEMO_PATH).expect(&quot;Should clean up test directory&quot;);</span>
+<span class="doccomment">//! std::fs::remove_dir_all(&amp;demo_path).expect(&quot;Should clean up test directory&quot;);</span>
 <span class="doccomment">//! ```</span>
 
 <span class="kw">mod</span> <span class="ident">aliasing</span>;

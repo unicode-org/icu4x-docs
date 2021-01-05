@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_invariant","Gets a locale-invariant default struct given a data key in this module's category. For example, if the data key is `plurals/cardinal@1`, a Response with an object of type `PluralRuleStringsV1` will be returned."],["get_receiver","Gets a boxed DataReceiver capable of receiving any known data struct."]],"mod":[["dates",""],["decimal",""],["plurals",""]]});
+initSidebarItems({"mod":[["dates",""],["icu4x",""],["plurals",""]]});

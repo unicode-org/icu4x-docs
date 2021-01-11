@@ -238,6 +238,27 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -266,6 +287,7 @@
 <span class="doccomment">///    w: 0,</span>
 <span class="doccomment">///    f: 0,</span>
 <span class="doccomment">///    t: 0,</span>
+<span class="doccomment">///    c: 0,</span>
 <span class="doccomment">/// }, PluralOperands::from(2_usize))</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -280,6 +302,7 @@
 <span class="doccomment">///    w: 3,</span>
 <span class="doccomment">///    f: 567,</span>
 <span class="doccomment">///    t: 567,</span>
+<span class="doccomment">///    c: 0,</span>
 <span class="doccomment">/// }), &quot;-1234.567&quot;.parse())</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -294,6 +317,7 @@
 <span class="doccomment">///    w: 2,</span>
 <span class="doccomment">///    f: 45,</span>
 <span class="doccomment">///    t: 45,</span>
+<span class="doccomment">///    c: 0,</span>
 <span class="doccomment">/// }), &quot;123.45&quot;.parse())</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
@@ -308,6 +332,8 @@
     <span class="kw">pub</span> <span class="ident">f</span>: <span class="ident">u64</span>,
     <span class="doccomment">/// Visible fraction digits without trailing zeros</span>
     <span class="kw">pub</span> <span class="ident">t</span>: <span class="ident">u64</span>,
+    <span class="doccomment">/// Exponent of the power of 10 used in compact decimal formatting</span>
+    <span class="kw">pub</span> <span class="ident">c</span>: <span class="ident">usize</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">PluralOperands</span> {
@@ -340,6 +366,15 @@
     }
 }
 
+<span class="kw">fn</span> <span class="ident">get_exponent</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">usize</span>), <span class="ident">OperandsError</span><span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">e_idx</span>) <span class="op">=</span> <span class="ident">input</span>.<span class="ident">find</span>(<span class="string">&#39;e&#39;</span>) {
+        <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">usize</span>::<span class="ident">from_str</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>[<span class="ident">e_idx</span> <span class="op">+</span> <span class="number">1</span>..])<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>((<span class="kw-2">&amp;</span><span class="ident">input</span>[..<span class="ident">e_idx</span>], <span class="ident">e</span>))
+    } <span class="kw">else</span> {
+        <span class="prelude-val">Ok</span>((<span class="ident">input</span>, <span class="number">0</span>))
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">PluralOperands</span> {
     <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">OperandsError</span>;
 
@@ -356,9 +391,10 @@
             <span class="ident">num_fraction_digits</span>,
             <span class="ident">fraction_digits0</span>,
             <span class="ident">fraction_digits</span>,
+            <span class="ident">exponent</span>,
         ) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">sep_idx</span>) <span class="op">=</span> <span class="ident">abs_str</span>.<span class="ident">find</span>(<span class="string">&#39;.&#39;</span>) {
             <span class="kw">let</span> <span class="ident">int_str</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">abs_str</span>[..<span class="ident">sep_idx</span>];
-            <span class="kw">let</span> <span class="ident">dec_str</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">abs_str</span>[(<span class="ident">sep_idx</span> <span class="op">+</span> <span class="number">1</span>)..];
+            <span class="kw">let</span> (<span class="ident">dec_str</span>, <span class="ident">exponent</span>) <span class="op">=</span> <span class="ident">get_exponent</span>(<span class="kw-2">&amp;</span><span class="ident">abs_str</span>[(<span class="ident">sep_idx</span> <span class="op">+</span> <span class="number">1</span>)..])<span class="question-mark">?</span>;
 
             <span class="kw">let</span> <span class="ident">integer_digits</span> <span class="op">=</span> <span class="ident">u64</span>::<span class="ident">from_str</span>(<span class="ident">int_str</span>)<span class="question-mark">?</span>;
 
@@ -381,10 +417,12 @@
                 <span class="ident">num_fraction_digits</span>,
                 <span class="ident">fraction_digits0</span>,
                 <span class="ident">fraction_digits</span>,
+                <span class="ident">exponent</span>,
             )
         } <span class="kw">else</span> {
+            <span class="kw">let</span> (<span class="ident">abs_str</span>, <span class="ident">exponent</span>) <span class="op">=</span> <span class="ident">get_exponent</span>(<span class="ident">abs_str</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">integer_digits</span> <span class="op">=</span> <span class="ident">u64</span>::<span class="ident">from_str</span>(<span class="ident">abs_str</span>)<span class="question-mark">?</span>;
-            (<span class="ident">integer_digits</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)
+            (<span class="ident">integer_digits</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="ident">exponent</span>)
         };
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
@@ -393,6 +431,7 @@
             <span class="ident">w</span>: <span class="ident">num_fraction_digits</span>,
             <span class="ident">f</span>: <span class="ident">fraction_digits0</span>,
             <span class="ident">t</span>: <span class="ident">fraction_digits</span>,
+            <span class="ident">c</span>: <span class="ident">exponent</span>,
         })
     }
 }
@@ -407,6 +446,7 @@
                     <span class="ident">w</span>: <span class="number">0</span>,
                     <span class="ident">f</span>: <span class="number">0</span>,
                     <span class="ident">t</span>: <span class="number">0</span>,
+                    <span class="ident">c</span>: <span class="number">0</span>,
                 }
             }
         }
@@ -428,6 +468,7 @@
                     <span class="ident">w</span>: <span class="number">0</span>,
                     <span class="ident">f</span>: <span class="number">0</span>,
                     <span class="ident">t</span>: <span class="number">0</span>,
+                    <span class="ident">c</span>: <span class="number">0</span>,
                 })
             }
         }
@@ -473,6 +514,7 @@
             <span class="ident">w</span>,
             <span class="ident">f</span>,
             <span class="ident">t</span>,
+            <span class="ident">c</span>: <span class="number">0</span>,
         }
     }
 }

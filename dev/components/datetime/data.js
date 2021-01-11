@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1610071896479,
+  "lastUpdate": 1610364416732,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -1499,6 +1499,66 @@ window.BENCHMARK_DATA = {
             "name": "datetime/overview",
             "value": 1053880,
             "range": "± 43343",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2a9adbca47e13371a314f5d98d0a48f3a2407916",
+          "message": "Add support for E PluralOperand (#407)\n\n* Add support for E PluralOperand\r\n\r\n* Add the FromStr\r\n\r\n* Fix ecma402 trait\r\n\r\n* Apply reviewers feedback\r\n\r\n* Add roundtrip parse/serialize test\r\n\r\n* Fix ECMA402 test for plurals\r\n\r\n* Move `e` to not be an operand\r\n\r\n* Move to serialize C as `c` and switch tests to use it.\r\n\r\n* Re-add AST node for E",
+          "timestamp": "2021-01-08T16:21:00-08:00",
+          "tree_id": "be2dc0e4f02be06a3f620b29b9763b04e8eb7afb",
+          "url": "https://github.com/unicode-org/icu4x/commit/2a9adbca47e13371a314f5d98d0a48f3a2407916"
+        },
+        "date": 1610152740586,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/overview",
+            "value": 1083257,
+            "range": "± 43295",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4c8d9dff321ceb822bab5a3c7b4e250792fffeb6",
+          "message": "Enable test-all-features and rename some GitHub Actions targets (#436)",
+          "timestamp": "2021-01-11T05:20:41-06:00",
+          "tree_id": "c2fe16c76d99ba703e3d55a9d0a0dc52a9f71b5c",
+          "url": "https://github.com/unicode-org/icu4x/commit/4c8d9dff321ceb822bab5a3c7b4e250792fffeb6"
+        },
+        "date": 1610364416044,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/overview",
+            "value": 1137113,
+            "range": "± 48273",
             "unit": "ns/iter"
           }
         ]

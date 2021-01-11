@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `components/provider_cldr/src/download/cldr_paths_download.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cldr_paths_download.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `components/provider_cldr/src/download/cldr_allinone.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cldr_allinone.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
 <link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../icu_provider_cldr/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><span class="help-button">?</span>
                 <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
@@ -109,24 +109,14 @@
 <span id="106">106</span>
 <span id="107">107</span>
 <span id="108">108</span>
-<span id="109">109</span>
-<span id="110">110</span>
-<span id="111">111</span>
-<span id="112">112</span>
-<span id="113">113</span>
-<span id="114">114</span>
-<span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/master/LICENSE ).</span>
+
+<span class="doccomment">//! Data downloader for CLDR JSON versions 38 and later. Starting in CLDR 38, the JSON for all</span>
+<span class="doccomment">//! components is shipped in a single zip file.</span>
+
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">io_util</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">CldrPaths</span>;
@@ -136,29 +126,30 @@
 <span class="doccomment">/// The download artifacts are saved in the user&#39;s cache directory; see</span>
 <span class="doccomment">/// https://docs.rs/dirs/3.0.0/dirs/fn.cache_dir.html</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// Downloads a single zip file for all components, as used in CLDR 38 and later.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
 <span class="doccomment">/// use icu_provider::structs;</span>
-<span class="doccomment">/// use icu_provider_cldr::download::CldrPathsDownload;</span>
-<span class="doccomment">/// use icu_provider_cldr::CldrJsonDataProvider;</span>
+<span class="doccomment">/// use icu_provider_cldr::CldrPaths;</span>
+<span class="doccomment">/// use icu_provider_cldr::download::CldrAllInOneDownloader;</span>
+<span class="doccomment">/// use icu_provider_cldr::transform::PluralsProvider;</span>
 <span class="doccomment">/// use icu_locid_macros::langid;</span>
 <span class="doccomment">/// use std::path::PathBuf;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let paths = CldrPathsDownload::try_from_github_tag(&quot;36.0.0&quot;)</span>
+<span class="doccomment">/// let paths = CldrAllInOneDownloader::try_from_github_tag(&quot;38.1.0-BETA4&quot;)</span>
 <span class="doccomment">///     .expect(&quot;Cache directory not found&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let data_provider = CldrJsonDataProvider::new(&amp;paths);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// fn demo&lt;&#39;d, &#39;s, P&gt;(data_provider: &amp;P)</span>
-<span class="doccomment">/// where</span>
-<span class="doccomment">///     &#39;s: &#39;d,</span>
-<span class="doccomment">///     P: DataProvider&lt;&#39;d, structs::plurals::PluralRuleStringsV1&lt;&#39;s&gt;&gt;</span>
-<span class="doccomment">/// {</span>
+<span class="doccomment">/// fn demo(paths: &amp;dyn CldrPaths) {</span>
 <span class="doccomment">///     use std::borrow::Cow;</span>
+<span class="doccomment">///     use std::convert::TryFrom;</span>
 <span class="doccomment">///     use icu_provider::prelude::*;</span>
 <span class="doccomment">///     use icu_provider::structs;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///     let data_provider = PluralsProvider::try_from(paths)</span>
+<span class="doccomment">///         .expect(&quot;The data should be well-formed after downloading&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///     let data: Cow&lt;structs::plurals::PluralRuleStringsV1&gt; = data_provider</span>
 <span class="doccomment">///         .load_payload(&amp;DataRequest {</span>
@@ -176,30 +167,35 @@
 <span class="doccomment">///     assert_eq!(data.few, Some(Cow::Borrowed(&quot;n % 10 = 3 and n % 100 != 13&quot;)));</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // Calling demo(&amp;data_provider) will cause the data to actually get downloaded.</span>
-<span class="doccomment">/// //demo(&amp;data_provider);</span>
+<span class="doccomment">/// // Calling demo(&amp;paths) will cause the data to actually get downloaded.</span>
+<span class="doccomment">/// //demo(&amp;paths);</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CldrPathsDownload</span> {
-    <span class="doccomment">/// Directory where downloaded files are stored.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CldrAllInOneDownloader</span> {
+    <span class="doccomment">/// Directory where downloaded files are stored</span>
     <span class="kw">pub</span> <span class="ident">cache_dir</span>: <span class="ident">PathBuf</span>,
 
-    <span class="kw">pub</span> <span class="ident">cldr_core</span>: <span class="ident">CldrZipFileInfo</span>,
-    <span class="kw">pub</span> <span class="ident">cldr_dates</span>: <span class="ident">CldrZipFileInfo</span>,
+    <span class="doccomment">/// The URL to the remote zip file</span>
+    <span class="kw">pub</span> <span class="ident">url</span>: <span class="ident">String</span>,
+
+    <span class="doccomment">/// CLDR JSON directory suffix: probably either &quot;modern&quot; or &quot;full&quot;</span>
+    <span class="kw">pub</span> <span class="ident">suffix</span>: <span class="ident">String</span>,
 }
 
 <span class="comment">// TODO(#297): Implement this async.</span>
-<span class="kw">impl</span> <span class="ident">CldrPaths</span> <span class="kw">for</span> <span class="ident">CldrPathsDownload</span> {
+<span class="kw">impl</span> <span class="ident">CldrPaths</span> <span class="kw">for</span> <span class="ident">CldrAllInOneDownloader</span> {
     <span class="kw">fn</span> <span class="ident">cldr_core</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">cldr_core</span>.<span class="ident">download_and_unzip</span>(<span class="kw-2">&amp;</span><span class="self">self</span>)
+        <span class="self">self</span>.<span class="ident">download_and_unzip</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">join</span>(<span class="string">&quot;cldr-core&quot;</span>.<span class="ident">to_string</span>()))
     }
     <span class="kw">fn</span> <span class="ident">cldr_dates</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">cldr_dates</span>.<span class="ident">download_and_unzip</span>(<span class="kw-2">&amp;</span><span class="self">self</span>)
+        <span class="self">self</span>.<span class="ident">download_and_unzip</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">join</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;cldr-dates-{}&quot;</span>, <span class="self">self</span>.<span class="ident">suffix</span>)))
     }
 }
 
-<span class="kw">impl</span> <span class="ident">CldrPathsDownload</span> {
-    <span class="doccomment">/// Creates a CldrPathsDownload that downloads files to the system cache directory</span>
+<span class="kw">impl</span> <span class="ident">CldrAllInOneDownloader</span> {
+    <span class="doccomment">/// Creates a CldrAllInOneDownloader that downloads files to the system cache directory</span>
     <span class="doccomment">/// as determined by dirs::cache_dir().</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// github_tag should be a tag in the CLDR JSON repositories, such as &quot;36.0.0&quot;:</span>
@@ -210,40 +206,16 @@
                 .<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="ident">NoCacheDir</span>)<span class="question-mark">?</span>
                 .<span class="ident">join</span>(<span class="string">&quot;icu4x&quot;</span>)
                 .<span class="ident">join</span>(<span class="string">&quot;cldr&quot;</span>),
-            <span class="ident">cldr_core</span>: <span class="ident">CldrZipFileInfo</span> {
-                <span class="ident">url</span>: <span class="macro">format</span><span class="macro">!</span>(
-                    <span class="string">&quot;https://github.com/unicode-cldr/cldr-core/archive/{}.zip&quot;</span>,
-                    <span class="ident">github_tag</span>
-                ),
-                <span class="ident">top_dir</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;cldr-core-{}&quot;</span>, <span class="ident">github_tag</span>),
-            },
-            <span class="ident">cldr_dates</span>: <span class="ident">CldrZipFileInfo</span> {
-                <span class="ident">url</span>: <span class="macro">format</span><span class="macro">!</span>(
-                    <span class="string">&quot;https://github.com/unicode-cldr/cldr-dates-full/archive/{}.zip&quot;</span>,
-                    <span class="ident">github_tag</span>
-                ),
-                <span class="ident">top_dir</span>: <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;cldr-dates-full-{}&quot;</span>, <span class="ident">github_tag</span>),
-            },
+            <span class="ident">url</span>: <span class="macro">format</span><span class="macro">!</span>(
+                <span class="string">&quot;https://github.com/unicode-org/cldr-json/releases/download/{}/cldr-{}-json-full.zip&quot;</span>,
+                <span class="ident">github_tag</span>, <span class="ident">github_tag</span>
+            ),
+            <span class="ident">suffix</span>: <span class="string">&quot;full&quot;</span>.<span class="ident">to_string</span>(),
         })
     }
-}
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CldrZipFileInfo</span> {
-    <span class="doccomment">/// The URL to the remote zip file</span>
-    <span class="kw">pub</span> <span class="ident">url</span>: <span class="ident">String</span>,
-    <span class="doccomment">/// The directory name in the unpacked zip fle</span>
-    <span class="kw">pub</span> <span class="ident">top_dir</span>: <span class="ident">String</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">CldrZipFileInfo</span> {
-    <span class="kw">fn</span> <span class="ident">download_and_unzip</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">CldrPathsDownload</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="ident">io_util</span>::<span class="ident">download_and_unzip</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">url</span>, <span class="kw-2">&amp;</span><span class="ident">parent</span>.<span class="ident">cache_dir</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">top_dir</span>))
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="kw">fn</span> <span class="ident">download_and_unzip</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="ident">io_util</span>::<span class="ident">download_and_unzip</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">url</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cache_dir</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
     }
 }
 </pre></div>

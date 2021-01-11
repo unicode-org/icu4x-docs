@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Error",""]],"struct":[["CldrPathsDownload","Implementation of CldrPaths that downloads CLDR data directories on demand. The download artifacts are saved in the user's cache directory; see https://docs.rs/dirs/3.0.0/dirs/fn.cache_dir.html"]]});
+initSidebarItems({"enum":[["Error",""]],"struct":[["CldrAllInOneDownloader","Implementation of CldrPaths that downloads CLDR data directories on demand. The download artifacts are saved in the user's cache directory; see https://docs.rs/dirs/3.0.0/dirs/fn.cache_dir.html"]]});

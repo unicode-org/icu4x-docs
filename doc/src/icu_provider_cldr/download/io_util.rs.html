@@ -108,6 +108,14 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -138,6 +146,7 @@
 <span class="comment">// TODO(#297): Implement this async.</span>
 <span class="kw">fn</span> <span class="ident">download_sync</span>(<span class="ident">url</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">destination</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="ident">log</span>::<span class="macro">info</span><span class="macro">!</span>(<span class="string">&quot;Downloading: {}&quot;</span>, <span class="ident">url</span>);
+    <span class="ident">log</span>::<span class="macro">info</span><span class="macro">!</span>(<span class="string">&quot;Please be patient; this could take a while. Downloads may exceed 50 MB&quot;</span>);
     <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant</span>::<span class="ident">now</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">reqwest</span>::<span class="ident">blocking</span>::<span class="ident">get</span>(<span class="ident">url</span>)<span class="question-mark">?</span>;
     <span class="kw">if</span> <span class="op">!</span><span class="ident">response</span>.<span class="ident">status</span>().<span class="ident">is_success</span>() {
@@ -169,6 +178,7 @@
 <span class="kw">fn</span> <span class="ident">unzip_sync</span>(<span class="ident">zip_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">dir_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">File</span>::<span class="ident">open</span>(<span class="ident">zip_path</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">zip_path</span>))<span class="question-mark">?</span>;
     <span class="ident">log</span>::<span class="macro">info</span><span class="macro">!</span>(<span class="string">&quot;Unzipping...&quot;</span>);
+    <span class="ident">log</span>::<span class="macro">info</span><span class="macro">!</span>(<span class="string">&quot;Please be patient; this could take a while. Unzipped size may exceed 500 MB&quot;</span>);
     <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant</span>::<span class="ident">now</span>();
     <span class="ident">Unzipper</span>::<span class="ident">new</span>(<span class="ident">reader</span>, <span class="ident">dir_path</span>)
         .<span class="ident">unzip</span>()
@@ -208,10 +218,16 @@
 
     <span class="kw">if</span> <span class="op">!</span><span class="ident">zip_path</span>.<span class="ident">exists</span>() {
         <span class="ident">download_sync</span>(<span class="ident">zip_file_url</span>, <span class="kw-2">&amp;</span><span class="ident">zip_path</span>)<span class="question-mark">?</span>;
+        <span class="ident">log</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;Saved as: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">zip_path</span>);
+    } <span class="kw">else</span> {
+        <span class="ident">log</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;Data already downloaded: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">zip_path</span>);
     }
 
     <span class="kw">if</span> <span class="op">!</span><span class="ident">dir_path</span>.<span class="ident">exists</span>() {
         <span class="ident">unzip_sync</span>(<span class="kw-2">&amp;</span><span class="ident">zip_path</span>, <span class="kw-2">&amp;</span><span class="ident">dir_path</span>)<span class="question-mark">?</span>;
+        <span class="ident">log</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;Unzipped as: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">dir_path</span>);
+    } <span class="kw">else</span> {
+        <span class="ident">log</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;Data already unzipped as: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">dir_path</span>);
     }
 
     <span class="prelude-val">Ok</span>(<span class="ident">dir_path</span>)

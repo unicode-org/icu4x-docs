@@ -1,5 +1,5 @@
 (function() {var implementors = {};
 implementors["icu_provider"] = [];
-implementors["icu_provider_cldr"] = [{"text":"impl&lt;'d&gt; DataProvider&lt;'d, DatesV1&gt; for DatesProvider&lt;'d&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'d&gt; DataProvider&lt;'d, PluralRuleStringsV1&lt;'static&gt;&gt; for PluralsProvider&lt;'d&gt;","synthetic":false,"types":[]}];
+implementors["icu_provider_cldr"] = [{"text":"impl&lt;'d&gt; DataProvider&lt;'d, DatesV1&gt; for DatesProvider&lt;'d&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'d&gt; DataProvider&lt;'d, LikelySubtagsV1&gt; for LikelySubtagsProvider&lt;'d&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'d&gt; DataProvider&lt;'d, PluralRuleStringsV1&lt;'static&gt;&gt; for PluralsProvider&lt;'d&gt;","synthetic":false,"types":[]}];
 implementors["icu_provider_fs"] = [{"text":"impl&lt;'d, T&gt; DataProvider&lt;'d, T&gt; for FsDataProvider <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: Deserialize&lt;'d&gt; + Serialize + Clone + Debug + 'd,&nbsp;</span>","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

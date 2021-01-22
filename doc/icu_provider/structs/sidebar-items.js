@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["dates",""],["icu4x",""],["plurals",""]]});
+initSidebarItems({"mod":[["dates",""],["icu4x",""],["likelysubtags",""],["plurals",""]]});

@@ -1,3 +1,4 @@
 (function() {var implementors = {};
 implementors["icu_datetime"] = [{"text":"impl Add&lt;u8&gt; for Month","synthetic":false,"types":[]},{"text":"impl Add&lt;u8&gt; for WeekDay","synthetic":false,"types":[]},{"text":"impl Add&lt;u8&gt; for Day","synthetic":false,"types":[]},{"text":"impl Add&lt;u8&gt; for Hour","synthetic":false,"types":[]},{"text":"impl Add&lt;u8&gt; for Minute","synthetic":false,"types":[]},{"text":"impl Add&lt;u8&gt; for Second","synthetic":false,"types":[]}];
+implementors["writeable"] = [{"text":"impl Add&lt;LengthHint&gt; for LengthHint","synthetic":false,"types":[]},{"text":"impl Add&lt;usize&gt; for LengthHint","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

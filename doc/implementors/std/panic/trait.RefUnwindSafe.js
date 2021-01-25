@@ -13,4 +13,5 @@ implementors["icu_provider_fs"] = [{"text":"impl RefUnwindSafe for FsDataProvide
 implementors["icu_segmenter_lstm"] = [{"text":"impl RefUnwindSafe for Error","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for Lstm","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for LstmData","synthetic":true,"types":[]}];
 implementors["icu_testdata"] = [{"text":"impl RefUnwindSafe for PackageMetadata","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for PackageInfo","synthetic":true,"types":[]},{"text":"impl !RefUnwindSafe for Error","synthetic":true,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl RefUnwindSafe for UnicodeSetBuilder","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for UnicodeSet","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for UnicodeSetError","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for UnicodeSetSpanCondition","synthetic":true,"types":[]}];
+implementors["writeable"] = [{"text":"impl RefUnwindSafe for LengthHint","synthetic":true,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

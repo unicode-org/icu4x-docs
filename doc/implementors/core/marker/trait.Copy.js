@@ -4,4 +4,5 @@ implementors["icu_locid"] = [{"text":"impl Copy for Key","synthetic":false,"type
 implementors["icu_plurals"] = [{"text":"impl Copy for PluralOperands","synthetic":false,"types":[]},{"text":"impl Copy for Operator","synthetic":false,"types":[]},{"text":"impl Copy for Operand","synthetic":false,"types":[]},{"text":"impl Copy for PluralRuleType","synthetic":false,"types":[]},{"text":"impl Copy for PluralCategory","synthetic":false,"types":[]}];
 implementors["icu_provider"] = [{"text":"impl Copy for ResourceCategory","synthetic":false,"types":[]},{"text":"impl Copy for ResourceKey","synthetic":false,"types":[]}];
 implementors["icu_provider_fs"] = [{"text":"impl Copy for AliasOption","synthetic":false,"types":[]},{"text":"impl Copy for OverwriteOption","synthetic":false,"types":[]},{"text":"impl Copy for StyleOption","synthetic":false,"types":[]}];
+implementors["writeable"] = [{"text":"impl Copy for LengthHint","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

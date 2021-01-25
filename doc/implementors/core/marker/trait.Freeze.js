@@ -13,4 +13,5 @@ implementors["icu_provider_fs"] = [{"text":"impl Freeze for FsDataProvider","syn
 implementors["icu_segmenter_lstm"] = [{"text":"impl Freeze for Error","synthetic":true,"types":[]},{"text":"impl Freeze for Lstm","synthetic":true,"types":[]},{"text":"impl Freeze for LstmData","synthetic":true,"types":[]}];
 implementors["icu_testdata"] = [{"text":"impl Freeze for PackageMetadata","synthetic":true,"types":[]},{"text":"impl Freeze for PackageInfo","synthetic":true,"types":[]},{"text":"impl Freeze for Error","synthetic":true,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl Freeze for UnicodeSetBuilder","synthetic":true,"types":[]},{"text":"impl Freeze for UnicodeSet","synthetic":true,"types":[]},{"text":"impl Freeze for UnicodeSetError","synthetic":true,"types":[]},{"text":"impl Freeze for UnicodeSetSpanCondition","synthetic":true,"types":[]}];
+implementors["writeable"] = [{"text":"impl Freeze for LengthHint","synthetic":true,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

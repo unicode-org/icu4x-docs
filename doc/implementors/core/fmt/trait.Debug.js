@@ -13,4 +13,5 @@ implementors["icu_provider_fs"] = [{"text":"impl Debug for Error","synthetic":fa
 implementors["icu_segmenter_lstm"] = [{"text":"impl Debug for Error","synthetic":false,"types":[]},{"text":"impl Debug for LstmData","synthetic":false,"types":[]}];
 implementors["icu_testdata"] = [{"text":"impl Debug for Error","synthetic":false,"types":[]},{"text":"impl Debug for PackageMetadata","synthetic":false,"types":[]},{"text":"impl Debug for PackageInfo","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl Debug for UnicodeSet","synthetic":false,"types":[]},{"text":"impl Debug for UnicodeSetError","synthetic":false,"types":[]}];
+implementors["writeable"] = [{"text":"impl Debug for LengthHint","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

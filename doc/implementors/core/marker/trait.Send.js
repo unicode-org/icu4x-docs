@@ -13,4 +13,5 @@ implementors["icu_provider_fs"] = [{"text":"impl Send for FsDataProvider","synth
 implementors["icu_segmenter_lstm"] = [{"text":"impl Send for Error","synthetic":true,"types":[]},{"text":"impl Send for Lstm","synthetic":true,"types":[]},{"text":"impl Send for LstmData","synthetic":true,"types":[]}];
 implementors["icu_testdata"] = [{"text":"impl Send for PackageMetadata","synthetic":true,"types":[]},{"text":"impl Send for PackageInfo","synthetic":true,"types":[]},{"text":"impl Send for Error","synthetic":true,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl Send for UnicodeSetBuilder","synthetic":true,"types":[]},{"text":"impl Send for UnicodeSet","synthetic":true,"types":[]},{"text":"impl Send for UnicodeSetError","synthetic":true,"types":[]},{"text":"impl Send for UnicodeSetSpanCondition","synthetic":true,"types":[]}];
+implementors["writeable"] = [{"text":"impl Send for LengthHint","synthetic":true,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

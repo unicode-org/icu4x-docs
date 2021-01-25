@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl Sync for Breakpoints","synthetic":true,"types":[]},{"text":"impl&lt;F&gt; Sync for BiesVector&lt;F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: Sync,&nbsp;</span>","synthetic":true,"types":[]},{"text":"impl Sync for BiesMatrix","synthetic":true,"types":[]},{"text":"impl&lt;'a&gt; Sync for BiesString&lt;'a&gt;","synthetic":true,"types":[]},{"text":"impl Sync for AlgorithmIter","synthetic":true,"types":[]},{"text":"impl Sync for Algorithm","synthetic":true,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl Sync for Error","synthetic":true,"types":[]},{"text":"impl Sync for FixedDecimal","synthetic":true,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl !Sync for Error","synthetic":true,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl Sync for Locale","synthetic":true,"types":[]},{"text":"impl Sync for PluralRules","synthetic":true,"types":[]}];

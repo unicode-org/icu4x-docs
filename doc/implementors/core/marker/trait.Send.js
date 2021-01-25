@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl Send for Breakpoints","synthetic":true,"types":[]},{"text":"impl&lt;F&gt; Send for BiesVector&lt;F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: Send,&nbsp;</span>","synthetic":true,"types":[]},{"text":"impl Send for BiesMatrix","synthetic":true,"types":[]},{"text":"impl&lt;'a&gt; Send for BiesString&lt;'a&gt;","synthetic":true,"types":[]},{"text":"impl Send for AlgorithmIter","synthetic":true,"types":[]},{"text":"impl Send for Algorithm","synthetic":true,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl Send for Error","synthetic":true,"types":[]},{"text":"impl Send for FixedDecimal","synthetic":true,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl !Send for Error","synthetic":true,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl Send for Locale","synthetic":true,"types":[]},{"text":"impl Send for PluralRules","synthetic":true,"types":[]}];

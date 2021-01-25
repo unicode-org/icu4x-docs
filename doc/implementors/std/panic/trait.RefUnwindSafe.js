@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl RefUnwindSafe for Breakpoints","synthetic":true,"types":[]},{"text":"impl&lt;F&gt; RefUnwindSafe for BiesVector&lt;F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: RefUnwindSafe,&nbsp;</span>","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for BiesMatrix","synthetic":true,"types":[]},{"text":"impl&lt;'a&gt; RefUnwindSafe for BiesString&lt;'a&gt;","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for AlgorithmIter","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for Algorithm","synthetic":true,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl RefUnwindSafe for Error","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for FixedDecimal","synthetic":true,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl !RefUnwindSafe for Error","synthetic":true,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl RefUnwindSafe for Locale","synthetic":true,"types":[]},{"text":"impl RefUnwindSafe for PluralRules","synthetic":true,"types":[]}];

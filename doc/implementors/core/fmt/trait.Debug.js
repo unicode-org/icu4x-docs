@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl Debug for Breakpoints","synthetic":false,"types":[]},{"text":"impl&lt;F:&nbsp;Debug&gt; Debug for BiesVector&lt;F&gt;","synthetic":false,"types":[]},{"text":"impl Debug for BiesMatrix","synthetic":false,"types":[]},{"text":"impl Debug for Algorithm","synthetic":false,"types":[]},{"text":"impl&lt;'_&gt; Debug for BiesString&lt;'_&gt;","synthetic":false,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl Debug for FixedDecimal","synthetic":false,"types":[]},{"text":"impl Debug for Error","synthetic":false,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl Debug for Error","synthetic":false,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl Debug for Locale","synthetic":false,"types":[]}];

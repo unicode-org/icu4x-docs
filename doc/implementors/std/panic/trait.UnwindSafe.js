@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl UnwindSafe for Breakpoints","synthetic":true,"types":[]},{"text":"impl&lt;F&gt; UnwindSafe for BiesVector&lt;F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: UnwindSafe,&nbsp;</span>","synthetic":true,"types":[]},{"text":"impl UnwindSafe for BiesMatrix","synthetic":true,"types":[]},{"text":"impl&lt;'a&gt; UnwindSafe for BiesString&lt;'a&gt;","synthetic":true,"types":[]},{"text":"impl UnwindSafe for AlgorithmIter","synthetic":true,"types":[]},{"text":"impl UnwindSafe for Algorithm","synthetic":true,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl UnwindSafe for Error","synthetic":true,"types":[]},{"text":"impl UnwindSafe for FixedDecimal","synthetic":true,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl !UnwindSafe for Error","synthetic":true,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl UnwindSafe for Locale","synthetic":true,"types":[]},{"text":"impl UnwindSafe for PluralRules","synthetic":true,"types":[]}];

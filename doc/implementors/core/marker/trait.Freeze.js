@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl Freeze for Breakpoints","synthetic":true,"types":[]},{"text":"impl&lt;F&gt; Freeze for BiesVector&lt;F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: Freeze,&nbsp;</span>","synthetic":true,"types":[]},{"text":"impl Freeze for BiesMatrix","synthetic":true,"types":[]},{"text":"impl&lt;'a&gt; Freeze for BiesString&lt;'a&gt;","synthetic":true,"types":[]},{"text":"impl Freeze for AlgorithmIter","synthetic":true,"types":[]},{"text":"impl Freeze for Algorithm","synthetic":true,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl Freeze for Error","synthetic":true,"types":[]},{"text":"impl Freeze for FixedDecimal","synthetic":true,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl Freeze for Error","synthetic":true,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl Freeze for Locale","synthetic":true,"types":[]},{"text":"impl Freeze for PluralRules","synthetic":true,"types":[]}];

@@ -1,4 +1,5 @@
 var N = null;var sourcesIndex = {};
+sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","uint_iterator.rs"]};
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};

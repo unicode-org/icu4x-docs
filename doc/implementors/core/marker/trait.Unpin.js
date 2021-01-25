@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["bies"] = [{"text":"impl Unpin for Breakpoints","synthetic":true,"types":[]},{"text":"impl&lt;F&gt; Unpin for BiesVector&lt;F&gt; <span class=\"where fmt-newline\">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: Unpin,&nbsp;</span>","synthetic":true,"types":[]},{"text":"impl Unpin for BiesMatrix","synthetic":true,"types":[]},{"text":"impl&lt;'a&gt; Unpin for BiesString&lt;'a&gt;","synthetic":true,"types":[]},{"text":"impl Unpin for AlgorithmIter","synthetic":true,"types":[]},{"text":"impl Unpin for Algorithm","synthetic":true,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl Unpin for Error","synthetic":true,"types":[]},{"text":"impl Unpin for FixedDecimal","synthetic":true,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl Unpin for Error","synthetic":true,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl Unpin for Locale","synthetic":true,"types":[]},{"text":"impl Unpin for PluralRules","synthetic":true,"types":[]}];

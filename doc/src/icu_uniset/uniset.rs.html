@@ -455,6 +455,75 @@
 <span id="452">452</span>
 <span id="453">453</span>
 <span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -470,8 +539,10 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Provides exposure to membership functions and constructors from serialized `UnicodeSets`</span>
 <span class="doccomment">/// and predefined ranges.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodeSet</span> {
+    <span class="comment">// TODO: need advice - how should we remove Hash and Eq from UnicodeSet unless we need it?</span>
+
     <span class="comment">// If we wanted to use an array to keep the memory on the stack, there is an unsafe nightly feature</span>
     <span class="comment">// https://doc.rust-lang.org/nightly/core/array/trait.FixedSizeArray.html</span>
     <span class="comment">// Allows for traits of fixed size arrays</span>
@@ -488,13 +559,17 @@
     <span class="doccomment">/// The inversion list must be of even length, sorted ascending non-overlapping,</span>
     <span class="doccomment">/// and within the bounds of `0x0 -&gt; 0x10FFFF` inclusive, and end points being exclusive.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSetError;</span>
-    <span class="doccomment">/// let empty: Vec&lt;u32&gt; = vec![];</span>
-    <span class="doccomment">/// assert_eq!(UnicodeSet::from_inversion_list(empty.clone()), Err(UnicodeSetError::InvalidSet(empty.clone())))</span>
+    <span class="doccomment">/// let invalid: Vec&lt;u32&gt; = vec![0, 128, 3];</span>
+    <span class="doccomment">/// let result = UnicodeSet::from_inversion_list(invalid.clone());</span>
+    <span class="doccomment">/// assert!(matches!(result, Err(UnicodeSetError::InvalidSet(_))));</span>
+    <span class="doccomment">/// if let Err(UnicodeSetError::InvalidSet(actual)) = result {</span>
+    <span class="doccomment">///     assert_eq!(invalid, actual);</span>
+    <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_inversion_list</span>(<span class="ident">inv_list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">UnicodeSetError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="ident">inv_list</span>) {
@@ -506,6 +581,14 @@
         } <span class="kw">else</span> {
             <span class="prelude-val">Err</span>(<span class="ident">UnicodeSetError</span>::<span class="ident">InvalidSet</span>(<span class="ident">inv_list</span>))
         }
+    }
+
+    <span class="doccomment">/// Returns an owned inversion list representing the current `UnicodeSet`</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_inversion_list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">as_inversion_list</span>() <span class="comment">// Only crate public, to not leak impl</span>
+            .<span class="ident">to_vec</span>();
+        <span class="ident">result</span>
     }
 
     <span class="doccomment">/// Returns `UnicodeSet` spanning entire Unicode range</span>
@@ -537,7 +620,7 @@
 
     <span class="doccomment">/// Yields an iterator going through the character set in the `UnicodeSet`</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -598,7 +681,7 @@
     <span class="doccomment">/// Runs a binary search in `O(log(n))` where `n` is the number of start and end points</span>
     <span class="doccomment">/// in the set using `std` implementation</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -611,13 +694,36 @@
         <span class="self">self</span>.<span class="ident">contains_query</span>(<span class="ident">query</span> <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">is_some</span>()
     }
 
-    <span class="doccomment">/// Checks to see if the range is in the `UnicodeSet`, returns a Result</span>
+    <span class="doccomment">/// Checks to see the unsigned int is in the `UnicodeSet`.all()</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Note: Even though `u32` and `char` in Rust are non-negative 4-byte</span>
+    <span class="doccomment">/// values, there is an important difference. A `u32` can take values up to</span>
+    <span class="doccomment">/// a very large integer value, while a `char` in Rust is defined to be in</span>
+    <span class="doccomment">/// the range from 0 to the maximum valid Unicode Scalar Value.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Runs a binary search in `O(log(n))` where `n` is the number of start and end points</span>
+    <span class="doccomment">/// in the set using `std` implementation</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
+    <span class="doccomment">/// let example_list = vec![65, 67, 68, 69];</span>
+    <span class="doccomment">/// let example = UnicodeSet::from_inversion_list(example_list).unwrap();</span>
+    <span class="doccomment">/// assert!(example.contains_u32(65));</span>
+    <span class="doccomment">/// assert!(!example.contains_u32(67));</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains_u32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">query</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">contains_query</span>(<span class="ident">query</span>).<span class="ident">is_some</span>()
+    }
+
+    <span class="doccomment">/// Checks to see if the range is in the UnicodeSet, returns a Result</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Runs a binary search in `O(log(n))` where `n` is the number of start and end points</span>
     <span class="doccomment">/// in the set using `std::vec::Vec` implementation Only runs the search once on the `start`</span>
     <span class="doccomment">/// parameter, while the `end` parameter is checked in a single `O(1)` step</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -636,7 +742,7 @@
     <span class="doccomment">/// The ICU4C/J `UnicodeSet::contains(UChar32 start, UChar32 end)` method</span>
     <span class="doccomment">/// differs by including the end boundary.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -659,7 +765,7 @@
 
     <span class="doccomment">/// Check if the calling `UnicodeSet` contains all the characters of the given `UnicodeSet`</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -694,7 +800,7 @@
     <span class="doccomment">/// Returns the end of the initial substring where the characters are either contained/not contained</span>
     <span class="doccomment">/// in the set.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -715,7 +821,7 @@
     <span class="doccomment">/// Returns the start of the trailing substring (starting from end of string) where the characters are</span>
     <span class="doccomment">/// either contained/not contained in the set. Returns the length of the string if no valid return.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example:</span>
+    <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_uniset::UnicodeSet;</span>
@@ -747,12 +853,17 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">ex</span>, <span class="ident">check</span>.<span class="ident">inv_list</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">2</span>, <span class="ident">check</span>.<span class="ident">size</span>());
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_try_from_vec_error</span>() {
         <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];
         <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">check</span>.<span class="ident">clone</span>());
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(<span class="ident">UnicodeSetError</span>::<span class="ident">InvalidSet</span>(<span class="ident">check</span>)), <span class="ident">set</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="macro">matches</span><span class="macro">!</span>(<span class="ident">set</span>, <span class="prelude-val">Err</span>(<span class="ident">UnicodeSetError</span>::<span class="ident">InvalidSet</span>(<span class="kw">_</span>))));
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">UnicodeSetError</span>::<span class="ident">InvalidSet</span>(<span class="ident">actual</span>)) <span class="op">=</span> <span class="ident">set</span> {
+            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>, <span class="ident">actual</span>);
+        }
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_all</span>() {
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>, (<span class="ident">char</span>::<span class="ident">MAX</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">+</span> <span class="number">1</span>];
@@ -762,6 +873,7 @@
             (<span class="ident">expected</span>[<span class="number">1</span>] <span class="op">-</span> <span class="ident">expected</span>[<span class="number">0</span>]) <span class="kw">as</span> <span class="ident">usize</span>
         )
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_bmp</span>() {
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>, <span class="ident">BMP_MAX</span> <span class="op">+</span> <span class="number">1</span>];
@@ -794,6 +906,7 @@
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">contains</span>(<span class="number">10</span> <span class="kw">as</span> <span class="ident">char</span>));
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">contains</span>(<span class="number">14</span> <span class="kw">as</span> <span class="ident">char</span>));
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_contains_false</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">2</span>, <span class="number">5</span>, <span class="number">10</span>, <span class="number">15</span>];
@@ -804,6 +917,7 @@
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains</span>(<span class="number">15</span> <span class="kw">as</span> <span class="ident">char</span>));
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains</span>(<span class="number">16</span> <span class="kw">as</span> <span class="ident">char</span>));
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_contains_range</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">70</span>, <span class="number">75</span>, <span class="number">85</span>];
@@ -813,6 +927,7 @@
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">contains_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;L&#39;</span>..<span class="string">&#39;P&#39;</span>))); <span class="comment">// 76 - 80</span>
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;L&#39;</span>..<span class="op">=</span><span class="string">&#39;U&#39;</span>))); <span class="comment">// 76 - 85</span>
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_contains_range_false</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">70</span>, <span class="number">75</span>, <span class="number">85</span>];
@@ -821,12 +936,14 @@
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;F&#39;</span>..<span class="string">&#39;K&#39;</span>))); <span class="comment">// 70 - 74</span>
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;U&#39;</span>..))); <span class="comment">// 85 - ..</span>
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_contains_range_invalid</span>() {
         <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">all</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;A&#39;</span>..<span class="string">&#39;!&#39;</span>))); <span class="comment">// 65 - 33</span>
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">contains_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;A&#39;</span>..<span class="string">&#39;A&#39;</span>))); <span class="comment">// 65 - 65</span>
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_contains_set_u</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">10</span>, <span class="number">20</span>, <span class="number">40</span>, <span class="number">50</span>, <span class="number">70</span>, <span class="number">80</span>, <span class="number">100</span>, <span class="number">110</span>];
@@ -835,6 +952,7 @@
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">inside</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">u</span>.<span class="ident">contains_set</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>));
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_contains_set_u_false</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">10</span>, <span class="number">20</span>, <span class="number">40</span>, <span class="number">50</span>, <span class="number">70</span>, <span class="number">80</span>, <span class="number">100</span>, <span class="number">110</span>];
@@ -843,6 +961,7 @@
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">outside</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">u</span>.<span class="ident">contains_set</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>));
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_size</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">2</span>, <span class="number">5</span>, <span class="number">10</span>, <span class="number">15</span>];
@@ -857,6 +976,7 @@
         };
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">size</span>(), <span class="number">0</span>);
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_is_empty</span>() {
         <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="ident">UnicodeSet</span> {
@@ -865,11 +985,13 @@
         };
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">is_empty</span>());
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_is_not_empty</span>() {
         <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">all</span>();
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">check</span>.<span class="ident">is_empty</span>());
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_iter</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">68</span>, <span class="number">69</span>, <span class="number">70</span>, <span class="number">0xD800</span>, <span class="number">0xD801</span>];
@@ -881,6 +1003,7 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Some</span>(<span class="string">&#39;E&#39;</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">None</span>, <span class="ident">iter</span>.<span class="ident">next</span>());
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_span_contains</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">68</span>, <span class="number">70</span>, <span class="number">75</span>]; <span class="comment">// A - D, F - K</span>
@@ -888,6 +1011,7 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span</span>(<span class="string">&quot;ABCDE&quot;</span>, <span class="bool-val">true</span>), <span class="number">3</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span</span>(<span class="string">&quot;E&quot;</span>, <span class="bool-val">true</span>), <span class="number">0</span>);
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_span_does_not_contain</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">68</span>, <span class="number">70</span>, <span class="number">75</span>]; <span class="comment">// A - D, F - K</span>
@@ -895,6 +1019,7 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span</span>(<span class="string">&quot;DEF&quot;</span>, <span class="bool-val">false</span>), <span class="number">2</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span</span>(<span class="string">&quot;KLMA&quot;</span>, <span class="bool-val">false</span>), <span class="number">3</span>);
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_span_back_contains</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">68</span>, <span class="number">70</span>, <span class="number">75</span>]; <span class="comment">// A - D, F - K</span>
@@ -902,12 +1027,25 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span_back</span>(<span class="string">&quot;XYZABFH&quot;</span>, <span class="bool-val">true</span>), <span class="number">3</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span_back</span>(<span class="string">&quot;ABCXYZ&quot;</span>, <span class="bool-val">true</span>), <span class="number">6</span>);
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_unicodeset_span_back_does_not_contain</span>() {
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">68</span>, <span class="number">70</span>, <span class="number">75</span>]; <span class="comment">// A - D, F - K</span>
         <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">ex</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span_back</span>(<span class="string">&quot;ABCXYZ&quot;</span>, <span class="bool-val">false</span>), <span class="number">3</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">check</span>.<span class="ident">span_back</span>(<span class="string">&quot;XYZABC&quot;</span>, <span class="bool-val">false</span>), <span class="number">6</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_uniset_to_inv_list</span>() {
+        <span class="kw">let</span> <span class="ident">inv_list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[
+            <span class="number">9</span>, <span class="number">14</span>, <span class="number">32</span>, <span class="number">33</span>, <span class="number">133</span>, <span class="number">134</span>, <span class="number">160</span>, <span class="number">161</span>, <span class="number">5760</span>, <span class="number">5761</span>, <span class="number">8192</span>, <span class="number">8203</span>, <span class="number">8232</span>, <span class="number">8234</span>, <span class="number">8239</span>, <span class="number">8240</span>,
+            <span class="number">8287</span>, <span class="number">8288</span>, <span class="number">12288</span>, <span class="number">12289</span>,
+        ];
+        <span class="kw">let</span> <span class="ident">inv_list_clone</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">inv_list</span>).<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">s</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">inv_list_clone</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">round_trip_inv_list</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">get_inversion_list</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">round_trip_inv_list</span>, <span class="ident">inv_list</span>);
     }
 }
 </pre></div>

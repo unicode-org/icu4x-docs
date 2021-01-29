@@ -99,12 +99,12 @@
 <span id="96">96</span>
 <span id="97">97</span>
 <span id="98">98</span>
+<span id="99">99</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/master/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">iter</span>::<span class="ident">IterableDataProvider</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
@@ -121,13 +121,12 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">/// use icu_provider::structs;</span>
 <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let provider = InvariantDataProvider;</span>
 <span class="doccomment">/// let expected_entries = vec![ResourceOptions::default()];</span>
 <span class="doccomment">/// let actual_entries: Vec&lt;ResourceOptions&gt; = provider</span>
-<span class="doccomment">///     .supported_options_for_key(&amp;structs::plurals::key::CARDINAL_V1)</span>
+<span class="doccomment">///     .supported_options_for_key(&amp;icu_plurals::provider::key::CARDINAL_V1)</span>
 <span class="doccomment">///     .unwrap()</span>
 <span class="doccomment">///     .collect();</span>
 <span class="doccomment">/// assert_eq!(&amp;expected_entries, &amp;actual_entries);</span>
@@ -146,11 +145,12 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">InvariantDataProvider</span> {
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;erased&quot;</span>)]</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">InvariantDataProvider</span> {
     <span class="kw">fn</span> <span class="ident">load_to_receiver</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-        <span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">ErasedDataReceiver</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
+        <span class="ident">receiver</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataReceiver</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponseMetadata</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident">receiver</span>.<span class="ident">receive_default</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponseMetadata</span>::<span class="ident">default</span>())
@@ -167,30 +167,32 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hello_world&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;erased&quot;</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataProvider</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_invariant</span>() {
-        <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">structs</span>;
+        <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hello_world</span>;
         <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">InvariantDataProvider</span>;
 
-        <span class="kw">let</span> <span class="ident">data1</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">structs</span>::<span class="ident">icu4x</span>::<span class="ident">HelloWorldV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>::<span class="ident">from</span>(<span class="ident">structs</span>::<span class="ident">icu4x</span>::<span class="ident">key</span>::<span class="ident">HELLO_WORLD_V1</span>))
+        <span class="kw">let</span> <span class="ident">data1</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">hello_world</span>::<span class="ident">HelloWorldV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>::<span class="ident">from</span>(<span class="ident">hello_world</span>::<span class="ident">key</span>::<span class="ident">HELLO_WORLD_V1</span>))
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
             .<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">data2</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">structs</span>::<span class="ident">icu4x</span>::<span class="ident">HelloWorldV1</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">provider</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">ErasedDataProvider</span>)
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>::<span class="ident">from</span>(<span class="ident">structs</span>::<span class="ident">icu4x</span>::<span class="ident">key</span>::<span class="ident">HELLO_WORLD_V1</span>))
+        <span class="kw">let</span> <span class="ident">data2</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">hello_world</span>::<span class="ident">HelloWorldV1</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">provider</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="ident">dyn</span> <span class="ident">ErasedDataProvider</span>)
+            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>::<span class="ident">from</span>(<span class="ident">hello_world</span>::<span class="ident">key</span>::<span class="ident">HELLO_WORLD_V1</span>))
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
             .<span class="ident">unwrap</span>();
 
         <span class="macro">assert_eq</span><span class="macro">!</span>(
             <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data1</span>,
-            <span class="kw-2">&amp;</span><span class="ident">structs</span>::<span class="ident">icu4x</span>::<span class="ident">HelloWorldV1</span> {
+            <span class="kw-2">&amp;</span><span class="ident">hello_world</span>::<span class="ident">HelloWorldV1</span> {
                 <span class="ident">message</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;(und) Hello World&quot;</span>)
             }
         );

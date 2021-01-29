@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["locale_canonicalizer",""]]});
+initSidebarItems({"mod":[["locale_canonicalizer",""],["provider",""]]});

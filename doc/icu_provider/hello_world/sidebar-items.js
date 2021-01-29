@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["HelloWorldProvider","A data provider returning Hello World strings in different languages."]]});
+initSidebarItems({"mod":[["key",""]],"struct":[["HelloWorldProvider","A data provider returning Hello World strings in different languages."],["HelloWorldV1","A struct containing \"Hello World\" in the requested language."]]});

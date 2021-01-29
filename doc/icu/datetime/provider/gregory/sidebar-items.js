@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["day_periods",""],["months",""],["patterns",""],["weekdays",""]],"struct":[["DateSymbolsV1",""],["DatesV1",""],["PatternsV1",""]]});

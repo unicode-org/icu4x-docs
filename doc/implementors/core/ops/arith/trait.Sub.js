@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["icu_datetime"] = [{"text":"impl Sub&lt;u8&gt; for Month","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for WeekDay","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for Day","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for Hour","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for Minute","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for Second","synthetic":false,"types":[]}];
+implementors["icu_datetime"] = [{"text":"impl Sub&lt;u8&gt; for IsoHour","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for IsoMinute","synthetic":false,"types":[]},{"text":"impl Sub&lt;u8&gt; for IsoSecond","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

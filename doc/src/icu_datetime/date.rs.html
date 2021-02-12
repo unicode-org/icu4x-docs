@@ -276,15 +276,95 @@
 <span id="273">273</span>
 <span id="274">274</span>
 <span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/master/LICENSE ).</span>
-<span class="doccomment">//! APIs for Date and Time handling</span>
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
+
+<span class="kw">use</span> <span class="ident">icu_locid</span>::<span class="ident">Locale</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Add</span>, <span class="ident">Sub</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
+<span class="kw">use</span> <span class="ident">tinystr</span>::<span class="ident">TinyStr8</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DateTimeError</span> {
@@ -307,156 +387,225 @@
     }
 }
 
-<span class="doccomment">/// Temporary trait used to represent the input data for [`DateTimeFormat`].</span>
+<span class="doccomment">/// Representation of a formattable calendar date. Supports dates in any calendar system that uses</span>
+<span class="doccomment">/// solar days indexed by an era, year, month, and day.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This type represents all data that the formatted needs in order to produced formatted string.</span>
+<span class="doccomment">/// All fields are optional. If a field is not present but is required when formatting, an error</span>
+<span class="doccomment">/// result will be returned from the formatter.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// *Note*: At the moment we support only `gregorian` calendar, and plan to extend support to</span>
-<span class="doccomment">/// other calendars in the upcoming releases. See &lt;https://github.com/unicode-org/icu4x/issues/355&gt;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`DateTimeFormat`]: super::DateTimeFormat</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DateTimeType</span>: <span class="ident">FromStr</span> {
-    <span class="kw">fn</span> <span class="ident">year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
-    <span class="kw">fn</span> <span class="ident">month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Month</span>;
-    <span class="kw">fn</span> <span class="ident">day</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Day</span>;
-    <span class="kw">fn</span> <span class="ident">hour</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hour</span>;
-    <span class="kw">fn</span> <span class="ident">minute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Minute</span>;
-    <span class="kw">fn</span> <span class="ident">second</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Second</span>;
+<span class="doccomment">/// All data represented in DateInput should be locale-agnostic.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DateInput</span> {
+    <span class="doccomment">/// Gets the era and year input.</span>
+    <span class="kw">fn</span> <span class="ident">year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Year</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the month input.</span>
+    <span class="kw">fn</span> <span class="ident">month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Month</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the day input.</span>
+    <span class="kw">fn</span> <span class="ident">day_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DayOfMonth</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the weekday input.</span>
+    <span class="kw">fn</span> <span class="ident">iso_weekday</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IsoWeekday</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets information on the position of the day within the year.</span>
+    <span class="kw">fn</span> <span class="ident">day_of_year_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DayOfYearInfo</span><span class="op">&gt;</span>;
 }
 
-<span class="doccomment">/// Temporary implementation of [`DateTimeType`],</span>
-<span class="doccomment">/// which is used in tests, benchmarks and examples of this component.</span>
+<span class="doccomment">/// Representation of a time of day according to ISO-8601 conventions. Always indexed from</span>
+<span class="doccomment">/// midnight, regardless of calendar system.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// *Notice:* Rust at the moment does not have a canonical way to represent date and time. We are introducing</span>
-<span class="doccomment">/// `MockDateTime` as an example of the data necessary for ICU [`DateTimeFormat`] to work, and</span>
-<span class="doccomment">/// [we hope to work with the community](https://github.com/unicode-org/icu4x/blob/master/docs/research/date_time.md)</span>
-<span class="doccomment">/// to develop core date and time APIs that will work as an input for this component.</span>
+<span class="doccomment">/// All fields are optional. If a field is not present but is required when formatting, an error</span>
+<span class="doccomment">/// result will be returned from the formatter.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// # Examples</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_datetime::date::MockDateTime;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let dt1 = MockDateTime::try_new(2020, 9, 24, 13, 21, 0)</span>
-<span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let dt2: MockDateTime = &quot;2020-10-14T13:21:00&quot;.parse()</span>
-<span class="doccomment">///     .expect(&quot;Failed to parse a date time.&quot;);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// [`DateTimeFormat`]: super::DateTimeFormat</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MockDateTime</span> {
-    <span class="kw">pub</span> <span class="ident">year</span>: <span class="ident">usize</span>,
-    <span class="kw">pub</span> <span class="ident">month</span>: <span class="ident">Month</span>,
-    <span class="kw">pub</span> <span class="ident">day</span>: <span class="ident">Day</span>,
-    <span class="kw">pub</span> <span class="ident">hour</span>: <span class="ident">Hour</span>,
-    <span class="kw">pub</span> <span class="ident">minute</span>: <span class="ident">Minute</span>,
-    <span class="kw">pub</span> <span class="ident">second</span>: <span class="ident">Second</span>,
+<span class="doccomment">/// All data represented in IsoTimeInput should be locale-agnostic.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IsoTimeInput</span> {
+    <span class="doccomment">/// Gets the hour input.</span>
+    <span class="kw">fn</span> <span class="ident">hour</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IsoHour</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the minute input.</span>
+    <span class="kw">fn</span> <span class="ident">minute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IsoMinute</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the second input.</span>
+    <span class="kw">fn</span> <span class="ident">second</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IsoSecond</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the fractional second input.</span>
+    <span class="kw">fn</span> <span class="ident">fraction</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FractionalSecond</span><span class="op">&gt;</span>;
 }
 
-<span class="kw">impl</span> <span class="ident">MockDateTime</span> {
-    <span class="doccomment">/// Creates a new `MockDateTime` from a list of already validated date/time parameters.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">year</span>: <span class="ident">usize</span>,
-        <span class="ident">month</span>: <span class="ident">Month</span>,
-        <span class="ident">day</span>: <span class="ident">Day</span>,
-        <span class="ident">hour</span>: <span class="ident">Hour</span>,
-        <span class="ident">minute</span>: <span class="ident">Minute</span>,
-        <span class="ident">second</span>: <span class="ident">Second</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+<span class="doccomment">/// A combination of a formattable calendar date and ISO time.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DateTimeInput</span>: <span class="ident">DateInput</span> <span class="op">+</span> <span class="ident">IsoTimeInput</span> {}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DateTimeInput</span> <span class="kw">for</span> <span class="ident">T</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">DateInput</span> <span class="op">+</span> <span class="ident">IsoTimeInput</span> {}
+
+<span class="doccomment">/// A formattable calendar date and ISO time that takes the locale into account.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">LocalizedDateTimeInput</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DateTimeInput</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// A reference to this instance&#39;s DateTimeInput.</span>
+    <span class="kw">fn</span> <span class="ident">date_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span>;
+
+    <span class="doccomment">/// The year number according to week numbering.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For example, December 31, 2020 is part of the first week of 2021.</span>
+    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Year</span>;
+
+    <span class="doccomment">/// The week of the month according to UTS 35.</span>
+    <span class="kw">fn</span> <span class="ident">week_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfMonth</span>;
+
+    <span class="doccomment">/// The week number of the year.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For example, December 31, 2020 is part of the first week of 2021.</span>
+    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfYear</span>;
+
+    <span class="doccomment">/// TODO(#487): Implement flexible day periods.</span>
+    <span class="kw">fn</span> <span class="ident">flexible_day_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">DateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">T</span>: <span class="ident">DateTimeInput</span><span class="op">&gt;</span> {
+    <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">T</span>,
+    <span class="ident">_first_weekday</span>: <span class="ident">u8</span>,
+    <span class="ident">_anchor_weekday</span>: <span class="ident">u8</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">T</span>: <span class="ident">DateTimeInput</span><span class="op">&gt;</span> <span class="ident">DateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">T</span>, <span class="ident">_locale</span>: <span class="kw-2">&amp;</span><span class="ident">Locale</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">year</span>,
-            <span class="ident">month</span>,
-            <span class="ident">day</span>,
-            <span class="ident">hour</span>,
-            <span class="ident">minute</span>,
-            <span class="ident">second</span>,
+            <span class="ident">data</span>,
+            <span class="comment">// TODO(#488): Implement week calculations.</span>
+            <span class="ident">_first_weekday</span>: <span class="number">1</span>,
+            <span class="ident">_anchor_weekday</span>: <span class="number">4</span>,
         }
     }
+}
 
-    <span class="doccomment">/// Constructor for the `MockDateTime`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_datetime::date::MockDateTime;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let dt = MockDateTime::try_new(2020, 9, 24, 13, 21, 0)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to construct a DateTime&quot;);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(
-        <span class="ident">year</span>: <span class="ident">usize</span>,
-        <span class="ident">month</span>: <span class="ident">usize</span>,
-        <span class="ident">day</span>: <span class="ident">usize</span>,
-        <span class="ident">hour</span>: <span class="ident">usize</span>,
-        <span class="ident">minute</span>: <span class="ident">usize</span>,
-        <span class="ident">second</span>: <span class="ident">usize</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">year</span>,
-            <span class="ident">month</span>: <span class="ident">month</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>,
-            <span class="ident">day</span>: <span class="ident">day</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>,
-            <span class="ident">hour</span>: <span class="ident">hour</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>,
-            <span class="ident">minute</span>: <span class="ident">minute</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>,
-            <span class="ident">second</span>: <span class="ident">second</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>,
-        })
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">T</span>: <span class="ident">DateTimeInput</span><span class="op">&gt;</span> <span class="ident">LocalizedDateTimeInput</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">date_time</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="self">self</span>.<span class="ident">data</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Year</span> {
+        <span class="macro">todo</span><span class="macro">!</span>(<span class="string">&quot;#488&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">week_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfMonth</span> {
+        <span class="macro">todo</span><span class="macro">!</span>(<span class="string">&quot;#488&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfYear</span> {
+        <span class="macro">todo</span><span class="macro">!</span>(<span class="string">&quot;#488&quot;</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">flexible_day_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="macro">todo</span><span class="macro">!</span>(<span class="string">&quot;#487&quot;</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">DateTimeType</span> <span class="kw">for</span> <span class="ident">MockDateTime</span> {
-    <span class="kw">fn</span> <span class="ident">year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">year</span>
-    }
-    <span class="kw">fn</span> <span class="ident">month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Month</span> {
-        <span class="self">self</span>.<span class="ident">month</span>
-    }
-    <span class="kw">fn</span> <span class="ident">day</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Day</span> {
-        <span class="self">self</span>.<span class="ident">day</span>
-    }
-    <span class="kw">fn</span> <span class="ident">hour</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Hour</span> {
-        <span class="self">self</span>.<span class="ident">hour</span>
-    }
-    <span class="kw">fn</span> <span class="ident">minute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Minute</span> {
-        <span class="self">self</span>.<span class="ident">minute</span>
-    }
-    <span class="kw">fn</span> <span class="ident">second</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Second</span> {
-        <span class="self">self</span>.<span class="ident">second</span>
+<span class="doccomment">/// TODO(#486): Implement era codes.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Era</span>(<span class="kw">pub</span> <span class="ident">TinyStr8</span>);
+
+<span class="doccomment">/// Representation of a formattable year.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Year</span> {
+    <span class="doccomment">/// The era containing the year.</span>
+    <span class="kw">pub</span> <span class="ident">era</span>: <span class="ident">Era</span>,
+
+    <span class="doccomment">/// Year number in the current era (usually 1-based).</span>
+    <span class="kw">pub</span> <span class="ident">number</span>: <span class="ident">i32</span>,
+
+    <span class="doccomment">/// Related ISO year. This is normally the ISO (proleptic Gregorian) year having the greatest</span>
+    <span class="doccomment">/// overlap with the calendar year. It is used in certain date formatting patterns.</span>
+    <span class="kw">pub</span> <span class="ident">related_iso</span>: <span class="ident">i32</span>,
+}
+
+<span class="doccomment">/// TODO(#486): Implement month codes.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MonthCode</span>(<span class="kw">pub</span> <span class="ident">TinyStr8</span>);
+
+<span class="doccomment">/// Representation of a formattable month.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Month</span> {
+    <span class="doccomment">/// A month number in a year. In normal years, this is usually the 1-based month index. In leap</span>
+    <span class="doccomment">/// years, this is what the month number would have been in a non-leap year.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For example:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// - January = 1</span>
+    <span class="doccomment">/// - December = 12</span>
+    <span class="doccomment">/// - Adar, Adar I, and Adar II = 6</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The `code` property is used to distinguish between unique months in leap years.</span>
+    <span class="kw">pub</span> <span class="ident">number</span>: <span class="ident">u32</span>,
+
+    <span class="doccomment">/// The month code, used to distinguish months during leap years.</span>
+    <span class="kw">pub</span> <span class="ident">code</span>: <span class="ident">MonthCode</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DayOfYearInfo</span> {
+    <span class="kw">pub</span> <span class="ident">day_of_year</span>: <span class="ident">u32</span>,
+    <span class="kw">pub</span> <span class="ident">days_in_year</span>: <span class="ident">u32</span>,
+    <span class="kw">pub</span> <span class="ident">prev_year</span>: <span class="ident">Year</span>,
+    <span class="kw">pub</span> <span class="ident">next_year</span>: <span class="ident">Year</span>,
+}
+
+<span class="doccomment">/// A weekday in a 7-day week, according to ISO-8601.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The discriminant values correspond to ISO-8601 weekday numbers (Monday = 1, Sunday = 7).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Example</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_datetime::date::IsoWeekday;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(1, IsoWeekday::MONDAY as usize);</span>
+<span class="doccomment">/// assert_eq!(7, IsoWeekday::SUNDAY as usize);</span>
+<span class="doccomment">/// ```</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">i8</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">IsoWeekday</span> {
+    <span class="ident">MONDAY</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">TUESDAY</span>,
+    <span class="ident">WEDNESDAY</span>,
+    <span class="ident">THURSDAY</span>,
+    <span class="ident">FRIDAY</span>,
+    <span class="ident">SATURDAY</span>,
+    <span class="ident">SUNDAY</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">IsoWeekday</span> {
+    <span class="doccomment">/// Convert from an ISO-8601 weekday number to an IsoWeekday enum. 0 is automatically converted</span>
+    <span class="doccomment">/// to 7 (Sunday). If the number is out of range, it is interpreted modulo 7.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_datetime::date::IsoWeekday;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(IsoWeekday::SUNDAY, IsoWeekday::from(0));</span>
+    <span class="doccomment">/// assert_eq!(IsoWeekday::MONDAY, IsoWeekday::from(1));</span>
+    <span class="doccomment">/// assert_eq!(IsoWeekday::SUNDAY, IsoWeekday::from(7));</span>
+    <span class="doccomment">/// assert_eq!(IsoWeekday::MONDAY, IsoWeekday::from(8));</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">input</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IsoWeekday</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ordinal</span> <span class="op">=</span> (<span class="ident">input</span> <span class="op">%</span> <span class="number">7</span>) <span class="kw">as</span> <span class="ident">i8</span>;
+        <span class="kw">if</span> <span class="ident">ordinal</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="ident">ordinal</span> <span class="op">=</span> <span class="number">7</span>;
+        }
+        <span class="kw">unsafe</span> { <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">ordinal</span>) }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">MockDateTime</span> {
-    <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">DateTimeError</span>;
+<span class="doccomment">/// A day number in a month. Usually 1-based.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DayOfMonth</span>(<span class="kw">pub</span> <span class="ident">u32</span>);
 
-    <span class="doccomment">/// Parse a `MockDateTime` from a string.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This utility is for easily creating dates, not a complete robust solution. The</span>
-    <span class="doccomment">/// string must take a specific form of the ISO 8601 format: `YYYY-MM-DDThh:mm:ss`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_datetime::date::MockDateTime;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let date: MockDateTime = &quot;2020-10-14T13:21:00&quot;.parse()</span>
-    <span class="doccomment">///     .expect(&quot;Failed to parse a date time.&quot;);</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="self">Self</span>::<span class="prelude-val">Err</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">year</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">month</span>: <span class="ident">Month</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">5</span>..<span class="number">7</span>].<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">day</span>: <span class="ident">Day</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">8</span>..<span class="number">10</span>].<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">hour</span>: <span class="ident">Hour</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">11</span>..<span class="number">13</span>].<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">minute</span>: <span class="ident">Minute</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">14</span>..<span class="number">16</span>].<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">second</span>: <span class="ident">Second</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">17</span>..<span class="number">19</span>].<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">year</span>,
-            <span class="ident">month</span>: <span class="ident">month</span> <span class="op">-</span> <span class="number">1</span>,
-            <span class="ident">day</span>: <span class="ident">day</span> <span class="op">-</span> <span class="number">1</span>,
-            <span class="ident">hour</span>,
-            <span class="ident">minute</span>,
-            <span class="ident">second</span>,
-        })
-    }
-}
+<span class="doccomment">/// A week number in a month. Usually 1-based.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WeekOfMonth</span>(<span class="kw">pub</span> <span class="ident">u32</span>);
 
-<span class="doccomment">/// This macro defines a struct for each type of unit to be used in a DateTime. Each</span>
+<span class="doccomment">/// A week number in a year. Usually 1-based.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WeekOfYear</span>(<span class="kw">pub</span> <span class="ident">u32</span>);
+
+<span class="doccomment">/// This macro defines a struct for 0-based date fields: hours, minutes, and seconds. Each</span>
 <span class="doccomment">/// unit is bounded by a range. The traits implemented here will return a Result on</span>
 <span class="doccomment">/// whether or not the unit is in range from the given input.</span>
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">dt_unit</span> {
@@ -546,11 +695,18 @@
     };
 }
 
-<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">Month</span>, <span class="number">12</span>);
-<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">WeekDay</span>, <span class="number">7</span>);
-<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">Day</span>, <span class="number">32</span>);
-<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">Hour</span>, <span class="number">24</span>);
-<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">Minute</span>, <span class="number">60</span>);
-<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">Second</span>, <span class="number">60</span>);
+<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">IsoHour</span>, <span class="number">24</span>);
+
+<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">IsoMinute</span>, <span class="number">60</span>);
+
+<span class="macro">dt_unit</span><span class="macro">!</span>(<span class="ident">IsoSecond</span>, <span class="number">61</span>);
+
+<span class="comment">// TODO(#485): Improve FractionalSecond.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">FractionalSecond</span> {
+    <span class="ident">Millisecond</span>(<span class="ident">u16</span>),
+    <span class="ident">Microsecond</span>(<span class="ident">u32</span>),
+    <span class="ident">Nanosecond</span>(<span class="ident">u32</span>),
+}
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "icu_datetime";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

@@ -20,5 +20,6 @@ sourcesIndex["icu_provider_ppucd"] = {"name":"","files":["error.rs","lib.rs","pa
 sourcesIndex["icu_segmenter_lstm"] = {"name":"","files":["error.rs","lib.rs","lstm.rs","math_helper.rs","structs.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","test_data_provider.rs"]};
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","props.rs","provider.rs","uniset.rs","utils.rs"]};
+sourcesIndex["litemap"] = {"name":"","files":["lib.rs","map.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["lib.rs","ops.rs"]};
 createSourceSidebar();

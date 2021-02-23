@@ -9,4 +9,5 @@ implementors["icu_provider"] = [{"text":"impl Default for DataResponseMetadata",
 implementors["icu_provider_cldr"] = [{"text":"impl Default for CldrPathsLocal","synthetic":false,"types":[]}];
 implementors["icu_provider_fs"] = [{"text":"impl Default for ExporterOptions","synthetic":false,"types":[]},{"text":"impl Default for Options","synthetic":false,"types":[]},{"text":"impl Default for Options","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl Default for UnicodeSetBuilder","synthetic":false,"types":[]},{"text":"impl Default for UnicodeProperty&lt;'static&gt;","synthetic":false,"types":[]}];
+implementors["litemap"] = [{"text":"impl&lt;K, V&gt; Default for LiteMap&lt;K, V&gt;","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -10,5 +10,6 @@ implementors["icu_provider"] = [{"text":"impl Clone for DataRequest","synthetic"
 implementors["icu_provider_fs"] = [{"text":"impl Clone for AliasOption","synthetic":false,"types":[]},{"text":"impl Clone for LocalesOption","synthetic":false,"types":[]},{"text":"impl Clone for SyntaxOption","synthetic":false,"types":[]},{"text":"impl Clone for OverwriteOption","synthetic":false,"types":[]},{"text":"impl Clone for ExporterOptions","synthetic":false,"types":[]},{"text":"impl Clone for StyleOption","synthetic":false,"types":[]},{"text":"impl Clone for Options","synthetic":false,"types":[]},{"text":"impl Clone for Options","synthetic":false,"types":[]}];
 implementors["icu_provider_ppucd"] = [{"text":"impl&lt;'s&gt; Clone for UnicodeProperties&lt;'s&gt;","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl&lt;'s&gt; Clone for UnicodeProperty&lt;'s&gt;","synthetic":false,"types":[]}];
+implementors["litemap"] = [{"text":"impl&lt;K:&nbsp;Clone, V:&nbsp;Clone&gt; Clone for LiteMap&lt;K, V&gt;","synthetic":false,"types":[]}];
 implementors["writeable"] = [{"text":"impl Clone for LengthHint","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

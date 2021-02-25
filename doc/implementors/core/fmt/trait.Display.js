@@ -1,5 +1,5 @@
 (function() {var implementors = {};
-implementors["bies"] = [{"text":"impl&lt;'_&gt; Display for BiesString&lt;'_&gt;","synthetic":false,"types":[]}];
+implementors["bies"] = [{"text":"impl Display for BiesString&lt;'_&gt;","synthetic":false,"types":[]}];
 implementors["fixed_decimal"] = [{"text":"impl Display for FixedDecimal","synthetic":false,"types":[]}];
 implementors["icu4x_cldr_export"] = [{"text":"impl Display for Error","synthetic":false,"types":[]}];
 implementors["icu4x_ecma402"] = [{"text":"impl Display for Locale","synthetic":false,"types":[]}];

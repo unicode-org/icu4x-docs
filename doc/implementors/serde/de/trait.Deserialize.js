@@ -8,4 +8,5 @@ implementors["icu_provider_fs"] = [{"text":"impl&lt;'de&gt; Deserialize&lt;'de&g
 implementors["icu_segmenter_lstm"] = [{"text":"impl&lt;'de&gt; Deserialize&lt;'de&gt; for LstmData","synthetic":false,"types":[]}];
 implementors["icu_testdata"] = [{"text":"impl&lt;'de&gt; Deserialize&lt;'de&gt; for PackageMetadata","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl&lt;'de, 's&gt; Deserialize&lt;'de&gt; for UnicodeProperty&lt;'s&gt;","synthetic":false,"types":[]}];
+implementors["litemap"] = [{"text":"impl&lt;'de, K:&nbsp;Ord + Deserialize&lt;'de&gt;, V:&nbsp;Deserialize&lt;'de&gt;&gt; Deserialize&lt;'de&gt; for LiteMap&lt;K, V&gt;","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

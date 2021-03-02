@@ -7,4 +7,5 @@ implementors["icu_provider"] = [{"text":"impl&lt;'s&gt; Serialize for HelloWorld
 implementors["icu_provider_fs"] = [{"text":"impl Serialize for AliasOption","synthetic":false,"types":[]},{"text":"impl Serialize for LocalesOption","synthetic":false,"types":[]},{"text":"impl Serialize for SyntaxOption","synthetic":false,"types":[]},{"text":"impl Serialize for OverwriteOption","synthetic":false,"types":[]},{"text":"impl Serialize for ExporterOptions","synthetic":false,"types":[]}];
 implementors["icu_segmenter_lstm"] = [{"text":"impl Serialize for LstmData","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl&lt;'s&gt; Serialize for UnicodeProperty&lt;'s&gt;","synthetic":false,"types":[]}];
+implementors["litemap"] = [{"text":"impl&lt;K:&nbsp;Serialize, V:&nbsp;Serialize&gt; Serialize for LiteMap&lt;K, V&gt;","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

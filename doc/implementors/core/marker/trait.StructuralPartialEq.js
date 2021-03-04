@@ -12,5 +12,6 @@ implementors["icu_provider_fs"] = [{"text":"impl StructuralPartialEq for FsDataP
 implementors["icu_provider_ppucd"] = [{"text":"impl&lt;'s&gt; StructuralPartialEq for UnicodeProperties&lt;'s&gt;","synthetic":false,"types":[]}];
 implementors["icu_segmenter_lstm"] = [{"text":"impl StructuralPartialEq for LstmData","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl&lt;'s&gt; StructuralPartialEq for UnicodeProperty&lt;'s&gt;","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for UnicodeSet","synthetic":false,"types":[]},{"text":"impl StructuralPartialEq for UnicodeSetSpanCondition","synthetic":false,"types":[]}];
+implementors["litemap"] = [{"text":"impl&lt;K, V&gt; StructuralPartialEq for LiteMap&lt;K, V&gt;","synthetic":false,"types":[]}];
 implementors["writeable"] = [{"text":"impl StructuralPartialEq for LengthHint","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

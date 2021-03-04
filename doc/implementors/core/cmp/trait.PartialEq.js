@@ -12,5 +12,6 @@ implementors["icu_provider_fs"] = [{"text":"impl PartialEq&lt;FsDataProvider&gt;
 implementors["icu_provider_ppucd"] = [{"text":"impl&lt;'s&gt; PartialEq&lt;UnicodeProperties&lt;'s&gt;&gt; for UnicodeProperties&lt;'s&gt;","synthetic":false,"types":[]}];
 implementors["icu_segmenter_lstm"] = [{"text":"impl PartialEq&lt;LstmData&gt; for LstmData","synthetic":false,"types":[]}];
 implementors["icu_uniset"] = [{"text":"impl&lt;'s&gt; PartialEq&lt;UnicodeProperty&lt;'s&gt;&gt; for UnicodeProperty&lt;'s&gt;","synthetic":false,"types":[]},{"text":"impl PartialEq&lt;UnicodeSet&gt; for UnicodeSet","synthetic":false,"types":[]},{"text":"impl PartialEq&lt;UnicodeSetSpanCondition&gt; for UnicodeSetSpanCondition","synthetic":false,"types":[]}];
+implementors["litemap"] = [{"text":"impl&lt;K:&nbsp;PartialEq, V:&nbsp;PartialEq&gt; PartialEq&lt;LiteMap&lt;K, V&gt;&gt; for LiteMap&lt;K, V&gt;","synthetic":false,"types":[]}];
 implementors["writeable"] = [{"text":"impl PartialEq&lt;LengthHint&gt; for LengthHint","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

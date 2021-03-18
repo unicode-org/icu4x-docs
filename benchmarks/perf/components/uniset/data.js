@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1615917957331,
+  "lastUpdate": 1616100996221,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16,19 +16,1069 @@ window.BENCHMARK_DATA = {
             "username": "web-flow"
           },
           "distinct": true,
-          "id": "88783ab4a36ea6e9e1b8aca4e75ba871f67b7df2",
-          "message": "Add per-component benchmark tests in CI (#353)",
-          "timestamp": "2020-10-14T21:52:15-07:00",
-          "tree_id": "a2f3a475ec905d5abe931e0c3e3eeea42cf96860",
-          "url": "https://github.com/unicode-org/icu4x/commit/88783ab4a36ea6e9e1b8aca4e75ba871f67b7df2"
+          "id": "b8b68b61b3372debda6911547f8fafd5bfcc08e2",
+          "message": "Run CI bench command per component (#328)",
+          "timestamp": "2020-10-12T12:16:42-07:00",
+          "tree_id": "1c1a87a7f25c4274b33bb9240b355444586557db",
+          "url": "https://github.com/unicode-org/icu4x/commit/b8b68b61b3372debda6911547f8fafd5bfcc08e2"
         },
-        "date": 1602737754627,
+        "date": 1602530414410,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1002418,
-            "range": "± 22699",
+            "name": "uniset/overview",
+            "value": 36909455,
+            "range": "± 1075061",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cc50a71267baf23db4b636b2f9fcc147dcc8eb38",
+          "message": "Fix locale macros to remove dependency on TinyStr (#337)",
+          "timestamp": "2020-10-13T11:42:33-05:00",
+          "tree_id": "e635af6a44159c7986364c1b293856de5518ec7a",
+          "url": "https://github.com/unicode-org/icu4x/commit/cc50a71267baf23db4b636b2f9fcc147dcc8eb38"
+        },
+        "date": 1602607589211,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 37965092,
+            "range": "± 101675",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dabd9f259ce3f9cddc0407ebbdaa721098d36238",
+          "message": "Use proc-macro-crate to handle icu vs icu_locale (#338)",
+          "timestamp": "2020-10-13T10:00:42-07:00",
+          "tree_id": "698bee642e47433193a1a86757f0141699f13a49",
+          "url": "https://github.com/unicode-org/icu4x/commit/dabd9f259ce3f9cddc0407ebbdaa721098d36238"
+        },
+        "date": 1602608630939,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 28785664,
+            "range": "± 1395091",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "24b22c9992e3ac8666bf6c267a07d5711d058b78",
+          "message": "remove cache step in coverage check in CI (#331)",
+          "timestamp": "2020-10-13T10:31:25-07:00",
+          "tree_id": "3698779d37499e0588c3c551ef4687511a2d242d",
+          "url": "https://github.com/unicode-org/icu4x/commit/24b22c9992e3ac8666bf6c267a07d5711d058b78"
+        },
+        "date": 1602610472589,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30059995,
+            "range": "± 1759078",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "0db49de698fa174a86d745ec7f331639f2fefaf3",
+          "message": "Fix clippy warning",
+          "timestamp": "2020-10-13T11:20:42-07:00",
+          "tree_id": "34cae13baf2a3ff2d8ab09c8acaa0cf93fe94bff",
+          "url": "https://github.com/unicode-org/icu4x/commit/0db49de698fa174a86d745ec7f331639f2fefaf3"
+        },
+        "date": 1602613510594,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34188674,
+            "range": "± 1555026",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f05a276e1126f330deaa014e298f9771da90696c",
+          "message": "Use langid macros everywhere. (#341)",
+          "timestamp": "2020-10-13T12:06:42-07:00",
+          "tree_id": "fe77378dc2aca94cca1d5ff1a3d2064cfac61c26",
+          "url": "https://github.com/unicode-org/icu4x/commit/f05a276e1126f330deaa014e298f9771da90696c"
+        },
+        "date": 1602616238817,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34270426,
+            "range": "± 1600228",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "88d531bf2d28ff57e2229fa177d68f03a41a161d",
+          "message": "temporarily disable benchmark test for utils/fixed-decimal (#344)",
+          "timestamp": "2020-10-13T12:17:48-07:00",
+          "tree_id": "838a6a93cba406411330ccb2db23ea3141a82b0d",
+          "url": "https://github.com/unicode-org/icu4x/commit/88d531bf2d28ff57e2229fa177d68f03a41a161d"
+        },
+        "date": 1602616944511,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34875478,
+            "range": "± 3585160",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9bd2b9ff50247c760e7bf99d6ccaca70277a0021",
+          "message": "Fix coverage CI (#343)",
+          "timestamp": "2020-10-13T12:30:02-07:00",
+          "tree_id": "c69bf53421e6a78f41381c065983a45cdc20261a",
+          "url": "https://github.com/unicode-org/icu4x/commit/9bd2b9ff50247c760e7bf99d6ccaca70277a0021"
+        },
+        "date": 1602617637004,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 33492127,
+            "range": "± 1036892",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b0f9de3c1d255650db5c0273c727d9def978b26c",
+          "message": "temporarily disable flaky unit test (#345)",
+          "timestamp": "2020-10-13T12:50:28-07:00",
+          "tree_id": "d5ee40a306f3767cbc1d03bf5044d4b53378bc89",
+          "url": "https://github.com/unicode-org/icu4x/commit/b0f9de3c1d255650db5c0273c727d9def978b26c"
+        },
+        "date": 1602618836790,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36420917,
+            "range": "± 130500",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "filmil@gmail.com",
+            "name": "Filip Filmar",
+            "username": "filmil"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "04478b52eaf8b68bd1c901bfeb74ef1f8efb49c7",
+          "message": "Implements ecma402_traits with icu4x. (#271)\n\nThis allows (almost) seamless switching between `rust_icu` and\r\nicu4x for plural formatting.\r\n\r\nThe API surface is a bit different with ecma402 than icu4x, which\r\nmay be a necessary concession to API uniformity.\r\n\r\nFor the time being, the significant digits in the formatted number\r\nare not handled completely, so, for example, excessive precision will\r\nnot be handled correctly.\r\n\r\nAlso for the time being, no other APIs defined in `ecma402_traits` have\r\na icu4x implementation.  Plural rules formatting was chosen as an easy\r\ndemo of the common ECMA402 API.",
+          "timestamp": "2020-10-13T13:19:05-07:00",
+          "tree_id": "3f58fd776d2526c5384ac9bb4ed7a072062165d7",
+          "url": "https://github.com/unicode-org/icu4x/commit/04478b52eaf8b68bd1c901bfeb74ef1f8efb49c7"
+        },
+        "date": 1602620554337,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36984109,
+            "range": "± 63084",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "99b68b1b9d1e086b515026473adb457299050b6d",
+          "message": "Initial commit with bincode support (#321)\n\n* Initial commit with bincode support\r\n\r\n* Running cargo fmt\r\n\r\n* Fixing bincode errors.",
+          "timestamp": "2020-10-13T13:30:42-07:00",
+          "tree_id": "5a4498c6922aa1ce18230540b03394bfac8d392d",
+          "url": "https://github.com/unicode-org/icu4x/commit/99b68b1b9d1e086b515026473adb457299050b6d"
+        },
+        "date": 1602621246735,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30829614,
+            "range": "± 1293178",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "f8de2adf11e3dd8964bc3b536811f2b0883a5e38",
+          "message": "Fix fs-data-provider bincode",
+          "timestamp": "2020-10-13T13:31:35-07:00",
+          "tree_id": "c2fc0dae9ff48c49a12ad2a7418eb449c11b5eb0",
+          "url": "https://github.com/unicode-org/icu4x/commit/f8de2adf11e3dd8964bc3b536811f2b0883a5e38"
+        },
+        "date": 1602621337988,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34141805,
+            "range": "± 1321295",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "887743d7479e6de7167a99da79293b376af51697",
+          "message": "Rename icu-locale to icu-locid",
+          "timestamp": "2020-10-13T13:49:19-07:00",
+          "tree_id": "144cff6e20b2e9cd076076ec43f1d85e431cdf48",
+          "url": "https://github.com/unicode-org/icu4x/commit/887743d7479e6de7167a99da79293b376af51697"
+        },
+        "date": 1602622380929,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30505172,
+            "range": "± 1941997",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "6fddde66b8f481ae480d988f9664773f1de8d80e",
+          "message": "Hotfix github workflow",
+          "timestamp": "2020-10-13T13:51:51-07:00",
+          "tree_id": "66b95d6457876f8388c27c053225371a3e838a30",
+          "url": "https://github.com/unicode-org/icu4x/commit/6fddde66b8f481ae480d988f9664773f1de8d80e"
+        },
+        "date": 1602622548651,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 33755331,
+            "range": "± 1006799",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "28674c5a4a27ffba89ef4f195bdc5c4d64df4c98",
+          "message": "Replace - with _ in crate and directory names",
+          "timestamp": "2020-10-13T14:05:47-07:00",
+          "tree_id": "f6994abc00a3c1148b74a74916da5d41dc8b874f",
+          "url": "https://github.com/unicode-org/icu4x/commit/28674c5a4a27ffba89ef4f195bdc5c4d64df4c98"
+        },
+        "date": 1602623367716,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 35538389,
+            "range": "± 776198",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "764c9695a018fdfba767c03d0a8426384b93ba1b",
+          "message": "Replace icu_data_provider and friends with icu_provider (#347)",
+          "timestamp": "2020-10-13T18:43:15-05:00",
+          "tree_id": "a47e616ac505743a8abda324438826b409f02739",
+          "url": "https://github.com/unicode-org/icu4x/commit/764c9695a018fdfba767c03d0a8426384b93ba1b"
+        },
+        "date": 1602632825227,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 33020873,
+            "range": "± 1962672",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "8725ff5a766fb406619601115d1eaf7816caf9c0",
+          "message": "Rename icu::locale to icu::locid",
+          "timestamp": "2020-10-13T18:05:20-07:00",
+          "tree_id": "bdbe2c5b62df9626384dc180c7863049492aa722",
+          "url": "https://github.com/unicode-org/icu4x/commit/8725ff5a766fb406619601115d1eaf7816caf9c0"
+        },
+        "date": 1602637722298,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 38067712,
+            "range": "± 1349823",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "33ef9644f0cde5f7a44ea2b0de43d19a41750e81",
+          "message": "Hot-fix for a proc macro",
+          "timestamp": "2020-10-13T18:12:55-07:00",
+          "tree_id": "6bf5822bf7a2d9bc2543a0c5d6c81fdab0d64de7",
+          "url": "https://github.com/unicode-org/icu4x/commit/33ef9644f0cde5f7a44ea2b0de43d19a41750e81"
+        },
+        "date": 1602638260429,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36625581,
+            "range": "± 102531",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "9013960948d6d3251e880969e0fee933bc1a7681",
+          "message": "Clippy nursery and pedantic lints - almost all are Self and docs.",
+          "timestamp": "2020-10-14T09:18:05-07:00",
+          "tree_id": "be801716393c689d188d64a89fd9d90f8ad0a26a",
+          "url": "https://github.com/unicode-org/icu4x/commit/9013960948d6d3251e880969e0fee933bc1a7681"
+        },
+        "date": 1602692793059,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34760595,
+            "range": "± 1299520",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "038531324236e1b45a4b7c4a47c30aef9f1b91bd",
+          "message": "Remove Error postfix from Errors.",
+          "timestamp": "2020-10-14T09:41:37-07:00",
+          "tree_id": "98a6ee4f8f23eec30e4fd63ecac6587f24040fbf",
+          "url": "https://github.com/unicode-org/icu4x/commit/038531324236e1b45a4b7c4a47c30aef9f1b91bd"
+        },
+        "date": 1602693914328,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34389659,
+            "range": "± 1112064",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "8c81d6dfcf270533c2836b9ecd32a98dc5e8124b",
+          "message": "API doc cleanups for main components",
+          "timestamp": "2020-10-14T10:36:33-07:00",
+          "tree_id": "aa36b41e675c8815ee1d4e4f90bfa4ea4e18f537",
+          "url": "https://github.com/unicode-org/icu4x/commit/8c81d6dfcf270533c2836b9ecd32a98dc5e8124b"
+        },
+        "date": 1602697200941,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 25925438,
+            "range": "± 986759",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "4025a90052299ee6fa8f35465611ccf3f63fe9ae",
+          "message": "Hot-fix to benchmark",
+          "timestamp": "2020-10-14T10:50:09-07:00",
+          "tree_id": "c7cd05cbb8a9b5488ecf0ace78dcf605e6508ce3",
+          "url": "https://github.com/unicode-org/icu4x/commit/4025a90052299ee6fa8f35465611ccf3f63fe9ae"
+        },
+        "date": 1602697999111,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 25089836,
+            "range": "± 1755288",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "3aa5b0ea32d019342fddf51f6f07be0704ce57d7",
+          "message": "API docs for providers",
+          "timestamp": "2020-10-14T11:28:20-07:00",
+          "tree_id": "58626ef5c81c8b18856431f87b37501d9b90a016",
+          "url": "https://github.com/unicode-org/icu4x/commit/3aa5b0ea32d019342fddf51f6f07be0704ce57d7"
+        },
+        "date": 1602700320498,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36527957,
+            "range": "± 559184",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4f0790dd12aca14305e2519deff172f3d8c35469",
+          "message": "Update README.md",
+          "timestamp": "2020-10-14T13:48:16-07:00",
+          "tree_id": "49ec68de555d39c3529f13d810424720d39868f9",
+          "url": "https://github.com/unicode-org/icu4x/commit/4f0790dd12aca14305e2519deff172f3d8c35469"
+        },
+        "date": 1602708708330,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36424299,
+            "range": "± 732208",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a960563d6ad2dd5d76a5e73af7bb33f0a1877bf8",
+          "message": "Refactor the DateTime pattern parser to handle quotes. (#336)\n\n* Refactor the DateTime pattern parser to handle quotes.\r\n\r\n* Refactor Parser\r\n\r\n* Switch several places to use Self",
+          "timestamp": "2020-10-14T18:39:36-07:00",
+          "tree_id": "5505bb1791e9c3454a1afe53751fd0f42b134182",
+          "url": "https://github.com/unicode-org/icu4x/commit/a960563d6ad2dd5d76a5e73af7bb33f0a1877bf8"
+        },
+        "date": 1602726199815,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36583721,
+            "range": "± 98517",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b1fac4565d04cf5c55c689c449b359ffea10c411",
+          "message": "Add author line to LICENSE (#350)",
+          "timestamp": "2020-10-14T20:40:31-05:00",
+          "tree_id": "3dfe935bd859a464cbfc6356952d8981c6aad96e",
+          "url": "https://github.com/unicode-org/icu4x/commit/b1fac4565d04cf5c55c689c449b359ffea10c411"
+        },
+        "date": 1602726245754,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30729236,
+            "range": "± 1664513",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "16345fe929d03167a5e2dd11c6dc13a593ee1e74",
+          "message": "More clippy cleanups",
+          "timestamp": "2020-10-14T19:56:50-07:00",
+          "tree_id": "99cf4a3ad4f72ac27152dd2827ae235b0fbbe5aa",
+          "url": "https://github.com/unicode-org/icu4x/commit/16345fe929d03167a5e2dd11c6dc13a593ee1e74"
+        },
+        "date": 1602730832577,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36396623,
+            "range": "± 381433",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "77328b4e2dd785e49904d10b577646a248f8ae63",
+          "message": "Update README.md",
+          "timestamp": "2020-10-14T20:10:50-07:00",
+          "tree_id": "5a9103ac82121f1af27d656489cdda4beaf35890",
+          "url": "https://github.com/unicode-org/icu4x/commit/77328b4e2dd785e49904d10b577646a248f8ae63"
+        },
+        "date": 1602731650651,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 26931338,
+            "range": "± 1901735",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d7f0dea144b03040199a7049f91f41d51a8ff4b9",
+          "message": "Update README.md",
+          "timestamp": "2020-10-14T20:15:52-07:00",
+          "tree_id": "21dab36e350f57f56773782d3e00f41424fe1c81",
+          "url": "https://github.com/unicode-org/icu4x/commit/d7f0dea144b03040199a7049f91f41d51a8ff4b9"
+        },
+        "date": 1602731982102,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 31471400,
+            "range": "± 1734225",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d1d0124bd522f96dae72653e4fb97a76181a5d35",
+          "message": "Update README.md",
+          "timestamp": "2020-10-14T20:17:36-07:00",
+          "tree_id": "aed1c8033b5298fa4504b0e62e987356471b117b",
+          "url": "https://github.com/unicode-org/icu4x/commit/d1d0124bd522f96dae72653e4fb97a76181a5d35"
+        },
+        "date": 1602732043054,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 31980537,
+            "range": "± 1257946",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "57d505091bc9d54aa481bb0331ad4d1e022a96c7",
+          "message": "Update README.md",
+          "timestamp": "2020-10-14T20:20:10-07:00",
+          "tree_id": "038ca4c016f92df0200943b0debee88f94ec082a",
+          "url": "https://github.com/unicode-org/icu4x/commit/57d505091bc9d54aa481bb0331ad4d1e022a96c7"
+        },
+        "date": 1602732213832,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36241567,
+            "range": "± 369132",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "697c0b09694ea848c0da3a0582edf326a7b7e0f6",
+          "message": "Remove doc links and add read more",
+          "timestamp": "2020-10-14T20:24:33-07:00",
+          "tree_id": "735eb719a346a390f162cbba69fd4442fa825a42",
+          "url": "https://github.com/unicode-org/icu4x/commit/697c0b09694ea848c0da3a0582edf326a7b7e0f6"
+        },
+        "date": 1602732480197,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34348244,
+            "range": "± 1044927",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7388c4d05b8ed3b457a42e947632aeffb384f628",
+          "message": "Update README.md",
+          "timestamp": "2020-10-14T20:40:08-07:00",
+          "tree_id": "aabd4a302e8c13f800ed182cfa638bb14bce72b8",
+          "url": "https://github.com/unicode-org/icu4x/commit/7388c4d05b8ed3b457a42e947632aeffb384f628"
+        },
+        "date": 1602733394573,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 31241301,
+            "range": "± 1460701",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zbraniecki@mozilla.com",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "9cb2aa2fa6944982a1534e3bf1580bbbd7055979",
+          "message": "Populate all readmes.",
+          "timestamp": "2020-10-14T21:04:22-07:00",
+          "tree_id": "1e75aeb92e0255d7a3c82936d3c15169958d9ae5",
+          "url": "https://github.com/unicode-org/icu4x/commit/9cb2aa2fa6944982a1534e3bf1580bbbd7055979"
+        },
+        "date": 1602734893226,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 38979726,
+            "range": "± 1551180",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6c018c1a53a310bee22983363fb3f13842b2da82",
+          "message": "Update CODEOWNERS",
+          "timestamp": "2020-10-14T21:08:31-07:00",
+          "tree_id": "191830ced40b15b72c1b715c0012c50c2be1ce21",
+          "url": "https://github.com/unicode-org/icu4x/commit/6c018c1a53a310bee22983363fb3f13842b2da82"
+        },
+        "date": 1602735130754,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30709194,
+            "range": "± 2395715",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "42f8db6b3f2a941f3a4ad32d8d8dfff08b4b896d",
+          "message": "First draft of datetime-input.md (#352)",
+          "timestamp": "2020-10-14T23:35:03-05:00",
+          "tree_id": "c27cdc5bc6f78a20347cb876de3623122abc03b7",
+          "url": "https://github.com/unicode-org/icu4x/commit/42f8db6b3f2a941f3a4ad32d8d8dfff08b4b896d"
+        },
+        "date": 1602736733989,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 34619828,
+            "range": "± 1900309",
             "unit": "ns/iter"
           }
         ]
@@ -52,13 +1102,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "a2f3a475ec905d5abe931e0c3e3eeea42cf96860",
           "url": "https://github.com/unicode-org/icu4x/commit/88783ab4a36ea6e9e1b8aca4e75ba871f67b7df2"
         },
-        "date": 1602737754627,
+        "date": 1602737757058,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1002418,
-            "range": "± 22699",
+            "name": "uniset/overview",
+            "value": 38163164,
+            "range": "± 126330",
             "unit": "ns/iter"
           }
         ]
@@ -82,13 +1132,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "6bc0a97dd78518e59b2560279d89e9afbc749241",
           "url": "https://github.com/unicode-org/icu4x/commit/174d846a131ca79802b7da3eb004982d442e399d"
         },
-        "date": 1602738396370,
+        "date": 1602738411947,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 846576,
-            "range": "± 72250",
+            "name": "uniset/overview",
+            "value": 37560388,
+            "range": "± 1145256",
             "unit": "ns/iter"
           }
         ]
@@ -112,13 +1162,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "8cb06e5985121110bea3015bbd75fd8eabbc3093",
           "url": "https://github.com/unicode-org/icu4x/commit/90f742a5bbad4a3588e37303f5f7cdda10f02c5c"
         },
-        "date": 1602773763972,
+        "date": 1602773749022,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1032083,
-            "range": "± 106884",
+            "name": "uniset/overview",
+            "value": 32593645,
+            "range": "± 2162033",
             "unit": "ns/iter"
           }
         ]
@@ -142,13 +1192,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "ee867ff11db8cb9d3e777f32e3742acc96e0e338",
           "url": "https://github.com/unicode-org/icu4x/commit/76ce8ebff561c9a60ec7cda581a9ea06c889f0ff"
         },
-        "date": 1602776604873,
+        "date": 1602776596502,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1005059,
-            "range": "± 9768",
+            "name": "uniset/overview",
+            "value": 30463616,
+            "range": "± 765100",
             "unit": "ns/iter"
           }
         ]
@@ -172,13 +1222,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "0a2e38fd2fa1cb4933a92eaf12221984a3414ae2",
           "url": "https://github.com/unicode-org/icu4x/commit/9eb493a7f06d2a10026a0a7a013206e81df15687"
         },
-        "date": 1602832928990,
+        "date": 1602832913507,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 866010,
-            "range": "± 73399",
+            "name": "uniset/overview",
+            "value": 36351739,
+            "range": "± 908965",
             "unit": "ns/iter"
           }
         ]
@@ -202,13 +1252,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "764a074d62b946a943ea4f51962aedebf01abd02",
           "url": "https://github.com/unicode-org/icu4x/commit/34c8915085550245cc6f70a83c2692a4e7fa89b6"
         },
-        "date": 1603242452524,
+        "date": 1603242451484,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 720029,
-            "range": "± 55300",
+            "name": "uniset/overview",
+            "value": 38336205,
+            "range": "± 1377334",
             "unit": "ns/iter"
           }
         ]
@@ -232,13 +1282,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "a9fd3d6ef6fb085b8dc4078a8e9aa87e05054ca2",
           "url": "https://github.com/unicode-org/icu4x/commit/23aaf0b47dc511ce323c764547c39fb878c94cd4"
         },
-        "date": 1603318515263,
+        "date": 1603318497617,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 835612,
-            "range": "± 4312",
+            "name": "uniset/overview",
+            "value": 37319149,
+            "range": "± 873330",
             "unit": "ns/iter"
           }
         ]
@@ -262,13 +1312,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "0e382ca4d7c7c03efd3990b8be31e802caab98d8",
           "url": "https://github.com/unicode-org/icu4x/commit/da3cc7152ec55a8469f09bcdfef78f2fb30a6999"
         },
-        "date": 1603525073525,
+        "date": 1603525071223,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 758749,
-            "range": "± 21327",
+            "name": "uniset/overview",
+            "value": 35653365,
+            "range": "± 537429",
             "unit": "ns/iter"
           }
         ]
@@ -292,13 +1342,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "59e796e05c9b4d64a6090f8e2e6ad1c08eca8b06",
           "url": "https://github.com/unicode-org/icu4x/commit/b3b6ba29bacf5cb17114cac22d35ef22b66c8d1a"
         },
-        "date": 1603566234775,
+        "date": 1603566203044,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 797604,
-            "range": "± 13291",
+            "name": "uniset/overview",
+            "value": 25506395,
+            "range": "± 1058246",
             "unit": "ns/iter"
           }
         ]
@@ -322,13 +1372,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "032848f91107095e1069784cea6ed60bfb5ac493",
           "url": "https://github.com/unicode-org/icu4x/commit/d358e47b4dac60c5532ae6fa1aa44fd89f03aae5"
         },
-        "date": 1603585652502,
+        "date": 1603585648739,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 713791,
-            "range": "± 31596",
+            "name": "uniset/overview",
+            "value": 37061590,
+            "range": "± 171065",
             "unit": "ns/iter"
           }
         ]
@@ -352,13 +1402,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "c000495ad2a67b40a7f97be0e3058e31901c02b1",
           "url": "https://github.com/unicode-org/icu4x/commit/fbce283a133bf8865ded6c2806cd992a201a82db"
         },
-        "date": 1603706347083,
+        "date": 1603706335479,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 783124,
-            "range": "± 13822",
+            "name": "uniset/overview",
+            "value": 30722636,
+            "range": "± 1556438",
             "unit": "ns/iter"
           }
         ]
@@ -382,13 +1432,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "0de8977bc2ea3f9fab515dd78cadeb0e564f1db6",
           "url": "https://github.com/unicode-org/icu4x/commit/989bb737ce70a8e1d16bc04c173f09f2eb7779bb"
         },
-        "date": 1604370346835,
+        "date": 1604370307622,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 930967,
-            "range": "± 33350",
+            "name": "uniset/overview",
+            "value": 33910600,
+            "range": "± 1482468",
             "unit": "ns/iter"
           }
         ]
@@ -412,13 +1462,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "4cb931d879e88af372e8abf26593ca2579452405",
           "url": "https://github.com/unicode-org/icu4x/commit/82b272875850b583651ecca80e8d65f15c279589"
         },
-        "date": 1604687654063,
+        "date": 1604687667997,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 682480,
-            "range": "± 1026",
+            "name": "uniset/overview",
+            "value": 33083674,
+            "range": "± 1816545",
             "unit": "ns/iter"
           }
         ]
@@ -442,13 +1492,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "f4c74f1111c3483b97db707f3bb0c037f79eb3d5",
           "url": "https://github.com/unicode-org/icu4x/commit/dcab5bbd27d2bf8403ee3871a7cdb7db537511cb"
         },
-        "date": 1604688120161,
+        "date": 1604688090439,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 808083,
-            "range": "± 2126",
+            "name": "uniset/overview",
+            "value": 36296908,
+            "range": "± 465742",
             "unit": "ns/iter"
           }
         ]
@@ -472,13 +1522,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "33e88af77eb1eee501d83e73ee1371d26f638fbc",
           "url": "https://github.com/unicode-org/icu4x/commit/11db1cdcfb2bb5f1c48b7993719596133702023f"
         },
-        "date": 1604688134403,
+        "date": 1604688126249,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 751682,
-            "range": "± 26361",
+            "name": "uniset/overview",
+            "value": 33972489,
+            "range": "± 1069953",
             "unit": "ns/iter"
           }
         ]
@@ -502,13 +1552,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "1b043d0ee64e1864c22a24483f3a021224f4d17b",
           "url": "https://github.com/unicode-org/icu4x/commit/23a283b2a8d159b99c45f3b459b0b5fe635794b9"
         },
-        "date": 1604954611932,
+        "date": 1604954561619,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 903097,
-            "range": "± 146665",
+            "name": "uniset/overview",
+            "value": 32534163,
+            "range": "± 1324944",
             "unit": "ns/iter"
           }
         ]
@@ -532,13 +1582,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "aab69107718c318cca89c8844f091b1fc6006c15",
           "url": "https://github.com/unicode-org/icu4x/commit/006505e1b6f592ae7e7515ae5c558cc367b8bf04"
         },
-        "date": 1604957960654,
+        "date": 1604957926730,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 833928,
-            "range": "± 1558",
+            "name": "uniset/overview",
+            "value": 36785023,
+            "range": "± 370546",
             "unit": "ns/iter"
           }
         ]
@@ -562,13 +1612,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "3662c9afac38e853763da480a0dec4abeb98803d",
           "url": "https://github.com/unicode-org/icu4x/commit/4b7a11d698b322517293c4875774dd1109d07d3b"
         },
-        "date": 1604996584218,
+        "date": 1604996560131,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 725064,
-            "range": "± 33388",
+            "name": "uniset/overview",
+            "value": 35654717,
+            "range": "± 613868",
             "unit": "ns/iter"
           }
         ]
@@ -592,13 +1642,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "4a6ebdcbd4a047a4de5a081300fca1f1feac2b3a",
           "url": "https://github.com/unicode-org/icu4x/commit/979806f8212579453a21cca562a7cd5bb77e8462"
         },
-        "date": 1605028822653,
+        "date": 1605028823383,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 807121,
-            "range": "± 1655",
+            "name": "uniset/overview",
+            "value": 32024258,
+            "range": "± 1440596",
             "unit": "ns/iter"
           }
         ]
@@ -622,13 +1672,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "b19692744ffbf0a320c983dd6a0b6cb5405cbdf4",
           "url": "https://github.com/unicode-org/icu4x/commit/73f1d954dc2316e425014a4c68b0339f34ef9d47"
         },
-        "date": 1605034144207,
+        "date": 1605034151079,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 798676,
-            "range": "± 6222",
+            "name": "uniset/overview",
+            "value": 35106247,
+            "range": "± 954755",
             "unit": "ns/iter"
           }
         ]
@@ -652,13 +1702,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "16d5dc6bdb7128a62cc83e074909db37c3e3bb34",
           "url": "https://github.com/unicode-org/icu4x/commit/8c1c3c5a0011d8e8abff68f28220d51709109f30"
         },
-        "date": 1605205896343,
+        "date": 1605205885059,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 748269,
-            "range": "± 29671",
+            "name": "uniset/overview",
+            "value": 31804541,
+            "range": "± 1198498",
             "unit": "ns/iter"
           }
         ]
@@ -682,43 +1732,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "ffb79c9115631c738f6188bcaf7225b879839492",
           "url": "https://github.com/unicode-org/icu4x/commit/bd0d43a9383201acd02e13cba79c54856a729026"
         },
-        "date": 1605206474448,
+        "date": 1605225249152,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 779328,
-            "range": "± 17956",
-            "unit": "ns/iter"
-          }
-        ]
-      },
-      {
-        "commit": {
-          "author": {
-            "email": "zibi@braniecki.net",
-            "name": "Zibi Braniecki",
-            "username": "zbraniecki"
-          },
-          "committer": {
-            "email": "noreply@github.com",
-            "name": "GitHub",
-            "username": "web-flow"
-          },
-          "distinct": true,
-          "id": "bd0d43a9383201acd02e13cba79c54856a729026",
-          "message": "Reorganize docs and add wiki articles. (#382)",
-          "timestamp": "2020-11-12T12:38:17-06:00",
-          "tree_id": "ffb79c9115631c738f6188bcaf7225b879839492",
-          "url": "https://github.com/unicode-org/icu4x/commit/bd0d43a9383201acd02e13cba79c54856a729026"
-        },
-        "date": 1605225263175,
-        "tool": "cargo",
-        "benches": [
-          {
-            "name": "datetime/overview",
-            "value": 793375,
-            "range": "± 77318",
+            "name": "uniset/overview",
+            "value": 33042585,
+            "range": "± 1096512",
             "unit": "ns/iter"
           }
         ]
@@ -742,13 +1762,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "41695b662fcad3a36311f96aa7232c3cc28b7d1a",
           "url": "https://github.com/unicode-org/icu4x/commit/10bb36be3a47f6c7d95995babb10c522da1858a3"
         },
-        "date": 1605564477808,
+        "date": 1605564467223,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 865549,
-            "range": "± 26042",
+            "name": "uniset/overview",
+            "value": 36580750,
+            "range": "± 2493330",
             "unit": "ns/iter"
           }
         ]
@@ -772,13 +1792,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "5f93517a009ce74fb72b66481ab1f249f515f2a4",
           "url": "https://github.com/unicode-org/icu4x/commit/fd524a91df3f5aef2efb908adddd051827972328"
         },
-        "date": 1605634419521,
+        "date": 1605634435756,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 888701,
-            "range": "± 19519",
+            "name": "uniset/overview",
+            "value": 36363345,
+            "range": "± 1542546",
             "unit": "ns/iter"
           }
         ]
@@ -802,13 +1822,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "0953e11235f9b7920026a46881cdaf3563819f10",
           "url": "https://github.com/unicode-org/icu4x/commit/c43fd478c0b69bb97461d334163a6bb3c9da2d4e"
         },
-        "date": 1605636069942,
+        "date": 1605636051846,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 924888,
-            "range": "± 26135",
+            "name": "uniset/overview",
+            "value": 35759710,
+            "range": "± 2542577",
             "unit": "ns/iter"
           }
         ]
@@ -832,13 +1852,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "867cd8144d27934b7a2e6104a71ef0d93e04fa7a",
           "url": "https://github.com/unicode-org/icu4x/commit/7a52e5677cc7f9ba69d53d0a700f836d99796776"
         },
-        "date": 1605661938375,
+        "date": 1605661931655,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 802474,
-            "range": "± 5618",
+            "name": "uniset/overview",
+            "value": 35726959,
+            "range": "± 1135106",
             "unit": "ns/iter"
           }
         ]
@@ -862,13 +1882,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "132e494cbd370040881c40cc23dd493da1dab513",
           "url": "https://github.com/unicode-org/icu4x/commit/4ead8619942be315d6521100509117f843669ebc"
         },
-        "date": 1605749989035,
+        "date": 1605749971345,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 864429,
-            "range": "± 43895",
+            "name": "uniset/overview",
+            "value": 36521318,
+            "range": "± 315918",
             "unit": "ns/iter"
           }
         ]
@@ -892,13 +1912,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "031561d9643b32575ee340920888fb4287f836ae",
           "url": "https://github.com/unicode-org/icu4x/commit/0e9a5553000618577ab37f1e9ffbba5c96d838b6"
         },
-        "date": 1605750195616,
+        "date": 1605750169454,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 855255,
-            "range": "± 23254",
+            "name": "uniset/overview",
+            "value": 29397523,
+            "range": "± 1969397",
             "unit": "ns/iter"
           }
         ]
@@ -922,13 +1942,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "7ff50630b3175fbd2983c522354df0e8734a0592",
           "url": "https://github.com/unicode-org/icu4x/commit/d9ec48f03056b0df8a6d86c552902092da928533"
         },
-        "date": 1605750346561,
+        "date": 1605750318725,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 836787,
-            "range": "± 2040",
+            "name": "uniset/overview",
+            "value": 36709762,
+            "range": "± 80312",
             "unit": "ns/iter"
           }
         ]
@@ -952,13 +1972,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "6989c34d9b3bff7d80947ad582054a7b53467720",
           "url": "https://github.com/unicode-org/icu4x/commit/c3d26c839a1c5822ae9459624d472098421103e8"
         },
-        "date": 1605810237570,
+        "date": 1605810223568,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 763766,
-            "range": "± 20064",
+            "name": "uniset/overview",
+            "value": 30093179,
+            "range": "± 1547670",
             "unit": "ns/iter"
           }
         ]
@@ -982,13 +2002,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "659274e93fa5b90dc30c97ec85f3f9f9ae564b92",
           "url": "https://github.com/unicode-org/icu4x/commit/561e10a3ea242397466781a9162c5ba37736e97e"
         },
-        "date": 1605822809889,
+        "date": 1605822819981,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 694838,
-            "range": "± 1604",
+            "name": "uniset/overview",
+            "value": 28226109,
+            "range": "± 1745714",
             "unit": "ns/iter"
           }
         ]
@@ -1012,13 +2032,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "26ee4a83a1a5056ef2520cc25f21b9c77f34b65e",
           "url": "https://github.com/unicode-org/icu4x/commit/fd2728764d5561f1e130546eb969b3811a226de5"
         },
-        "date": 1605897584633,
+        "date": 1605897575829,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 790346,
-            "range": "± 22325",
+            "name": "uniset/overview",
+            "value": 29180928,
+            "range": "± 1774863",
             "unit": "ns/iter"
           }
         ]
@@ -1042,13 +2062,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "bc1bfc4b39890657ec5c9bd0d56eadacaca9f587",
           "url": "https://github.com/unicode-org/icu4x/commit/4cae8e0a2f1e4d497621055c77d0446e17cbe041"
         },
-        "date": 1606260326678,
+        "date": 1606260290941,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 824404,
-            "range": "± 1979",
+            "name": "uniset/overview",
+            "value": 32510393,
+            "range": "± 434509",
             "unit": "ns/iter"
           }
         ]
@@ -1072,13 +2092,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "df6f6d7446e2498f425d222d2900a15282c652f3",
           "url": "https://github.com/unicode-org/icu4x/commit/7fb8ee0e92ffa91f999ceec97dd498d9151259e2"
         },
-        "date": 1607067519883,
+        "date": 1607067546338,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 756818,
-            "range": "± 773",
+            "name": "uniset/overview",
+            "value": 34722588,
+            "range": "± 1288587",
             "unit": "ns/iter"
           }
         ]
@@ -1102,13 +2122,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "06853c21de842e7e9c6981db81636831f53a37ad",
           "url": "https://github.com/unicode-org/icu4x/commit/4dfb4e29fbaabd1560156fbccb71c4676845cd49"
         },
-        "date": 1607128672419,
+        "date": 1607128639050,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 991017,
-            "range": "± 49246",
+            "name": "uniset/overview",
+            "value": 32052636,
+            "range": "± 944000",
             "unit": "ns/iter"
           }
         ]
@@ -1132,13 +2152,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "ec1bd9d1e0761130ee3cf859398e445e59ec2bd4",
           "url": "https://github.com/unicode-org/icu4x/commit/17ff2cfa39a1f7442515ab903244bd270deb39c3"
         },
-        "date": 1607465913428,
+        "date": 1607465906940,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 807027,
-            "range": "± 52747",
+            "name": "uniset/overview",
+            "value": 35656702,
+            "range": "± 170178",
             "unit": "ns/iter"
           }
         ]
@@ -1162,13 +2182,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "d799103d9420068322c688f29e16c4c485a79c4f",
           "url": "https://github.com/unicode-org/icu4x/commit/2bfeb089cd885e5b425704f05500e55743db239b"
         },
-        "date": 1607621489307,
+        "date": 1607621453455,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1002563,
-            "range": "± 74212",
+            "name": "uniset/overview",
+            "value": 30603301,
+            "range": "± 1405035",
             "unit": "ns/iter"
           }
         ]
@@ -1192,13 +2212,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "811ce90ea5c6db118013f0614972e46803269f89",
           "url": "https://github.com/unicode-org/icu4x/commit/6f25f89484dc3c17d2ec0a07bff6534e36e4462a"
         },
-        "date": 1607625650250,
+        "date": 1607625492127,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 828308,
-            "range": "± 48684",
+            "name": "uniset/overview",
+            "value": 29668326,
+            "range": "± 48415",
             "unit": "ns/iter"
           }
         ]
@@ -1222,13 +2242,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "9d130ed6fde2cfe1f2d7942d0f9d7c8adc89f82f",
           "url": "https://github.com/unicode-org/icu4x/commit/8557dc671b84b5b900010b7e47e4c5ce7310fba2"
         },
-        "date": 1608236037900,
+        "date": 1608235998818,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 941742,
-            "range": "± 56325",
+            "name": "uniset/overview",
+            "value": 31541105,
+            "range": "± 2015739",
             "unit": "ns/iter"
           }
         ]
@@ -1252,13 +2272,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "800f5d2de7c6930165deeb7dbc34550d6ec0fc60",
           "url": "https://github.com/unicode-org/icu4x/commit/6597c1a6b431f43efc70468e904a2868e5bc9fd1"
         },
-        "date": 1608690493200,
+        "date": 1608690486817,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1101832,
-            "range": "± 98822",
+            "name": "uniset/overview",
+            "value": 37338294,
+            "range": "± 1257051",
             "unit": "ns/iter"
           }
         ]
@@ -1282,13 +2302,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "4ec160a35865ab0aad73934f5b7f6f2caefc822f",
           "url": "https://github.com/unicode-org/icu4x/commit/c29534633acb3d88cd85f30ae2a4078ac555f6a5"
         },
-        "date": 1608691288329,
+        "date": 1608691244923,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1268282,
-            "range": "± 12806",
+            "name": "uniset/overview",
+            "value": 36675487,
+            "range": "± 331549",
             "unit": "ns/iter"
           }
         ]
@@ -1312,13 +2332,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "d941409e76b443dc324cf3fe52a46f30be7cba9f",
           "url": "https://github.com/unicode-org/icu4x/commit/05490a5c8606d6e3cb69fd443682843ad7cb3303"
         },
-        "date": 1608694044778,
+        "date": 1608693983327,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1307817,
-            "range": "± 104123",
+            "name": "uniset/overview",
+            "value": 35269112,
+            "range": "± 1055095",
             "unit": "ns/iter"
           }
         ]
@@ -1342,13 +2362,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "87e1e434dbd71872cc6168d67d3dbd46db5400d2",
           "url": "https://github.com/unicode-org/icu4x/commit/90f7381e0cbea53b38d7b6d53279903e4f19efe5"
         },
-        "date": 1608694099005,
+        "date": 1608694072188,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1317007,
-            "range": "± 61141",
+            "name": "uniset/overview",
+            "value": 33990915,
+            "range": "± 583095",
             "unit": "ns/iter"
           }
         ]
@@ -1372,13 +2392,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "dfb64ec5d5e308e104122ab709f6ed86728e3c97",
           "url": "https://github.com/unicode-org/icu4x/commit/3f1e984e849558b20d561606237c19375c060d59"
         },
-        "date": 1609801615914,
+        "date": 1609801513927,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1364572,
-            "range": "± 41480",
+            "name": "uniset/overview",
+            "value": 33417696,
+            "range": "± 1741656",
             "unit": "ns/iter"
           }
         ]
@@ -1402,13 +2422,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "4153026a6098501fa2161321bb5baf3f89942a6a",
           "url": "https://github.com/unicode-org/icu4x/commit/03ae8315ff1ccb4dfcb3336bf436066176d2cd7c"
         },
-        "date": 1609801704408,
+        "date": 1609801673654,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1226356,
-            "range": "± 36973",
+            "name": "uniset/overview",
+            "value": 34340523,
+            "range": "± 1077573",
             "unit": "ns/iter"
           }
         ]
@@ -1432,13 +2452,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "1f2ca5a5f2337167693bf6e857745ac38939e54b",
           "url": "https://github.com/unicode-org/icu4x/commit/8a8893b1182dc5e0607122d74c193971b1e452fc"
         },
-        "date": 1609888668937,
+        "date": 1609888647027,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 900275,
-            "range": "± 30754",
+            "name": "uniset/overview",
+            "value": 28863376,
+            "range": "± 1847770",
             "unit": "ns/iter"
           }
         ]
@@ -1462,13 +2482,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "cc09349a454a3fcccf1349d3d856763881827a36",
           "url": "https://github.com/unicode-org/icu4x/commit/91223e9d10839d2ef632a27cca7f793231320431"
         },
-        "date": 1610045326463,
+        "date": 1610045276328,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 959921,
-            "range": "± 41846",
+            "name": "uniset/overview",
+            "value": 30178819,
+            "range": "± 64690",
             "unit": "ns/iter"
           }
         ]
@@ -1492,13 +2512,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "f677a3933d09bb77e225119d757fd9e0f37007b0",
           "url": "https://github.com/unicode-org/icu4x/commit/d0ee68bf679bd5bb49cb1514025fcec0428ff618"
         },
-        "date": 1610071895898,
+        "date": 1610071897684,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1053880,
-            "range": "± 43343",
+            "name": "uniset/overview",
+            "value": 36545269,
+            "range": "± 179667",
             "unit": "ns/iter"
           }
         ]
@@ -1522,13 +2542,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "be2dc0e4f02be06a3f620b29b9763b04e8eb7afb",
           "url": "https://github.com/unicode-org/icu4x/commit/2a9adbca47e13371a314f5d98d0a48f3a2407916"
         },
-        "date": 1610152740586,
+        "date": 1610152746532,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1083257,
-            "range": "± 43295",
+            "name": "uniset/overview",
+            "value": 35618336,
+            "range": "± 1551407",
             "unit": "ns/iter"
           }
         ]
@@ -1552,13 +2572,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "c2fe16c76d99ba703e3d55a9d0a0dc52a9f71b5c",
           "url": "https://github.com/unicode-org/icu4x/commit/4c8d9dff321ceb822bab5a3c7b4e250792fffeb6"
         },
-        "date": 1610364416044,
+        "date": 1610364505234,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1137113,
-            "range": "± 48273",
+            "name": "uniset/overview",
+            "value": 29289995,
+            "range": "± 1366615",
             "unit": "ns/iter"
           }
         ]
@@ -1582,13 +2602,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "33914139d1bbfbe04a8cab54884d53fa45bca8e0",
           "url": "https://github.com/unicode-org/icu4x/commit/273ec285057bad902c6a08880df4c07a188a7968"
         },
-        "date": 1610394673942,
+        "date": 1610394673517,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 849839,
-            "range": "± 826",
+            "name": "uniset/overview",
+            "value": 33538454,
+            "range": "± 828512",
             "unit": "ns/iter"
           }
         ]
@@ -1612,13 +2632,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "cf42e024d6e4b6463169ec87f02ad4433bc5055c",
           "url": "https://github.com/unicode-org/icu4x/commit/20dd293f708382695be8d730d7492400bf50520f"
         },
-        "date": 1610604981430,
+        "date": 1610604943013,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 868571,
-            "range": "± 47349",
+            "name": "uniset/overview",
+            "value": 34247213,
+            "range": "± 1496129",
             "unit": "ns/iter"
           }
         ]
@@ -1642,13 +2662,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "a0e6ed158c282dd8c00da376053859c40edb6955",
           "url": "https://github.com/unicode-org/icu4x/commit/3a359966df24a4cac457f24f4ef1e6a22d42756e"
         },
-        "date": 1610735804609,
+        "date": 1610735759509,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1011770,
-            "range": "± 65089",
+            "name": "uniset/overview",
+            "value": 29725605,
+            "range": "± 44669",
             "unit": "ns/iter"
           }
         ]
@@ -1672,13 +2692,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "b8429b31702119e9c8612de8f0b3fb72332bafda",
           "url": "https://github.com/unicode-org/icu4x/commit/f526638516e522312213c9e437a44ecf2101fe6d"
         },
-        "date": 1610765880978,
+        "date": 1610765886570,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 762882,
-            "range": "± 39914",
+            "name": "uniset/overview",
+            "value": 36714261,
+            "range": "± 712336",
             "unit": "ns/iter"
           }
         ]
@@ -1702,13 +2722,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "911f9237447741a675d4d1029ae392f19333a141",
           "url": "https://github.com/unicode-org/icu4x/commit/19cc9749dd2f6d29fa70c6a663aef24aa06820e7"
         },
-        "date": 1610778572011,
+        "date": 1610778543964,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1010518,
-            "range": "± 33747",
+            "name": "uniset/overview",
+            "value": 30461482,
+            "range": "± 62411",
             "unit": "ns/iter"
           }
         ]
@@ -1732,13 +2752,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "ebc2c67a0e92cd96801ad1e1f8263ed3f4edde86",
           "url": "https://github.com/unicode-org/icu4x/commit/d9347aa4ec3d55df1102a19eb1c438beb1fdd54d"
         },
-        "date": 1610778648099,
+        "date": 1610778627027,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1074240,
-            "range": "± 65615",
+            "name": "uniset/overview",
+            "value": 31811541,
+            "range": "± 1502837",
             "unit": "ns/iter"
           }
         ]
@@ -1762,13 +2782,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "a8920c181a8c8497eb442c82f6d61e9846e209ba",
           "url": "https://github.com/unicode-org/icu4x/commit/d1c1adf41a48bb7a93cecb5e2008bbc638466cd8"
         },
-        "date": 1611256480153,
+        "date": 1611256463924,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1036127,
-            "range": "± 76643",
+            "name": "uniset/overview",
+            "value": 35234022,
+            "range": "± 503265",
             "unit": "ns/iter"
           }
         ]
@@ -1792,13 +2812,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "e8a3bf2389b3b0dd1d1970ab82912b46fed737db",
           "url": "https://github.com/unicode-org/icu4x/commit/fd37c88bb580c618ae9294e3fd668a4b5c0676ef"
         },
-        "date": 1611270339998,
+        "date": 1611270337717,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 962109,
-            "range": "± 113435",
+            "name": "uniset/overview",
+            "value": 30364753,
+            "range": "± 927084",
             "unit": "ns/iter"
           }
         ]
@@ -1822,13 +2842,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "7426de0f884f04f21e80aff7dcab0e1782f258f0",
           "url": "https://github.com/unicode-org/icu4x/commit/e609a54f363ebee202d619a8560e6857b07a6339"
         },
-        "date": 1611348246925,
+        "date": 1611348180827,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1135278,
-            "range": "± 96829",
+            "name": "uniset/overview",
+            "value": 30228014,
+            "range": "± 82416",
             "unit": "ns/iter"
           }
         ]
@@ -1852,13 +2872,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "2a74a15a24e78d938211b03b87d58f3f7badd9b8",
           "url": "https://github.com/unicode-org/icu4x/commit/9daf90be3a3a3fc31b6c725686ab0e12b773e9e6"
         },
-        "date": 1611564088586,
+        "date": 1611564068683,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 949828,
-            "range": "± 61691",
+            "name": "uniset/overview",
+            "value": 34679450,
+            "range": "± 588381",
             "unit": "ns/iter"
           }
         ]
@@ -1882,13 +2902,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "dc572e18293a96926f7102363d461742b23300db",
           "url": "https://github.com/unicode-org/icu4x/commit/30da77444dfe80f41e7226bb9054e87b8fe43196"
         },
-        "date": 1611598501179,
+        "date": 1611598491917,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 846371,
-            "range": "± 1529",
+            "name": "uniset/overview",
+            "value": 35488689,
+            "range": "± 557031",
             "unit": "ns/iter"
           }
         ]
@@ -1912,13 +2932,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "bc706c9073696d2e06e340110701228e25912269",
           "url": "https://github.com/unicode-org/icu4x/commit/c2661c9b4a699c182aa335e710a7c393f41abb53"
         },
-        "date": 1611664681280,
+        "date": 1611664649331,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1075017,
-            "range": "± 41707",
+            "name": "uniset/overview",
+            "value": 35531589,
+            "range": "± 1228036",
             "unit": "ns/iter"
           }
         ]
@@ -1942,13 +2962,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "cfc9ef4c40d41a200ab94698f5518541c2b8c3c5",
           "url": "https://github.com/unicode-org/icu4x/commit/6e0b36cc38ac11ce6e4a2d6a37877acd3b2f7314"
         },
-        "date": 1611765290772,
+        "date": 1611765243757,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1006227,
-            "range": "± 3474",
+            "name": "uniset/overview",
+            "value": 31356924,
+            "range": "± 62139",
             "unit": "ns/iter"
           }
         ]
@@ -1972,13 +2992,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "5f50d35a6b7caff3f0cb7e5906eab77d3d25e731",
           "url": "https://github.com/unicode-org/icu4x/commit/f5915f19bfd775c930e31dc4a600d771efad746c"
         },
-        "date": 1611768776928,
+        "date": 1611768753063,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 968931,
-            "range": "± 33517",
+            "name": "uniset/overview",
+            "value": 39270370,
+            "range": "± 91715",
             "unit": "ns/iter"
           }
         ]
@@ -2002,13 +3022,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "85619fb928fb9362a7f3d1fec400f1af2241028f",
           "url": "https://github.com/unicode-org/icu4x/commit/b9696b7c0ee7e922e027b96f5363184bbc79b8d1"
         },
-        "date": 1611782603244,
+        "date": 1611782616311,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 921810,
-            "range": "± 30565",
+            "name": "uniset/overview",
+            "value": 34716541,
+            "range": "± 1317637",
             "unit": "ns/iter"
           }
         ]
@@ -2032,13 +3052,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "540015789534a6c35e0066be69bbd67fbb77b91e",
           "url": "https://github.com/unicode-org/icu4x/commit/de60d1698f9c2a04a5733982c10998087c071f2c"
         },
-        "date": 1611860356475,
+        "date": 1611860364982,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1123240,
-            "range": "± 80694",
+            "name": "uniset/overview",
+            "value": 34588864,
+            "range": "± 1529854",
             "unit": "ns/iter"
           }
         ]
@@ -2062,13 +3082,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "9bf2dd468ae1bd5e4e0759bddb20b89a7513073f",
           "url": "https://github.com/unicode-org/icu4x/commit/d2f47f76a82b64a1204bec2a81130fcb70fcea06"
         },
-        "date": 1611890866514,
+        "date": 1611890817136,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 937247,
-            "range": "± 60498",
+            "name": "uniset/overview",
+            "value": 32450450,
+            "range": "± 78519",
             "unit": "ns/iter"
           }
         ]
@@ -2092,13 +3112,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "1346c593ea25db06f27b1797450da6c3d3736567",
           "url": "https://github.com/unicode-org/icu4x/commit/1d14a5dc9a94ef334d387ef685e4faf4eb1ff51a"
         },
-        "date": 1611965894759,
+        "date": 1611965903538,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1096066,
-            "range": "± 15471",
+            "name": "uniset/overview",
+            "value": 36272879,
+            "range": "± 1678266",
             "unit": "ns/iter"
           }
         ]
@@ -2122,13 +3142,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "a17d3bec25466f93a0a646280468b702473aa3c1",
           "url": "https://github.com/unicode-org/icu4x/commit/71deed46c6e36a6283ed83e6af3c01cda7f642de"
         },
-        "date": 1612217898967,
+        "date": 1612217874249,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1082439,
-            "range": "± 19949",
+            "name": "uniset/overview",
+            "value": 37494638,
+            "range": "± 440877",
             "unit": "ns/iter"
           }
         ]
@@ -2152,13 +3172,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "8940f02ba87a19483c0027b6a5904a79a40c7a8d",
           "url": "https://github.com/unicode-org/icu4x/commit/e9416c3fa5100f11a621f9c8bd498a7dd3a986db"
         },
-        "date": 1612246431277,
+        "date": 1612246455601,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 910791,
-            "range": "± 998",
+            "name": "uniset/overview",
+            "value": 34230029,
+            "range": "± 2038181",
             "unit": "ns/iter"
           }
         ]
@@ -2182,13 +3202,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "b24a02430c995fda5f39e5982049523f7037643c",
           "url": "https://github.com/unicode-org/icu4x/commit/ae89da479dfbbcfc73fbaa977cd3f4ecfd0e4fac"
         },
-        "date": 1612316824472,
+        "date": 1612316823420,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1071833,
-            "range": "± 62723",
+            "name": "uniset/overview",
+            "value": 33693965,
+            "range": "± 1855449",
             "unit": "ns/iter"
           }
         ]
@@ -2212,13 +3232,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "aa4dfdf479054ceece40e1ef09ddb1b5137c46a7",
           "url": "https://github.com/unicode-org/icu4x/commit/85c3a5a933a3a5b1dd2499f916511b80164a8fc1"
         },
-        "date": 1612807517029,
+        "date": 1612807484677,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1197139,
-            "range": "± 68500",
+            "name": "uniset/overview",
+            "value": 34128983,
+            "range": "± 1426179",
             "unit": "ns/iter"
           }
         ]
@@ -2242,13 +3262,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "2c56364a53a4a7ae440c17ab874dea143b804d24",
           "url": "https://github.com/unicode-org/icu4x/commit/01d85cc1bd793aecbd189a1826d22ed3ddaba771"
         },
-        "date": 1612813826700,
+        "date": 1612813845872,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 936736,
-            "range": "± 70470",
+            "name": "uniset/overview",
+            "value": 33433096,
+            "range": "± 757062",
             "unit": "ns/iter"
           }
         ]
@@ -2272,13 +3292,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "76c5cf0b9b2525cd88649614be13f54c1b8c849c",
           "url": "https://github.com/unicode-org/icu4x/commit/ad895a860fc83a7617a0ab604d19ac36d1380915"
         },
-        "date": 1612826732666,
+        "date": 1612826698812,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1159421,
-            "range": "± 62610",
+            "name": "uniset/overview",
+            "value": 38630698,
+            "range": "± 178095",
             "unit": "ns/iter"
           }
         ]
@@ -2302,13 +3322,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "31b1a7acbb99eaaa9981f887f97fca38ff479ed9",
           "url": "https://github.com/unicode-org/icu4x/commit/efba26f9e066c514a2f1bfce9a8020e7e0a2b653"
         },
-        "date": 1612899571774,
+        "date": 1612899564902,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1039452,
-            "range": "± 76395",
+            "name": "uniset/overview",
+            "value": 38128455,
+            "range": "± 158592",
             "unit": "ns/iter"
           }
         ]
@@ -2332,13 +3352,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "5882c86bb80a06b39e3b924ddded92a7d6d33b64",
           "url": "https://github.com/unicode-org/icu4x/commit/324d9edd2def40e0d000646748172cce370d92db"
         },
-        "date": 1613152021406,
+        "date": 1613151979800,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1189689,
-            "range": "± 103338",
+            "name": "uniset/overview",
+            "value": 33344242,
+            "range": "± 83551",
             "unit": "ns/iter"
           }
         ]
@@ -2362,13 +3382,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "3516e2db54f25c315b8e63f51df7cb8fc3f4de38",
           "url": "https://github.com/unicode-org/icu4x/commit/3be597cdf89432e493e7777bb4dec54854a47f97"
         },
-        "date": 1613160784997,
+        "date": 1613160760810,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1085959,
-            "range": "± 25572",
+            "name": "uniset/overview",
+            "value": 25923988,
+            "range": "± 760439",
             "unit": "ns/iter"
           }
         ]
@@ -2392,13 +3412,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "31fa9eb6d25b32050bf2d6b629f45179818d8261",
           "url": "https://github.com/unicode-org/icu4x/commit/fdd3a0b4773388f2df8cdc3c6cb5bf4230ac79cf"
         },
-        "date": 1614042340474,
+        "date": 1614042318732,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1110542,
-            "range": "± 19064",
+            "name": "uniset/overview",
+            "value": 37011997,
+            "range": "± 650770",
             "unit": "ns/iter"
           }
         ]
@@ -2422,13 +3442,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "c40fb8c842f2cfe18053c1f7f1773a77d88017f1",
           "url": "https://github.com/unicode-org/icu4x/commit/d1e746357f79f9fcf2a63e50db15f365ab9b063b"
         },
-        "date": 1614296404358,
+        "date": 1614296376743,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 913178,
-            "range": "± 40098",
+            "name": "uniset/overview",
+            "value": 30536495,
+            "range": "± 74846",
             "unit": "ns/iter"
           }
         ]
@@ -2452,13 +3472,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "4d625493d15543672a3f6413db21e02a8d3e0c6e",
           "url": "https://github.com/unicode-org/icu4x/commit/df7b6edf44c3360d3ad4127c12ed03c5f039ff6b"
         },
-        "date": 1614422719143,
+        "date": 1614422724693,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1003508,
-            "range": "± 2306",
+            "name": "uniset/overview",
+            "value": 33394465,
+            "range": "± 1436794",
             "unit": "ns/iter"
           }
         ]
@@ -2482,13 +3502,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "dc24eebcd24cdd1bc8fe1b680e0d02c7d509ce7a",
           "url": "https://github.com/unicode-org/icu4x/commit/3f9e74b767a215c490007361b23f9c45cf2d1b82"
         },
-        "date": 1614645025081,
+        "date": 1614645012388,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1002300,
-            "range": "± 25525",
+            "name": "uniset/overview",
+            "value": 35422273,
+            "range": "± 767666",
             "unit": "ns/iter"
           }
         ]
@@ -2512,13 +3532,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "ade81acb58382bed3e53eeaf91f1eb688b93feb7",
           "url": "https://github.com/unicode-org/icu4x/commit/c308b40dbdb5018dd6c3ffec429e2dd002bb4066"
         },
-        "date": 1614656632988,
+        "date": 1614656619467,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 810294,
-            "range": "± 41706",
+            "name": "uniset/overview",
+            "value": 35680926,
+            "range": "± 887391",
             "unit": "ns/iter"
           }
         ]
@@ -2542,13 +3562,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "b171fbf1030491ae586af21032d1c76eaffe293b",
           "url": "https://github.com/unicode-org/icu4x/commit/64c143f402a3c2956f4aa172e903e1e159598b6d"
         },
-        "date": 1614666180682,
+        "date": 1614666148198,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1053801,
-            "range": "± 54405",
+            "name": "uniset/overview",
+            "value": 36590747,
+            "range": "± 539993",
             "unit": "ns/iter"
           }
         ]
@@ -2572,13 +3592,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "8c6d75a7dbcdd0015e8419882389c04863145644",
           "url": "https://github.com/unicode-org/icu4x/commit/b15c0b36901095406a67e3620a3d1d0e294b7692"
         },
-        "date": 1614686995909,
+        "date": 1614686964714,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1078920,
-            "range": "± 45097",
+            "name": "uniset/overview",
+            "value": 36101487,
+            "range": "± 850505",
             "unit": "ns/iter"
           }
         ]
@@ -2602,13 +3622,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "a408baa9d9867ae1aafe7557813ceaa087254972",
           "url": "https://github.com/unicode-org/icu4x/commit/40c5dd3205c8fa4beee91a9ac47b18f628a7e550"
         },
-        "date": 1614879575484,
+        "date": 1614879556752,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1037293,
-            "range": "± 11059",
+            "name": "uniset/overview",
+            "value": 32026338,
+            "range": "± 1901453",
             "unit": "ns/iter"
           }
         ]
@@ -2632,13 +3652,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "fac0d611c10d52bfd9390ec23ca617338358fd7e",
           "url": "https://github.com/unicode-org/icu4x/commit/9b0fa09152aea4de2f8a37628d0bebb9ebb50f3d"
         },
-        "date": 1614881699925,
+        "date": 1614881671842,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 952605,
-            "range": "± 31779",
+            "name": "uniset/overview",
+            "value": 30262719,
+            "range": "± 1386090",
             "unit": "ns/iter"
           }
         ]
@@ -2662,13 +3682,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "c613b9f025246813565511cb22eaf08afc4a8bc6",
           "url": "https://github.com/unicode-org/icu4x/commit/2d622075ee5b17ce15f22c9ef2388ea4df930710"
         },
-        "date": 1614882528367,
+        "date": 1614882517158,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1016716,
-            "range": "± 14794",
+            "name": "uniset/overview",
+            "value": 36787921,
+            "range": "± 458983",
             "unit": "ns/iter"
           }
         ]
@@ -2692,13 +3712,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "6b5351a233b4d758cc95b5cd352a9bca13818898",
           "url": "https://github.com/unicode-org/icu4x/commit/68d6b2bdcfbf36c7d25848a71009a2159ea3d780"
         },
-        "date": 1614882669313,
+        "date": 1614882655253,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1085069,
-            "range": "± 66546",
+            "name": "uniset/overview",
+            "value": 32626653,
+            "range": "± 2054458",
             "unit": "ns/iter"
           }
         ]
@@ -2722,13 +3742,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "07c2754e5e1c5c81c3c8fb1545c77baa5c4d115a",
           "url": "https://github.com/unicode-org/icu4x/commit/ba3ea1deb32bbd6c5d7177d68db4b6f51531baad"
         },
-        "date": 1614885961285,
+        "date": 1614885939938,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 968050,
-            "range": "± 30939",
+            "name": "uniset/overview",
+            "value": 32978735,
+            "range": "± 2325519",
             "unit": "ns/iter"
           }
         ]
@@ -2752,13 +3772,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "e3ca34ef3a4d4f167fe1688db94643a4d44d8ed7",
           "url": "https://github.com/unicode-org/icu4x/commit/2179f6fee8764aec332b2d251514ac30970ec021"
         },
-        "date": 1614890912335,
+        "date": 1614890898968,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1014250,
-            "range": "± 12472",
+            "name": "uniset/overview",
+            "value": 32530818,
+            "range": "± 1186903",
             "unit": "ns/iter"
           }
         ]
@@ -2782,13 +3802,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "c6e88347fda54bd0e73aba4c94510803800e4025",
           "url": "https://github.com/unicode-org/icu4x/commit/2d6664a376df209f86d4af47f0a686b91b8172e0"
         },
-        "date": 1614959161924,
+        "date": 1614959168288,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1005955,
-            "range": "± 2085",
+            "name": "uniset/overview",
+            "value": 34587570,
+            "range": "± 957062",
             "unit": "ns/iter"
           }
         ]
@@ -2812,13 +3832,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "01203783bcee98b2dc8dd6e86af26e01f3a2da42",
           "url": "https://github.com/unicode-org/icu4x/commit/c5104b3ab7cce22e11a71f9797d1dbaff9b40f2c"
         },
-        "date": 1615583296788,
+        "date": 1615583277554,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1131388,
-            "range": "± 109684",
+            "name": "uniset/overview",
+            "value": 36286852,
+            "range": "± 1646649",
             "unit": "ns/iter"
           }
         ]
@@ -2842,13 +3862,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "d6e37aaaa114fcc11a47423215a3457177fa66bb",
           "url": "https://github.com/unicode-org/icu4x/commit/a4a8e4a68a1e9c3b3b0517068bd46707f410bf2e"
         },
-        "date": 1615584319318,
+        "date": 1615584339750,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 984119,
-            "range": "± 38910",
+            "name": "uniset/overview",
+            "value": 33785049,
+            "range": "± 938531",
             "unit": "ns/iter"
           }
         ]
@@ -2872,13 +3892,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "8641e96858fdad8258a651439f28f8a30b188fa4",
           "url": "https://github.com/unicode-org/icu4x/commit/ed9db541404a2cc36c0c1f813f0b365a136ac085"
         },
-        "date": 1615829409500,
+        "date": 1615829374361,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 1151459,
-            "range": "± 80787",
+            "name": "uniset/overview",
+            "value": 30853624,
+            "range": "± 1468020",
             "unit": "ns/iter"
           }
         ]
@@ -2902,13 +3922,13 @@ window.BENCHMARK_DATA = {
           "tree_id": "2dd2ddda3eb75c73dad705596b764977c5352b9c",
           "url": "https://github.com/unicode-org/icu4x/commit/43360de1e53004d9a56d7f29a2573de03dd145fc"
         },
-        "date": 1615915552559,
+        "date": 1615915536042,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 964182,
-            "range": "± 88434",
+            "name": "uniset/overview",
+            "value": 37554276,
+            "range": "± 965891",
             "unit": "ns/iter"
           }
         ]
@@ -2932,13 +3952,43 @@ window.BENCHMARK_DATA = {
           "tree_id": "f3444d407a7ff607c187d15f4aa9a6d452dd1045",
           "url": "https://github.com/unicode-org/icu4x/commit/b6ed6f058a0c3b6566eac78a58f47303bf48830f"
         },
-        "date": 1615917954641,
+        "date": 1615917966696,
         "tool": "cargo",
         "benches": [
           {
-            "name": "datetime/overview",
-            "value": 947390,
-            "range": "± 28888",
+            "name": "uniset/overview",
+            "value": 35061754,
+            "range": "± 1055486",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "gregtatum@users.noreply.github.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4dae1fa1ce36e35ea48d41343890a311dfb7ee49",
+          "message": "Re-organize the benchmark data (#546)",
+          "timestamp": "2021-03-18T15:49:59-05:00",
+          "tree_id": "74d02b07f4f7c8e5a8057a5200b61f4230ef4969",
+          "url": "https://github.com/unicode-org/icu4x/commit/4dae1fa1ce36e35ea48d41343890a311dfb7ee49"
+        },
+        "date": 1616100994227,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 29422108,
+            "range": "± 1646020",
             "unit": "ns/iter"
           }
         ]

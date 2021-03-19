@@ -8,6 +8,7 @@ sourcesIndex["icu4x_ecma402"] = {"name":"","files":["lib.rs","pluralrules.rs"]};
 sourcesIndex["icu4x_gen_testdata"] = {"name":"","files":["icu4x-gen-testdata.rs"]};
 sourcesIndex["icu_benchmark_macros"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu_benchmark_memory"] = {"name":"","files":["main.rs"]};
+sourcesIndex["icu_capi"] = {"name":"","files":["lib.rs","locale.rs","pluralrules.rs","provider.rs"]};
 sourcesIndex["icu_datetime"] = {"name":"","dirs":[{"name":"fields","files":["length.rs","mod.rs","symbols.rs"]},{"name":"options","files":["components.rs","mod.rs","preferences.rs","style.rs"]},{"name":"pattern","files":["error.rs","mod.rs","parser.rs"]},{"name":"provider","files":["helpers.rs","mod.rs"]}],"files":["arithmetic.rs","date.rs","error.rs","format.rs","lib.rs","mock.rs"]};
 sourcesIndex["icu_locale_canonicalizer"] = {"name":"","files":["lib.rs","locale_canonicalizer.rs","provider.rs"]};
 sourcesIndex["icu_locid"] = {"name":"","dirs":[{"name":"extensions","dirs":[{"name":"private","files":["key.rs","mod.rs"]},{"name":"transform","files":["fields.rs","key.rs","mod.rs","value.rs"]},{"name":"unicode","files":["attribute.rs","attributes.rs","key.rs","keywords.rs","mod.rs","value.rs"]}],"files":["mod.rs"]},{"name":"parser","files":["errors.rs","langid.rs","locale.rs","mod.rs"]},{"name":"serde","files":["langid.rs","mod.rs"]},{"name":"subtags","files":["language.rs","mod.rs","region.rs","script.rs","variant.rs","variants.rs"]}],"files":["helpers.rs","langid.rs","lib.rs","locale.rs"]};

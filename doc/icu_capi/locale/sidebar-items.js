@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["icu4x_locale_create","FFI version of [`Locale::from_bytes()`], see its docs for more details"],["icu4x_locale_destroy","Destructor for [`ICU4XLocale`]."]],"type":[["ICU4XLocale","Opaque type for use behind a pointer, is [`Locale`]"]]});

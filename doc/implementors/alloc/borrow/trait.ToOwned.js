@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["icu_provider"] = [{"text":"impl ToOwned for dyn ErasedDataStruct","synthetic":false,"types":[]}];
+implementors["icu_provider"] = [{"text":"impl&lt;'s&gt; ToOwned for dyn ErasedDataStruct + 's","synthetic":false,"types":[]},{"text":"impl&lt;'s&gt; ToOwned for dyn SerdeSeDataStruct&lt;'s&gt; + 's","synthetic":false,"types":[]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

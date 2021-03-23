@@ -207,6 +207,11 @@
 <span id="204">204</span>
 <span id="205">205</span>
 <span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -215,6 +220,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">reader</span>::<span class="ident">open_reader</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">CldrPaths</span>;
 <span class="kw">use</span> <span class="ident">icu_locale_canonicalizer</span>::<span class="ident">provider</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">iter</span>::{<span class="ident">IterableDataProviderCore</span>, <span class="ident">KeyedDataProvider</span>};
 <span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
@@ -274,7 +280,9 @@
                 <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata</span> {
                     <span class="ident">data_langid</span>: <span class="ident">langid</span>.<span class="ident">clone</span>(),
                 },
-                <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">LikelySubtagsV1</span>::<span class="ident">from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>))),
+                <span class="ident">payload</span>: <span class="ident">DataPayload</span> {
+                    <span class="ident">cow</span>: <span class="prelude-val">Some</span>(<span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">LikelySubtagsV1</span>::<span class="ident">from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>))),
+                },
             })
         } <span class="kw">else</span> {
             <span class="prelude-val">Err</span>(<span class="ident">DataError</span>::<span class="ident">UnavailableResourceOptions</span>(<span class="ident">req</span>.<span class="ident">clone</span>()))
@@ -282,9 +290,10 @@
     }
 }
 
-<span class="ident">icu_provider</span>::<span class="macro">impl_erased</span><span class="macro">!</span>(<span class="ident">LikelySubtagsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span>, <span class="lifetime">&#39;d</span>);
+<span class="ident">icu_provider</span>::<span class="macro">impl_dyn_provider</span><span class="macro">!</span>(<span class="ident">LikelySubtagsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span>, <span class="ident">LikelySubtagsV1</span>, <span class="ident">ERASED</span>, <span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>);
+<span class="ident">icu_provider</span>::<span class="macro">impl_dyn_provider</span><span class="macro">!</span>(<span class="ident">LikelySubtagsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span>, <span class="ident">LikelySubtagsV1</span>, <span class="ident">SERDE_SE</span>, <span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">IterableDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LikelySubtagsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">IterableDataProviderCore</span> <span class="kw">for</span> <span class="ident">LikelySubtagsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">_resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
@@ -400,7 +409,8 @@
     <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">LikelySubtagsV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>::<span class="ident">from</span>(<span class="ident">key</span>::<span class="ident">LIKELY_SUBTAGS_V1</span>))
         .<span class="ident">unwrap</span>()
-        .<span class="ident">take_payload</span>()
+        .<span class="ident">payload</span>
+        .<span class="ident">take</span>()
         .<span class="ident">unwrap</span>();
 
     <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="macro">langid</span><span class="macro">!</span>(<span class="string">&quot;cu-Glag&quot;</span>);

@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["DataExporter","An object capable of serializing data payloads to be read by a DataProvider."]]});

@@ -122,6 +122,33 @@
 <span id="119">119</span>
 <span id="120">120</span>
 <span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -162,6 +189,18 @@
 <span class="doccomment">//! - [`StructProvider`] wraps a particular instance of a struct and returns it.</span>
 <span class="doccomment">//! - [`HelloWorldProvider`] returns &quot;hello world&quot; strings in several languages.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! ## Types and Lifetimes</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! All types `T` compatible with `Cow` and `Debug` can be passed through the data provider.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Most DataProvider traits take a lifetime argument `&#39;d`. This represents the lifetime of data</span>
+<span class="doccomment">//! returned by the DataProvider, which is a `Cow&lt;&#39;d, T&gt;`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Objects returned by DataProvider can have their own borrowed fields, which enables zero-copy</span>
+<span class="doccomment">//! deserialization. By convention, the lifetime `&#39;s` is used to constrain data struct fields. In</span>
+<span class="doccomment">//! general, `&#39;s` should exceed `&#39;d` (i.e., `&#39;s: &#39;d`), such that the data is valid for as long as</span>
+<span class="doccomment">//! the `Cow&lt;&#39;d, T&gt;` is valid.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! ## Additional Traits</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### `IterableDataProvider`</span>
@@ -171,33 +210,33 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For more information, see the `iter` module.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ### `ErasedDataProvider`</span>
+<span class="doccomment">//! ### `SerdeDeDataProvider`</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The [`DataProvider`] trait has a type argument corresponding to the type being loaded. A peer</span>
-<span class="doccomment">//! trait [`ErasedDataProvider`] removes the type argument, using runtime type checking instead.</span>
+<span class="doccomment">//! *Enabled with the &quot;provider_serde&quot; feature*</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Since [`ErasedDataProvider`] is not specific to a single type, it can be useful for:</span>
+<span class="doccomment">//! The trait [`SerdeDeDataProvider`] removes the type argument from `DataProvider` and requires</span>
+<span class="doccomment">//! that all data structs be deserializable via Serde. This allows for a Serde-enabled provider</span>
+<span class="doccomment">//! to be saved as a trait object without being specific to a data struct type.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - Caches</span>
-<span class="doccomment">//! - Bulk data operations</span>
-<span class="doccomment">//! - Transforming from one format to another</span>
+<span class="doccomment">//! ### `DataProvider&lt;dyn SerdeSeDataStruct&gt;`</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ## Types and Lifetimes</span>
+<span class="doccomment">//! *Enabled with the &quot;provider_serde&quot; feature*</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! All types `T` compatible with `Cow` and `Debug` can be passed through the data provider.</span>
+<span class="doccomment">//! Data providers capable of returning opaque [`SerdeSeDataStruct`] trait objects can be used as</span>
+<span class="doccomment">//! input to a data exporter, such as when writing data to the filesystem.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Most DataProvider traits take a lifetime argument `&#39;d`. This represents the lifetime of data</span>
-<span class="doccomment">//! returned by the DataProvider.</span>
+<span class="doccomment">//! This trait is normally implemented using the [`impl_dyn_provider!`] macro.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! DataProvider returns data in the form of a `Cow&lt;&#39;d, T&gt;`, where `&#39;d` is the lifetime of the data</span>
-<span class="doccomment">//! if it is borrowed, and `T` is constrained by `T: &#39;d` such that if the data is owned, it may not</span>
-<span class="doccomment">//! have any fields whose lifetime subceeds `&#39;d`.</span>
+<span class="doccomment">//! ### `DataProvider&lt;dyn ErasedDataStruct&gt;`</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! When using `ErasedDataProvider`, the following additional requirements are placed on `T`:</span>
+<span class="doccomment">//! The trait [`ErasedDataProvider`] removes the type argument from `DataProvider` and requires</span>
+<span class="doccomment">//! that all data structs be convertible to the `Any` type. This enables the processing of data</span>
+<span class="doccomment">//! without the caller knowing the underlying data struct.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - `T: &#39;static`, since `T` must be compatible with `Any`</span>
-<span class="doccomment">//! - `serde::Deserialize` and `serde::Serialize`, allowing for type-agnostic (de)serialization</span>
-<span class="doccomment">//! - `Default`, allowing `InvariantDataProvider` to work</span>
+<span class="doccomment">//! Since [`ErasedDataProvider`] is not specific to a single type, it can be useful for caches or</span>
+<span class="doccomment">//! other bulk data operations.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This trait is normally implemented using the [`impl_dyn_provider!`] macro.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`ICU4X`]: ../icu/index.html</span>
 <span class="doccomment">//! [`DataProvider`]: data_provider::DataProvider</span>
@@ -211,16 +250,24 @@
 <span class="doccomment">//! [`StructProvider`]: struct_provider::StructProvider</span>
 <span class="doccomment">//! [`HelloWorldProvider`]: hello_world::HelloWorldProvider</span>
 <span class="doccomment">//! [`ErasedDataProvider`]: erased::ErasedDataProvider</span>
+<span class="doccomment">//! [`SerdeDeDataProvider`]: serde::SerdeDeDataProvider</span>
+<span class="doccomment">//! [`SerdeSeDataStruct`]: serde::SerdeSeDataStruct</span>
+<span class="doccomment">//! [`impl_dyn_provider!`]: impl_dyn_provider</span>
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">data_provider</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">resource</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;erased&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">util</span>;
+
+<span class="kw">mod</span> <span class="ident">data_provider</span>;
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">mod</span> <span class="ident">resource</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">erased</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">export</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">hello_world</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">inv</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">iter</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">serde</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">struct_provider</span>;
 
 <span class="kw">mod</span> <span class="ident">error</span>;
@@ -229,13 +276,12 @@
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
     <span class="doccomment">//! Core selection of APIs and structures for `DataProvider`.</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataPayload</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataProvider</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataRequest</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataResponse</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataResponseMetadata</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">DataError</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">iter</span>::<span class="ident">IterableDataProvider</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">iter</span>::<span class="ident">KeyedDataProvider</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">resource</span>::<span class="ident">ResourceCategory</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">resource</span>::<span class="ident">ResourceKey</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">resource</span>::<span class="ident">ResourceOptions</span>;
@@ -244,5 +290,13 @@
 
 <span class="comment">// Also include the same symbols at the top level for selective inclusion</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">prelude</span>::<span class="kw-2">*</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">internal</span> {
+    <span class="doccomment">//! Macro dependencies; not intended to be used directly.</span>
+    <span class="doccomment">/// Re-export tinystr16 for macro resource_key!()</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tinystr</span>::<span class="ident">tinystr16</span>;
+    <span class="doccomment">/// Re-export tinystr4 for macro resource_key!()</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tinystr</span>::<span class="ident">tinystr4</span>;
+}
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "icu_provider";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

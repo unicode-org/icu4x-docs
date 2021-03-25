@@ -17,10 +17,10 @@ sourcesIndex["icu_plurals"] = {"name":"","dirs":[{"name":"rules","files":["ast.r
 sourcesIndex["icu_provider"] = {"name":"","files":["data_provider.rs","erased.rs","error.rs","export.rs","hello_world.rs","inv.rs","iter.rs","lib.rs","resource.rs","serde.rs","struct_provider.rs","util.rs"]};
 sourcesIndex["icu_provider_cldr"] = {"name":"","dirs":[{"name":"download","files":["cldr_allinone.rs","error.rs","io_util.rs","mod.rs"]},{"name":"transform","files":["dates.rs","likelysubtags.rs","mod.rs","plurals.rs"]}],"files":["cldr_langid.rs","cldr_paths.rs","error.rs","lib.rs","reader.rs","support.rs"]};
 sourcesIndex["icu_provider_fs"] = {"name":"","dirs":[{"name":"export","dirs":[{"name":"serializers","files":["bincode.rs","json.rs","mod.rs"]}],"files":["aliasing.rs","fs_exporter.rs","mod.rs"]}],"files":["deserializer.rs","error.rs","fs_data_provider.rs","lib.rs","manifest.rs"]};
-sourcesIndex["icu_provider_ppucd"] = {"name":"","files":["error.rs","lib.rs","parse_ppucd.rs","support.rs"]};
+sourcesIndex["icu_provider_ppucd"] = {"name":"","files":["enum_prop_mapping.rs","error.rs","lib.rs","parse_ppucd.rs","support.rs"]};
 sourcesIndex["icu_segmenter_lstm"] = {"name":"","files":["error.rs","lib.rs","lstm.rs","math_helper.rs","structs.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","paths.rs","test_data_provider.rs"]};
-sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","props.rs","provider.rs","uniset.rs","utils.rs"]};
+sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","enum_props.rs","lib.rs","props.rs","provider.rs","uniset.rs","utils.rs"]};
 sourcesIndex["litemap"] = {"name":"","files":["lib.rs","map.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["lib.rs","ops.rs"]};
 createSourceSidebar();

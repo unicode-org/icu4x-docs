@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["SkeletonError",""]],"struct":[["Skeleton","A `Skeleton` is used to represent what types of `Field`s are present in a `Pattern`. The ordering of the `Skeleton`'s `Field`s have no bearing on the ordering of the `Field`s and `Literal`s in the `Pattern`."]]});

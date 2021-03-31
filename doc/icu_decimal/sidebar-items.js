@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["provider","Data provider struct definitions for `icu_decimal`."]]});

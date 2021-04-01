@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["icu4x_ecma402"] = [{"text":"impl PluralRules for PluralRules","synthetic":false,"types":[]}];
+implementors["icu4x_ecma402"] = [{"text":"impl PluralRules for <a class=\"struct\" href=\"icu4x_ecma402/pluralrules/struct.PluralRules.html\" title=\"struct icu4x_ecma402::pluralrules::PluralRules\">PluralRules</a>","synthetic":false,"types":["icu4x_ecma402::pluralrules::PluralRules"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

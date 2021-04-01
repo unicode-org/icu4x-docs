@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["icu_provider_fs"] = [{"text":"impl&lt;'de&gt; SerdeDeDataProvider&lt;'de&gt; for FsDataProvider","synthetic":false,"types":[]}];
+implementors["icu_provider_fs"] = [{"text":"impl&lt;'de&gt; <a class=\"trait\" href=\"icu_provider/serde/trait.SerdeDeDataProvider.html\" title=\"trait icu_provider::serde::SerdeDeDataProvider\">SerdeDeDataProvider</a>&lt;'de&gt; for <a class=\"struct\" href=\"icu_provider_fs/struct.FsDataProvider.html\" title=\"struct icu_provider_fs::FsDataProvider\">FsDataProvider</a>","synthetic":false,"types":["icu_provider_fs::fs_data_provider::FsDataProvider"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

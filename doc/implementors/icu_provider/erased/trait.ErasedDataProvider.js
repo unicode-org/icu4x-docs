@@ -1,4 +1,3 @@
 (function() {var implementors = {};
 implementors["icu_provider"] = [];
-implementors["icu_provider_cldr"] = [{"text":"impl&lt;'a, 'd&gt; <a class=\"trait\" href=\"icu_provider/erased/trait.ErasedDataProvider.html\" title=\"trait icu_provider::erased::ErasedDataProvider\">ErasedDataProvider</a>&lt;'d&gt; for <a class=\"struct\" href=\"icu_provider_cldr/transform/struct.CldrJsonDataProvider.html\" title=\"struct icu_provider_cldr::transform::CldrJsonDataProvider\">CldrJsonDataProvider</a>&lt;'a, 'd&gt;","synthetic":false,"types":["icu_provider_cldr::transform::CldrJsonDataProvider"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

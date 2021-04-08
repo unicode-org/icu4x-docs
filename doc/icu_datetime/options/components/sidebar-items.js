@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Month",""],["Numeric",""],["Text",""],["TimeZoneName",""]],"struct":[["Bag",""]]});
+initSidebarItems({"enum":[["Month",""],["Numeric",""],["Text",""],["TimeZoneName",""]],"struct":[["Bag","See the module-level docs for more information."]]});

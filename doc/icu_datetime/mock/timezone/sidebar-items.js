@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MockTimeZone","Temporary implementation of [`TimeZoneInput`], which is used in tests, benchmarks and examples of this component."]]});

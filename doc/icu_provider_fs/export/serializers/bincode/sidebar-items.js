@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Options","Options bag for initializing a bincode::Serializer."],["Serializer","A serializer for Bincode."]]});
+initSidebarItems({"struct":[["Options","Options bag for initializing a [`bincode::Serializer`]."],["Serializer","A serializer for Bincode."]]});

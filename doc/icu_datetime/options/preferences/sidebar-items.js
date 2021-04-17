@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["HourCycle","User Preference for adjusting how hour component is displayed."]],"struct":[["Bag","Bag of preferences stores user preferences which may affect the result of date and time formatting."]]});
+initSidebarItems({"enum":[["HourCycle","A user preference for adjusting how the hour component is displayed."]],"struct":[["Bag","Stores user preferences which may affect the result of date and time formatting."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ZeroVec","A zero-copy vector for fixed-width types."]],"mod":[["samples","Example data useful for testing ZeroVec."],["ule","Traits over unaligned little-endian data (ULE, pronounced \"yule\")."]]});
+initSidebarItems({"enum":[["VarZeroVecError",""],["ZeroVec","A zero-copy vector for fixed-width types."]],"mod":[["samples","Example data useful for testing ZeroVec."],["ule","Traits over unaligned little-endian data (ULE, pronounced \"yule\")."]],"struct":[["VarZeroVec","A zero-copy vector for variable-width types."]]});

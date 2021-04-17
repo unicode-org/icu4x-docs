@@ -24,5 +24,5 @@ sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","paths
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","enum_props.rs","lib.rs","props.rs","provider.rs","uniset.rs","utils.rs"]};
 sourcesIndex["litemap"] = {"name":"","files":["lib.rs","map.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["lib.rs","ops.rs"]};
-sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"ule","files":["chars.rs","mod.rs","plain.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs"]}],"files":["lib.rs","samples.rs"]};
+sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"ule","files":["chars.rs","mod.rs","plain.rs","string.rs"]},{"name":"varzerovec","files":["components.rs","mod.rs","serde.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs"]}],"files":["lib.rs","samples.rs"]};
 createSourceSidebar();

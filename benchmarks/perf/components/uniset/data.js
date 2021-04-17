@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618523263059,
+  "lastUpdate": 1618619432344,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -5069,6 +5069,66 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 32615999,
             "range": "± 1136921",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d6e5e2d96bcf62d27d07f0ffe3acff8b82e44e08",
+          "message": "Adding Valgrind build task (#631)",
+          "timestamp": "2021-04-16T00:56:17-05:00",
+          "tree_id": "3dfdb297dd2df7f83d2283f739da22a8d7eeb60d",
+          "url": "https://github.com/unicode-org/icu4x/commit/d6e5e2d96bcf62d27d07f0ffe3acff8b82e44e08"
+        },
+        "date": 1618552936575,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 26478103,
+            "range": "± 1012905",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c9590b53ef98322b903308ff5b4c57d621222e35",
+          "message": "Small cleanups to prepare for data source abstraction (#649)",
+          "timestamp": "2021-04-16T19:24:01-05:00",
+          "tree_id": "f303e309927a4c804d80979b3bd94c308745d80d",
+          "url": "https://github.com/unicode-org/icu4x/commit/c9590b53ef98322b903308ff5b4c57d621222e35"
+        },
+        "date": 1618619428785,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 31985435,
+            "range": "± 1930875",
             "unit": "ns/iter"
           }
         ]

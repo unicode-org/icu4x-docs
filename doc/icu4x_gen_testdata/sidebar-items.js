@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Error",""]],"fn":[["download","Downloads the CLDR JSON and copies a subset of it into data/cldr"],["generate",""],["main",""]]});
+initSidebarItems({"enum":[["Error",""]],"fn":[["download","Downloads the CLDR JSON and copies a subset of it into data/cldr"],["export_cldr",""],["generate",""],["main",""]]});

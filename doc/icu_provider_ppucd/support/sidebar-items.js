@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["PpucdDataProvider",""],["UnicodeProperties",""]]});
+initSidebarItems({"struct":[["PpucdDataProvider","Provides Unicode binary properties by reading from a ppucd.txt data file."],["UnicodeProperties",""]]});

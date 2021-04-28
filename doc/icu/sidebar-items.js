@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["datetime","Date and Time operations"],["decimal","Decimal formatting operations"],["locid","Language and Locale operations"],["plurals","Plural Rules operations"],["uniset","Unicode Set operations"]]});
+initSidebarItems({"mod":[["datetime","Date and Time operations"],["decimal","Decimal formatting operations"],["locale_canonicalizer","This API provides functionality to canonicalize locale identifiers based upon `CLDR` data."],["locid","Language and Locale operations"],["plurals","Plural Rules operations"],["uniset","Unicode Set operations"]]});

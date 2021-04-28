@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["locale_canonicalizer",""],["provider",""]]});
+initSidebarItems({"mod":[["locale_canonicalizer",""],["provider","Data provider struct definitions for this ICU4X component."]]});

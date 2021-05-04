@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["locale",""],["pluralrules",""],["provider",""]]});
+initSidebarItems({"mod":[["custom_writeable",""],["decimal",""],["fixed_decimal",""],["locale",""],["pluralrules",""],["provider",""]]});

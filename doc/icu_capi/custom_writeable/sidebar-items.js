@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["icu4x_simple_writeable","Create an `ICU4XWriteable` that can write to a fixed-length stack allocated `u8` buffer."]],"struct":[["ICU4XWriteable","An object that can one can write UTF-8 strings to"]]});

@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["icu_uniset"] = [{"text":"impl <a class=\"trait\" href=\"icu_uniset/fmt/trait.Display.html\" title=\"trait icu_uniset::fmt::Display\">Display</a> for <a class=\"enum\" href=\"icu_uniset/enum.UnicodeSetError.html\" title=\"enum icu_uniset::UnicodeSetError\">UnicodeSetError</a>","synthetic":false,"types":["icu_uniset::UnicodeSetError"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

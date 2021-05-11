@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Yoke","A Cow-like borrowed object \"yoked\" to its backing data."]],"trait":[["Yokeable","A [`Yokeable`] type is essentially one with a covariant lifetime parameter, matched to the parameter in the trait definition. The trait allows one to cast the covariant lifetime to and from `'static`."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cldr_json_root","Returns the absolute path to the CLDR JSON root directory."],["icu4x_json_root","Returns the absolute path to the ICU4X JSON root directory."]]});
+initSidebarItems({"fn":[["cldr_json_root","Returns the absolute path to the CLDR JSON root directory."],["data_root","Returns the absolute path to the top-level data directory."],["icu4x_json_root","Returns the absolute path to the ICU4X JSON root directory."]]});

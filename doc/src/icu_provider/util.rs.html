@@ -137,6 +137,49 @@
 <span id="134">134</span>
 <span id="135">135</span>
 <span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -190,12 +233,15 @@
 }
 
 <span class="doccomment">/// Implement [`DataProvider&lt;dyn S&gt;`](crate::DataProvider) on a type that already implements [`DataProvider&lt;T&gt;`](crate::DataProvider)</span>
-<span class="doccomment">/// where `T` is a [`Sized`] type that implements the trait `S`.</span>
+<span class="doccomment">/// for one or more `T`, where `T` is a [`Sized`] type that implements the trait `S`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Use this macro to add support to your data provider for:</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// - [`ErasedDataStruct`](crate::erased::ErasedDataStruct) if your provider can return typed objects as [`Any`](std::any::Any)</span>
 <span class="doccomment">/// - [`SerdeSeDataStruct`](crate::serde::SerdeSeDataStruct) if your provider returns objects implementing [`serde::Serialize`]</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The second argument is a match-like construction mapping from resource keys to structs. To map</span>
+<span class="doccomment">/// multiple keys to a single data struct, use `_` as the data key.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The third argument can be either the trait expression, like [SerdeSeDataStruct&lt;&#39;s&gt;`], or the</span>
 <span class="doccomment">/// shorthands `ERASED` or `SERDE_SE`.</span>
@@ -207,11 +253,12 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">/// use icu_provider::erased::ErasedDataStruct;</span>
-<span class="doccomment">/// use std::borrow::Cow;</span>
+<span class="doccomment">/// Basic usage:</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// # use icu_provider::prelude::*;</span>
+<span class="doccomment">/// # use icu_provider::erased::ErasedDataStruct;</span>
+<span class="doccomment">/// # use std::borrow::Cow;</span>
 <span class="doccomment">/// const DEMO_KEY: ResourceKey = icu_provider::resource_key!(x, &quot;foo&quot;, &quot;bar&quot;, 1);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // A small DataProvider that returns owned strings</span>
@@ -229,7 +276,9 @@
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Since `String` is `&#39;static`, we can implement `DataProvider&lt;dyn ErasedDataStruct&gt;`</span>
-<span class="doccomment">/// icu_provider::impl_dyn_provider!(MyProvider, String, ERASED, &#39;d, &#39;s);</span>
+<span class="doccomment">/// icu_provider::impl_dyn_provider!(MyProvider, {</span>
+<span class="doccomment">///     DEMO_KEY =&gt; String,</span>
+<span class="doccomment">/// }, ERASED, &#39;d, &#39;s);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Usage example</span>
 <span class="doccomment">/// let provider = MyProvider(&quot;demo&quot;.to_string());</span>
@@ -237,22 +286,50 @@
 <span class="doccomment">///     .load_payload(&amp;DEMO_KEY.into())</span>
 <span class="doccomment">///     .expect(&quot;Loading should succeed&quot;);</span>
 <span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Using the wildcard `_` match:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// # use icu_provider::prelude::*;</span>
+<span class="doccomment">/// # use std::borrow::Cow;</span>
+<span class="doccomment">/// # struct MyProvider(pub String);</span>
+<span class="doccomment">/// # impl&lt;&#39;d&gt; DataProvider&lt;&#39;d, String&gt; for MyProvider {</span>
+<span class="doccomment">/// #   fn load_payload(&amp;self, req: &amp;DataRequest) -&gt; Result&lt;DataResponse&lt;&#39;d, String&gt;, DataError&gt; {</span>
+<span class="doccomment">/// #       Ok(DataResponse {</span>
+<span class="doccomment">/// #           metadata: Default::default(),</span>
+<span class="doccomment">/// #           payload: DataPayload {</span>
+<span class="doccomment">/// #               cow: Some(Cow::Owned(self.0.to_string()))</span>
+<span class="doccomment">/// #           }</span>
+<span class="doccomment">/// #       })</span>
+<span class="doccomment">/// #   }</span>
+<span class="doccomment">/// # }</span>
+<span class="doccomment">/// // Send all keys to the `String` provider.</span>
+<span class="doccomment">/// icu_provider::impl_dyn_provider!(MyProvider, {</span>
+<span class="doccomment">///     _ =&gt; String,</span>
+<span class="doccomment">/// }, ERASED, &#39;d, &#39;s);</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">impl_dyn_provider</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ty</span>, <span class="ident">ERASED</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">lifetime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">lifetime</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro">impl_dyn_provider</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>, <span class="macro-nonterminal">$</span><span class="kw">struct</span>, <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">erased</span>::<span class="ident">ErasedDataStruct</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>);
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ty</span>),<span class="op">+</span>, }, <span class="ident">ERASED</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">lifetime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">lifetime</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro">impl_dyn_provider</span><span class="macro">!</span>(
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
+            { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">struct</span>),<span class="op">+</span>, },
+            <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">erased</span>::<span class="ident">ErasedDataStruct</span>,
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>,
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>
+        );
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ty</span>, <span class="ident">SERDE_SE</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">lifetime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">lifetime</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ty</span>),<span class="op">+</span>, }, <span class="ident">SERDE_SE</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">lifetime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">lifetime</span>) <span class="op">=</span><span class="op">&gt;</span> {
         <span class="comment">// If this fails to compile, enable the &quot;provider_serde&quot; feature on this crate.</span>
         <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro">impl_dyn_provider</span><span class="macro">!</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
-            <span class="macro-nonterminal">$</span><span class="kw">struct</span>,
+            { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">struct</span>),<span class="op">+</span>, },
             <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">serde</span>::<span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span><span class="op">&gt;</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>
         );
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_trait</span>:<span class="ident">path</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">lifetime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">lifetime</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">struct</span>:<span class="macro-nonterminal">ty</span>),<span class="op">+</span>, }, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_trait</span>:<span class="ident">path</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">lifetime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">lifetime</span>) <span class="op">=</span><span class="op">&gt;</span> {
         <span class="kw">impl</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>, <span class="kw">dyn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_trait</span> <span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
         <span class="kw">where</span>
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>,
@@ -264,15 +341,24 @@
                 <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>, <span class="kw">dyn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_trait</span> <span class="op">+</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span><span class="op">&gt;</span>,
                 <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataError</span>,
             <span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">result</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="kw">struct</span><span class="op">&gt;</span> <span class="op">=</span>
-                    <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataProvider</span>::<span class="ident">load_payload</span>(<span class="self">self</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
-                    <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,
-                    <span class="ident">payload</span>: <span class="ident">result</span>.<span class="ident">payload</span>.<span class="ident">into</span>(),
-                })
+                <span class="kw">match</span> <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span> {
+                    $(
+                        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">result</span>: <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="kw">struct</span><span class="op">&gt;</span> <span class="op">=</span>
+                                <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">prelude</span>::<span class="ident">DataProvider</span>::<span class="ident">load_payload</span>(<span class="self">self</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
+                            <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
+                                <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,
+                                <span class="ident">payload</span>: <span class="ident">result</span>.<span class="ident">payload</span>.<span class="ident">into</span>(),
+                            })
+                        }
+                    )<span class="op">+</span>,
+                    <span class="comment">// Don&#39;t complain if the call site has its own wildcard match</span>
+                    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unreachable_patterns</span>)]</span>
+                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DataError</span>::<span class="ident">UnsupportedResourceKey</span>(<span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>))
+                }
             }
         }
-    };
+    }
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_provider"></div>

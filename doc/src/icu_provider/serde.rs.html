@@ -150,6 +150,10 @@
 <span id="147">147</span>
 <span id="148">148</span>
 <span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -193,17 +197,16 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider::prelude::*;</span>
     <span class="doccomment">/// use icu_provider::serde::SerdeDeDataReceiver;</span>
-    <span class="doccomment">/// use std::borrow::Cow;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// const JSON: &amp;&#39;static str = &quot;\&quot;hello world\&quot;&quot;;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut receiver = DataPayload::&lt;String&gt;::new();</span>
+    <span class="doccomment">/// let mut receiver: Option&lt;&amp;str&gt; = None;</span>
     <span class="doccomment">/// let mut d = serde_json::Deserializer::from_str(JSON);</span>
     <span class="doccomment">/// receiver.receive_deserializer(&amp;mut erased_serde::Deserializer::erase(&amp;mut d))</span>
     <span class="doccomment">///     .expect(&quot;Deserialization should be successful&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert!(matches!(receiver.cow, Some(Cow::Owned(_))));</span>
-    <span class="doccomment">/// assert_eq!(&quot;hello world&quot;, *receiver.borrow().unwrap());</span>
+    <span class="doccomment">/// assert!(matches!(receiver, Some(_)));</span>
+    <span class="doccomment">/// assert_eq!(receiver, Some(&quot;hello world&quot;));</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">fn</span> <span class="ident">receive_deserializer</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
@@ -211,7 +214,7 @@
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;de</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SerdeDeDataReceiver</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SerdeDeDataReceiver</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Debug</span>,
 {
@@ -220,7 +223,7 @@
         <span class="ident">deserializer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">erased_serde</span>::<span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">obj</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">erased_serde</span>::<span class="ident">deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">cow</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">obj</span>));
+        <span class="self">self</span>.<span class="ident">replace</span>(<span class="ident">obj</span>);
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -246,9 +249,14 @@
 {
     <span class="doccomment">/// Serve objects implementing [`serde::Deserialize&lt;&#39;de&gt;`] from a [`SerdeDeDataProvider`].</span>
     <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>::<span class="ident">new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">payload</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">load_to_receiver</span>(<span class="ident">req</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">payload</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> { <span class="ident">metadata</span>, <span class="ident">payload</span> })
+        <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
+            <span class="ident">metadata</span>,
+            <span class="ident">payload</span>: <span class="ident">payload</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">obj</span><span class="op">|</span> <span class="ident">DataPayload</span> {
+                <span class="ident">cow</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">obj</span>),
+            }),
+        })
     }
 }
 

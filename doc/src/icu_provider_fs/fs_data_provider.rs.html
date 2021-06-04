@@ -115,6 +115,8 @@
 <span id="112">112</span>
 <span id="113">113</span>
 <span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -199,11 +201,13 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FsDataProvider</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FsDataProvider</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">serde</span>::<span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">serde</span>::<span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Debug</span> <span class="op">+</span> <span class="lifetime">&#39;d</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>,
+    <span class="comment">// TODO(#667): Change this to Deserialize&lt;&#39;s&gt;</span>
+    <span class="ident">M</span>::<span class="ident">Yokeable</span>: <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">DeserializeOwned</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">reader</span>, <span class="ident">path_buf</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_reader</span>(<span class="ident">req</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">deserializer</span>::<span class="ident">deserialize_into_type</span>(<span class="ident">reader</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">manifest</span>.<span class="ident">syntax</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">err</span>.<span class="ident">into_resource_error</span>(<span class="kw-2">&amp;</span><span class="ident">path_buf</span>))<span class="question-mark">?</span>;

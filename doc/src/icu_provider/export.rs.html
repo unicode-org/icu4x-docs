@@ -52,11 +52,6 @@
 <span id="49">49</span>
 <span id="50">50</span>
 <span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -67,21 +62,19 @@
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">iter</span>::<span class="ident">IterableDataProvider</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>;
 
 <span class="doccomment">/// An object capable of serializing data payloads to be read by a [`DataProvider`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// A [`DataProvider`] by itself is &quot;read-only&quot;; this trait enables it to be &quot;read-write&quot;.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>: <span class="lifetime">&#39;d</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="lifetime">&#39;s</span> <span class="op">+</span> <span class="ident">ToOwned</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">ToOwned</span><span class="op">&gt;</span>::<span class="ident">Owned</span>: <span class="ident">Debug</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Save a `payload` corresponding to the given data request (resource path).</span>
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-        <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+        <span class="ident">req</span>: <span class="ident">DataRequest</span>,
+        <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Whether to load and dump data for the given entry. This function enables the</span>
@@ -90,14 +83,11 @@
 
     <span class="doccomment">/// Auto-implemented function that loads data from an [`IterableDataProvider`] and dumps it</span>
     <span class="doccomment">/// into this [`DataExporter`].</span>
-    <span class="kw">fn</span> <span class="ident">put_key_from_provider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span>(
+    <span class="kw">fn</span> <span class="ident">put_key_from_provider</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
-        <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">IterableDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="lifetime">&#39;s</span>: <span class="lifetime">&#39;d</span>,
-    {
+        <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">IterableDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">resc_options</span> <span class="kw">in</span> <span class="ident">provider</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">resc_key</span>)<span class="question-mark">?</span> {
             <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">include_resource_options</span>(<span class="kw-2">&amp;</span><span class="ident">resc_options</span>) {
                 <span class="kw">continue</span>;
@@ -109,7 +99,7 @@
                 },
             };
             <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">put_payload</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>, <span class="ident">payload</span>.<span class="ident">get</span>())<span class="question-mark">?</span>;
+            <span class="self">self</span>.<span class="ident">put_payload</span>(<span class="ident">req</span>, <span class="ident">payload</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }

@@ -181,6 +181,46 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -194,7 +234,9 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Debug</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">rc</span>::<span class="ident">Rc</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
+<span class="kw">use</span> <span class="ident">yoke</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">key</span> {
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">resource</span>::<span class="ident">ResourceKey</span>;
@@ -208,7 +250,7 @@
     <span class="ident">derive</span>(<span class="ident">serde</span>::<span class="ident">Serialize</span>, <span class="ident">serde</span>::<span class="ident">Deserialize</span>)
 )]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="comment">// TODO(#667): Use serde borrow.</span>
     <span class="kw">pub</span> <span class="ident">message</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
@@ -220,6 +262,46 @@
     }
 }
 
+<span class="comment">// BEGIN YOKEABLE BOILERPLATE</span>
+
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">transform</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>::<span class="ident">Output</span> {
+        <span class="self">self</span>
+    }
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make</span>(<span class="ident">from</span>: <span class="self">Self</span>::<span class="ident">Output</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">from</span>)
+    }
+    <span class="kw">fn</span> <span class="ident">with_mut</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>)
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Output</span>),
+    {
+        <span class="kw">unsafe</span> {
+            <span class="ident">f</span>(<span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">transmute</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span>(
+                <span class="self">self</span>,
+            ))
+        }
+    }
+}
+
+<span class="comment">// END YOKEABLE BOILERPLATE</span>
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
+        <span class="ident">HelloWorldV1</span> {
+            <span class="ident">message</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="kw-2">&amp;</span><span class="ident">this</span>.<span class="ident">message</span>),
+        }
+    }
+}
+
+<span class="doccomment">/// Marker type for [`HelloWorldV1`].</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HelloWorldV1Marker</span>;
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldV1Marker</span> {
+    <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
+}
+
 <span class="doccomment">/// A data provider returning Hello World strings in different languages.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Mostly useful for testing.</span>
@@ -227,13 +309,13 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_provider::hello_world::{key, HelloWorldProvider, HelloWorldV1};</span>
+<span class="doccomment">/// use icu_provider::hello_world::{key, HelloWorldProvider, HelloWorldV1Marker};</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
 <span class="doccomment">/// use icu_locid_macros::langid;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let provider = HelloWorldProvider::new_with_placeholder_data();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let german_hello_world: DataPayload&lt;HelloWorldV1&gt; = provider</span>
+<span class="doccomment">/// let german_hello_world: DataPayload&lt;HelloWorldV1Marker&gt; = provider</span>
 <span class="doccomment">///     .load_payload(&amp;DataRequest {</span>
 <span class="doccomment">///         resource_path: ResourcePath {</span>
 <span class="doccomment">///             key: key::HELLO_WORLD_V1,</span>
@@ -243,9 +325,9 @@
 <span class="doccomment">///             }</span>
 <span class="doccomment">///         }</span>
 <span class="doccomment">///     })</span>
-<span class="doccomment">///     .unwrap()</span>
+<span class="doccomment">///     .expect(&quot;Loading should succeed&quot;)</span>
 <span class="doccomment">///     .take_payload()</span>
-<span class="doccomment">///     .unwrap();</span>
+<span class="doccomment">///     .expect(&quot;Data should be present&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(&quot;Hallo Welt&quot;, german_hello_world.get().message);</span>
 <span class="doccomment">/// ```</span>
@@ -289,14 +371,11 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="lifetime">&#39;s</span>: <span class="lifetime">&#39;d</span>,
-{
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="lifetime">&#39;t</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">HelloWorldV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">load_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">HelloWorldV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>.<span class="ident">match_key</span>(<span class="ident">key</span>::<span class="ident">HELLO_WORLD_V1</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>
@@ -308,20 +387,18 @@
             <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata</span> {
                 <span class="ident">data_langid</span>: <span class="prelude-val">Some</span>(<span class="ident">langid</span>.<span class="ident">clone</span>()),
             },
-            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload</span> {
-                <span class="ident">cow</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">data</span>),
-            }),
+            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload</span>::<span class="ident">from_partial_owned</span>(<span class="ident">Rc</span>::<span class="ident">from</span>(<span class="ident">data</span>))),
         })
     }
 }
 
 <span class="macro">impl_dyn_provider</span><span class="macro">!</span>(<span class="ident">HelloWorldProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>, {
-    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
-}, <span class="ident">ERASED</span>, <span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>);
+    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HelloWorldV1Marker</span>,
+}, <span class="ident">ERASED</span>, <span class="lifetime">&#39;d</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>)]</span>
 <span class="macro">impl_dyn_provider</span><span class="macro">!</span>(<span class="ident">HelloWorldProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>, {
-    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HelloWorldV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>,
+    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HelloWorldV1Marker</span>,
 }, <span class="ident">SERDE_SE</span>, <span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">IterableDataProviderCore</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
@@ -343,18 +420,21 @@
 }
 
 <span class="doccomment">/// Adds entries to a [`HelloWorldProvider`] from [`ErasedDataStruct`](crate::erased::ErasedDataStruct)</span>
-<span class="kw">impl</span> <span class="kw">crate</span>::<span class="ident">export</span>::<span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="kw">dyn</span> <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataStruct</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">export</span>::<span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>
     <span class="kw">for</span> <span class="ident">HelloWorldProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>
 {
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-        <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataStruct</span>,
+        <span class="ident">req</span>: <span class="ident">DataRequest</span>,
+        <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="kw">crate</span>::<span class="ident">erased</span>::<span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>.<span class="ident">match_key</span>(<span class="ident">key</span>::<span class="ident">HELLO_WORLD_V1</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">HelloWorldV1</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">downcast_ref</span>()<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">langid</span>.<span class="ident">clone</span>(), <span class="ident">data</span>.<span class="ident">message</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">downcast_payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">HelloWorldV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">downcast</span>()<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">insert</span>(
+            <span class="ident">langid</span>.<span class="ident">clone</span>(),
+            <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">downcast_payload</span>.<span class="ident">get</span>().<span class="ident">message</span>.<span class="ident">to_string</span>()),
+        );
         <span class="prelude-val">Ok</span>(())
     }
 

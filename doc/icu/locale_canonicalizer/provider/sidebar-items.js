@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["key",""]],"struct":[["LikelySubtagsV1",""],["LikelySubtagsV1Marker","Marker type for [`LikelySubtagsV1`]"]]});
+initSidebarItems({"mod":[["key",""]],"struct":[["AliasesV1",""],["AliasesV1Marker","Marker type for [`AliasesV1`]"],["LikelySubtagsV1",""],["LikelySubtagsV1Marker","Marker type for [`LikelySubtagsV1`]"]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["LIKELY_SUBTAGS_V1",""]]});
+initSidebarItems({"constant":[["ALIASES_V1",""],["LIKELY_SUBTAGS_V1",""]]});

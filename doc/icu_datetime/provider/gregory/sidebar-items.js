@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["day_periods",""],["months",""],["patterns",""],["weekdays",""]],"struct":[["DateSymbolsV1",""],["DateSymbolsV1Marker","Marker type for [`DateSymbolsV1`]"],["DatesV1",""],["DatesV1Marker","Marker type for [`DatesV1`]"],["PatternsV1",""]]});
+initSidebarItems({"mod":[["day_periods",""],["months",""],["patterns",""],["weekdays",""]],"struct":[["DatePatternsV1",""],["DatePatternsV1Marker","Marker type for [`DatePatternsV1`]"],["DateSymbolsV1",""],["DateSymbolsV1Marker","Marker type for [`DateSymbolsV1`]"]]});

@@ -133,6 +133,45 @@
 <span id="130">130</span>
 <span id="131">131</span>
 <span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -142,8 +181,9 @@
 <span class="kw">use</span> <span class="ident">icu_plurals</span>::{<span class="ident">PluralCategory</span>, <span class="ident">PluralOperands</span>, <span class="ident">PluralRuleType</span>, <span class="ident">PluralRules</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">provider</span>::<span class="ident">ICU4XDataProvider</span>;
-
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">slice</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::{<span class="self">self</span>, <span class="ident">FromStr</span>};
 
 <span class="doccomment">/// Opaque type for use behind a pointer, is [`PluralRules`]</span>
 <span class="doccomment">///</span>
@@ -189,6 +229,44 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="doccomment">/// This is the result returned by [`icu4x_plural_operands_create()`]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XCreatePluralOperandsResult</span> {
+    <span class="doccomment">/// Will default initialized if `success` is [`false`]</span>
+    <span class="kw">pub</span> <span class="ident">operands</span>: <span class="ident">ICU4XPluralOperands</span>,
+    <span class="doccomment">/// Currently just a boolean, but we might add a proper error enum as necessary</span>
+    <span class="kw">pub</span> <span class="ident">success</span>: <span class="ident">bool</span>,
+}
+
+<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
+<span class="doccomment">/// FFI version of [`PluralOperands::from_str()`]. See its docs for more details.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Safety</span>
+<span class="doccomment">/// `number` and `len` should point to a valid ASCII string of length `len`.</span>
+<span class="doccomment">/// The string `number` should be able to parse as a floating-point value.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It does not need to be be null terminated, and `len` should not include a null</span>
+<span class="doccomment">/// terminator (this will just cause the function to panic, and is not a safety requirement).</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_plural_operands_create</span>(
+    <span class="ident">number</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>,
+    <span class="ident">len</span>: <span class="ident">usize</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XCreatePluralOperandsResult</span> {
+    <span class="ident">str</span>::<span class="ident">from_utf8</span>(<span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">number</span>, <span class="ident">len</span>))
+        .<span class="ident">ok</span>()
+        .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
+            <span class="ident">PluralOperands</span>::<span class="ident">from_str</span>(<span class="ident">s</span>)
+                .<span class="ident">ok</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">ops</span><span class="op">|</span> <span class="ident">ICU4XCreatePluralOperandsResult</span> {
+                    <span class="ident">operands</span>: <span class="ident">ops</span>.<span class="ident">into</span>(),
+                    <span class="ident">success</span>: <span class="bool-val">true</span>,
+                })
+        })
+        .<span class="ident">unwrap_or</span>(<span class="ident">ICU4XCreatePluralOperandsResult</span> {
+            <span class="ident">operands</span>: <span class="ident">ICU4XPluralOperands</span>::<span class="ident">default</span>(),
+            <span class="ident">success</span>: <span class="bool-val">false</span>,
+        })
+}
+
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
 <span class="doccomment">/// FFI version of [`PluralRules::select()`]. See its docs for more details.</span>
 <span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_plural_rules_select</span>(
@@ -209,7 +287,7 @@
 }
 
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
 <span class="doccomment">/// FFI version of [`PluralOperands`]. See its docs for more details.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XPluralOperands</span> {
     <span class="kw">pub</span> <span class="ident">i</span>: <span class="ident">u64</span>,

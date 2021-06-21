@@ -496,6 +496,65 @@
 <span id="493">493</span>
 <span id="494">494</span>
 <span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -503,8 +562,12 @@
 
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">char</span>, <span class="ident">ops</span>::<span class="ident">RangeBounds</span>, <span class="ident">slice</span>::<span class="ident">Chunks</span>};
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">serde</span>::<span class="ident">ser</span>::<span class="ident">SerializeSeq</span>;
+
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">UnicodeSetError</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">utils</span>::{<span class="ident">deconstruct_range</span>, <span class="ident">is_valid</span>};
+
 <span class="doccomment">/// Represents the end code point of the Basic Multilingual Plane range, starting from code point 0, inclusive</span>
 <span class="kw">const</span> <span class="ident">BMP_MAX</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFFFF</span>;
 
@@ -512,7 +575,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Provides exposure to membership functions and constructors from serialized [`UnicodeSets`](UnicodeSet)</span>
 <span class="doccomment">/// and predefined ranges.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodeSet</span> {
     <span class="comment">// TODO: need advice - how should we remove Hash and Eq from UnicodeSet unless we need it?</span>
 
@@ -523,6 +586,37 @@
     <span class="comment">// Implements an [inversion list.](https://en.wikipedia.org/wiki/Inversion_list)</span>
     <span class="ident">inv_list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     <span class="ident">size</span>: <span class="ident">usize</span>,
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">serde</span>::<span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UnicodeSet</span> {
+    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">D</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">serde</span>::<span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">use</span> <span class="ident">serde</span>::<span class="ident">de</span>::<span class="ident">Error</span>;
+        <span class="kw">let</span> <span class="ident">parsed_inv_list</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>::<span class="ident">deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
+
+        <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">parsed_inv_list</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error</span>::<span class="ident">custom</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;Cannot deserialize invalid inversion list for UnicodeSet: {:?}&quot;</span>, <span class="ident">e</span>)))
+    }
+}
+
+<span class="comment">// Note: serde(flatten) currently does not promote a struct field of type Vec</span>
+<span class="comment">// to replace the struct when serializing. The error message from the default</span>
+<span class="comment">// serialization is: &quot;can only flatten structs and maps (got a sequence)&quot;.</span>
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
+<span class="kw">impl</span> <span class="ident">serde</span>::<span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">UnicodeSet</span> {
+    <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">S</span>: <span class="ident">serde</span>::<span class="ident">Serializer</span>,
+    {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seq</span> <span class="op">=</span> <span class="ident">serializer</span>.<span class="ident">serialize_seq</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">inv_list</span>.<span class="ident">len</span>()))<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">e</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inv_list</span> {
+            <span class="ident">seq</span>.<span class="ident">serialize_element</span>(<span class="ident">e</span>)<span class="question-mark">?</span>;
+        }
+        <span class="ident">seq</span>.<span class="ident">end</span>()
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">UnicodeSet</span> {
@@ -990,6 +1084,30 @@
         <span class="kw">let</span> <span class="ident">s</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">inv_list_clone</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">round_trip_inv_list</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">get_inversion_list</span>();
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">round_trip_inv_list</span>, <span class="ident">inv_list</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_serde_serialize</span>() {
+        <span class="kw">let</span> <span class="ident">inv_list</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">70</span>, <span class="number">75</span>, <span class="number">85</span>];
+        <span class="kw">let</span> <span class="ident">uniset</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">inv_list</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">json_str</span> <span class="op">=</span> <span class="ident">serde_json</span>::<span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="ident">uniset</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">json_str</span>, <span class="string">&quot;[65,70,75,85]&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_serde_deserialize</span>() {
+        <span class="kw">let</span> <span class="ident">inv_list_str</span> <span class="op">=</span> <span class="string">&quot;[65,70,75,85]&quot;</span>;
+        <span class="kw">let</span> <span class="ident">exp_inv_list</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">65</span>, <span class="number">70</span>, <span class="number">75</span>, <span class="number">85</span>];
+        <span class="kw">let</span> <span class="ident">exp_uniset</span> <span class="op">=</span> <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="ident">exp_inv_list</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">act_uniset</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">serde_json</span>::<span class="ident">from_str</span>(<span class="ident">inv_list_str</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">act_uniset</span>, <span class="ident">exp_uniset</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_serde_deserialize_invalid</span>() {
+        <span class="kw">let</span> <span class="ident">inv_list_str</span> <span class="op">=</span> <span class="string">&quot;[65,70,98775,85]&quot;</span>;
+        <span class="kw">let</span> <span class="ident">act_result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UnicodeSet</span>, <span class="ident">serde_json</span>::<span class="ident">Error</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">serde_json</span>::<span class="ident">from_str</span>(<span class="ident">inv_list_str</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="macro">matches</span><span class="macro">!</span>(<span class="ident">act_result</span>, <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
     }
 }
 </pre></div>

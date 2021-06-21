@@ -140,6 +140,8 @@
 <span id="137">137</span>
 <span id="138">138</span>
 <span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -154,7 +156,7 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodeProperties</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">props</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">UnicodeProperty</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">props</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Provides Unicode binary properties by reading from a ppucd.txt data file.</span>
@@ -166,7 +168,7 @@
 <span class="doccomment">/// ```ignore</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
 <span class="doccomment">/// use icu_provider_ppucd::PpucdDataProvider;</span>
-<span class="doccomment">/// use icu_uniset::provider::{key, UnicodeProperty};</span>
+<span class="doccomment">/// use icu_uniset::provider::{key, UnicodePropertyV1};</span>
 <span class="doccomment">/// use std::borrow::Cow;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let ppucd_data = std::fs::read_to_string(icu_testdata::paths::ppucd_path())</span>
@@ -174,14 +176,14 @@
 <span class="doccomment">/// // TODO(#454): Enable this part of the docs test once PpucdDataProvider is made faster.</span>
 <span class="doccomment">/// let provider = PpucdDataProvider::new(&amp;ppucd_data);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let result: Cow&lt;UnicodeProperty&gt; = provider</span>
+<span class="doccomment">/// let result: Cow&lt;UnicodePropertyV1&gt; = provider</span>
 <span class="doccomment">///     .load_payload(&amp;DataRequest::from(key::ASCII_HEX_DIGIT_V1))</span>
 <span class="doccomment">///     .expect(&quot;Data should be well-formed&quot;)</span>
 <span class="doccomment">///     .payload</span>
 <span class="doccomment">///     .take()</span>
 <span class="doccomment">///     .expect(&quot;Key should be present&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(result, Cow::Owned(UnicodeProperty {</span>
+<span class="doccomment">/// assert_eq!(result, Cow::Owned(UnicodePropertyV1 {</span>
 <span class="doccomment">///     name: Cow::Borrowed(&quot;AHex&quot;),</span>
 <span class="doccomment">///     inv_list: vec![48, 58, 65, 71, 97, 103],</span>
 <span class="doccomment">/// }));</span>
@@ -197,7 +199,7 @@
         <span class="ident">PpucdDataProvider</span> { <span class="ident">ppucd_props</span>: <span class="ident">data</span> }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_prop</span>(<span class="ident">ppucd_prop</span>: <span class="ident">UnicodeProperty</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_prop</span>(<span class="ident">ppucd_prop</span>: <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">PpucdDataProvider</span> {
             <span class="ident">ppucd_props</span>: <span class="ident">UnicodeProperties</span> {
                 <span class="ident">props</span>: <span class="macro">vec</span><span class="macro">!</span>[<span class="ident">ppucd_prop</span>],
@@ -214,9 +216,9 @@
         <span class="kw">let</span> <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>;
         <span class="kw">let</span> <span class="ident">resc_key_str</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="ident">resc_key</span>.<span class="ident">sub_category</span>.<span class="ident">as_str</span>();
         <span class="kw">let</span> <span class="ident">props_data</span>: <span class="kw-2">&amp;</span><span class="ident">UnicodeProperties</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ppucd_props</span>;
-        <span class="kw">let</span> <span class="ident">matching_prop</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">UnicodeProperty</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="kw">let</span> <span class="ident">matching_prop</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">UnicodePropertyV1</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">props_data</span>.<span class="ident">props</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="ident">resc_key_str</span>);
-        <span class="kw">let</span> <span class="ident">owned_matching_prop</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UnicodeProperty</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">matching_prop</span>.<span class="ident">cloned</span>();
+        <span class="kw">let</span> <span class="ident">owned_matching_prop</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UnicodePropertyV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">matching_prop</span>.<span class="ident">cloned</span>();
         <span class="kw">let</span> <span class="ident">prop</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">owned_matching_prop</span> {
             <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">req</span>.<span class="ident">clone</span>().<span class="ident">into</span>()),
@@ -254,6 +256,7 @@
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_ppucd_provider_parse</span>() {
+    <span class="kw">use</span> <span class="ident">icu_uniset</span>::<span class="ident">UnicodeSet</span>;
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 
     <span class="kw">let</span> <span class="ident">ppucd_property_files_root_path</span> <span class="op">=</span> <span class="string">&quot;tests/testdata/ppucd-wspace-test.txt&quot;</span>;
@@ -271,12 +274,13 @@
     <span class="kw">let</span> <span class="ident">resp</span>: <span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">UnicodePropertyMarker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ppucd_provider</span>.<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">data_req</span>).<span class="ident">unwrap</span>();
 
     <span class="kw">let</span> <span class="ident">ppucd_property_cow</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UnicodePropertyMarker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">resp</span>.<span class="ident">take_payload</span>().<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">exp_prop_uniset</span>: <span class="ident">UnicodeProperty</span> <span class="op">=</span> <span class="ident">UnicodeProperty</span> {
+    <span class="kw">let</span> <span class="ident">exp_prop_uniset</span>: <span class="ident">UnicodePropertyV1</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
         <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;WSpace&quot;</span>),
-        <span class="ident">inv_list</span>: <span class="macro">vec</span><span class="macro">!</span>[
+        <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[
             <span class="number">9</span>, <span class="number">14</span>, <span class="number">32</span>, <span class="number">33</span>, <span class="number">133</span>, <span class="number">134</span>, <span class="number">160</span>, <span class="number">161</span>, <span class="number">5760</span>, <span class="number">5761</span>, <span class="number">8192</span>, <span class="number">8203</span>, <span class="number">8232</span>, <span class="number">8234</span>, <span class="number">8239</span>, <span class="number">8240</span>,
             <span class="number">8287</span>, <span class="number">8288</span>, <span class="number">12288</span>, <span class="number">12289</span>,
-        ],
+        ])
+        .<span class="ident">unwrap</span>(),
     };
     <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">exp_prop_uniset</span>, <span class="ident">ppucd_property_cow</span>.<span class="ident">get</span>().<span class="ident">clone</span>());
 }

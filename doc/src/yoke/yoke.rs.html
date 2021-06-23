@@ -477,6 +477,59 @@
 <span id="474">474</span>
 <span id="475">475</span>
 <span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -498,8 +551,10 @@
 <span class="doccomment">/// not the actual lifetime of the data, rather it is a convenient way to erase</span>
 <span class="doccomment">/// the lifetime and make it dynamic.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// `C` is the &quot;cart&quot;, which `Y` may contain references to. A [`Yoke`] can be constructed</span>
-<span class="doccomment">/// with such references using [`Self::attach_to_cart()`].</span>
+<span class="doccomment">/// `C` is the &quot;cart&quot;, which `Y` may contain references to.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The primary constructor for [`Yoke`] is [`Yoke::attach_to_cart()`]. Several variants of that</span>
+<span class="doccomment">/// constructor are provided to serve numerous types of call sites and `Yoke` signatures.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
@@ -535,11 +590,45 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span>: <span class="ident">StableDeref</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Construct a [`Yoke`] by yokeing an object to a cart. This is the primary constructor</span>
-    <span class="doccomment">/// for [`Yoke`].</span>
+    <span class="doccomment">/// Construct a [`Yoke`] by yokeing an object to a cart in a closure.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This method is currently unusable due to a [compiler bug](https://github.com/rust-lang/rust/issues/84937),</span>
-    <span class="doccomment">/// use [`Yoke::attach_to_cart_badly()`] instead</span>
+    <span class="doccomment">/// See also [`Yoke::try_attach_to_cart()`] to return a `Result` from the closure.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Due to [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937), call sites</span>
+    <span class="doccomment">/// for this function may not compile; if this happens, use</span>
+    <span class="doccomment">/// [`Yoke::attach_to_cart_badly()`] instead.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_cart</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="ident">C</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span>::<span class="ident">Target</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>,
+    {
+        <span class="kw">let</span> <span class="ident">deserialized</span> <span class="op">=</span> <span class="ident">f</span>(<span class="ident">cart</span>.<span class="ident">deref</span>());
+        <span class="self">Self</span> {
+            <span class="ident">yokeable</span>: <span class="kw">unsafe</span> { <span class="ident">Y</span>::<span class="ident">make</span>(<span class="ident">deserialized</span>) },
+            <span class="ident">cart</span>,
+        }
+    }
+
+    <span class="doccomment">/// Construct a [`Yoke`] by yokeing an object to a cart. If an error occurs in the</span>
+    <span class="doccomment">/// deserializer function, the error is passed up to the caller.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Due to [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937), call sites</span>
+    <span class="doccomment">/// for this function may not compile; if this happens, use</span>
+    <span class="doccomment">/// [`Yoke::try_attach_to_cart_badly()`] instead.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_attach_to_cart</span><span class="op">&lt;</span><span class="ident">E</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="ident">C</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span>::<span class="ident">Target</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">let</span> <span class="ident">deserialized</span> <span class="op">=</span> <span class="ident">f</span>(<span class="ident">cart</span>.<span class="ident">deref</span>())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">yokeable</span>: <span class="kw">unsafe</span> { <span class="ident">Y</span>::<span class="ident">make</span>(<span class="ident">deserialized</span>) },
+            <span class="ident">cart</span>,
+        })
+    }
+
+    <span class="doccomment">/// Construct a [`Yoke`] by yokeing an object to a cart in a closure.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For a version of this function that takes a `FnOnce` instead of a raw function pointer,</span>
+    <span class="doccomment">/// see [`Yoke::attach_to_cart()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
@@ -566,21 +655,6 @@
     <span class="doccomment">/// assert_eq!(&amp;**yoke.get(), &quot;hello&quot;);</span>
     <span class="doccomment">/// assert!(matches!(yoke.get(), &amp;Cow::Borrowed(_)));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_cart</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="ident">C</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span>::<span class="ident">Target</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>,
-    {
-        <span class="kw">let</span> <span class="ident">deserialized</span> <span class="op">=</span> <span class="ident">f</span>(<span class="ident">cart</span>.<span class="ident">deref</span>());
-        <span class="self">Self</span> {
-            <span class="ident">yokeable</span>: <span class="kw">unsafe</span> { <span class="ident">Y</span>::<span class="ident">make</span>(<span class="ident">deserialized</span>) },
-            <span class="ident">cart</span>,
-        }
-    }
-
-    <span class="doccomment">/// Temporary version of [`Yoke::attach_to_cart()`]</span>
-    <span class="doccomment">/// that doesn&#39;t hit https://github.com/rust-lang/rust/issues/84937</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See its docs for more details</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_cart_badly</span>(
         <span class="ident">cart</span>: <span class="ident">C</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span>::<span class="ident">Target</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>,
@@ -590,6 +664,38 @@
             <span class="ident">yokeable</span>: <span class="kw">unsafe</span> { <span class="ident">Y</span>::<span class="ident">make</span>(<span class="ident">deserialized</span>) },
             <span class="ident">cart</span>,
         }
+    }
+
+    <span class="doccomment">/// Construct a [`Yoke`] by yokeing an object to a cart. If an error occurs in the</span>
+    <span class="doccomment">/// deserializer function, the error is passed up to the caller.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For a version of this function that takes a `FnOnce` instead of a raw function pointer,</span>
+    <span class="doccomment">/// see [`Yoke::try_attach_to_cart()`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// # use yoke::{Yoke, Yokeable};</span>
+    <span class="doccomment">/// # use std::rc::Rc;</span>
+    <span class="doccomment">/// # use std::borrow::Cow;</span>
+    <span class="doccomment">/// let rc = Rc::new([0xb, 0xa, 0xd]);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let yoke_result: Result&lt;Yoke&lt;Cow&lt;str&gt;, Rc&lt;[u8]&gt;&gt;, _&gt; =</span>
+    <span class="doccomment">///     Yoke::try_attach_to_cart_badly(rc, |data: &amp;[u8]| {</span>
+    <span class="doccomment">///         bincode::deserialize(data)</span>
+    <span class="doccomment">///     });</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert!(matches!(yoke_result, Err(_)));</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_attach_to_cart_badly</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(
+        <span class="ident">cart</span>: <span class="ident">C</span>,
+        <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span>::<span class="ident">Target</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">deserialized</span> <span class="op">=</span> <span class="ident">f</span>(<span class="ident">cart</span>.<span class="ident">deref</span>())<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">yokeable</span>: <span class="kw">unsafe</span> { <span class="ident">Y</span>::<span class="ident">make</span>(<span class="ident">deserialized</span>) },
+            <span class="ident">cart</span>,
+        })
     }
 }
 

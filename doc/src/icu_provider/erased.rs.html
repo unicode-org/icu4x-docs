@@ -287,6 +287,78 @@
 <span id="284">284</span>
 <span id="285">285</span>
 <span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -399,6 +471,11 @@
                 <span class="kw">let</span> <span class="ident">cart</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">from</span>(<span class="ident">yoke</span>);
                 <span class="ident">DataPayload</span>::<span class="ident">from_partial_owned</span>(<span class="ident">cart</span>)
             }
+            <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// Case 4: Cast the whole RcBuf Yoke to the trait object.</span>
+                <span class="kw">let</span> <span class="ident">cart</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">from</span>(<span class="ident">yoke</span>);
+                <span class="ident">DataPayload</span>::<span class="ident">from_partial_owned</span>(<span class="ident">cart</span>)
+            }
         }
     }
 }
@@ -493,15 +570,27 @@
                     },
                     <span class="prelude-val">Err</span>(<span class="ident">any_rc</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">any_rc</span>,
                 };
+                <span class="comment">// Check for Case 4: an RcBuf Yoke.</span>
+                <span class="kw">let</span> <span class="ident">y2</span> <span class="op">=</span> <span class="ident">any_rc</span>.<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+                <span class="kw">let</span> <span class="ident">any_rc</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">y2</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">rc_yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">Rc</span>::<span class="ident">try_unwrap</span>(<span class="ident">rc_yoke</span>) {
+                        <span class="prelude-val">Ok</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">DataPayload</span> { <span class="ident">inner</span>: <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) }),
+                        <span class="comment">// Note: We could consider cloning the Yoke instead of erroring out.</span>
+                        <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MultipleReferences</span>),
+                    },
+                    <span class="prelude-val">Err</span>(<span class="ident">any_rc</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">any_rc</span>,
+                };
                 <span class="comment">// None of the downcasts succeeded; return an error.</span>
                 <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MismatchedType</span> {
                     <span class="ident">actual</span>: <span class="prelude-val">Some</span>(<span class="ident">any_rc</span>.<span class="ident">type_id</span>()),
                     <span class="ident">generic</span>: <span class="prelude-val">Some</span>(<span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Cart</span><span class="op">&gt;</span>()),
                 })
             }
-            <span class="comment">// This is unreachable because ErasedDataStructMarker cannot be fully owned, since it</span>
+            <span class="comment">// This is unreachable because ErasedDataStruct cannot be fully owned, since it</span>
             <span class="comment">// contains a reference.</span>
             <span class="ident">Owned</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
+            <span class="comment">// This is unreachable because ErasedDataStruct needs to reference an object.</span>
+            <span class="ident">RcBuf</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
         }
     }
 }
@@ -572,6 +661,61 @@
             <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,
             <span class="ident">payload</span>: <span class="ident">result</span>.<span class="ident">payload</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">downcast</span>()).<span class="ident">transpose</span>()<span class="question-mark">?</span>,
         })
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">test</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">dynutil</span>::<span class="ident">UpcastDataPayload</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">marker</span>::<span class="ident">CowStringMarker</span>;
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_erased_case_1</span>() {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>();
+        <span class="kw">let</span> <span class="ident">original</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>::<span class="ident">from_borrowed</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>);
+        <span class="kw">let</span> <span class="ident">upcasted</span> <span class="op">=</span> <span class="ident">ErasedDataStructMarker</span>::<span class="ident">upcast</span>(<span class="ident">original</span>);
+        <span class="kw">let</span> <span class="ident">downcasted</span> <span class="op">=</span> <span class="ident">upcasted</span>
+            .<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Type conversion&quot;</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">downcasted</span>.<span class="ident">get</span>(), <span class="string">&quot;foo&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_erased_case_2</span>() {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
+        <span class="kw">let</span> <span class="ident">original</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>::<span class="ident">from_partial_owned</span>(<span class="ident">data</span>);
+        <span class="kw">let</span> <span class="ident">upcasted</span> <span class="op">=</span> <span class="ident">ErasedDataStructMarker</span>::<span class="ident">upcast</span>(<span class="ident">original</span>);
+        <span class="kw">let</span> <span class="ident">downcasted</span> <span class="op">=</span> <span class="ident">upcasted</span>
+            .<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Type conversion&quot;</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">downcasted</span>.<span class="ident">get</span>(), <span class="string">&quot;foo&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_erased_case_3</span>() {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>();
+        <span class="kw">let</span> <span class="ident">original</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>::<span class="ident">from_owned</span>(<span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">data</span>));
+        <span class="kw">let</span> <span class="ident">upcasted</span> <span class="op">=</span> <span class="ident">ErasedDataStructMarker</span>::<span class="ident">upcast</span>(<span class="ident">original</span>);
+        <span class="kw">let</span> <span class="ident">downcasted</span> <span class="op">=</span> <span class="ident">upcasted</span>
+            .<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Type conversion&quot;</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">downcasted</span>.<span class="ident">get</span>(), <span class="string">&quot;foo&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_erased_case_4</span>() {
+        <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="string">&quot;foo&quot;</span>.<span class="ident">as_bytes</span>().<span class="ident">into</span>();
+        <span class="kw">let</span> <span class="ident">original</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>::<span class="ident">try_from_rc_buffer_badly</span>(<span class="ident">data</span>, <span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
+            <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">from_utf8</span>(<span class="ident">bytes</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="ident">s</span>))
+        })
+        .<span class="ident">expect</span>(<span class="string">&quot;String is valid UTF-8&quot;</span>);
+        <span class="kw">let</span> <span class="ident">upcasted</span> <span class="op">=</span> <span class="ident">ErasedDataStructMarker</span>::<span class="ident">upcast</span>(<span class="ident">original</span>);
+        <span class="kw">let</span> <span class="ident">downcasted</span> <span class="op">=</span> <span class="ident">upcasted</span>
+            .<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Type conversion&quot;</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">downcasted</span>.<span class="ident">get</span>(), <span class="string">&quot;foo&quot;</span>);
     }
 }
 </pre></div>

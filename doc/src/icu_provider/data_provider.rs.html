@@ -414,6 +414,72 @@
 <span id="411">411</span>
 <span id="412">412</span>
 <span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -515,6 +581,7 @@
     <span class="ident">Borrowed</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;d</span> <span class="ident">M</span>::<span class="ident">Cart</span><span class="op">&gt;</span>),
     <span class="ident">RcStruct</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Cart</span><span class="op">&gt;</span><span class="op">&gt;</span>),
     <span class="ident">Owned</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span>, ()<span class="op">&gt;</span>),
+    <span class="ident">RcBuf</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>),
 }
 
 <span class="doccomment">/// A wrapper around the payload returned in a [`DataResponse`].</span>
@@ -566,6 +633,7 @@
             <span class="ident">Borrowed</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Borrowed</span>(<span class="ident">yoke</span>.<span class="ident">clone</span>()),
             <span class="ident">RcStruct</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RcStruct</span>(<span class="ident">yoke</span>.<span class="ident">clone</span>()),
             <span class="ident">Owned</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Owned</span>(<span class="ident">yoke</span>.<span class="ident">clone</span>()),
+            <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RcBuf</span>(<span class="ident">yoke</span>.<span class="ident">clone</span>()),
         };
         <span class="self">Self</span> { <span class="ident">inner</span>: <span class="ident">new_inner</span> }
     }
@@ -640,6 +708,68 @@
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>,
 {
+    <span class="doccomment">/// Convert a byte buffer into a [`DataPayload`]. A function must be provided to perform the</span>
+    <span class="doccomment">/// conversion. This can often be a Serde deserialization operation.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Due to [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937), call sites</span>
+    <span class="doccomment">/// for this function may not compile; if this happens, use</span>
+    <span class="doccomment">/// [`try_from_rc_buffer_badly()`](Self::try_from_rc_buffer_badly) instead.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_rc_buffer</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(
+        <span class="ident">rc_buffer</span>: <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+        <span class="ident">f</span>: <span class="kw">impl</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">yoke</span> <span class="op">=</span> <span class="ident">Yoke</span>::<span class="ident">try_attach_to_cart</span>(<span class="ident">rc_buffer</span>, <span class="ident">f</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">inner</span>: <span class="ident">DataPayloadInner</span>::<span class="ident">RcBuf</span>(<span class="ident">yoke</span>),
+        })
+    }
+
+    <span class="doccomment">/// Convert a byte buffer into a [`DataPayload`]. A function must be provided to perform the</span>
+    <span class="doccomment">/// conversion. This can often be a Serde deserialization operation.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For a version of this function that takes a `FnOnce` instead of a raw function pointer,</span>
+    <span class="doccomment">/// see [`try_from_rc_buffer()`](Self::try_from_rc_buffer).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # #[cfg(feature = &quot;provider_serde&quot;)] {</span>
+    <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">/// use icu_provider::hello_world::*;</span>
+    <span class="doccomment">/// use std::rc::Rc;</span>
+    <span class="doccomment">/// use icu_provider::yoke::Yokeable;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let json_text = &quot;{\&quot;message\&quot;:\&quot;Hello World\&quot;}&quot;;</span>
+    <span class="doccomment">/// let json_rc_buffer: Rc&lt;[u8]&gt; = json_text.as_bytes().into();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let payload = DataPayload::&lt;HelloWorldV1Marker&gt;::try_from_rc_buffer_badly(</span>
+    <span class="doccomment">///     json_rc_buffer.clone(),</span>
+    <span class="doccomment">///     |bytes| {</span>
+    <span class="doccomment">///         serde_json::from_slice(bytes)</span>
+    <span class="doccomment">///     }</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .expect(&quot;JSON is valid&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(&quot;Hello World&quot;, payload.get().message);</span>
+    <span class="doccomment">/// # } // feature = &quot;provider_serde&quot;</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">type_complexity</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_rc_buffer_badly</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(
+        <span class="ident">rc_buffer</span>: <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+        <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">yoke</span> <span class="op">=</span> <span class="ident">Yoke</span>::<span class="ident">try_attach_to_cart_badly</span>(<span class="ident">rc_buffer</span>, <span class="ident">f</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">inner</span>: <span class="ident">DataPayloadInner</span>::<span class="ident">RcBuf</span>(<span class="ident">yoke</span>),
+        })
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">M</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Convert a fully owned (`&#39;static`) data struct into a DataPayload.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
@@ -706,6 +836,7 @@
             <span class="ident">Borrowed</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">with_mut</span>(<span class="ident">f</span>),
             <span class="ident">RcStruct</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">with_mut</span>(<span class="ident">f</span>),
             <span class="ident">Owned</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">with_mut</span>(<span class="ident">f</span>),
+            <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">with_mut</span>(<span class="ident">f</span>),
         }
     }
 
@@ -731,6 +862,7 @@
             <span class="ident">Borrowed</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">get</span>(),
             <span class="ident">RcStruct</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">get</span>(),
             <span class="ident">Owned</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">get</span>(),
+            <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">yoke</span>.<span class="ident">get</span>(),
         }
     }
 }

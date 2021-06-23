@@ -28,6 +28,6 @@ sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","paths
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","enum_props.rs","lib.rs","props.rs","provider.rs","uniset.rs","utils.rs"]};
 sourcesIndex["litemap"] = {"name":"","files":["lib.rs","map.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["lib.rs","ops.rs"]};
-sourcesIndex["yoke"] = {"name":"","files":["lib.rs","serde.rs","yoke.rs","yokeable.rs","zero_copy_from.rs"]};
+sourcesIndex["yoke"] = {"name":"","files":["lib.rs","serde.rs","trait_hack.rs","yoke.rs","yokeable.rs","zero_copy_from.rs"]};
 sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["kv.rs","mod.rs","serde.rs","vecs.rs"]},{"name":"ule","files":["chars.rs","mod.rs","plain.rs","string.rs"]},{"name":"varzerovec","files":["components.rs","mod.rs","serde.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs"]}],"files":["lib.rs","samples.rs","yoke_impls.rs"]};
 createSourceSidebar();

@@ -218,19 +218,6 @@
 <span id="215">215</span>
 <span id="216">216</span>
 <span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -240,10 +227,10 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Spec reference: https://unicode.org/reports/tr35/tr35-numbers.html#Number_Format_Patterns</span>
 
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
-<span class="kw">type</span> <span class="ident">SmallString8</span> <span class="op">=</span> <span class="ident">smallstr</span>::<span class="ident">SmallString</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">8</span>]<span class="op">&gt;</span>;
 <span class="kw">use</span> <span class="ident">icu_decimal</span>::<span class="ident">provider</span>::<span class="ident">AffixesV1</span>;
 <span class="kw">use</span> <span class="ident">itertools</span>::<span class="ident">Itertools</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
 <span class="kw">use</span> <span class="ident">thiserror</span>::<span class="ident">Error</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
@@ -257,8 +244,8 @@
 <span class="doccomment">/// Representation of a UTS-35 number subpattern (part of a number pattern between &#39;;&#39;s).</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DecimalSubPattern</span> {
-    <span class="kw">pub</span> <span class="ident">prefix</span>: <span class="ident">SmallString8</span>,
-    <span class="kw">pub</span> <span class="ident">suffix</span>: <span class="ident">SmallString8</span>,
+    <span class="kw">pub</span> <span class="ident">prefix</span>: <span class="ident">String</span>,
+    <span class="kw">pub</span> <span class="ident">suffix</span>: <span class="ident">String</span>,
     <span class="kw">pub</span> <span class="ident">primary_grouping</span>: <span class="ident">u8</span>,
     <span class="kw">pub</span> <span class="ident">secondary_grouping</span>: <span class="ident">u8</span>,
     <span class="kw">pub</span> <span class="ident">min_fraction_digits</span>: <span class="ident">u8</span>,
@@ -332,29 +319,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DecimalPattern</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">localize_sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sign_str</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AffixesV1</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">localize_sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sign_str</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AffixesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
         <span class="comment">// UTS 35: the absence of a negative pattern means a single prefixed sign</span>
         <span class="kw">let</span> <span class="ident">signed_affixes</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">negative</span>
             .<span class="ident">as_ref</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">subpattern</span><span class="op">|</span> {
-                (
-                    <span class="kw">if</span> <span class="ident">subpattern</span>.<span class="ident">prefix</span>.<span class="ident">is_empty</span>() {
-                        <span class="prelude-val">None</span>
-                    } <span class="kw">else</span> {
-                        <span class="prelude-val">Some</span>(<span class="ident">subpattern</span>.<span class="ident">prefix</span>.<span class="ident">clone</span>())
-                    },
-                    <span class="kw">if</span> <span class="ident">subpattern</span>.<span class="ident">suffix</span>.<span class="ident">is_empty</span>() {
-                        <span class="prelude-val">None</span>
-                    } <span class="kw">else</span> {
-                        <span class="prelude-val">Some</span>(<span class="ident">subpattern</span>.<span class="ident">suffix</span>.<span class="ident">clone</span>())
-                    },
-                )
-            })
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> (<span class="prelude-val">Some</span>(<span class="string">&quot;-&quot;</span>.<span class="ident">into</span>()), <span class="prelude-val">None</span>));
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">subpattern</span><span class="op">|</span> (<span class="ident">subpattern</span>.<span class="ident">prefix</span>.<span class="ident">as_str</span>(), <span class="ident">subpattern</span>.<span class="ident">suffix</span>.<span class="ident">as_str</span>()))
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> (<span class="string">&quot;-&quot;</span>, <span class="string">&quot;&quot;</span>));
         <span class="ident">AffixesV1</span> {
-            <span class="ident">prefix</span>: <span class="ident">signed_affixes</span>.<span class="number">0</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">replace</span>(<span class="string">&quot;-&quot;</span>, <span class="ident">sign_str</span>).<span class="ident">into</span>()),
-            <span class="ident">suffix</span>: <span class="ident">signed_affixes</span>.<span class="number">1</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">replace</span>(<span class="string">&quot;-&quot;</span>, <span class="ident">sign_str</span>).<span class="ident">into</span>()),
+            <span class="ident">prefix</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">signed_affixes</span>.<span class="number">0</span>.<span class="ident">replace</span>(<span class="string">&quot;-&quot;</span>, <span class="ident">sign_str</span>)),
+            <span class="ident">suffix</span>: <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">signed_affixes</span>.<span class="number">1</span>.<span class="ident">replace</span>(<span class="string">&quot;-&quot;</span>, <span class="ident">sign_str</span>)),
         }
     }
 }

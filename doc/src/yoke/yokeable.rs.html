@@ -259,6 +259,35 @@
 <span id="256">256</span>
 <span id="257">257</span>
 <span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -321,6 +350,11 @@
 <span class="doccomment">///         self</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">///</span>
+<span class="doccomment">///     fn transform_owned(self) -&gt; Bar&lt;&#39;a&gt; {</span>
+<span class="doccomment">///         // covariant lifetime cast, can be done safely</span>
+<span class="doccomment">///         self</span>
+<span class="doccomment">///     }</span>
+<span class="doccomment">///</span>
 <span class="doccomment">///     unsafe fn make(from: Bar&lt;&#39;a&gt;) -&gt; Self {</span>
 <span class="doccomment">///         // We&#39;re just doing mem::transmute() here, however Rust is</span>
 <span class="doccomment">///         // not smart enough to realize that Bar&lt;&#39;a&gt; and Bar&lt;&#39;static&gt; are of</span>
@@ -354,6 +388,15 @@
     <span class="doccomment">/// should simply be `{ self }`, though it&#39;s acceptable to include additional assertions</span>
     <span class="doccomment">/// if desired.</span>
     <span class="kw">fn</span> <span class="ident">transform</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span>::<span class="ident">Output</span>;
+
+    <span class="doccomment">/// This method must cast `self` between `Self&lt;&#39;static&gt;` and `Self&lt;&#39;a&gt;`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Implementation safety</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the invariants of [`Yokeable`] are being satisfied, the body of this method</span>
+    <span class="doccomment">/// should simply be `{ self }`, though it&#39;s acceptable to include additional assertions</span>
+    <span class="doccomment">/// if desired.</span>
+    <span class="kw">fn</span> <span class="ident">transform_owned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Output</span>;
 
     <span class="doccomment">/// This method can be used to cast away `Self&lt;&#39;a&gt;`&#39;s lifetime.</span>
     <span class="doccomment">///</span>
@@ -428,6 +471,11 @@
     <span class="doccomment">/// #         self</span>
     <span class="doccomment">/// #     }</span>
     <span class="doccomment">/// #</span>
+    <span class="doccomment">/// #     fn transform_owned(self) -&gt; Bar&lt;&#39;a&gt; {</span>
+    <span class="doccomment">/// #         // covariant lifetime cast, can be done safely</span>
+    <span class="doccomment">/// #         self</span>
+    <span class="doccomment">/// #     }</span>
+    <span class="doccomment">/// #</span>
     <span class="doccomment">/// #     unsafe fn make(from: Bar&lt;&#39;a&gt;) -&gt; Self {</span>
     <span class="doccomment">/// #         let ret = mem::transmute_copy(&amp;from);</span>
     <span class="doccomment">/// #         mem::forget(from);</span>
@@ -480,6 +528,11 @@
         <span class="self">self</span>
     }
 
+    <span class="kw">fn</span> <span class="ident">transform_owned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="comment">// Doesn&#39;t need unsafe: `&#39;a` is covariant so this lifetime cast is always safe</span>
+        <span class="self">self</span>
+    }
+
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make</span>(<span class="ident">from</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="comment">// i hate this</span>
         <span class="comment">// unfortunately Rust doesn&#39;t think `mem::transmute` is possible since it&#39;s not sure the sizes</span>
@@ -502,6 +555,11 @@
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">T</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>;
     <span class="kw">fn</span> <span class="ident">transform</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span> {
+        <span class="comment">// Doesn&#39;t need unsafe: `&#39;a` is covariant so this lifetime cast is always safe</span>
+        <span class="self">self</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">transform_owned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span> {
         <span class="comment">// Doesn&#39;t need unsafe: `&#39;a` is covariant so this lifetime cast is always safe</span>
         <span class="self">self</span>
     }

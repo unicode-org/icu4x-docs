@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_provider","Get a `DataProvider` loading from test data. Panics if unable to load the data."]],"mod":[["metadata",""],["paths",""]]});
+initSidebarItems({"fn":[["get_provider","Get a `DataProvider`, loading from the test data JSON directory. Panics if unable to load the data."],["get_static_provider","Get a `DataProvider`, loading from the statically initialized bincode blob. Panics if unable to load the data."]],"mod":[["metadata",""],["paths",""]]});

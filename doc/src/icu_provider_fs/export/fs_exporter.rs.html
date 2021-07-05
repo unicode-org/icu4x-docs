@@ -175,21 +175,6 @@
 <span id="172">172</span>
 <span id="173">173</span>
 <span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -199,7 +184,6 @@
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">serializers</span>::<span class="ident">AbstractSerializer</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">AliasOption</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">LocalesOption</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">Manifest</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">manifest</span>::<span class="ident">MANIFEST_FILE</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">export</span>::<span class="ident">DataExporter</span>;
@@ -227,8 +211,6 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ExporterOptions</span> {
     <span class="doccomment">/// Directory in the filesystem to write output.</span>
     <span class="kw">pub</span> <span class="ident">root</span>: <span class="ident">PathBuf</span>,
-    <span class="doccomment">/// Strategy for including locales.</span>
-    <span class="kw">pub</span> <span class="ident">locales</span>: <span class="ident">LocalesOption</span>,
     <span class="doccomment">/// Strategy for de-duplicating locale data.</span>
     <span class="kw">pub</span> <span class="ident">aliasing</span>: <span class="ident">AliasOption</span>,
     <span class="doccomment">/// Option for initializing the output directory.</span>
@@ -239,7 +221,6 @@
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">root</span>: <span class="ident">PathBuf</span>::<span class="ident">from</span>(<span class="string">&quot;icu4x_data&quot;</span>),
-            <span class="ident">locales</span>: <span class="ident">LocalesOption</span>::<span class="ident">IncludeAll</span>,
             <span class="ident">aliasing</span>: <span class="ident">AliasOption</span>::<span class="ident">NoAliases</span>,
             <span class="ident">overwrite</span>: <span class="ident">OverwriteOption</span>::<span class="ident">CheckEmpty</span>,
         }
@@ -268,7 +249,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">req</span>: <span class="ident">DataRequest</span>,
         <span class="ident">obj</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">clone</span>();
         <span class="ident">path_buf</span>.<span class="ident">extend</span>(<span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>());
         <span class="ident">path_buf</span>.<span class="ident">extend</span>(<span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">options</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>());
@@ -277,14 +258,13 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">include_resource_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">resc_options</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">manifest</span>.<span class="ident">locales</span> {
-            <span class="ident">LocalesOption</span>::<span class="ident">IncludeAll</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="ident">LocalesOption</span>::<span class="ident">IncludeList</span>(<span class="kw-2">ref</span> <span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">resc_options</span>.<span class="ident">langid</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">langid</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">list</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>),
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            },
+    <span class="doccomment">/// This function must be called before the [`FilesystemExporter`] leaves scope.</span>
+    <span class="doccomment">/// It is recommended to flush after exporting each [`ResourceKey`].</span>
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">alias_collection</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">alias_collection</span>.<span class="ident">take</span>() {
+            <span class="ident">alias_collection</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
         }
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -297,7 +277,6 @@
             <span class="ident">root</span>: <span class="ident">options</span>.<span class="ident">root</span>,
             <span class="ident">manifest</span>: <span class="ident">Manifest</span> {
                 <span class="ident">aliasing</span>: <span class="ident">options</span>.<span class="ident">aliasing</span>,
-                <span class="ident">locales</span>: <span class="ident">options</span>.<span class="ident">locales</span>,
                 <span class="ident">syntax</span>: <span class="ident">serializer</span>.<span class="ident">deref</span>().<span class="ident">clone</span>(),
             },
             <span class="ident">alias_collection</span>: <span class="prelude-val">None</span>,
@@ -329,15 +308,6 @@
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">manifest_path</span>))<span class="question-mark">?</span>;
         <span class="macro">writeln</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">manifest_file</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">manifest_path</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
-    }
-
-    <span class="doccomment">/// This function must be called before the [`FilesystemExporter`] leaves scope.</span>
-    <span class="doccomment">/// It is recommended to flush after exporting each [`ResourceKey`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">alias_collection</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">alias_collection</span>.<span class="ident">take</span>() {
-            <span class="ident">alias_collection</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
-        }
-        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">write_to_path</span>(

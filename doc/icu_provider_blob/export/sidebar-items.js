@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BlobExporter","A data exporter that writes data to a single-file blob. See the module-level docs for an example."]]});

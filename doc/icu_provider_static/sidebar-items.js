@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["StaticDataProvider","A data provider loading data statically baked in to the binary. Useful for testing in situations where setting up a filesystem is tricky (e.g. WASM)."]]});

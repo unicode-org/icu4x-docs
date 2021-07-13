@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1625612686707,
+  "lastUpdate": 1626201131654,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -9827,6 +9827,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 119316,
             "range": "± 369",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "56c71b72ce26499abf258e877fb7bfe61bc274c4",
+          "message": "Add custom derive for Yokeable and ZCF (#847)\n\n* Add yoke-derive\r\n\r\n* Use yoke derive in icu4x\r\n\r\n* Satisfy clippy\r\n\r\n* Improve ZeroMap yoke impl, add zerovec derive tests\r\n\r\n* CloningZCF -> cloning_zcf\r\n\r\n* unsafe_impl_data_marker_with_lifetime -> impl_data_marker_with_lifetime\r\n\r\n* Add ZCF impls for ZV\r\n\r\n* fix sentence fragment\r\n\r\n* Remove extra yoke deps\r\n\r\n* fix bounds formatting\r\n\r\n* rm yoke::\r\n\r\n* Fix test failure\r\n\r\n* Add #[data_struct] custom derive\r\n\r\n* Use #[data_struct] everywhere\r\n\r\n* UnicodePropertyMarker -> UnicodePropertyV1Marker\r\n\r\n* Fix generated docs",
+          "timestamp": "2021-07-13T11:20:21-07:00",
+          "tree_id": "6226fde1918ed61005f3993daaf12cfb5d9de17a",
+          "url": "https://github.com/unicode-org/icu4x/commit/56c71b72ce26499abf258e877fb7bfe61bc274c4"
+        },
+        "date": 1626201067180,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1292,
+            "range": "± 85",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 8141,
+            "range": "± 666",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 126642,
+            "range": "± 6600",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b7d35d1e2085c8429da3266044bac15dfab49ce4",
+          "message": "Clean up zerovec::samples so that it is not available outside of tests (#857)\n\n* Clean up zerovec::samples\r\n\r\n* fix unused warning",
+          "timestamp": "2021-07-13T11:20:35-07:00",
+          "tree_id": "8a07e78f5daa972c0a7494b71f74ab978fae8240",
+          "url": "https://github.com/unicode-org/icu4x/commit/b7d35d1e2085c8429da3266044bac15dfab49ce4"
+        },
+        "date": 1626201130134,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1116,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6489,
+            "range": "± 27",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 99868,
+            "range": "± 555",
             "unit": "ns/iter"
           }
         ]

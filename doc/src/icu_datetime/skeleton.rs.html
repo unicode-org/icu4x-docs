@@ -985,6 +985,14 @@
 <span id="982">982</span>
 <span id="983">983</span>
 <span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -992,9 +1000,9 @@
 
 <span class="doccomment">//! Skeletons are used for pattern matching. See the [`Skeleton`] struct for more information.</span>
 
+<span class="kw">use</span> <span class="ident">displaydoc</span>::<span class="ident">Display</span>;
 <span class="kw">use</span> <span class="ident">smallvec</span>::<span class="ident">SmallVec</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">TryFrom</span>;
-<span class="kw">use</span> <span class="ident">thiserror</span>::<span class="ident">Error</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>},
@@ -1208,22 +1216,30 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Serde will generate an error such as:</span>
 <span class="doccomment">/// &quot;invalid value: unclosed literal in pattern, expected a valid UTS 35 pattern string at line 1 column 12&quot;</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Display</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SkeletonError</span> {
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;field too long in skeleton&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;field too long in skeleton&quot;</span>)]</span>
     <span class="ident">InvalidFieldLength</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;duplicate field in skeleton&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;duplicate field in skeleton&quot;</span>)]</span>
     <span class="ident">DuplicateField</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;symbol unknown {0} in skeleton&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;symbol unknown {0} in skeleton&quot;</span>)]</span>
     <span class="ident">SymbolUnknown</span>(<span class="ident">char</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;symbol invalid {0} in skeleton&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;symbol invalid {0} in skeleton&quot;</span>)]</span>
     <span class="ident">SymbolInvalid</span>(<span class="ident">char</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;symbol unimplemented {0} in skeleton&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;symbol unimplemented {0} in skeleton&quot;</span>)]</span>
     <span class="ident">SymbolUnimplemented</span>(<span class="ident">char</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unimplemented field {0} in skeleton&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;unimplemented field {0} in skeleton&quot;</span>)]</span>
     <span class="ident">UnimplementedField</span>(<span class="ident">char</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="ident">transparent</span>)]</span>
-    <span class="ident">Fields</span>(<span class="attribute">#[<span class="ident">from</span>]</span> <span class="ident">fields</span>::<span class="ident">Error</span>),
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;{0}&quot;</span>)]</span>
+    <span class="ident">Fields</span>(<span class="ident">fields</span>::<span class="ident">Error</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">for</span> <span class="ident">SkeletonError</span> {}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">fields</span>::<span class="ident">Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SkeletonError</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">fields</span>::<span class="ident">Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">SkeletonError</span>::<span class="ident">Fields</span>(<span class="ident">e</span>)
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">fields</span>::<span class="ident">LengthError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SkeletonError</span> {

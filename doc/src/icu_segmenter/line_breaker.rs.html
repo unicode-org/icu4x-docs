@@ -996,7 +996,7 @@
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">is_break_from_table</span>(<span class="ident">rule_table</span>: <span class="kw-2">&amp;</span>[<span class="ident">i8</span>], <span class="ident">property_count</span>: <span class="ident">usize</span>, <span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">let</span> <span class="ident">rule</span> <span class="op">=</span> <span class="ident">rule_table</span>[((<span class="ident">left</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> <span class="number">1</span>) <span class="op">*</span> <span class="ident">property_count</span> <span class="op">+</span> (<span class="ident">right</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> <span class="number">1</span>];
+    <span class="kw">let</span> <span class="ident">rule</span> <span class="op">=</span> <span class="ident">get_break_state_from_table</span>(<span class="ident">rule_table</span>, <span class="ident">property_count</span>, <span class="ident">left</span>, <span class="ident">right</span>);
     <span class="kw">if</span> <span class="ident">rule</span> <span class="op">=</span><span class="op">=</span> <span class="ident">KEEP_RULE</span> {
         <span class="kw">return</span> <span class="bool-val">false</span>;
     }
@@ -1005,6 +1005,11 @@
         <span class="kw">return</span> <span class="bool-val">false</span>;
     }
     <span class="bool-val">true</span>
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">is_break</span>(<span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="ident">is_break_from_table</span>(<span class="kw-2">&amp;</span><span class="ident">UAX14_RULE_TABLE</span>, <span class="ident">PROP_COUNT</span>, <span class="ident">left</span>, <span class="ident">right</span>)
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1205,7 +1210,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
                         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
                     }
 
-                    <span class="kw">if</span> <span class="ident">is_break_from_table</span>(<span class="kw-2">&amp;</span><span class="ident">UAX14_RULE_TABLE</span>, <span class="ident">PROP_COUNT</span>, <span class="ident">left_prop</span>, <span class="ident">right_prop</span>) {
+                    <span class="kw">if</span> <span class="ident">is_break</span>(<span class="ident">left_prop</span>, <span class="ident">right_prop</span>) {
                         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
                     }
                 }
@@ -1538,8 +1543,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">lb_define</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">line_breaker</span>::<span class="ident">get_linebreak_property_with_rule</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">line_breaker</span>::<span class="ident">is_break_from_table</span>;
-    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">rule_table</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">line_breaker</span>::<span class="ident">is_break</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">LineBreakRule</span>;
     <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">WordBreakRule</span>;
 
@@ -1563,10 +1567,6 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">get_linebreak_property</span>(<span class="string">&#39;\u{50005}&#39;</span>), <span class="ident">XX</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">get_linebreak_property</span>(<span class="string">&#39;\u{17D6}&#39;</span>), <span class="ident">NS</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">get_linebreak_property</span>(<span class="string">&#39;\u{2014}&#39;</span>), <span class="ident">B2</span>);
-    }
-
-    <span class="kw">fn</span> <span class="ident">is_break</span>(<span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">is_break_from_table</span>(<span class="kw-2">&amp;</span><span class="ident">UAX14_RULE_TABLE</span>, <span class="ident">PROP_COUNT</span>, <span class="ident">left</span>, <span class="ident">right</span>)
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>

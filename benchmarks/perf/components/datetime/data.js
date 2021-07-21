@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1626832202823,
+  "lastUpdate": 1626905196486,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -4355,6 +4355,78 @@ window.BENCHMARK_DATA = {
             "name": "datetime/zoned_datetime_overview",
             "value": 1188678,
             "range": "± 62947",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "gregtatum@users.noreply.github.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4052c2ec46d082142f12c09e680d42fae6d62a82",
+          "message": "Modify patterns from a skeleton match to have the correct width (#832)",
+          "timestamp": "2021-07-21T16:36:33-05:00",
+          "tree_id": "77d6dcabe60d44573d2531361ee356e61b6761d8",
+          "url": "https://github.com/unicode-org/icu4x/commit/4052c2ec46d082142f12c09e680d42fae6d62a82"
+        },
+        "date": 1626903774127,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_overview",
+            "value": 473893,
+            "range": "± 8553",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 1102338,
+            "range": "± 3137",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "832a4055c0a3228c14d8ca122405c135ba8a72e4",
+          "message": "Update roadmap.md (#875)",
+          "timestamp": "2021-07-21T17:00:20-05:00",
+          "tree_id": "844376f9087003ddaf175d4c8f85ae7e3c3befe6",
+          "url": "https://github.com/unicode-org/icu4x/commit/832a4055c0a3228c14d8ca122405c135ba8a72e4"
+        },
+        "date": 1626905194580,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_overview",
+            "value": 567142,
+            "range": "± 27762",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 1137723,
+            "range": "± 58444",
             "unit": "ns/iter"
           }
         ]

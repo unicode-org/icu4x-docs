@@ -79,12 +79,6 @@
 <span id="76">76</span>
 <span id="77">77</span>
 <span id="78">78</span>
-<span id="79">79</span>
-<span id="80">80</span>
-<span id="81">81</span>
-<span id="82">82</span>
-<span id="83">83</span>
-<span id="84">84</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -123,18 +117,12 @@
 }
 
 <span class="doccomment">/// TODO(#837): De-duplicate this code from icu_provider_fs.</span>
-<span class="kw">fn</span> <span class="ident">serialize</span>(
-    <span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">erased_serde</span>::<span class="ident">Serialize</span>,
-    <span class="kw-2">mut</span> <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>),
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-    <span class="kw">use</span> <span class="ident">bincode</span>::<span class="ident">Options</span>;
-    <span class="ident">obj</span>.<span class="ident">erased_serialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">erased_serde</span>::<span class="ident">Serializer</span><span class="op">&gt;</span>::<span class="ident">erase</span>(
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">bincode</span>::<span class="ident">Serializer</span>::<span class="ident">new</span>(
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sink</span>,
-            <span class="ident">bincode</span>::<span class="ident">config</span>::<span class="ident">DefaultOptions</span>::<span class="ident">new</span>().<span class="ident">with_fixint_encoding</span>(),
-        ),
-    ))<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(())
+<span class="kw">fn</span> <span class="ident">serialize</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">erased_serde</span>::<span class="ident">Serialize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serializer</span> <span class="op">=</span> <span class="ident">postcard</span>::<span class="ident">Serializer</span> {
+        <span class="ident">output</span>: <span class="ident">postcard</span>::<span class="ident">flavors</span>::<span class="ident">AllocVec</span>(<span class="ident">Vec</span>::<span class="ident">new</span>()),
+    };
+    <span class="ident">obj</span>.<span class="ident">erased_serialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">erased_serde</span>::<span class="ident">Serializer</span><span class="op">&gt;</span>::<span class="ident">erase</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">serializer</span>))<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="ident">serializer</span>.<span class="ident">output</span>.<span class="number">0</span>)
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>: <span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;s</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
@@ -145,8 +133,7 @@
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">path_util</span>::<span class="ident">resource_path_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>);
         <span class="ident">log</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;Adding: {}&quot;</span>, <span class="ident">path</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
-        <span class="ident">serialize</span>(<span class="ident">obj</span>.<span class="ident">get</span>().<span class="ident">as_serialize</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">serialize</span>(<span class="ident">obj</span>.<span class="ident">get</span>().<span class="ident">as_serialize</span>())<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">insert</span>(<span class="ident">path</span>, <span class="ident">buffer</span>);
         <span class="prelude-val">Ok</span>(())
     }
@@ -165,7 +152,8 @@
         }
         <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">BlobSchema</span>::<span class="ident">V001</span>(<span class="ident">schema</span>);
         <span class="ident">log</span>::<span class="macro">info</span><span class="macro">!</span>(<span class="string">&quot;Serializing blob to output stream...&quot;</span>);
-        <span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>, <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">as_mut</span>())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">clear</span>();
         <span class="prelude-val">Ok</span>(())
     }

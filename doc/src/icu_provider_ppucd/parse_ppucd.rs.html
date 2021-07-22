@@ -1121,10 +1121,6 @@
 <span id="1118">1118</span>
 <span id="1119">1119</span>
 <span id="1120">1120</span>
-<span id="1121">1121</span>
-<span id="1122">1122</span>
-<span id="1123">1123</span>
-<span id="1124">1124</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -1133,9 +1129,9 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">Iterator</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">u32</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">enum_prop_mapping</span>::<span class="ident">get_prop_name_identifier</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">support</span>::<span class="ident">UnicodeProperties</span>;
 <span class="kw">use</span> <span class="ident">icu_uniset</span>::<span class="ident">provider</span>::<span class="ident">UnicodePropertyV1</span>;
 <span class="kw">use</span> <span class="ident">icu_uniset</span>::{<span class="ident">UnicodeSet</span>, <span class="ident">UnicodeSetBuilder</span>};
@@ -1479,16 +1475,20 @@
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">TinyStr16</span><span class="op">&gt;</span>, <span class="ident">UnicodeSet</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">new</span>();
 
-    <span class="comment">// Insert UnicodeSets into `result`, with a key like `&quot;5=10&quot;` that</span>
-    <span class="comment">// is the integer representation of the Rust enums for the Unicode</span>
+    <span class="comment">// Insert UnicodeSets into `result`, with a key like `&quot;gc=Lo&quot;` that</span>
+    <span class="comment">// represents the combination of the Unicode</span>
     <span class="comment">// enumerated property name (`gc` or `General_Category`) and the Unicode</span>
     <span class="comment">// enumerated property value (`Lo` or `Other_letter`).</span>
+    <span class="comment">// Note: because we want to revert the use of enum integer values in the</span>
+    <span class="comment">// key in favor of the Unicode property short aliases, the key strings</span>
+    <span class="comment">// longer than the length of TinyStr16 will not be included in the parsed</span>
+    <span class="comment">// result.</span>
     <span class="kw">for</span> (<span class="ident">canonical_prop_name</span>, <span class="ident">prop_val_builder_map</span>) <span class="kw">in</span> <span class="ident">m</span> {
         <span class="kw">for</span> (<span class="ident">canonical_val_name</span>, <span class="ident">uniset_builder</span>) <span class="kw">in</span> <span class="ident">prop_val_builder_map</span> {
-            <span class="kw">let</span> <span class="ident">enum_val_uniset_name</span> <span class="op">=</span>
-                <span class="ident">get_prop_name_identifier</span>(<span class="ident">canonical_prop_name</span>, <span class="ident">canonical_val_name</span>);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">name_str</span>) <span class="op">=</span> <span class="ident">enum_val_uniset_name</span> {
-                <span class="kw">let</span> <span class="ident">enum_val_uniset_name</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">TinyStr16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">name_str</span>);
+            <span class="kw">let</span> <span class="ident">uniset_name_result</span> <span class="op">=</span>
+                <span class="ident">TinyStr16</span>::<span class="ident">from_str</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}={}&quot;</span>, <span class="ident">canonical_prop_name</span>, <span class="ident">canonical_val_name</span>));
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">uniset_name</span>) <span class="op">=</span> <span class="ident">uniset_name_result</span> {
+                <span class="kw">let</span> <span class="ident">enum_val_uniset_name</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="ident">TinyStr16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">uniset_name</span>);
                 <span class="kw">let</span> <span class="ident">uniset</span> <span class="op">=</span> <span class="ident">uniset_builder</span>.<span class="ident">build</span>();
                 <span class="ident">result</span>.<span class="ident">insert</span>(<span class="ident">enum_val_uniset_name</span>, <span class="ident">uniset</span>);
             }
@@ -2008,12 +2008,12 @@
         <span class="comment">// Expected</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exp_uni_props_set</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">UnicodePropertyV1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashSet</span>::<span class="ident">new</span>();
         <span class="kw">let</span> <span class="ident">gc_lo</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;5=10&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;gc=Lo&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">gc_lo</span>);
         <span class="kw">let</span> <span class="ident">gc_mn</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;5=16&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;gc=Mn&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">gc_mn</span>);
@@ -2033,52 +2033,42 @@
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">ids</span>);
         <span class="kw">let</span> <span class="ident">insc_consonant</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;9=4&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;InSC=Consonant&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5891</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">insc_consonant</span>);
-        <span class="kw">let</span> <span class="ident">insc_vowel_independent</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;9=35&quot;</span>),
-            <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5891</span>]).<span class="ident">unwrap</span>(),
-        };
-        <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">insc_vowel_independent</span>);
-        <span class="kw">let</span> <span class="ident">insc_vowel_dependent</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;9=34&quot;</span>),
-            <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5908</span>]).<span class="ident">unwrap</span>(),
-        };
-        <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">insc_vowel_dependent</span>);
         <span class="kw">let</span> <span class="ident">insc_pure_killer</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;9=26&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;InSC=Pure_Killer&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5908</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">insc_pure_killer</span>);
         <span class="kw">let</span> <span class="ident">lb_al</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;12=1&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;lb=AL&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">lb_al</span>);
         <span class="kw">let</span> <span class="ident">lb_cm</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;12=9&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;lb=CM&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">lb_cm</span>);
         <span class="kw">let</span> <span class="ident">sb_le</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;19=5&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;SB=LE&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">sb_le</span>);
         <span class="kw">let</span> <span class="ident">sb_ex</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;19=3&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;SB=EX&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">sb_ex</span>);
         <span class="kw">let</span> <span class="ident">wb_le</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;22=11&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;WB=LE&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">wb_le</span>);
         <span class="kw">let</span> <span class="ident">wb_extend</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;22=6&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;WB=Extend&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">wb_extend</span>);
@@ -2093,12 +2083,12 @@
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">xids</span>);
         <span class="kw">let</span> <span class="ident">bc_l</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;0=9&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;bc=L&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">bc_l</span>);
         <span class="kw">let</span> <span class="ident">bc_nsm</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;0=13&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;bc=NSM&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">bc_nsm</span>);
@@ -2108,12 +2098,12 @@
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">ci</span>);
         <span class="kw">let</span> <span class="ident">gcb_ex</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;6=5&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;GCB=EX&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">gcb_ex</span>);
         <span class="kw">let</span> <span class="ident">gcb_xx</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;6=16&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;GCB=XX&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">gcb_xx</span>);
@@ -2122,29 +2112,29 @@
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">gr_ext</span>);
-        <span class="kw">let</span> <span class="ident">inpc_al</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;8=5&quot;</span>),
+        <span class="kw">let</span> <span class="ident">inpc_na</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;InPC=NA&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
-        <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">inpc_al</span>);
+        <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">inpc_na</span>);
         <span class="kw">let</span> <span class="ident">inpc_top</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;8=8&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;InPC=Top&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5907</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">inpc_top</span>);
         <span class="kw">let</span> <span class="ident">inpc_bottom</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;8=0&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;InPC=Bottom&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5907</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">inpc_bottom</span>);
 
         <span class="kw">let</span> <span class="ident">jt_u</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;11=5&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;jt=U&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5906</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">jt_u</span>);
         <span class="kw">let</span> <span class="ident">jt_t</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;11=4&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;jt=T&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5906</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">jt_t</span>);
@@ -2154,57 +2144,52 @@
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">alpha</span>);
         <span class="kw">let</span> <span class="ident">nfd_qc_y</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;15=1&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;NFD_QC=Y&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">nfd_qc_y</span>);
         <span class="kw">let</span> <span class="ident">nfc_qc_y</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;14=2&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;NFC_QC=Y&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">nfc_qc_y</span>);
         <span class="kw">let</span> <span class="ident">nfkd_qc_y</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;17=1&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;NFKD_QC=Y&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">nfkd_qc_y</span>);
         <span class="kw">let</span> <span class="ident">nfkc_qc_y</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;16=2&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;NFKC_QC=Y&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">nfkc_qc_y</span>);
-        <span class="kw">let</span> <span class="ident">jg_no_joining_group</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;10=71&quot;</span>),
-            <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
-        };
-        <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">jg_no_joining_group</span>);
         <span class="kw">let</span> <span class="ident">dt_none</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;3=11&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;dt=None&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">dt_none</span>);
         <span class="kw">let</span> <span class="ident">nt_none</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;18=2&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;nt=None&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">nt_none</span>);
         <span class="kw">let</span> <span class="ident">ea_n</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;4=3&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;ea=N&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">ea_n</span>);
         <span class="kw">let</span> <span class="ident">vo_r</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;21=0&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;vo=R&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">vo_r</span>);
         <span class="kw">let</span> <span class="ident">ccc_9</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;2=9&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;ccc=9&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5908</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">ccc_9</span>);
         <span class="kw">let</span> <span class="ident">hst_na</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;7=3&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;hst=NA&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">hst_na</span>);
@@ -2214,7 +2199,7 @@
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">gr_link</span>);
         <span class="kw">let</span> <span class="ident">bpt_n</span> <span class="op">=</span> <span class="ident">UnicodePropertyV1</span> {
-            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;1=1&quot;</span>),
+            <span class="ident">name</span>: <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="string">&quot;bpt=n&quot;</span>),
             <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>::<span class="ident">from_inversion_list</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">5888</span>, <span class="number">5901</span>, <span class="number">5902</span>, <span class="number">5909</span>]).<span class="ident">unwrap</span>(),
         };
         <span class="ident">exp_uni_props_set</span>.<span class="ident">insert</span>(<span class="ident">bpt_n</span>);
@@ -2225,15 +2210,22 @@
         <span class="kw">let</span> <span class="ident">act_uni_props_names_set</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">act_uni_props_set</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">name</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">names_diff</span> <span class="op">=</span> <span class="ident">act_uni_props_names_set</span>.<span class="ident">difference</span>(<span class="kw-2">&amp;</span><span class="ident">exp_uni_props_names_set</span>);
+        <span class="kw">let</span> <span class="ident">names_diff_2</span> <span class="op">=</span> <span class="ident">exp_uni_props_names_set</span>.<span class="ident">difference</span>(<span class="kw-2">&amp;</span><span class="ident">act_uni_props_names_set</span>);
         <span class="kw">let</span> <span class="ident">names_diff_str</span> <span class="op">=</span> <span class="ident">names_diff</span>
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">cloned</span>()
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
+        <span class="kw">let</span> <span class="ident">names_diff_str_2</span> <span class="op">=</span> <span class="ident">names_diff_2</span>
             .<span class="ident">into_iter</span>()
             .<span class="ident">cloned</span>()
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()
             .<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(
             <span class="ident">exp_uni_props_names_set</span>, <span class="ident">act_uni_props_names_set</span>,
-            <span class="string">&quot;**** prop names missing in exp but in act = {}&quot;</span>,
-            <span class="ident">names_diff_str</span>
+            <span class="string">&quot;**** prop names missing in exp but in act = {}
+            **** prop names missing in act but in exp = {}&quot;</span>,
+            <span class="ident">names_diff_str</span>, <span class="ident">names_diff_str_2</span>,
         );
 
         <span class="comment">// full assertion</span>

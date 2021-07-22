@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1626974820453,
+  "lastUpdate": 1626975375631,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -7469,6 +7469,66 @@ window.BENCHMARK_DATA = {
             "name": "fixed_decimal/overview",
             "value": 141773,
             "range": "± 10030",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9acd1e99b12cc2c3eac2338fbe07f0059686b6e7",
+          "message": "Fix name of Bidi_M (#884)",
+          "timestamp": "2021-07-22T12:29:58-05:00",
+          "tree_id": "8d221a68e13801f21723f33ecff92e92651865ff",
+          "url": "https://github.com/unicode-org/icu4x/commit/9acd1e99b12cc2c3eac2338fbe07f0059686b6e7"
+        },
+        "date": 1626975342171,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 131447,
+            "range": "± 2215",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b76cb7961957945b2a1576d5c8f1ad25eb280279",
+          "message": "Move icu_plurals and icu_decimal to no_std (#888)\n\n* no_std in pluralrules\r\n\r\n* autoreplace\r\n\r\n* fix errors\r\n\r\n* powi\r\n\r\n* Fix icu_plurals use in ffi/ecma402\r\n\r\n* fmt\r\n\r\n* add no_std to fixeddecimal\r\n\r\n* autoreplace\r\n\r\n* fmt\r\n\r\n* fix error\r\n\r\n* require std feature for pluralrules test",
+          "timestamp": "2021-07-22T10:29:28-07:00",
+          "tree_id": "c205d36691fc577a1b260990fefb3b167d2ff49b",
+          "url": "https://github.com/unicode-org/icu4x/commit/b76cb7961957945b2a1576d5c8f1ad25eb280279"
+        },
+        "date": 1626975373098,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 149964,
+            "range": "± 8877",
             "unit": "ns/iter"
           }
         ]

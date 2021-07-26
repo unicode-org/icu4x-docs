@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["StructProvider","A data provider that unconditionally returns references to borrowed data."]]});
+initSidebarItems({"struct":[["StructProvider","A data provider that returns clones of a constant data payload."]]});

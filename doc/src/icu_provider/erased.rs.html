@@ -322,21 +322,6 @@
 <span id="319">319</span>
 <span id="320">320</span>
 <span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -400,7 +385,7 @@
 
 <span class="macro">impl_dyn_clone</span><span class="macro">!</span>(<span class="ident">ErasedDataStruct</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span> {
+<span class="kw">impl</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">needless_lifetimes</span>)]</span>
     <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> (<span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span> {
         <span class="ident">this</span>
@@ -410,33 +395,21 @@
 <span class="doccomment">/// Marker type for [`ErasedDataStruct`].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ErasedDataStructMarker</span> {}
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ErasedDataStructMarker</span> {
+<span class="kw">impl</span> <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ErasedDataStructMarker</span> {
     <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span>;
     <span class="kw">type</span> <span class="ident">Cart</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">dynutil</span>::<span class="ident">UpcastDataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ErasedDataStructMarker</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">dynutil</span>::<span class="ident">UpcastDataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ErasedDataStructMarker</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
     <span class="ident">M</span>::<span class="ident">Cart</span>: <span class="ident">Sized</span>,
 {
-    <span class="doccomment">/// Upcast for ErasedDataStruct performs the following mapping of the data payload variants,</span>
-    <span class="doccomment">/// where `Y` is the concrete Yokeable and `S` is ErasedDataStruct Yokeable:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// - `Yoke&lt;Y, &amp;&#39;d C&gt;` =&gt; `Yoke&lt;S, &amp;&#39;d dyn ErasedDataStruct&gt;`, where the trait object in the</span>
-    <span class="doccomment">///   cart is obtained by calling `.into_backing_cart()` on the input Yoke</span>
-    <span class="doccomment">/// - `Yoke&lt;Y, Rc&lt;C&gt;&gt;` =&gt; `Yoke&lt;S, Rc&lt;dyn ErasedDataStruct&gt;`, where the trait object in the</span>
-    <span class="doccomment">///   cart is the result of casting the whole input Yoke to `ErasedDataStruct`</span>
-    <span class="doccomment">/// - `Yoke&lt;Y, _&gt;` (fully owned) =&gt; `Yoke&lt;S, Rc&lt;dyn ErasedDataStruct&gt;&gt;`, by casting the</span>
-    <span class="doccomment">///   whole input Yoke to `ErasedDataStruct` as above</span>
-    <span class="kw">fn</span> <span class="ident">upcast</span>(
-        <span class="ident">other</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Upcast for ErasedDataStruct creates an `Rc&lt;dyn ErasedDataStruct&gt;` from the current inner</span>
+    <span class="doccomment">/// `Yoke` (i.e., `Rc::from(yoke)`).</span>
+    <span class="kw">fn</span> <span class="ident">upcast</span>(<span class="ident">other</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">other</span>.<span class="ident">inner</span> {
-            <span class="ident">Borrowed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;#752&quot;</span>)
-            }
             <span class="ident">RcStruct</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="comment">// Case 2: Cast the whole RcStruct Yoke to the trait object.</span>
                 <span class="kw">let</span> <span class="ident">cart</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rc</span>::<span class="ident">from</span>(<span class="ident">yoke</span>);
@@ -456,7 +429,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Convert this [`DataPayload`] of an [`ErasedDataStruct`] into a [`DataPayload`] of a</span>
     <span class="doccomment">/// concrete type.</span>
     <span class="doccomment">///</span>
@@ -498,7 +471,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;Hallo Welt&quot;, downcast_payload.get().message);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">downcast</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">downcast</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
         <span class="ident">M</span>::<span class="ident">Cart</span>: <span class="ident">Sized</span>,
@@ -506,9 +479,6 @@
     {
         <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">data_provider</span>::<span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span> {
-            <span class="ident">Borrowed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;#752&quot;</span>)
-            }
             <span class="ident">RcStruct</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">any_rc</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">yoke</span>.<span class="ident">into_backing_cart</span>().<span class="ident">into_any_rc</span>();
                 <span class="comment">// `any_rc` is the Yoke that was converted into the `dyn ErasedDataStruct`. It</span>
@@ -590,7 +560,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// - [#41517](https://github.com/rust-lang/rust/issues/41517) (trait aliases are not supported)</span>
 <span class="doccomment">/// - [#68636](https://github.com/rust-lang/rust/issues/68636) (identical traits can&#39;t be auto-implemented)</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Query the provider for data, returning the result as an [`ErasedDataStruct`] trait object.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns [`Ok`] if the request successfully loaded data. If data failed to load, returns an</span>
@@ -598,23 +568,23 @@
     <span class="kw">fn</span> <span class="ident">load_erased</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="comment">// Auto-implement `ErasedDataProvider` on types implementing `DataProvider&lt;dyn ErasedDataStruct&gt;`</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>,
+    <span class="ident">T</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">load_erased</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident">DataProvider</span>::<span class="op">&lt;</span><span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span>::<span class="ident">load_payload</span>(<span class="self">self</span>, <span class="ident">req</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">dyn</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;d</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">dyn</span> <span class="ident">ErasedDataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
     <span class="op">&lt;</span><span class="ident">M</span>::<span class="ident">Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Output</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Any</span>,
@@ -622,7 +592,7 @@
     <span class="ident">M</span>::<span class="ident">Cart</span>: <span class="ident">Sized</span>,
 {
     <span class="doccomment">/// Serve [`Sized`] objects from an [`ErasedDataProvider`] via downcasting.</span>
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;d</span>, <span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">ErasedDataProvider</span>::<span class="ident">load_erased</span>(<span class="self">self</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,

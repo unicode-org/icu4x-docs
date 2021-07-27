@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1627416531938,
+  "lastUpdate": 1627425946024,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -7859,6 +7859,66 @@ window.BENCHMARK_DATA = {
             "name": "fixed_decimal/overview",
             "value": 134008,
             "range": "± 5934",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "becafac79b327f18e8f1721683de638e828f2419",
+          "message": "Improve docs on DataProvider lifetimes (#915)",
+          "timestamp": "2021-07-27T17:39:28-05:00",
+          "tree_id": "d44cf184c25ca2457c67a931b558426e59bfad1f",
+          "url": "https://github.com/unicode-org/icu4x/commit/becafac79b327f18e8f1721683de638e828f2419"
+        },
+        "date": 1627425933006,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 150243,
+            "range": "± 5373",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5970335819dd63caf5653ca76529bd9e9e90650e",
+          "message": "Fix FFI lifetimes for DataProvider (#914)",
+          "timestamp": "2021-07-27T17:39:49-05:00",
+          "tree_id": "5e873125b3716f751c3ccd3acf1a7c938dd499af",
+          "url": "https://github.com/unicode-org/icu4x/commit/5970335819dd63caf5653ca76529bd9e9e90650e"
+        },
+        "date": 1627425944189,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 131270,
+            "range": "± 543",
             "unit": "ns/iter"
           }
         ]

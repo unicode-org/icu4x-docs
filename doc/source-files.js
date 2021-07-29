@@ -6,6 +6,7 @@ sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x_datagen"] = {"name":"","files":["datagen.rs"]};
 sourcesIndex["icu4x_ecma402"] = {"name":"","files":["lib.rs","pluralrules.rs"]};
 sourcesIndex["icu4x_testdata_download"] = {"name":"","files":["testdata-download.rs"]};
+sourcesIndex["icu_benchmark_binsize"] = {"name":"","files":["main.rs"]};
 sourcesIndex["icu_benchmark_macros"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu_benchmark_memory"] = {"name":"","files":["main.rs"]};
 sourcesIndex["icu_calendar"] = {"name":"","files":["calendar.rs","date.rs","duration.rs","error.rs","iso.rs","lib.rs"]};

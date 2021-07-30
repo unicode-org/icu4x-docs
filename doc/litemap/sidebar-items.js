@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["LiteMap","A simple \"flat\" map based on a sorted vector"]]});
+initSidebarItems({"struct":[["LiteMap","A simple “flat” map based on a sorted vector"]]});

@@ -1,7 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `ffi/capi/src/provider.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>provider.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `ffi/capi/src/provider.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>provider.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 <link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
-<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../icu_capi/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
-                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../icu_capi/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img src="../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img src="../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -145,18 +144,18 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
-</pre><div class="example-wrap"><pre class="rust ">
+</pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident">alloc</span>::<span class="ident">boxed</span>::<span class="ident">Box</span>;
+<span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;wasm32&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;none&quot;</span>)))]</span>
-<span class="kw">use</span> <span class="ident">alloc</span>::<span class="ident">string</span>::<span class="ident">ToString</span>;
+<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">mem</span>, <span class="ident">ptr</span>};
-<span class="kw">use</span> <span class="ident">icu_provider</span>::<span class="ident">serde</span>::<span class="ident">SerdeDeDataProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::serde::SerdeDeDataProvider</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;wasm32&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;none&quot;</span>)))]</span>
-<span class="kw">use</span> <span class="ident">icu_provider_fs</span>::<span class="ident">FsDataProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider_fs::FsDataProvider</span>;
 
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="doccomment">/// FFI version of [`SerdeDeDataProvider`]. See its docs for more details.</span>
@@ -195,29 +194,29 @@
         <span class="kw">unsafe</span> {
             <span class="comment">// If the layout changes this will error</span>
             <span class="comment">// Once Rust gets pointer metadata APIs we should switch to using those</span>
-            <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">x</span>)
+            <span class="ident">mem::transmute</span>(<span class="ident">x</span>)
         }
     }
 
     <span class="doccomment">/// Obtain the original boxed Rust [`SerdeDeDataProvider`] for this</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_boxed</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerdeDeDataProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
-        <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">_field1</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">_field1</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
         <span class="comment">// If the layout changes this will error</span>
         <span class="comment">// Once Rust gets pointer metadata APIs we should switch to using those</span>
-        <span class="kw">unsafe</span> { <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="self">self</span>) }
+        <span class="kw">unsafe</span> { <span class="ident">mem::transmute</span>(<span class="self">self</span>) }
     }
 
     <span class="doccomment">/// Convert a borrowed reference to a borrowed [`SerdeDeDataProvider`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_dyn_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">SerdeDeDataProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>) {
-        <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">_field1</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">_field1</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
         <span class="kw">unsafe</span> {
             <span class="comment">// &amp;dyn Trait and Box&lt;dyn Trait&gt; have the same layout</span>
             <span class="comment">// Note that we are reading from a *pointer* to `Box&lt;dyn Trait&gt;`,</span>
             <span class="comment">// so we need to `ptr::read` the fat pointer first.</span>
-            <span class="kw">let</span> <span class="ident">borrowed_erased</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">ptr</span>::<span class="ident">read</span>(<span class="self">self</span>);
+            <span class="kw">let</span> <span class="ident">borrowed_erased</span>: <span class="self">Self</span> <span class="op">=</span> <span class="ident">ptr::read</span>(<span class="self">self</span>);
             <span class="comment">// If the layout changes this will error</span>
             <span class="comment">// Once Rust gets pointer metadata APIs we should switch to using those</span>
-            <span class="ident">mem</span>::<span class="ident">transmute</span>(<span class="ident">borrowed_erased</span>)
+            <span class="ident">mem::transmute</span>(<span class="ident">borrowed_erased</span>)
         }
     }
 }
@@ -258,17 +257,17 @@
     <span class="ident">len</span>: <span class="ident">usize</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
     <span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">slice</span>, <span class="ident">str</span>};
-    <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">str</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">slice</span>::<span class="ident">from_raw_parts</span>(<span class="ident">path</span>, <span class="ident">len</span>));
-    <span class="kw">match</span> <span class="ident">FsDataProvider</span>::<span class="ident">try_new</span>(<span class="ident">path</span>.<span class="ident">to_string</span>()) {
+    <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">str::from_utf8_unchecked</span>(<span class="ident">slice::from_raw_parts</span>(<span class="ident">path</span>, <span class="ident">len</span>));
+    <span class="kw">match</span> <span class="ident">FsDataProvider::try_new</span>(<span class="ident">path</span>.<span class="ident">to_string</span>()) {
         <span class="prelude-val">Ok</span>(<span class="ident">fs</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">erased</span> <span class="op">=</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">fs</span>);
+            <span class="kw">let</span> <span class="ident">erased</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">fs</span>);
             <span class="ident">ICU4XCreateDataProviderResult</span> {
-                <span class="ident">provider</span>: <span class="ident">ICU4XDataProvider</span>::<span class="ident">from_boxed</span>(<span class="ident">erased</span>),
+                <span class="ident">provider</span>: <span class="ident">ICU4XDataProvider::from_boxed</span>(<span class="ident">erased</span>),
                 <span class="ident">success</span>: <span class="bool-val">true</span>,
             }
         }
         <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
-            <span class="ident">provider</span>: <span class="ident">ICU4XDataProvider</span>::<span class="ident">zeroed</span>(),
+            <span class="ident">provider</span>: <span class="ident">ICU4XDataProvider::zeroed</span>(),
             <span class="ident">success</span>: <span class="bool-val">false</span>,
         },
     }
@@ -283,13 +282,12 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Only access `provider` in the result if `success` is [`true`].</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_static_data_provider_create</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata</span>::<span class="ident">get_static_provider</span>();
-    <span class="kw">let</span> <span class="ident">erased</span> <span class="op">=</span> <span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">provider</span>);
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_static_provider</span>();
+    <span class="kw">let</span> <span class="ident">erased</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">provider</span>);
     <span class="ident">ICU4XCreateDataProviderResult</span> {
-        <span class="ident">provider</span>: <span class="ident">ICU4XDataProvider</span>::<span class="ident">from_boxed</span>(<span class="ident">erased</span>),
+        <span class="ident">provider</span>: <span class="ident">ICU4XDataProvider::from_boxed</span>(<span class="ident">erased</span>),
         <span class="ident">success</span>: <span class="bool-val">true</span>,
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_capi"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_capi" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>

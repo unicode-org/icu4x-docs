@@ -154,200 +154,160 @@
 <span id="152">152</span>
 <span id="153">153</span>
 <span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::custom_writeable::ICU4XWriteable</span>;
-<span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
-<span class="kw">use</span> <span class="ident">core::slice</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode::Key</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
-<span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
+<span class="attribute">#[<span class="ident">diplomat::bridge</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ffi</span> {
+    <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
+    <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
+    <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
+    <span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode::Key</span>;
+    <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 
-<span class="doccomment">/// Opaque type for use behind a pointer, is [`Locale`]</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Can be obtained via [`icu4x_locale_create()`] and destroyed via [`icu4x_locale_destroy()`]</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ICU4XLocale</span> <span class="op">=</span> <span class="ident">Locale</span>;
+    <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="prelude-val">Ok</span>,
-    <span class="ident">Undefined</span>,
-    <span class="ident">Error</span>,
-}
+    <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
+    <span class="doccomment">/// An ICU4X Locale, capable of representing strings like `&quot;en-US&quot;`.</span>
+    <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html) for more information.</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XLocale</span>(<span class="kw">pub</span> <span class="ident">Locale</span>);
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// FFI version of [`Locale::from_bytes()`], see its docs for more details</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">/// `value` and `len` should point to a valid ASCII string of length `len`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It does not need to be be null terminated, and `len` should not include a null</span>
-<span class="doccomment">/// terminator (this will just cause the function to panic, and is not a safety requirement).</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_create</span>(<span class="ident">value</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ICU4XLocale</span> {
-    <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">slice::from_raw_parts</span>(<span class="ident">value</span>, <span class="ident">len</span>);
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">loc</span>) <span class="op">=</span> <span class="ident">ICU4XLocale::from_bytes</span>(<span class="ident">bytes</span>) {
-        <span class="ident">Box::into_raw</span>(<span class="ident">Box::new</span>(<span class="ident">loc</span>))
-    } <span class="kw">else</span> {
-        <span class="ident">core::ptr::null_mut</span>()
+    <span class="kw">enum</span> <span class="ident">ICU4XLocaleError</span> {
+        <span class="ident">Undefined</span>,
+        <span class="ident">Error</span>,
     }
-}
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// FFI version of [`Locale::clone()`]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_clone</span>(<span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ICU4XLocale</span> {
-    <span class="kw">let</span> <span class="ident">clone</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
-    <span class="ident">Box::into_raw</span>(<span class="ident">Box::new</span>(<span class="ident">clone</span>))
-}
-
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Write a string representation of the [`LanguageIdentifier`] part of</span>
-<span class="doccomment">/// [`ICU4XLocale`] to `write`.</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_basename</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>,
-    <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ICU4XWriteable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">id</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">is_ok</span>();
-    <span class="ident">write</span>.<span class="ident">flush</span>();
-    <span class="kw">if</span> <span class="ident">result</span> {
-        <span class="ident">ICU4XLocaleResult::Ok</span>
-    } <span class="kw">else</span> {
-        <span class="ident">ICU4XLocaleResult::Error</span>
-    }
-}
-
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Write a string representation of the unicode extension to `write`</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">/// `value` and `len` should point to a valid ASCII string of length `len`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// It does not need to be be null terminated, and `len` should not include a null</span>
-<span class="doccomment">/// terminator (this will just cause the function to panic, and is not a safety requirement).</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_get_unicode_extension</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>,
-    <span class="ident">value</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>,
-    <span class="ident">len</span>: <span class="ident">usize</span>,
-    <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ICU4XWriteable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">slice::from_raw_parts</span>(<span class="ident">value</span>, <span class="ident">len</span>);
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">key</span>) <span class="op">=</span> <span class="ident">Key::from_bytes</span>(<span class="ident">bytes</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">get_unicode_extension</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">is_ok</span>();
-            <span class="ident">write</span>.<span class="ident">flush</span>();
-            <span class="kw">if</span> <span class="ident">result</span> {
-                <span class="ident">ICU4XLocaleResult::Ok</span>
-            } <span class="kw">else</span> {
-                <span class="ident">ICU4XLocaleResult::Error</span>
-            }
-        } <span class="kw">else</span> {
-            <span class="ident">ICU4XLocaleResult::Undefined</span>
+    <span class="kw">impl</span> <span class="ident">ICU4XLocale</span> {
+        <span class="doccomment">/// Construct an [`ICU4XLocale`] from an locale identifier.</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#method.from_bytes) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">create</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLocale</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="ident">Locale::from_str</span>(<span class="ident">name</span>)
+                .<span class="ident">ok</span>()
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">Box::new</span>(<span class="ident">ICU4XLocale</span>(<span class="ident">l</span>)))
         }
-    } <span class="kw">else</span> {
-        <span class="ident">ICU4XLocaleResult::Error</span>
-    }
-}
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Write a string representation of [`ICU4XLocale`] language to `write`</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_language</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>,
-    <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ICU4XWriteable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">id</span>.<span class="ident">language</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">is_ok</span>();
-    <span class="ident">write</span>.<span class="ident">flush</span>();
-    <span class="kw">if</span> <span class="ident">result</span> {
-        <span class="ident">ICU4XLocaleResult::Ok</span>
-    } <span class="kw">else</span> {
-        <span class="ident">ICU4XLocaleResult::Error</span>
-    }
-}
+        <span class="doccomment">/// Clones the [`ICU4XLocale`].</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLocale</span><span class="op">&gt;</span> {
+            <span class="ident">Box::new</span>(<span class="ident">ICU4XLocale</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">clone</span>()))
+        }
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Write a string representation of [`ICU4XLocale`] region to `write`</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_region</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>,
-    <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ICU4XWriteable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="kw">match</span> <span class="ident">locale</span>.<span class="ident">id</span>.<span class="ident">region</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">region</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">is_ok</span>();
+        <span class="doccomment">/// Write a string representation of the `LanguageIdentifier` part of</span>
+        <span class="doccomment">/// [`ICU4XLocale`] to `write`.</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.id) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">basename</span>(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
+                .<span class="number">0</span>
+                .<span class="ident">id</span>
+                .<span class="ident">write_to</span>(<span class="ident">write</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                .<span class="ident">into</span>();
             <span class="ident">write</span>.<span class="ident">flush</span>();
-            <span class="kw">if</span> <span class="ident">result</span> {
-                <span class="ident">ICU4XLocaleResult::Ok</span>
+            <span class="ident">result</span>
+        }
+
+        <span class="doccomment">/// Write a string representation of the unicode extension to `write`</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.extensions) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">get_unicode_extension</span>(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+            <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">key</span>) <span class="op">=</span> <span class="ident">Key::from_bytes</span>(<span class="ident">bytes</span>.<span class="ident">as_bytes</span>()) {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">get_unicode_extension</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
+                    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+                    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">value</span>
+                        .<span class="ident">write_to</span>(<span class="ident">write</span>)
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                        .<span class="ident">into</span>();
+                    <span class="ident">write</span>.<span class="ident">flush</span>();
+                    <span class="ident">result</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
+                }
             } <span class="kw">else</span> {
-                <span class="ident">ICU4XLocaleResult::Error</span>
+                <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Error</span>).<span class="ident">into</span>()
             }
         }
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult::Undefined</span>,
-    }
-}
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Write a string representation of [`ICU4XLocale`] script to `write`</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_script</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>,
-    <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ICU4XWriteable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="kw">match</span> <span class="ident">locale</span>.<span class="ident">id</span>.<span class="ident">script</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">script</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">is_ok</span>();
+        <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] language to `write`</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.id) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">language</span>(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
+                .<span class="number">0</span>
+                .<span class="ident">id</span>
+                .<span class="ident">language</span>
+                .<span class="ident">write_to</span>(<span class="ident">write</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                .<span class="ident">into</span>();
             <span class="ident">write</span>.<span class="ident">flush</span>();
-            <span class="kw">if</span> <span class="ident">result</span> {
-                <span class="ident">ICU4XLocaleResult::Ok</span>
+            <span class="ident">result</span>
+        }
+
+        <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] region to `write`</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.id) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">region</span>(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">region</span> {
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">region</span>
+                    .<span class="ident">write_to</span>(<span class="ident">write</span>)
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                    .<span class="ident">into</span>();
+                <span class="ident">write</span>.<span class="ident">flush</span>();
+                <span class="ident">result</span>
             } <span class="kw">else</span> {
-                <span class="ident">ICU4XLocaleResult::Error</span>
+                <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
             }
         }
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult::Undefined</span>,
-    }
-}
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Write a string representation of [`ICU4XLocale`] to `write`</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_tostring</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XLocale</span>,
-    <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ICU4XWriteable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ICU4XLocaleResult</span> {
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">is_ok</span>();
-    <span class="ident">write</span>.<span class="ident">flush</span>();
-    <span class="kw">if</span> <span class="ident">result</span> {
-        <span class="ident">ICU4XLocaleResult::Ok</span>
-    } <span class="kw">else</span> {
-        <span class="ident">ICU4XLocaleResult::Error</span>
-    }
-}
+        <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] script to `write`</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.id) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">script</span>(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">script</span> {
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">script</span>
+                    .<span class="ident">write_to</span>(<span class="ident">write</span>)
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                    .<span class="ident">into</span>();
+                <span class="ident">write</span>.<span class="ident">flush</span>();
+                <span class="ident">result</span>
+            } <span class="kw">else</span> {
+                <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
+            }
+        }
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="doccomment">/// Destructor for [`ICU4XLocale`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `loc` must be a pointer to a locale allocated by `icu4x_locale_destroy`.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">icu4x_locale_destroy</span>(<span class="ident">loc</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ICU4XLocale</span>) {
-    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Box::from_raw</span>(<span class="ident">loc</span>);
+        <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] to `write`</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html) for more information.</span>
+        <span class="kw">fn</span> <span class="ident">tostring</span>(
+            <span class="kw-2">&amp;</span><span class="self">self</span>,
+            <span class="ident">write</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
+                .<span class="number">0</span>
+                .<span class="ident">write_to</span>(<span class="ident">write</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                .<span class="ident">into</span>();
+            <span class="ident">write</span>.<span class="ident">flush</span>();
+            <span class="ident">result</span>
+        }
+    }
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_capi" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script></body></html>

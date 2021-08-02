@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ICU4XCanonicalizationResult","FFI version of `CanonicalizationResult`. See the Rust docs for more details."]],"struct":[["ICU4XLocaleCanonicalizer","A locale canonicalizer. See the Rust docs for more details."]]});

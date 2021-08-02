@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XCreateFixedDecimalResult",""],["ICU4XFixedDecimal","A decimal number. See the Rust docs for more information."]]});

@@ -11,6 +11,7 @@ sourcesIndex["icu_benchmark_macros"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu_benchmark_memory"] = {"name":"","files":["main.rs"]};
 sourcesIndex["icu_calendar"] = {"name":"","files":["calendar.rs","date.rs","duration.rs","error.rs","iso.rs","lib.rs"]};
 sourcesIndex["icu_capi"] = {"name":"","files":["custom_writeable.rs","decimal.rs","fixed_decimal.rs","lib.rs","locale.rs","locale_canonicalizer.rs","pluralrules.rs","provider.rs"]};
+sourcesIndex["icu_codepointtrie"] = {"name":"","files":["codepointtrie.rs","error.rs","impl_const.rs","lib.rs","planes.rs"]};
 sourcesIndex["icu_datagen"] = {"name":"","files":["main.rs"]};
 sourcesIndex["icu_datetime"] = {"name":"","dirs":[{"name":"fields","files":["length.rs","mod.rs","symbols.rs"]},{"name":"format","files":["datetime.rs","mod.rs","time_zone.rs","zoned_datetime.rs"]},{"name":"mock","files":["datetime.rs","mod.rs","time_zone.rs","zoned_datetime.rs"]},{"name":"options","files":["components.rs","length.rs","mod.rs","preferences.rs"]},{"name":"pattern","files":["error.rs","mod.rs","parser.rs","transform_hour_cycle.rs"]},{"name":"provider","files":["gregory.rs","helpers.rs","mod.rs","time_zones.rs"]}],"files":["arithmetic.rs","date.rs","datetime.rs","error.rs","lib.rs","skeleton.rs","time_zone.rs","zoned_datetime.rs"]};
 sourcesIndex["icu_decimal"] = {"name":"","files":["error.rs","format.rs","grouper.rs","lib.rs","options.rs","provider.rs","sign_selector.rs"]};

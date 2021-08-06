@@ -26,6 +26,7 @@ sourcesIndex["icu_provider_cldr"] = {"name":"","dirs":[{"name":"download","files
 sourcesIndex["icu_provider_fs"] = {"name":"","dirs":[{"name":"export","dirs":[{"name":"serializers","files":["bincode.rs","json.rs","mod.rs"]}],"files":["aliasing.rs","fs_exporter.rs","mod.rs"]}],"files":["deserializer.rs","error.rs","fs_data_provider.rs","lib.rs","manifest.rs"]};
 sourcesIndex["icu_provider_macros"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu_provider_ppucd"] = {"name":"","files":["error.rs","lib.rs","parse_ppucd.rs","support.rs"]};
+sourcesIndex["icu_provider_uprops"] = {"name":"","files":["binary.rs","error.rs","lib.rs","upropdump_serde.rs"]};
 sourcesIndex["icu_segmenter"] = {"name":"","files":["lb_define.rs","lib.rs","line_breaker.rs","lstm.rs","properties_defines.rs","properties_other.rs","property_table.rs","rule_table.rs"]};
 sourcesIndex["icu_segmenter_lstm"] = {"name":"","files":["error.rs","lib.rs","lstm.rs","math_helper.rs","structs.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["blob.rs","fs.rs","lib.rs","metadata.rs","paths.rs"]};

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1628303074666,
+  "lastUpdate": 1628640343654,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -10793,6 +10793,78 @@ window.BENCHMARK_DATA = {
             "name": "locale/overview",
             "value": 4596,
             "range": "± 57",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f0977050566fcac7d8b8427feba50eed91f9d1a5",
+          "message": "Use cargo-all-features' new denylist feature to improve our CI time (#942)\n\n* Update cargo-all-features version\r\n\r\n* Stop including bench feature in cargo-all-features\r\n\r\n* Deny more features for capi crate",
+          "timestamp": "2021-08-09T10:17:29-07:00",
+          "tree_id": "c83289bcca60a0624f03ef3382fb9124e7b72393",
+          "url": "https://github.com/unicode-org/icu4x/commit/f0977050566fcac7d8b8427feba50eed91f9d1a5"
+        },
+        "date": 1628529834496,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2383,
+            "range": "± 163",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4061,
+            "range": "± 368",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c5f62dfc5f15c88581d69279634b6087da42768c",
+          "message": "Data struct tutorial (#929)",
+          "timestamp": "2021-08-10T18:58:13-05:00",
+          "tree_id": "8f65327cdddac0173da8ea1fbdfc6aded27a76ac",
+          "url": "https://github.com/unicode-org/icu4x/commit/c5f62dfc5f15c88581d69279634b6087da42768c"
+        },
+        "date": 1628640340452,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 3290,
+            "range": "± 190",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 5265,
+            "range": "± 991",
             "unit": "ns/iter"
           }
         ]

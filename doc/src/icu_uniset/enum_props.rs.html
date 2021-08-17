@@ -255,17 +255,20 @@
 <span id="253">253</span>
 <span id="254">254</span>
 <span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::upper_case_acronyms</span>)]</span>
-
 <span class="doccomment">/// Selection constants for Unicode properties.</span>
 <span class="doccomment">/// These constants are used to select one of the Unicode properties.</span>
 <span class="doccomment">/// See UProperty in ICU4C.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">EnumeratedProperty</span> {
     <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="number">0x1005</span>,
     <span class="ident">Script</span> <span class="op">=</span> <span class="number">0x100A</span>,
@@ -273,50 +276,87 @@
 }
 
 <span class="doccomment">/// Enumerated Unicode general category types.</span>
+<span class="doccomment">/// The discriminants correspond to the U_GC_XX_MASK constants in ICU4C.</span>
+<span class="doccomment">/// This supports groups of general categories: for example, `Letter`</span>
+<span class="doccomment">/// is the union of `UppercaseLetter`, `LowercaseLetter`, etc...</span>
 <span class="doccomment">/// See https://www.unicode.org/reports/tr44/ .</span>
-<span class="doccomment">/// See UCharCategory in ICU4C.</span>
+<span class="doccomment">/// See UCharCategory and U_GET_GC_MASK in ICU4C.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u32</span>)]</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GeneralCategory</span> {
-    <span class="ident">Control</span> <span class="op">=</span> <span class="number">15</span>,
-    <span class="ident">Format</span> <span class="op">=</span> <span class="number">16</span>,
     <span class="ident">Unassigned</span> <span class="op">=</span> <span class="number">0</span>,
-    <span class="ident">PrivateUse</span> <span class="op">=</span> <span class="number">17</span>,
-    <span class="ident">Surrogate</span> <span class="op">=</span> <span class="number">18</span>,
-    <span class="ident">LowercaseLetter</span> <span class="op">=</span> <span class="number">2</span>,
-    <span class="ident">ModifierLetter</span> <span class="op">=</span> <span class="number">4</span>,
-    <span class="ident">OtherLetter</span> <span class="op">=</span> <span class="number">5</span>,
-    <span class="ident">TitlecaseLetter</span> <span class="op">=</span> <span class="number">3</span>,
-    <span class="ident">UppercaseLetter</span> <span class="op">=</span> <span class="number">1</span>,
-    <span class="ident">SpacingMark</span> <span class="op">=</span> <span class="number">8</span>,
-    <span class="ident">EnclosingMark</span> <span class="op">=</span> <span class="number">7</span>,
-    <span class="ident">NonspacingMark</span> <span class="op">=</span> <span class="number">6</span>,
-    <span class="ident">Digit</span> <span class="op">=</span> <span class="number">9</span>,
-    <span class="ident">LetterNumber</span> <span class="op">=</span> <span class="number">10</span>,
-    <span class="ident">OtherNumber</span> <span class="op">=</span> <span class="number">11</span>,
-    <span class="ident">ConnectorPunctuation</span> <span class="op">=</span> <span class="number">22</span>,
-    <span class="ident">DashPunctuation</span> <span class="op">=</span> <span class="number">19</span>,
-    <span class="ident">ClosePunctuation</span> <span class="op">=</span> <span class="number">21</span>,
-    <span class="ident">FinalPunctuation</span> <span class="op">=</span> <span class="number">29</span>,
-    <span class="ident">InitialPunctuation</span> <span class="op">=</span> <span class="number">28</span>,
-    <span class="ident">OtherPunctuation</span> <span class="op">=</span> <span class="number">23</span>,
-    <span class="ident">OpenPunctuation</span> <span class="op">=</span> <span class="number">20</span>,
-    <span class="ident">CurrencySymbol</span> <span class="op">=</span> <span class="number">25</span>,
-    <span class="ident">ModifierSymbol</span> <span class="op">=</span> <span class="number">26</span>,
-    <span class="ident">MathSymbol</span> <span class="op">=</span> <span class="number">24</span>,
-    <span class="ident">OtherSymbol</span> <span class="op">=</span> <span class="number">27</span>,
-    <span class="ident">LineSeparator</span> <span class="op">=</span> <span class="number">13</span>,
-    <span class="ident">ParagraphSeparator</span> <span class="op">=</span> <span class="number">14</span>,
-    <span class="ident">SpaceSeparator</span> <span class="op">=</span> <span class="number">12</span>,
+
+    <span class="ident">UppercaseLetter</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
+    <span class="ident">LowercaseLetter</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">2</span>,
+    <span class="ident">TitlecaseLetter</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>,
+    <span class="ident">ModifierLetter</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>,
+    <span class="ident">OtherLetter</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>,
+    <span class="ident">CasedLetter</span> <span class="op">=</span>
+        <span class="self">Self</span><span class="ident">::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>,
+    <span class="ident">Letter</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::CasedLetter</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::ModifierLetter</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::OtherLetter</span> <span class="kw">as</span> <span class="ident">u32</span>,
+
+    <span class="ident">NonspacingMark</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span>,
+    <span class="ident">EnclosingMark</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">7</span>,
+    <span class="ident">SpacingMark</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>,
+    <span class="ident">Mark</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::NonspacingMark</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::EnclosingMark</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::SpacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>,
+
+    <span class="ident">Digit</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">9</span>,
+    <span class="ident">LetterNumber</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">10</span>,
+    <span class="ident">OtherNumber</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">11</span>,
+    <span class="ident">Number</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::Digit</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::LetterNumber</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::OtherNumber</span> <span class="kw">as</span> <span class="ident">u32</span>,
+
+    <span class="ident">SpaceSeparator</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">12</span>,
+    <span class="ident">LineSeparator</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">13</span>,
+    <span class="ident">ParagraphSeparator</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">14</span>,
+    <span class="ident">Separator</span> <span class="op">=</span>
+        <span class="self">Self</span><span class="ident">::SpaceSeparator</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::LineSeparator</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> <span class="self">Self</span><span class="ident">::ParagraphSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>,
+
+    <span class="ident">Control</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">15</span>,
+    <span class="ident">Format</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>,
+    <span class="ident">PrivateUse</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">17</span>,
+    <span class="ident">Surrogate</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">18</span>,
+    <span class="ident">Other</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::Control</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::Format</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::PrivateUse</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::Surrogate</span> <span class="kw">as</span> <span class="ident">u32</span>,
+
+    <span class="ident">DashPunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">19</span>,
+    <span class="ident">OpenPunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>,
+    <span class="ident">ClosePunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>,
+    <span class="ident">ConnectorPunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">22</span>,
+    <span class="ident">OtherPunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">23</span>,
+    <span class="ident">InitialPunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">28</span>,
+    <span class="ident">FinalPunctuation</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">29</span>,
+    <span class="ident">Punctuation</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::DashPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::OpenPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::ClosePunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::ConnectorPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::OtherPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::InitialPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::FinalPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>,
+
+    <span class="ident">MathSymbol</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>,
+    <span class="ident">CurrencySymbol</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">25</span>,
+    <span class="ident">ModifierSymbol</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">26</span>,
+    <span class="ident">OtherSymbol</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">27</span>,
+    <span class="ident">Symbol</span> <span class="op">=</span> <span class="self">Self</span><span class="ident">::MathSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::CurrencySymbol</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::ModifierSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>
+        <span class="op">|</span> <span class="self">Self</span><span class="ident">::OtherSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>,
 }
 
-<span class="comment">//// Enumerated property Script.</span>
+<span class="doccomment">/// Enumerated property Script.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// For more information, see UAX #24: http://www.unicode.org/reports/tr24/.</span>
 <span class="doccomment">/// See UScriptCode in ICU4C.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This enum only contains variants for scripts that are used in the Unicode</span>
+<span class="doccomment">/// Property Database.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Script</span> {
     <span class="ident">Adlam</span> <span class="op">=</span> <span class="number">167</span>,
-    <span class="ident">Afaka</span> <span class="op">=</span> <span class="number">147</span>,
     <span class="ident">Ahom</span> <span class="op">=</span> <span class="number">161</span>,
     <span class="ident">AnatolianHieroglyphs</span> <span class="op">=</span> <span class="number">156</span>,
     <span class="ident">Arabic</span> <span class="op">=</span> <span class="number">2</span>,
@@ -328,8 +368,6 @@
     <span class="ident">Batak</span> <span class="op">=</span> <span class="number">63</span>,
     <span class="ident">Bengali</span> <span class="op">=</span> <span class="number">4</span>,
     <span class="ident">Bhaiksuki</span> <span class="op">=</span> <span class="number">168</span>,
-    <span class="ident">Blissymbols</span> <span class="op">=</span> <span class="number">64</span>,
-    <span class="ident">BookPahlavi</span> <span class="op">=</span> <span class="number">124</span>,
     <span class="ident">Bopomofo</span> <span class="op">=</span> <span class="number">5</span>,
     <span class="ident">Brahmi</span> <span class="op">=</span> <span class="number">65</span>,
     <span class="ident">Braille</span> <span class="op">=</span> <span class="number">46</span>,
@@ -342,24 +380,20 @@
     <span class="ident">Cham</span> <span class="op">=</span> <span class="number">66</span>,
     <span class="ident">Cherokee</span> <span class="op">=</span> <span class="number">6</span>,
     <span class="ident">Chorasmian</span> <span class="op">=</span> <span class="number">189</span>,
-    <span class="ident">Cirth</span> <span class="op">=</span> <span class="number">67</span>,
-    <span class="ident">CodeLimit</span> <span class="op">=</span> <span class="number">193</span>,
     <span class="ident">Common</span> <span class="op">=</span> <span class="number">0</span>,
     <span class="ident">Coptic</span> <span class="op">=</span> <span class="number">7</span>,
     <span class="ident">Cuneiform</span> <span class="op">=</span> <span class="number">101</span>,
     <span class="ident">Cypriot</span> <span class="op">=</span> <span class="number">47</span>,
+    <span class="ident">CyproMinoan</span> <span class="op">=</span> <span class="number">193</span>,
     <span class="ident">Cyrillic</span> <span class="op">=</span> <span class="number">8</span>,
-    <span class="ident">DemoticEgyptian</span> <span class="op">=</span> <span class="number">69</span>,
     <span class="ident">Deseret</span> <span class="op">=</span> <span class="number">9</span>,
     <span class="ident">Devanagari</span> <span class="op">=</span> <span class="number">10</span>,
     <span class="ident">DivesAkuru</span> <span class="op">=</span> <span class="number">190</span>,
     <span class="ident">Dogra</span> <span class="op">=</span> <span class="number">178</span>,
     <span class="ident">Duployan</span> <span class="op">=</span> <span class="number">135</span>,
-    <span class="ident">EasternSyriac</span> <span class="op">=</span> <span class="number">97</span>,
     <span class="ident">EgyptianHieroglyphs</span> <span class="op">=</span> <span class="number">71</span>,
     <span class="ident">Elbasan</span> <span class="op">=</span> <span class="number">136</span>,
     <span class="ident">Elymaic</span> <span class="op">=</span> <span class="number">185</span>,
-    <span class="ident">EstrangeloSyriac</span> <span class="op">=</span> <span class="number">95</span>,
     <span class="ident">Ethiopic</span> <span class="op">=</span> <span class="number">11</span>,
     <span class="ident">Georgian</span> <span class="op">=</span> <span class="number">12</span>,
     <span class="ident">Glagolitic</span> <span class="op">=</span> <span class="number">56</span>,
@@ -370,48 +404,33 @@
     <span class="ident">GunjalaGondi</span> <span class="op">=</span> <span class="number">179</span>,
     <span class="ident">Gurmukhi</span> <span class="op">=</span> <span class="number">16</span>,
     <span class="ident">Han</span> <span class="op">=</span> <span class="number">17</span>,
-    <span class="ident">HanWithBopomofo</span> <span class="op">=</span> <span class="number">172</span>,
     <span class="ident">Hangul</span> <span class="op">=</span> <span class="number">18</span>,
     <span class="ident">HanifiRohingya</span> <span class="op">=</span> <span class="number">182</span>,
     <span class="ident">Hanunoo</span> <span class="op">=</span> <span class="number">43</span>,
-    <span class="ident">HarappanIndus</span> <span class="op">=</span> <span class="number">77</span>,
     <span class="ident">Hatran</span> <span class="op">=</span> <span class="number">162</span>,
     <span class="ident">Hebrew</span> <span class="op">=</span> <span class="number">19</span>,
-    <span class="ident">HieraticEgyptian</span> <span class="op">=</span> <span class="number">70</span>,
     <span class="ident">Hiragana</span> <span class="op">=</span> <span class="number">20</span>,
     <span class="ident">ImperialAramaic</span> <span class="op">=</span> <span class="number">116</span>,
     <span class="ident">Inherited</span> <span class="op">=</span> <span class="number">1</span>,
     <span class="ident">InscriptionalPahlavi</span> <span class="op">=</span> <span class="number">122</span>,
     <span class="ident">InscriptionalParthian</span> <span class="op">=</span> <span class="number">125</span>,
-    <span class="ident">InvalidCode</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>,
-    <span class="ident">Jamo</span> <span class="op">=</span> <span class="number">173</span>,
-    <span class="ident">Japanese</span> <span class="op">=</span> <span class="number">105</span>,
     <span class="ident">Javanese</span> <span class="op">=</span> <span class="number">78</span>,
-    <span class="ident">Jurchen</span> <span class="op">=</span> <span class="number">148</span>,
     <span class="ident">Kaithi</span> <span class="op">=</span> <span class="number">120</span>,
     <span class="ident">Kannada</span> <span class="op">=</span> <span class="number">21</span>,
     <span class="ident">Katakana</span> <span class="op">=</span> <span class="number">22</span>,
-    <span class="ident">KatakanaOrHiragana</span> <span class="op">=</span> <span class="number">54</span>,
     <span class="ident">KayahLi</span> <span class="op">=</span> <span class="number">79</span>,
     <span class="ident">Kharoshthi</span> <span class="op">=</span> <span class="number">57</span>,
     <span class="ident">KhitanSmallScript</span> <span class="op">=</span> <span class="number">191</span>,
     <span class="ident">Khmer</span> <span class="op">=</span> <span class="number">23</span>,
     <span class="ident">Khojki</span> <span class="op">=</span> <span class="number">157</span>,
     <span class="ident">Khudawadi</span> <span class="op">=</span> <span class="number">145</span>,
-    <span class="ident">Khutsuri</span> <span class="op">=</span> <span class="number">72</span>,
-    <span class="ident">Korean</span> <span class="op">=</span> <span class="number">119</span>,
-    <span class="ident">Kpelle</span> <span class="op">=</span> <span class="number">138</span>,
-    <span class="ident">Lanna</span> <span class="op">=</span> <span class="number">106</span>,
     <span class="ident">Lao</span> <span class="op">=</span> <span class="number">24</span>,
     <span class="ident">Latin</span> <span class="op">=</span> <span class="number">25</span>,
-    <span class="ident">LatinFraktur</span> <span class="op">=</span> <span class="number">80</span>,
-    <span class="ident">LatinGaelic</span> <span class="op">=</span> <span class="number">81</span>,
     <span class="ident">Lepcha</span> <span class="op">=</span> <span class="number">82</span>,
     <span class="ident">Limbu</span> <span class="op">=</span> <span class="number">48</span>,
     <span class="ident">LinearA</span> <span class="op">=</span> <span class="number">83</span>,
     <span class="ident">LinearB</span> <span class="op">=</span> <span class="number">49</span>,
     <span class="ident">Lisu</span> <span class="op">=</span> <span class="number">131</span>,
-    <span class="ident">Loma</span> <span class="op">=</span> <span class="number">139</span>,
     <span class="ident">Lycian</span> <span class="op">=</span> <span class="number">107</span>,
     <span class="ident">Lydian</span> <span class="op">=</span> <span class="number">108</span>,
     <span class="ident">Mahajani</span> <span class="op">=</span> <span class="number">160</span>,
@@ -421,22 +440,18 @@
     <span class="ident">Manichaean</span> <span class="op">=</span> <span class="number">121</span>,
     <span class="ident">Marchen</span> <span class="op">=</span> <span class="number">169</span>,
     <span class="ident">MasaramGondi</span> <span class="op">=</span> <span class="number">175</span>,
-    <span class="ident">MathematicalNotation</span> <span class="op">=</span> <span class="number">128</span>,
-    <span class="ident">MayanHieroglyphs</span> <span class="op">=</span> <span class="number">85</span>,
     <span class="ident">Medefaidrin</span> <span class="op">=</span> <span class="number">181</span>,
-    <span class="ident">MeiteiMayek</span> <span class="op">=</span> <span class="number">115</span>,
-    <span class="ident">Mende</span> <span class="op">=</span> <span class="number">140</span>,
+    <span class="ident">MeeteiMayek</span> <span class="op">=</span> <span class="number">115</span>,
+    <span class="ident">MendeKikakui</span> <span class="op">=</span> <span class="number">140</span>,
     <span class="ident">MeroiticCursive</span> <span class="op">=</span> <span class="number">141</span>,
     <span class="ident">MeroiticHieroglyphs</span> <span class="op">=</span> <span class="number">86</span>,
     <span class="ident">Miao</span> <span class="op">=</span> <span class="number">92</span>,
     <span class="ident">Modi</span> <span class="op">=</span> <span class="number">163</span>,
     <span class="ident">Mongolian</span> <span class="op">=</span> <span class="number">27</span>,
-    <span class="ident">Moon</span> <span class="op">=</span> <span class="number">114</span>,
     <span class="ident">Mro</span> <span class="op">=</span> <span class="number">149</span>,
     <span class="ident">Multani</span> <span class="op">=</span> <span class="number">164</span>,
     <span class="ident">Myanmar</span> <span class="op">=</span> <span class="number">28</span>,
     <span class="ident">Nabataean</span> <span class="op">=</span> <span class="number">143</span>,
-    <span class="ident">NakhiGeba</span> <span class="op">=</span> <span class="number">132</span>,
     <span class="ident">Nandinagari</span> <span class="op">=</span> <span class="number">187</span>,
     <span class="ident">NewTaiLue</span> <span class="op">=</span> <span class="number">59</span>,
     <span class="ident">Newa</span> <span class="op">=</span> <span class="number">170</span>,
@@ -445,7 +460,6 @@
     <span class="ident">NyiakengPuachueHmong</span> <span class="op">=</span> <span class="number">186</span>,
     <span class="ident">Ogham</span> <span class="op">=</span> <span class="number">29</span>,
     <span class="ident">OlChiki</span> <span class="op">=</span> <span class="number">109</span>,
-    <span class="ident">OldChurchSlavonicCyrillic</span> <span class="op">=</span> <span class="number">68</span>,
     <span class="ident">OldHungarian</span> <span class="op">=</span> <span class="number">76</span>,
     <span class="ident">OldItalic</span> <span class="op">=</span> <span class="number">30</span>,
     <span class="ident">OldNorthArabian</span> <span class="op">=</span> <span class="number">142</span>,
@@ -453,8 +467,9 @@
     <span class="ident">OldPersian</span> <span class="op">=</span> <span class="number">61</span>,
     <span class="ident">OldSogdian</span> <span class="op">=</span> <span class="number">184</span>,
     <span class="ident">OldSouthArabian</span> <span class="op">=</span> <span class="number">133</span>,
+    <span class="ident">OldTurkic</span> <span class="op">=</span> <span class="number">88</span>,
+    <span class="ident">OldUyghur</span> <span class="op">=</span> <span class="number">194</span>,
     <span class="ident">Oriya</span> <span class="op">=</span> <span class="number">31</span>,
-    <span class="ident">Orkhon</span> <span class="op">=</span> <span class="number">88</span>,
     <span class="ident">Osage</span> <span class="op">=</span> <span class="number">171</span>,
     <span class="ident">Osmanya</span> <span class="op">=</span> <span class="number">50</span>,
     <span class="ident">PahawhHmong</span> <span class="op">=</span> <span class="number">75</span>,
@@ -464,49 +479,42 @@
     <span class="ident">Phoenician</span> <span class="op">=</span> <span class="number">91</span>,
     <span class="ident">PsalterPahlavi</span> <span class="op">=</span> <span class="number">123</span>,
     <span class="ident">Rejang</span> <span class="op">=</span> <span class="number">110</span>,
-    <span class="ident">Rongorongo</span> <span class="op">=</span> <span class="number">93</span>,
     <span class="ident">Runic</span> <span class="op">=</span> <span class="number">32</span>,
     <span class="ident">Samaritan</span> <span class="op">=</span> <span class="number">126</span>,
-    <span class="ident">Sarati</span> <span class="op">=</span> <span class="number">94</span>,
     <span class="ident">Saurashtra</span> <span class="op">=</span> <span class="number">111</span>,
     <span class="ident">Sharada</span> <span class="op">=</span> <span class="number">151</span>,
     <span class="ident">Shavian</span> <span class="op">=</span> <span class="number">51</span>,
     <span class="ident">Siddham</span> <span class="op">=</span> <span class="number">166</span>,
     <span class="ident">SignWriting</span> <span class="op">=</span> <span class="number">112</span>,
-    <span class="ident">SimplifiedHan</span> <span class="op">=</span> <span class="number">73</span>,
     <span class="ident">Sinhala</span> <span class="op">=</span> <span class="number">33</span>,
     <span class="ident">Sogdian</span> <span class="op">=</span> <span class="number">183</span>,
     <span class="ident">SoraSompeng</span> <span class="op">=</span> <span class="number">152</span>,
     <span class="ident">Soyombo</span> <span class="op">=</span> <span class="number">176</span>,
     <span class="ident">Sundanese</span> <span class="op">=</span> <span class="number">113</span>,
     <span class="ident">SylotiNagri</span> <span class="op">=</span> <span class="number">58</span>,
-    <span class="ident">Symbols</span> <span class="op">=</span> <span class="number">129</span>,
-    <span class="ident">SymbolsEmoji</span> <span class="op">=</span> <span class="number">174</span>,
     <span class="ident">Syriac</span> <span class="op">=</span> <span class="number">34</span>,
     <span class="ident">Tagalog</span> <span class="op">=</span> <span class="number">42</span>,
     <span class="ident">Tagbanwa</span> <span class="op">=</span> <span class="number">45</span>,
     <span class="ident">TaiLe</span> <span class="op">=</span> <span class="number">52</span>,
+    <span class="ident">TaiTham</span> <span class="op">=</span> <span class="number">106</span>,
     <span class="ident">TaiViet</span> <span class="op">=</span> <span class="number">127</span>,
     <span class="ident">Takri</span> <span class="op">=</span> <span class="number">153</span>,
     <span class="ident">Tamil</span> <span class="op">=</span> <span class="number">35</span>,
+    <span class="ident">Tangsa</span> <span class="op">=</span> <span class="number">195</span>,
     <span class="ident">Tangut</span> <span class="op">=</span> <span class="number">154</span>,
     <span class="ident">Telugu</span> <span class="op">=</span> <span class="number">36</span>,
-    <span class="ident">Tengwar</span> <span class="op">=</span> <span class="number">98</span>,
     <span class="ident">Thaana</span> <span class="op">=</span> <span class="number">37</span>,
     <span class="ident">Thai</span> <span class="op">=</span> <span class="number">38</span>,
     <span class="ident">Tibetan</span> <span class="op">=</span> <span class="number">39</span>,
     <span class="ident">Tifinagh</span> <span class="op">=</span> <span class="number">60</span>,
     <span class="ident">Tirhuta</span> <span class="op">=</span> <span class="number">158</span>,
-    <span class="ident">TraditionalHan</span> <span class="op">=</span> <span class="number">74</span>,
+    <span class="ident">Toto</span> <span class="op">=</span> <span class="number">196</span>,
     <span class="ident">Ugaritic</span> <span class="op">=</span> <span class="number">53</span>,
     <span class="ident">Unknown</span> <span class="op">=</span> <span class="number">103</span>,
-    <span class="ident">UnwrittenLanguages</span> <span class="op">=</span> <span class="number">102</span>,
     <span class="ident">Vai</span> <span class="op">=</span> <span class="number">99</span>,
-    <span class="ident">VisibleSpeech</span> <span class="op">=</span> <span class="number">100</span>,
+    <span class="ident">Vithkuqi</span> <span class="op">=</span> <span class="number">197</span>,
     <span class="ident">Wancho</span> <span class="op">=</span> <span class="number">188</span>,
     <span class="ident">WarangCiti</span> <span class="op">=</span> <span class="number">146</span>,
-    <span class="ident">WesternSyriac</span> <span class="op">=</span> <span class="number">96</span>,
-    <span class="ident">Woleai</span> <span class="op">=</span> <span class="number">155</span>,
     <span class="ident">Yezidi</span> <span class="op">=</span> <span class="number">192</span>,
     <span class="ident">Yi</span> <span class="op">=</span> <span class="number">41</span>,
     <span class="ident">ZanabazarSquare</span> <span class="op">=</span> <span class="number">177</span>,

@@ -203,6 +203,10 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -330,7 +334,9 @@
 
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">subtag</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek</span>() {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">attr</span>) <span class="op">=</span> <span class="ident">Attribute::from_bytes</span>(<span class="ident">subtag</span>) {
-                <span class="ident">attributes</span>.<span class="ident">push</span>(<span class="ident">attr</span>);
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">idx</span>) <span class="op">=</span> <span class="ident">attributes</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">attr</span>) {
+                    <span class="ident">attributes</span>.<span class="ident">insert</span>(<span class="ident">idx</span>, <span class="ident">attr</span>);
+                }
             } <span class="kw">else</span> {
                 <span class="kw">break</span>;
             }
@@ -341,7 +347,9 @@
             <span class="kw">let</span> <span class="ident">slen</span> <span class="op">=</span> <span class="ident">subtag</span>.<span class="ident">len</span>();
             <span class="kw">if</span> <span class="ident">slen</span> <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">kw</span>) <span class="op">=</span> <span class="ident">current_keyword</span>.<span class="ident">take</span>() {
-                    <span class="ident">keywords</span>.<span class="ident">push</span>((<span class="ident">kw</span>, <span class="ident">Value::from_vec_unchecked</span>(<span class="ident">current_type</span>)));
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">idx</span>) <span class="op">=</span> <span class="ident">keywords</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">kw</span>, <span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">k</span>) {
+                        <span class="ident">keywords</span>.<span class="ident">insert</span>(<span class="ident">idx</span>, (<span class="ident">kw</span>, <span class="ident">Value::from_vec_unchecked</span>(<span class="ident">current_type</span>)));
+                    }
                     <span class="ident">current_type</span> <span class="op">=</span> <span class="macro">vec!</span>[];
                 }
                 <span class="ident">current_keyword</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Key::from_bytes</span>(<span class="ident">subtag</span>)<span class="question-mark">?</span>);
@@ -358,10 +366,10 @@
         }
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">kw</span>) <span class="op">=</span> <span class="ident">current_keyword</span>.<span class="ident">take</span>() {
-            <span class="ident">keywords</span>.<span class="ident">push</span>((<span class="ident">kw</span>, <span class="ident">Value::from_vec_unchecked</span>(<span class="ident">current_type</span>)));
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">idx</span>) <span class="op">=</span> <span class="ident">keywords</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">kw</span>, <span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">k</span>) {
+                <span class="ident">keywords</span>.<span class="ident">insert</span>(<span class="ident">idx</span>, (<span class="ident">kw</span>, <span class="ident">Value::from_vec_unchecked</span>(<span class="ident">current_type</span>)));
+            }
         }
-
-        <span class="ident">keywords</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="number">0</span>);
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">keywords</span>: <span class="ident">Keywords::from_vec_unchecked</span>(<span class="ident">keywords</span>),

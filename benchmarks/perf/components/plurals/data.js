@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1629378584864,
+  "lastUpdate": 1629465080252,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -12473,6 +12473,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 23195,
             "range": "± 1797",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dminor@mozilla.com",
+            "name": "Dan Minor",
+            "username": "dminor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cdab7f1771ff47093e006d8309e137b5ce1097df",
+          "message": "Ignore duplicate keywords and attributes (#966)\n\nFrom https://tc39.es/ecma402/#sec-canonicalizeunicodelocaleid, we should\r\nonly keep the first keyword for a given key and the first instance of any\r\nattribute defined in the input.",
+          "timestamp": "2021-08-19T09:02:10-04:00",
+          "tree_id": "db46eb09517856ec3d326b95924bf62e65d34f89",
+          "url": "https://github.com/unicode-org/icu4x/commit/cdab7f1771ff47093e006d8309e137b5ce1097df"
+        },
+        "date": 1629378600182,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1429,
+            "range": "± 40",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 8003,
+            "range": "± 319",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 25168,
+            "range": "± 1470",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dminor@mozilla.com",
+            "name": "Dan Minor",
+            "username": "dminor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9b41685af03e5cbc8ddd97348ae19719ace30753",
+          "message": "Reject empty unicode extensions (#970)\n\nFrom https://www.unicode.org/reports/tr35/#Unicode_locale_identifier,\r\nunicode extensions must include at least one attribute or at least one\r\nkeyword.",
+          "timestamp": "2021-08-20T09:04:27-04:00",
+          "tree_id": "1becf955de38f8291f81982f6322c5a11a1328f9",
+          "url": "https://github.com/unicode-org/icu4x/commit/9b41685af03e5cbc8ddd97348ae19719ace30753"
+        },
+        "date": 1629465077891,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1152,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6471,
+            "range": "± 9",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 20868,
+            "range": "± 294",
             "unit": "ns/iter"
           }
         ]

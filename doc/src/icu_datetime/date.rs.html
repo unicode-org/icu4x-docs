@@ -525,10 +525,53 @@
 <span id="523">523</span>
 <span id="524">524</span>
 <span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
+
+<span class="doccomment">//! A collection of utilities for representing and working with dates as an input to</span>
+<span class="doccomment">//! formatting operations.</span>
 
 <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Add</span>, <span class="ident">Sub</span>};
@@ -537,14 +580,22 @@
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
 
+<span class="doccomment">/// A list of possible error outcomes for working with various inputs to DateTime inputs</span>
+<span class="doccomment">/// and operations.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Display</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DateTimeError</span> {
+    <span class="doccomment">/// An input could not be parsed.</span>
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;{0}&quot;</span>)]</span>
     <span class="ident">Parse</span>(<span class="ident">core::num::ParseIntError</span>),
+    <span class="doccomment">/// An input overflowed its range.</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;{field} must be between 0-{max}&quot;</span>)]</span>
     <span class="ident">Overflow</span> { <span class="ident">field</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">max</span>: <span class="ident">usize</span> },
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;{field} must be between {min}-0&quot;</span>)]</span>
+    <span class="doccomment">/// An input underflowed its range.</span>
     <span class="ident">Underflow</span> { <span class="ident">field</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">min</span>: <span class="ident">isize</span> },
+    <span class="doccomment">/// The time zone offset was invalid.</span>
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Failed to parse time-zone offset&quot;</span>)]</span>
     <span class="ident">InvalidTimeZoneOffset</span>,
 }
@@ -777,11 +828,18 @@
     <span class="kw">pub</span> <span class="ident">code</span>: <span class="ident">MonthCode</span>,
 }
 
+<span class="doccomment">/// A struct containing various details about the position of the day within a year. It is returned</span>
+<span class="comment">// by the [`day_of_year_info()`](trait.DateInput.html#tymethod.day_of_year_info) method of the</span>
+<span class="comment">// [`DateInput`] trait.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DayOfYearInfo</span> {
+    <span class="doccomment">/// The current day of the year, 1-based.</span>
     <span class="kw">pub</span> <span class="ident">day_of_year</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// The number of days in a year.</span>
     <span class="kw">pub</span> <span class="ident">days_in_year</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// The previous year.</span>
     <span class="kw">pub</span> <span class="ident">prev_year</span>: <span class="ident">Year</span>,
+    <span class="doccomment">/// The next year.</span>
     <span class="kw">pub</span> <span class="ident">next_year</span>: <span class="ident">Year</span>,
 }
 
@@ -798,6 +856,7 @@
 <span class="doccomment">/// assert_eq!(7, IsoWeekday::Sunday as usize);</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// The weekday variants should be self-obvious.</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">i8</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">IsoWeekday</span> {
     <span class="ident">Monday</span> <span class="op">=</span> <span class="number">1</span>,
@@ -847,11 +906,13 @@
 <span class="doccomment">/// unit is bounded by a range. The traits implemented here will return a Result on</span>
 <span class="doccomment">/// whether or not the unit is in range from the given input.</span>
 <span class="macro">macro_rules!</span> <span class="ident">dt_unit</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">value</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">value</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">docs</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">doc</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">docs</span>]</span>
         <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Hash</span>)]</span>
         <span class="kw">pub</span> <span class="kw">struct</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="ident">u8</span>);
 
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
+            <span class="doccomment">/// Do not validate the numeric input for this component.</span>
             <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">input</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
                 <span class="self">Self</span>(<span class="ident">input</span>)
             }
@@ -933,17 +994,34 @@
     };
 }
 
-<span class="macro">dt_unit!</span>(<span class="ident">IsoHour</span>, <span class="number">24</span>);
+<span class="macro">dt_unit!</span>(
+    <span class="ident">IsoHour</span>,
+    <span class="number">24</span>,
+    <span class="string">&quot;An ISO-8601 hour component, for use with the [`IsoTimeInput`].&quot;</span>
+);
 
-<span class="macro">dt_unit!</span>(<span class="ident">IsoMinute</span>, <span class="number">60</span>);
+<span class="macro">dt_unit!</span>(
+    <span class="ident">IsoMinute</span>,
+    <span class="number">60</span>,
+    <span class="string">&quot;An ISO-8601 minute component, for use with the [`IsoTimeInput`].&quot;</span>
+);
 
-<span class="macro">dt_unit!</span>(<span class="ident">IsoSecond</span>, <span class="number">61</span>);
+<span class="macro">dt_unit!</span>(
+    <span class="ident">IsoSecond</span>,
+    <span class="number">61</span>,
+    <span class="string">&quot;An ISO-8601 second component, for use with the [`IsoTimeInput`].&quot;</span>
+);
 
 <span class="comment">// TODO(#485): Improve FractionalSecond.</span>
+<span class="doccomment">/// A placeholder for fractional seconds support. See [Issue #485](https://github.com/unicode-org/icu4x/issues/485)</span>
+<span class="doccomment">/// for tracking the support of this feature.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">FractionalSecond</span> {
+    <span class="doccomment">/// The millisecond component of the fractional second.</span>
     <span class="ident">Millisecond</span>(<span class="ident">u16</span>),
+    <span class="doccomment">/// The microsecond component of the fractional second.</span>
     <span class="ident">Microsecond</span>(<span class="ident">u32</span>),
+    <span class="doccomment">/// The nanosecond component of the fractional second.</span>
     <span class="ident">Nanosecond</span>(<span class="ident">u32</span>),
 }
 
@@ -952,6 +1030,8 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GmtOffset</span>(<span class="ident">i32</span>);
 
 <span class="kw">impl</span> <span class="ident">GmtOffset</span> {
+    <span class="doccomment">/// Attempt to create a [`GmtOffset`] from a seconds input. It returns an error when the seconds</span>
+    <span class="doccomment">/// overflows or underflows.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">seconds</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
         <span class="comment">// Valid range is from GMT-12 to GMT+14 in seconds.</span>
         <span class="kw">if</span> <span class="ident">seconds</span> <span class="op">&lt;</span> <span class="op">-</span>(<span class="number">12</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span>) {

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["datetime",""],["time_zone",""],["zoned_datetime",""]]});
+initSidebarItems({"mod":[["datetime","Temporary DateTime input utilities."],["time_zone","Temporary time zone input utilities."],["zoned_datetime","Temporary zoned DateTime input utilities."]]});

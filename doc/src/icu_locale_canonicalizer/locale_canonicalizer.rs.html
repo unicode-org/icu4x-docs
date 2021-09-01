@@ -615,6 +615,85 @@
 <span id="613">613</span>
 <span id="614">614</span>
 <span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -633,18 +712,97 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr4</span>, <span class="ident">TinyStr4</span>, <span class="ident">TinyStr8</span>};
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#1027) - Add missing docs.</span>
 <span class="doccomment">/// Used to track the result of a canonicalization operation that potentially modifies its argument in place.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CanonicalizationResult</span> {
+    <span class="doccomment">/// The canonicalization operation modified the locale.</span>
     <span class="ident">Modified</span>,
+    <span class="doccomment">/// The canonicalization operation did not modify the locale.</span>
     <span class="ident">Unmodified</span>,
 }
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#1027) - Add missing docs.</span>
+<span class="doccomment">/// LocaleCanonicalizer implementation.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The LocaleCanonicalizer provides methods to canonicalize Locales and</span>
+<span class="doccomment">/// LanguageIdentifiers based upon [`CLDR`] data.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It currently supports locale canonicalization based upon the canonicalization</span>
+<span class="doccomment">/// algorithm from [`UTS #35: Unicode LDML 3. LocaleId Canonicalization`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It also supports the `minimize` and `maximize` likely subtags algorithms</span>
+<span class="doccomment">/// as described in [`UTS #35: Unicode LDML 3. Likely Subtags`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The maximize method potentially updates a passed in locale in place</span>
+<span class="doccomment">/// depending up the results of running the &#39;Add Likely Subtags&#39; algorithm</span>
+<span class="doccomment">/// from [`UTS #35: Unicode LDML 3. Likely Subtags`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This minimize method returns a new Locale that is the result of running the</span>
+<span class="doccomment">/// &#39;Remove Likely Subtags&#39; algorithm from [`UTS #35: Unicode LDML 3. Likely Subtags`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locale_canonicalizer::{CanonicalizationResult, LocaleCanonicalizer};</span>
+<span class="doccomment">/// use icu_locid::Locale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">/// let lc = LocaleCanonicalizer::new(&amp;provider)</span>
+<span class="doccomment">///     .expect(&quot;create failed&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut locale : Locale = &quot;ja-Latn-fonipa-hepburn-heploc&quot;.parse()</span>
+<span class="doccomment">///     .expect(&quot;parse failed&quot;);</span>
+<span class="doccomment">/// assert_eq!(lc.canonicalize(&amp;mut locale), CanonicalizationResult::Modified);</span>
+<span class="doccomment">/// assert_eq!(locale.to_string(), &quot;ja-Latn-alalc97-fonipa&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locale_canonicalizer::{CanonicalizationResult, LocaleCanonicalizer};</span>
+<span class="doccomment">/// use icu_locid::Locale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">/// let lc = LocaleCanonicalizer::new(&amp;provider)</span>
+<span class="doccomment">///     .expect(&quot;create failed&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut locale : Locale = &quot;zh-CN&quot;.parse()</span>
+<span class="doccomment">///     .expect(&quot;parse failed&quot;);</span>
+<span class="doccomment">/// assert_eq!(lc.maximize(&amp;mut locale), CanonicalizationResult::Modified);</span>
+<span class="doccomment">/// assert_eq!(locale.to_string(), &quot;zh-Hans-CN&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut locale : Locale = &quot;zh-Hant-TW&quot;.parse()</span>
+<span class="doccomment">///     .expect(&quot;parse failed&quot;);</span>
+<span class="doccomment">/// assert_eq!(lc.maximize(&amp;mut locale), CanonicalizationResult::Unmodified);</span>
+<span class="doccomment">/// assert_eq!(locale.to_string(), &quot;zh-Hant-TW&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locale_canonicalizer::{CanonicalizationResult, LocaleCanonicalizer};</span>
+<span class="doccomment">/// use icu_locid::Locale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">/// let lc = LocaleCanonicalizer::new(&amp;provider)</span>
+<span class="doccomment">///     .expect(&quot;create failed&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut locale : Locale = &quot;zh-Hans-CN&quot;.parse()</span>
+<span class="doccomment">///     .expect(&quot;parse failed&quot;);</span>
+<span class="doccomment">/// assert_eq!(lc.minimize(&amp;mut locale), CanonicalizationResult::Modified);</span>
+<span class="doccomment">/// assert_eq!(locale.to_string(), &quot;zh&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut locale : Locale = &quot;zh&quot;.parse()</span>
+<span class="doccomment">///     .expect(&quot;parse failed&quot;);</span>
+<span class="doccomment">/// assert_eq!(lc.minimize(&amp;mut locale), CanonicalizationResult::Unmodified);</span>
+<span class="doccomment">/// assert_eq!(locale.to_string(), &quot;zh&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`ICU4X`]: ../icu/index.html</span>
+<span class="doccomment">/// [`CLDR`]: http://cldr.unicode.org/</span>
+<span class="doccomment">/// [`UTS #35: Unicode LDML 3. Likely Subtags`]: https://www.unicode.org/reports/tr35/#Likely_Subtags.</span>
+<span class="doccomment">/// [`UTS #35: Unicode LDML 3. LocaleId Canonicalization`]: http://unicode.org/reports/tr35/#LocaleId_Canonicalization,</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleCanonicalizer</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Data to support canonicalization.</span>
     <span class="ident">aliases</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">AliasesV1Marker</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Data to support likely subtags maximize and minimize.</span>
     <span class="ident">likely_subtags</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">LikelySubtagsV1Marker</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Extension keys that require canonicalization.</span>
     <span class="ident">extension_keys</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
 }
 

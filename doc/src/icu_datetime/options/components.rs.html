@@ -428,6 +428,74 @@
 <span id="426">426</span>
 <span id="427">427</span>
 <span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -672,7 +740,7 @@
                     <span class="comment">// region-based (h12 for US, h23 for GB, etc). This is in CLDR, but we need</span>
                     <span class="comment">// to load it as well as think about the best architecture for where that</span>
                     <span class="comment">// data loading code should reside.</span>
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields::Hour::H24</span>,
+                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields::Hour::H23</span>,
                 }),
                 <span class="ident">length</span>: <span class="kw">match</span> <span class="ident">hour</span> {
                     <span class="comment">// Example for h: (note that this is the same for k, K, and H)</span>
@@ -710,10 +778,13 @@
             <span class="comment">// A - Milliseconds in day. Not used in skeletons.</span>
         }
 
-        <span class="comment">// TODO(#583) - Implement:</span>
-        <span class="comment">// if self.time_zone_name.is_some() {</span>
-        <span class="comment">//     unimplemented!();</span>
-        <span class="comment">// }</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">time_zone_name</span>.<span class="ident">is_some</span>() {
+            <span class="comment">// Only the lower &quot;v&quot; field is used in skeletons.</span>
+            <span class="ident">fields</span>.<span class="ident">push</span>(<span class="ident">Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">fields::TimeZone::LowerV</span>),
+                <span class="ident">length</span>: <span class="ident">FieldLength::One</span>,
+            });
+        }
 
         <span class="macro">debug_assert!</span>(
             <span class="ident">fields</span>.<span class="ident">windows</span>(<span class="number">2</span>).<span class="ident">all</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>[<span class="number">0</span>] <span class="op">&lt;</span> <span class="ident">f</span>[<span class="number">1</span>]),
@@ -793,16 +864,81 @@
     <span class="ident">Narrow</span>,
 }
 
+<span class="comment">// Each enum variant is documented with the UTS 35 field information from:</span>
+<span class="comment">// https://unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table</span>
+<span class="comment">//</span>
 <span class="doccomment">/// Options for displaying a time zone for the `components::`[`Bag`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Note that the initial implementation is focusing on only supporting ECMA-402 compatible</span>
+<span class="doccomment">/// options.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TimeZoneName</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;long&quot;</span>))]</span>
-    <span class="ident">Long</span>,
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;short&quot;</span>))]</span>
-    <span class="ident">Short</span>,
+    <span class="comment">// UTS-35 fields: z..zzz</span>
+    <span class="comment">//</span>
+    <span class="doccomment">/// Short localized form, without the location. (e.g.: PST, GMT-8)</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;shortSpecific&quot;</span>))]</span>
+    <span class="ident">ShortSpecific</span>,
+
+    <span class="comment">// UTS-35 fields: zzzz</span>
+    <span class="comment">// Per UTS-35: [long form] specific non-location (falling back to long localized GMT)</span>
+    <span class="comment">//</span>
+    <span class="doccomment">/// Long localized form, without the location (e.g., Pacific Standard Time, Nordamerikanische Westküsten-Normalzeit)</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;longSpecific&quot;</span>))]</span>
+    <span class="ident">LongSpecific</span>,
+
+    <span class="comment">// UTS-35 fields: O, OOOO</span>
+    <span class="comment">// Per UTS-35: The long localized GMT format. This is equivalent to the &quot;OOOO&quot; specifier</span>
+    <span class="comment">// Per UTS-35: Short localized GMT format (e.g., GMT-8)</span>
+    <span class="comment">// This enum variant is combining the two types of fields, as the CLDR specifices the preferred</span>
+    <span class="comment">// hour-format for the locale, and ICU4X uses the preferred one.</span>
+    <span class="comment">//   e.g.</span>
+    <span class="comment">//   https://github.com/unicode-org/cldr-json/blob/c23635f13946292e40077fd62aee6a8e122e7689/cldr-json/cldr-dates-full/main/es-MX/timeZoneNames.json#L13</span>
+    <span class="comment">//</span>
+    <span class="doccomment">/// Localized GMT format, in the locale&#39;s preferred hour format. (e.g., GMT-0800),</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;gmtOffset&quot;</span>))]</span>
+    <span class="ident">GmtOffset</span>,
+
+    <span class="comment">// UTS-35 fields: v</span>
+    <span class="comment">//   * falling back to generic location (See UTS 35 for more specific rules)</span>
+    <span class="comment">//   * falling back to short localized GMT</span>
+    <span class="doccomment">/// Short generic non-location format (e.g.: PT, Los Angeles, Zeit).</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;shortGeneric&quot;</span>))]</span>
+    <span class="ident">ShortGeneric</span>,
+
+    <span class="comment">// UTS-35 fields: vvvv</span>
+    <span class="comment">//  * falling back to generic location (See UTS 35 for more specific rules)</span>
+    <span class="comment">//  * falling back to long localized GMT</span>
+    <span class="doccomment">/// Long generic non-location format (e.g.: Pacific Time, Nordamerikanische Westküstenzeit),</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;longGeneric&quot;</span>))]</span>
+    <span class="ident">LongGeneric</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">TimeZoneName</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Field</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">time_zone_name</span>: <span class="ident">TimeZoneName</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">match</span> <span class="ident">time_zone_name</span> {
+            <span class="ident">TimeZoneName::ShortSpecific</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">fields::TimeZone::LowerZ</span>),
+                <span class="ident">length</span>: <span class="ident">FieldLength::One</span>,
+            },
+            <span class="ident">TimeZoneName::LongSpecific</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">fields::TimeZone::LowerZ</span>),
+                <span class="ident">length</span>: <span class="ident">FieldLength::Wide</span>,
+            },
+            <span class="ident">TimeZoneName::GmtOffset</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">fields::TimeZone::UpperO</span>),
+                <span class="ident">length</span>: <span class="ident">FieldLength::Wide</span>,
+            },
+            <span class="ident">TimeZoneName::ShortGeneric</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">fields::TimeZone::LowerV</span>),
+                <span class="ident">length</span>: <span class="ident">FieldLength::One</span>,
+            },
+            <span class="ident">TimeZoneName::LongGeneric</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">fields::TimeZone::LowerV</span>),
+                <span class="ident">length</span>: <span class="ident">FieldLength::Wide</span>,
+            },
+        }
+    }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -832,7 +968,7 @@
                 (<span class="ident">Symbol::Year</span>(<span class="ident">fields::Year::Calendar</span>), <span class="ident">Length::One</span>).<span class="ident">into</span>(),
                 (<span class="ident">Symbol::Month</span>(<span class="ident">fields::Month::Format</span>), <span class="ident">Length::Wide</span>).<span class="ident">into</span>(),
                 (<span class="ident">Symbol::Day</span>(<span class="ident">fields::Day::DayOfMonth</span>), <span class="ident">Length::One</span>).<span class="ident">into</span>(),
-                (<span class="ident">Symbol::Hour</span>(<span class="ident">fields::Hour::H24</span>), <span class="ident">Length::One</span>).<span class="ident">into</span>(),
+                (<span class="ident">Symbol::Hour</span>(<span class="ident">fields::Hour::H23</span>), <span class="ident">Length::One</span>).<span class="ident">into</span>(),
                 (<span class="ident">Symbol::Minute</span>, <span class="ident">Length::One</span>).<span class="ident">into</span>(),
                 (<span class="ident">Symbol::Second</span>(<span class="ident">fields::Second::Second</span>), <span class="ident">Length::One</span>).<span class="ident">into</span>(),
             ]

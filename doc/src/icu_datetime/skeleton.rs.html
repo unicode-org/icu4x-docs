@@ -1200,6 +1200,14 @@
 <span id="1198">1198</span>
 <span id="1199">1199</span>
 <span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -1219,7 +1227,7 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>},
-    <span class="ident">options</span>::{<span class="ident">length</span>, <span class="ident">preferences</span>},
+    <span class="ident">options</span>::{<span class="ident">components</span>, <span class="ident">length</span>, <span class="ident">preferences</span>},
     <span class="ident">pattern</span>::{<span class="ident">Pattern</span>, <span class="ident">PatternItem</span>},
     <span class="ident">provider::gregory::patterns</span>::{<span class="ident">LengthPatternsV1</span>, <span class="ident">PatternV1</span>, <span class="ident">SkeletonV1</span>, <span class="ident">SkeletonsV1</span>},
 };
@@ -1645,6 +1653,26 @@
     }
 }
 
+<span class="doccomment">/// This function swaps out the the time zone name field for the appropriate one. Skeleton matching</span>
+<span class="doccomment">/// only needs to find a single &quot;v&quot; field, and then the time zone name can expand from there.</span>
+<span class="kw">fn</span> <span class="ident">naively_apply_time_zone_name</span>(
+    <span class="ident">pattern</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Pattern</span>,
+    <span class="ident">time_zone_name</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">components::TimeZoneName</span><span class="op">&gt;</span>,
+) {
+    <span class="comment">// If there is a preference overiding the hour cycle, apply it now.</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time_zone_name</span>) <span class="op">=</span> <span class="ident">time_zone_name</span> {
+        <span class="kw">for</span> <span class="ident">item</span> <span class="kw">in</span> <span class="ident">pattern</span>.<span class="ident">items_mut</span>() {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PatternItem::Field</span>(<span class="ident">fields::Field</span> {
+                <span class="ident">symbol</span>: <span class="ident">fields::FieldSymbol::TimeZone</span>(<span class="kw">_</span>),
+                <span class="ident">length</span>: <span class="kw">_</span>,
+            }) <span class="op">=</span> <span class="ident">item</span>
+            {
+                <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">PatternItem::Field</span>((<span class="kw-2">*</span><span class="ident">time_zone_name</span>).<span class="ident">into</span>());
+            }
+        }
+    }
+}
+
 <span class="comment">// TODO - This could return a Cow&lt;&#39;a, Pattern&gt;, but it affects every other part of the API to</span>
 <span class="comment">// add a lifetime here. The pattern returned here could be one that we&#39;ve already constructed in</span>
 <span class="comment">// the CLDR as an exotic type, or it could be one that was modified to meet the requirements of</span>
@@ -1664,7 +1692,7 @@
     <span class="ident">skeletons</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SkeletonsV1</span>,
     <span class="ident">length_patterns</span>: <span class="kw-2">&amp;</span><span class="ident">LengthPatternsV1</span>,
     <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Field</span>],
-    <span class="ident">preferences</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">preferences::Bag</span><span class="op">&gt;</span>,
+    <span class="ident">components</span>: <span class="kw-2">&amp;</span><span class="ident">components::Bag</span>,
     <span class="ident">prefer_matched_pattern</span>: <span class="ident">bool</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BestSkeleton</span><span class="op">&lt;</span><span class="ident">Pattern</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">first_pattern_match</span> <span class="op">=</span>
@@ -1672,26 +1700,12 @@
 
     <span class="comment">// Try to match a skeleton to all of the fields.</span>
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">BestSkeleton::AllFieldsMatch</span>(<span class="kw-2">mut</span> <span class="ident">pattern</span>) <span class="op">=</span> <span class="ident">first_pattern_match</span> {
-        <span class="ident">naively_apply_hour_cycle_preferences</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pattern</span>, <span class="ident">preferences</span>);
+        <span class="ident">naively_apply_hour_cycle_preferences</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">preferences</span>);
+        <span class="ident">naively_apply_time_zone_name</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">time_zone_name</span>);
         <span class="kw">return</span> <span class="ident">BestSkeleton::AllFieldsMatch</span>(<span class="ident">pattern</span>);
     }
 
-    <span class="kw">let</span> <span class="ident">FieldsByType</span> { <span class="ident">date</span>, <span class="ident">time</span>, <span class="ident">other</span> } <span class="op">=</span> <span class="ident">group_fields_by_type</span>(<span class="ident">fields</span>);
-
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">other</span>.<span class="ident">is_empty</span>() {
-        <span class="comment">// These require &quot;append items&quot; support, see #586.</span>
-        <span class="comment">// TODO(#583) - TimeZones</span>
-        <span class="comment">// TODO(#486) - Eras,</span>
-        <span class="comment">// ... etc.</span>
-
-        <span class="comment">// TODO(#583) - This is commented out because TimeZone support is required here in order to</span>
-        <span class="comment">// generate length::Bag patterns correctly. For now it&#39;s commented out so that everything</span>
-        <span class="comment">// works for length::Bag with a preference, although it may lack a time zone.</span>
-
-        <span class="comment">// unimplemented!(</span>
-        <span class="comment">//     &quot;There are no \&quot;other\&quot; fields supported, these need to be appended to the pattern. {:?}&quot;, other</span>
-        <span class="comment">// );</span>
-    }
+    <span class="kw">let</span> <span class="ident">FieldsByType</span> { <span class="ident">date</span>, <span class="ident">time</span> } <span class="op">=</span> <span class="ident">group_fields_by_type</span>(<span class="ident">fields</span>);
 
     <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">time</span>.<span class="ident">is_empty</span>() {
         <span class="kw">return</span> <span class="kw">match</span> <span class="ident">first_pattern_match</span> {
@@ -1700,7 +1714,8 @@
             }
             <span class="ident">BestSkeleton::MissingOrExtraFields</span>(<span class="kw-2">mut</span> <span class="ident">pattern</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">is_empty</span>() {
-                    <span class="ident">naively_apply_hour_cycle_preferences</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pattern</span>, <span class="ident">preferences</span>);
+                    <span class="ident">naively_apply_hour_cycle_preferences</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">preferences</span>);
+                    <span class="ident">naively_apply_time_zone_name</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">time_zone_name</span>);
                 }
                 <span class="ident">BestSkeleton::MissingOrExtraFields</span>(<span class="ident">pattern</span>)
             }
@@ -1725,7 +1740,8 @@
         };
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">pattern</span>) <span class="op">=</span> <span class="ident">time_pattern</span> {
-        <span class="ident">naively_apply_hour_cycle_preferences</span>(<span class="ident">pattern</span>, <span class="ident">preferences</span>)
+        <span class="ident">naively_apply_hour_cycle_preferences</span>(<span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">preferences</span>);
+        <span class="ident">naively_apply_time_zone_name</span>(<span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">time_zone_name</span>);
     }
 
     <span class="comment">// Determine how to combine the date and time.</span>
@@ -1768,7 +1784,10 @@
                 <span class="ident">length::Date::Short</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">length_patterns</span>.<span class="ident">short</span>,
             };
 
-            <span class="prelude-val">Some</span>(<span class="ident">Pattern::from_bytes_combination</span>(<span class="ident">bytes</span>, <span class="ident">date_pattern</span>, <span class="ident">time_pattern</span>).<span class="ident">expect</span>(<span class="string">&quot;TODO&quot;</span>))
+            <span class="prelude-val">Some</span>(
+                <span class="ident">Pattern::from_bytes_combination</span>(<span class="ident">bytes</span>, <span class="ident">date_pattern</span>, <span class="ident">time_pattern</span>)
+                    .<span class="ident">expect</span>(<span class="string">&quot;Failed to create a Pattern from bytes&quot;</span>),
+            )
         }
         (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">pattern</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">pattern</span>),
         (<span class="prelude-val">Some</span>(<span class="ident">pattern</span>), <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">pattern</span>),
@@ -1790,13 +1809,11 @@
 <span class="kw">struct</span> <span class="ident">FieldsByType</span> {
     <span class="kw">pub</span> <span class="ident">date</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Field</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">time</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Field</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">other</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Field</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">fn</span> <span class="ident">group_fields_by_type</span>(<span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Field</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FieldsByType</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">time</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">other</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
     <span class="kw">for</span> <span class="ident">field</span> <span class="kw">in</span> <span class="ident">fields</span> {
         <span class="kw">match</span> <span class="ident">field</span>.<span class="ident">symbol</span> {
@@ -1814,17 +1831,16 @@
             <span class="ident">FieldSymbol::DayPeriod</span>(<span class="kw">_</span>)
             <span class="op">|</span> <span class="ident">FieldSymbol::Hour</span>(<span class="kw">_</span>)
             <span class="op">|</span> <span class="ident">FieldSymbol::Minute</span>
-            <span class="op">|</span> <span class="ident">FieldSymbol::Second</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">time</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">field</span>),
-
+            <span class="op">|</span> <span class="ident">FieldSymbol::Second</span>(<span class="kw">_</span>)
+            <span class="op">|</span> <span class="ident">FieldSymbol::TimeZone</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">time</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">field</span>),
             <span class="comment">// Other components</span>
-            <span class="ident">FieldSymbol::TimeZone</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">other</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">field</span>),
             <span class="comment">// TODO(#486)</span>
             <span class="comment">// FieldSymbol::Era(_) =&gt; other.push(*field),</span>
             <span class="comment">// Plus others...</span>
         };
     }
 
-    <span class="ident">FieldsByType</span> { <span class="ident">date</span>, <span class="ident">time</span>, <span class="ident">other</span> }
+    <span class="ident">FieldsByType</span> { <span class="ident">date</span>, <span class="ident">time</span> }
 }
 
 <span class="doccomment">/// A partial implementation of the [UTS 35 skeleton matching algorithm](https://unicode.org/reports/tr35/tr35-dates.html#Matching_Skeletons).</span>
@@ -2079,13 +2095,14 @@
 
     <span class="comment">// TODO(#586) - Append items support needs to be added.</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="attribute">#[<span class="ident">should_panic</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_missing_append_items_support</span>() {
         <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">components::Bag</span> {
             <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">components::Numeric::Numeric</span>),
             <span class="ident">month</span>: <span class="prelude-val">Some</span>(<span class="ident">components::Month::Long</span>),
             <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">components::Numeric::Numeric</span>),
             <span class="comment">// This will be appended.</span>
-            <span class="ident">time_zone_name</span>: <span class="prelude-val">Some</span>(<span class="ident">components::TimeZoneName::Long</span>),
+            <span class="ident">time_zone_name</span>: <span class="prelude-val">Some</span>(<span class="ident">components::TimeZoneName::LongSpecific</span>),
             ..<span class="ident">Default::default</span>()
         };
         <span class="kw">let</span> <span class="ident">requested_fields</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">to_vec_fields</span>();
@@ -2095,15 +2112,14 @@
             <span class="kw-2">&amp;</span><span class="ident">data_provider</span>.<span class="ident">get</span>().<span class="ident">datetime</span>.<span class="ident">skeletons</span>,
             <span class="kw-2">&amp;</span><span class="ident">data_provider</span>.<span class="ident">get</span>().<span class="ident">datetime</span>.<span class="ident">length_patterns</span>,
             <span class="kw-2">&amp;</span><span class="ident">requested_fields</span>,
-            <span class="kw-2">&amp;</span><span class="prelude-val">None</span>,
+            <span class="kw-2">&amp;</span><span class="ident">Default::default</span>(),
             <span class="bool-val">false</span>,
         ) {
             <span class="ident">BestSkeleton::AllFieldsMatch</span>(<span class="ident">available_format_pattern</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="comment">// TODO - This needs to support the &quot;Z&quot; pattern. This test will begin to fail</span>
-                <span class="comment">// once support is added.</span>
+                <span class="comment">// TODO - Append items are needed here.</span>
                 <span class="macro">assert_eq!</span>(
                     <span class="ident">available_format_pattern</span>.<span class="ident">to_string</span>(),
-                    <span class="ident">String::from</span>(<span class="string">&quot;MMMM d, y&quot;</span>)
+                    <span class="ident">String::from</span>(<span class="string">&quot;MMMM d, y vvvv&quot;</span>)
                 )
             }
             <span class="ident">best</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Unexpected {:?}&quot;</span>, <span class="ident">best</span>),
@@ -2132,7 +2148,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_skeleton_no_match</span>() {
         <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">components::Bag</span> {
-            <span class="ident">time_zone_name</span>: <span class="prelude-val">Some</span>(<span class="ident">components::TimeZoneName::Long</span>),
+            <span class="ident">time_zone_name</span>: <span class="prelude-val">Some</span>(<span class="ident">components::TimeZoneName::LongSpecific</span>),
             ..<span class="ident">Default::default</span>()
         };
         <span class="kw">let</span> <span class="ident">requested_fields</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">to_vec_fields</span>();

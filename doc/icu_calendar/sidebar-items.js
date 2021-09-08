@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["DurationUnit",""],["Error",""]],"mod":[["iso",""]],"struct":[["Date",""],["DateDuration","A duration between two dates"]],"trait":[["AsCalendar",""],["Calendar","A calendar implementation"]]});
+initSidebarItems({"enum":[["DateTimeError","A list of possible error outcomes for working with various inputs to DateTime inputs and operations."],["DurationUnit",""]],"mod":[["iso",""],["types",""]],"struct":[["Date",""],["DateDuration","A duration between two dates"]],"trait":[["AsCalendar",""],["Calendar","A calendar implementation"]]});

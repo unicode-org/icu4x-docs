@@ -46,12 +46,23 @@
 <span id="44">44</span>
 <span id="45">45</span>
 <span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DurationUnit</span>, <span class="ident">Iso</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">Iso</span>};
 
 <span class="doccomment">/// A calendar implementation</span>
 <span class="doccomment">///</span>
@@ -61,17 +72,27 @@
 <span class="doccomment">/// Individual [`Calendar`] implementations may have inherent utility methods</span>
 <span class="doccomment">/// allowing for direct construction, etc.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Calendar</span> {
+    <span class="doccomment">/// The internal type used to represent dates</span>
     <span class="kw">type</span> <span class="ident">DateInner</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Clone</span>;
     <span class="doccomment">/// Construct the date from an ISO date</span>
     <span class="kw">fn</span> <span class="ident">date_from_iso</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">iso</span>: <span class="ident">Date</span><span class="op">&lt;</span><span class="ident">Iso</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::DateInner</span>;
+    <span class="doccomment">/// Obtain an ISO date from this date</span>
     <span class="kw">fn</span> <span class="ident">date_to_iso</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Date</span><span class="op">&lt;</span><span class="ident">Iso</span><span class="op">&gt;</span>;
     <span class="comment">// fn validate_date(&amp;self, e: Era, y: Year, m: MonthCode, d: Day) -&gt; bool;</span>
     <span class="comment">// // similar validators for YearMonth, etc</span>
 
     <span class="comment">// fn is_leap&lt;A: AsCalendar&lt;Calendar = Self&gt;&gt;(&amp;self, date: &amp;Date&lt;A&gt;) -&gt; bool;</span>
+    <span class="doccomment">/// Count the number of months in a given year, specified by providing a date</span>
+    <span class="doccomment">/// from that year</span>
     <span class="kw">fn</span> <span class="ident">months_in_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
+    <span class="doccomment">/// Count the number of days in a given year, specified by providing a date</span>
+    <span class="doccomment">/// from that year</span>
     <span class="kw">fn</span> <span class="ident">days_in_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span>;
+    <span class="doccomment">/// Count the number of days in a given month, specified by providing a date</span>
+    <span class="doccomment">/// from that year/month</span>
     <span class="kw">fn</span> <span class="ident">days_in_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
+    <span class="doccomment">/// Calculate the day of the week and return it</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// Monday is 1, Sunday is 7, according to ISO</span>
     <span class="kw">fn</span> <span class="ident">day_of_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">date_to_iso</span>(<span class="ident">date</span>).<span class="ident">day_of_week</span>()
@@ -86,10 +107,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">date1</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>,
         <span class="ident">date2</span>: <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::DateInner</span>,
-        <span class="ident">largest_unit</span>: <span class="ident">DurationUnit</span>,
-        <span class="ident">smallest_unit</span>: <span class="ident">DurationUnit</span>,
+        <span class="ident">largest_unit</span>: <span class="ident">DateDurationUnit</span>,
+        <span class="ident">smallest_unit</span>: <span class="ident">DateDurationUnit</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DateDuration</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 
+    <span class="doccomment">/// Obtain a name for the calendar for debug printing</span>
     <span class="kw">fn</span> <span class="ident">debug_name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>;
     <span class="comment">// fn since(&amp;self, from: &amp;Date&lt;Self&gt;, to: &amp;Date&lt;Self&gt;) -&gt; Duration&lt;Self&gt;, Error;</span>
 }

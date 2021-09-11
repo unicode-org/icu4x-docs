@@ -312,7 +312,6 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`DataProvider`]`&lt;dyn `[`SerdeSeDataStruct`]`&gt;` is used by data exporters such as `FilesystemExporter`.</span>
 
-<span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data_provider::DataPayloadInner</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::error::Error</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::yoke</span>::<span class="kw-2">*</span>;
@@ -472,7 +471,10 @@
 
 <span class="doccomment">/// Auto-implemented trait for all data structs that support [`serde::Serialize`]. This trait is</span>
 <span class="doccomment">/// usually used as a trait object in [`DataProvider`]`&lt;dyn `[`SerdeSeDataStruct`]`&gt;`.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>: <span class="lifetime">&#39;data</span> {
+<span class="doccomment">///</span>
+<span class="doccomment">/// This trait requires [`IsCovariant`] such that it can be safely used as a trait object in</span>
+<span class="doccomment">/// [`DataProvider`].</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>: <span class="ident">IsCovariant</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return this trait object reference for Serde serialization.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
@@ -502,18 +504,29 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="lifetime">&#39;data</span> <span class="op">+</span> <span class="ident">serde::Serialize</span>,
+    <span class="ident">T</span>: <span class="ident">IsCovariant</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">serde::Serialize</span>,
 {
     <span class="kw">fn</span> <span class="ident">as_serialize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serialize</span> {
         <span class="self">self</span>
     }
 }
 
-<span class="doccomment">/// A wrapper around `&amp;dyn `[`SerdeSeDataStruct`]`&lt;&#39;data&gt;` for integration with DataProvider.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SerdeSeDataStructWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> (<span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span>));
+<span class="doccomment">/// A wrapper around `&amp;dyn `[`SerdeSeDataStruct`]`&lt;&#39;a&gt;` for integration with DataProvider.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> (<span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>));
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">SerdeSeDataStructWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span><span class="op">&gt;</span>
+    <span class="kw">for</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>
+{
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
+        <span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> (<span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span>),
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
+        <span class="comment">// This is safe because the trait object requires IsCovariant.</span>
+        <span class="ident">SerdeSeDataStructDynRef</span>(<span class="kw">unsafe</span> { <span class="ident">core::mem::transmute</span>(<span class="ident">this</span>) })
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>;
     <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span><span class="ident">::Target</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">deref</span>()
     }
@@ -523,6 +536,7 @@
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>: <span class="ident">serde::Serialize</span>,
+    <span class="ident">M::Cart</span>: <span class="ident">IsCovariant</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">upcast</span>(<span class="ident">other</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="kw">crate</span><span class="ident">::data_provider::DataPayloadInner</span>::<span class="kw-2">*</span>;
@@ -531,28 +545,14 @@
             <span class="ident">Owned</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Rc::from</span>(<span class="ident">yoke</span>),
             <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Rc::from</span>(<span class="ident">yoke</span>),
         };
-        <span class="kw">let</span> <span class="ident">yoke_helper</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="kw">fn</span>(
-            <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> (<span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span>),
-        )
-            <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">SerdeSeDataStructWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span> <span class="op">=</span> <span class="op">|</span><span class="ident">obj</span><span class="op">|</span> {
-            <span class="comment">// The following block casts &#39;data to &#39;_ on the trait object. This is safe because:</span>
-            <span class="comment">//   1. &#39;_ (the local scope lifetime) is shorter than &#39;data</span>
-            <span class="comment">//   2. This impl is only defined on types implementing Yokeable, so the lifetime on</span>
-            <span class="comment">//      the resulting trait object is covariant</span>
-            <span class="kw">let</span> <span class="ident">shortened</span>: <span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span>) <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">core::mem::transmute</span>(<span class="ident">obj</span>) };
-            <span class="ident">SerdeSeDataStructWrap</span>(<span class="ident">shortened</span>)
-        };
-        <span class="ident">DataPayload</span> {
-            <span class="ident">inner</span>: <span class="ident">DataPayloadInner::RcStruct</span>(<span class="ident">Yoke::attach_to_cart_badly</span>(<span class="ident">cart</span>, <span class="ident">yoke_helper</span>)),
-        }
+        <span class="ident">DataPayload::from_partial_owned</span>(<span class="ident">cart</span>)
     }
 }
 
-<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SerdeSeDataStructWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">SerdeSeDataStructWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">transform</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">Self</span><span class="ident">::Output</span> {
-        <span class="comment">// This is only safe to the extent that the only way to create a SerdeSeDataStructWrap is</span>
-        <span class="comment">// via the `upcast()` function above, which asserts that the lifetimes are covariant.</span>
+        <span class="comment">// This is safe because SerdeSeDataStruct requires IsCovariant.</span>
         <span class="kw">unsafe</span> { <span class="ident">core::mem::transmute</span>(<span class="self">self</span>) }
     }
     <span class="kw">fn</span> <span class="ident">transform_owned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span><span class="ident">::Output</span> {
@@ -578,7 +578,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SerdeSeDataStructMarker</span> {}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SerdeSeDataStructMarker</span> {
-    <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">SerdeSeDataStructWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">SerdeSeDataStructDynRef</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">Cart</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">SerdeSeDataStruct</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>;
 }
 </pre></div>

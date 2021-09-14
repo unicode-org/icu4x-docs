@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["BinaryPropertiesDataProvider",""]]});
+initSidebarItems({"struct":[["PropertiesDataProvider",""]]});

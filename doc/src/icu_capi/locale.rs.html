@@ -165,6 +165,63 @@
 <span id="163">163</span>
 <span id="164">164</span>
 <span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
 </pre><pre class="rust">
 <span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
@@ -176,6 +233,7 @@
     <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
     <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
     <span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode::Key</span>;
+    <span class="kw">use</span> <span class="ident">icu_locid::subtags</span>::{<span class="ident">Language</span>, <span class="ident">Region</span>, <span class="ident">Script</span>};
     <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 
     <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
@@ -207,6 +265,11 @@
         <span class="doccomment">/// Construct an [`ICU4XLocale`] for the Bangla language.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_bn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLocale</span><span class="op">&gt;</span> {
             <span class="ident">Box::new</span>(<span class="ident">ICU4XLocale</span>(<span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;bn&quot;</span>).<span class="ident">into</span>()))
+        }
+
+        <span class="doccomment">/// Construct a default undefined [`ICU4XLocale`] &quot;und&quot;.</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">und</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLocale</span><span class="op">&gt;</span> {
+            <span class="ident">Box::new</span>(<span class="ident">ICU4XLocale</span>(<span class="ident">Locale::und</span>()))
         }
 
         <span class="doccomment">/// Clones the [`ICU4XLocale`].</span>
@@ -276,6 +339,23 @@
             <span class="ident">result</span>
         }
 
+        <span class="doccomment">/// Set the language part of the [`ICU4XLocale`].</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#method.from_bytes) for more information.</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_language</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
+                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">language</span> <span class="op">=</span> <span class="ident">Language::und</span>();
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(()).<span class="ident">into</span>();
+            }
+            <span class="kw">match</span> <span class="ident">Language::from_bytes</span>(<span class="ident">bytes</span>.<span class="ident">as_bytes</span>()) {
+                <span class="prelude-val">Ok</span>(<span class="ident">language</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">language</span> <span class="op">=</span> <span class="ident">language</span>;
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ICU4XLocaleError::Error</span>),
+            }
+            .<span class="ident">into</span>()
+        }
+
         <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] region to `write`</span>
         <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.id) for more information.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">region</span>(
@@ -295,6 +375,23 @@
             }
         }
 
+        <span class="doccomment">/// Set the region part of the [`ICU4XLocale`].</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#method.from_bytes) for more information.</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_region</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
+                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">region</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(()).<span class="ident">into</span>();
+            }
+            <span class="kw">match</span> <span class="ident">Region::from_bytes</span>(<span class="ident">bytes</span>.<span class="ident">as_bytes</span>()) {
+                <span class="prelude-val">Ok</span>(<span class="ident">region</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">region</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>);
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ICU4XLocaleError::Error</span>),
+            }
+            .<span class="ident">into</span>()
+        }
+
         <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] script to `write`</span>
         <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#structfield.id) for more information.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">script</span>(
@@ -312,6 +409,23 @@
             } <span class="kw">else</span> {
                 <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
             }
+        }
+
+        <span class="doccomment">/// Set the script part of the [`ICU4XLocale`]. Pass an empty string to remove the script.</span>
+        <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu/locid/struct.Locale.html#method.from_bytes) for more information.</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_script</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
+                <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">script</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(()).<span class="ident">into</span>();
+            }
+            <span class="kw">match</span> <span class="ident">Script::from_bytes</span>(<span class="ident">bytes</span>.<span class="ident">as_bytes</span>()) {
+                <span class="prelude-val">Ok</span>(<span class="ident">script</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">script</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>);
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ICU4XLocaleError::Error</span>),
+            }
+            .<span class="ident">into</span>()
         }
 
         <span class="doccomment">/// Write a string representation of [`ICU4XLocale`] to `write`</span>

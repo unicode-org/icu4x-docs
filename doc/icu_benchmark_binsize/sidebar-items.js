@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["main",""],["wasm_filesize",""]]});
+initSidebarItems({"fn":[["any_file_size",""],["main",""],["wasm_filesize",""]]});

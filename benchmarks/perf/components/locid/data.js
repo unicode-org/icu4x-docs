@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1631900463242,
+  "lastUpdate": 1632171718391,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -12557,6 +12557,78 @@ window.BENCHMARK_DATA = {
             "name": "locale/overview",
             "value": 4454,
             "range": "± 252",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "41129501+gnrunge@users.noreply.github.com",
+            "name": "Norbert Runge",
+            "username": "gnrunge"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f19a64b4662d56c2588a592685e87c1e799c7f2a",
+          "message": "Add data size benchmark: monitor size of file (#1051)\n\nprovider/testdata/data/testdata.postcard.\r\n\r\nRemove erroneous second print-out of results.\r\n\r\nMoves directory datasize/ with the output data under 'benchmarks/' directory,\r\nfrom 'benchmarks/binsize/'.",
+          "timestamp": "2021-09-20T10:25:55-07:00",
+          "tree_id": "470c8072eebfc55a2fad062841a147b4b49fdae1",
+          "url": "https://github.com/unicode-org/icu4x/commit/f19a64b4662d56c2588a592685e87c1e799c7f2a"
+        },
+        "date": 1632159155099,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2413,
+            "range": "± 143",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4954,
+            "range": "± 211",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "04cfbd2684f1eaa0439ffe3e394fd496e6160a85",
+          "message": "Remove provider_ppucd (#1069)",
+          "timestamp": "2021-09-20T13:55:31-07:00",
+          "tree_id": "c24ef6012e2105fa1ccf4a0cf686aa6ee105e542",
+          "url": "https://github.com/unicode-org/icu4x/commit/04cfbd2684f1eaa0439ffe3e394fd496e6160a85"
+        },
+        "date": 1632171715151,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2524,
+            "range": "± 145",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4327,
+            "range": "± 187",
             "unit": "ns/iter"
           }
         ]

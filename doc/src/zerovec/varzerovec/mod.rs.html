@@ -510,19 +510,28 @@
 <span id="510">510</span>
 <span id="511">511</span>
 <span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">components::SliceComponents</span>;
-<span class="kw">use</span> <span class="ident">either::Either</span>;
 <span class="kw">use</span> <span class="ident">std::fmt</span>::{<span class="self">self</span>, <span class="ident">Display</span>};
 <span class="kw">use</span> <span class="ident">std::ops::Index</span>;
 
-<span class="kw">mod</span> <span class="ident">components</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">components</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">owned</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">serde</span>;
+<span class="kw">mod</span> <span class="ident">ule</span>;
+
+<span class="kw">use</span> <span class="ident">owned::VarZeroVecOwned</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ule::VarZeroVecULE</span>;
 
 <span class="doccomment">/// A zero-copy vector for variable-width types.</span>
 <span class="doccomment">///</span>
@@ -570,7 +579,7 @@
 <span class="doccomment">///     6, 0, 0, 0, 119, 207, 137, 230, 150, 135, 240, 145, 132, 131,</span>
 <span class="doccomment">/// ];</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(bytes)?;</span>
+<span class="doccomment">/// let zerovec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(zerovec.get(2), Some(&quot;文&quot;));</span>
 <span class="doccomment">/// assert_eq!(zerovec, &amp;*strings);</span>
@@ -598,8 +607,8 @@
 <span class="doccomment">///              0, 0, 42, 0, 0, 0, 3, 217, 0, 0, 57, 48, 0, 0, 49, 212, 0, 0,</span>
 <span class="doccomment">///              9, 0, 0, 0];</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec: VarZeroVec&lt;Vec&lt;PlainOldULE&lt;4&gt;&gt;&gt; = VarZeroVec::try_from_bytes(bytes)?;</span>
-<span class="doccomment">/// let zerovec2: VarZeroVec&lt;ZeroVec&lt;&#39;static, u32&gt;&gt; = VarZeroVec::try_from_bytes(bytes)?;</span>
+<span class="doccomment">/// let zerovec: VarZeroVec&lt;Vec&lt;PlainOldULE&lt;4&gt;&gt;&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
+<span class="doccomment">/// let zerovec2: VarZeroVec&lt;ZeroVec&lt;&#39;static, u32&gt;&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(zerovec.get(2).and_then(|v| v.get(1)), Some(&amp;55555.into()));</span>
 <span class="doccomment">/// assert_eq!(zerovec2.get(2).and_then(|v| v.get(1)), Some(&amp;55555.into()));</span>
@@ -609,6 +618,10 @@
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;std::convert::Infallible&gt;&gt;(())</span>
 <span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`VarZeroVec`]s can be nested infinitely, see the docs of [`VarZeroVecULE`]</span>
+<span class="doccomment">/// for more information.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`ule`]: crate::ule</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
@@ -636,7 +649,7 @@
 <span class="doccomment">/// The actual implementation details of this can be found in the `components` module</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">enum</span> <span class="ident">VarZeroVecInner</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="ident">Owned</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>),
+    <span class="ident">Owned</span>(<span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>),
     <span class="doccomment">/// This is *basically* an `&amp;&#39;a [u8]` to a zero copy buffer, but split out into</span>
     <span class="doccomment">/// the buffer components. Logically this is capable of behaving as</span>
     <span class="doccomment">/// a `&amp;&#39;a [T::VarULE]`, but since `T::VarULE` is unsized that type does not actually</span>
@@ -668,18 +681,11 @@
     }
 }
 
-<span class="kw">type</span> <span class="ident">ParseErrorFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVecError</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">AsVarULE</span><span class="op">&gt;</span><span class="ident">::VarULE</span> <span class="kw">as</span> <span class="ident">VarULE</span><span class="op">&gt;</span><span class="ident">::Error</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ParseErrorFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVecError</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">AsVarULE</span><span class="op">&gt;</span><span class="ident">::VarULE</span> <span class="kw">as</span> <span class="ident">VarULE</span><span class="op">&gt;</span><span class="ident">::Error</span><span class="op">&gt;</span>;
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVecError</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::ParseError</span>(<span class="ident">e</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">VarZeroVecInner::Owned</span>(<span class="ident">other</span>))
     }
 }
 
@@ -690,7 +696,20 @@
     }
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">VarZeroVecInner::Owned</span>(<span class="ident">other</span>).<span class="ident">into</span>()
+    }
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">AsVarULE</span><span class="op">&gt;</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_components</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SliceComponents</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
+            <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="ident">owned</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">owned</span>.<span class="ident">get_components</span>(),
+            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">components</span>,
+        }
+    }
     <span class="doccomment">/// Get the number of elements in this vector</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
@@ -704,15 +723,12 @@
     <span class="doccomment">///                    &quot;baz&quot;.to_owned(), &quot;quux&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">/// assert_eq!(vec.len(), 4);</span>
     <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>.<span class="ident">len</span>(),
-            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">components</span>.<span class="ident">len</span>(),
-        }
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">len</span>()
     }
 
     <span class="doccomment">/// Returns `true` if the vector contains no elements.</span>
@@ -727,20 +743,18 @@
     <span class="doccomment">/// let strings: Vec&lt;String&gt; = vec![];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">/// assert!(vec.is_empty());</span>
     <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>.<span class="ident">is_empty</span>(),
-            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">components</span>.<span class="ident">is_empty</span>(),
-        }
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">is_empty</span>()
     }
 
     <span class="doccomment">/// Parse a VarZeroVec from a slice of the appropriate format</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Slices of the right format can be obtained via VarZeroVec::get_serializable_bytes()</span>
+    <span class="doccomment">/// Slices of the right format can be obtained via [`VarZeroVec::get_serializable_bytes()`]</span>
+    <span class="doccomment">/// or [`VarZeroVec::get_encoded_slice()`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
@@ -753,20 +767,20 @@
     <span class="doccomment">///                    &quot;baz&quot;.to_owned(), &quot;quux&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">/// assert_eq!(&amp;vec[0], &quot;foo&quot;);</span>
     <span class="doccomment">/// assert_eq!(&amp;vec[1], &quot;bar&quot;);</span>
     <span class="doccomment">/// assert_eq!(&amp;vec[2], &quot;baz&quot;);</span>
     <span class="doccomment">/// assert_eq!(&amp;vec[3], &quot;quux&quot;);</span>
     <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_bytes</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParseErrorFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_byte_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParseErrorFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">is_empty</span>() {
             <span class="comment">// does not allocate</span>
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">VarZeroVecInner::Owned</span>(<span class="ident">Vec::new</span>()).<span class="ident">into</span>());
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">VarZeroVecInner::Owned</span>(<span class="ident">VarZeroVecOwned::new</span>()).<span class="ident">into</span>());
         }
 
-        <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">SliceComponents</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_from_bytes</span>(<span class="ident">slice</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">SliceComponents</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::parse_byte_slice</span>(<span class="ident">slice</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>).<span class="ident">into</span>())
     }
@@ -783,7 +797,7 @@
     <span class="doccomment">/// let strings = vec![&quot;foo&quot;.to_owned(), &quot;bar&quot;.to_owned(),</span>
     <span class="doccomment">///                    &quot;baz&quot;.to_owned(), &quot;quux&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut iter_results: Vec&lt;&amp;str&gt; = vec.iter().collect();</span>
     <span class="doccomment">/// assert_eq!(iter_results[0], &quot;foo&quot;);</span>
@@ -793,14 +807,7 @@
     <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">T::VarULE</span><span class="op">&gt;</span> {
-        <span class="comment">// We use Either here so that we can use `impl Trait` with heterogeneous types</span>
-        <span class="comment">//</span>
-        <span class="comment">// An alternate design is to write explicit iterators. Once Rust has generators this will</span>
-        <span class="comment">// be unnecessary.</span>
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Either::Left</span>(<span class="ident">vec</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">t</span>.<span class="ident">as_unaligned</span>())),
-            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Either::Right</span>(<span class="ident">components</span>.<span class="ident">iter</span>()),
-        }
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">iter</span>()
     }
 
     <span class="doccomment">/// Get one of VarZeroVec&#39;s elements, returning None if the index is out of bounds</span>
@@ -815,7 +822,7 @@
     <span class="doccomment">/// let strings = vec![&quot;foo&quot;.to_owned(), &quot;bar&quot;.to_owned(),</span>
     <span class="doccomment">///                    &quot;baz&quot;.to_owned(), &quot;quux&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut iter_results: Vec&lt;&amp;str&gt; = vec.iter().collect();</span>
     <span class="doccomment">/// assert_eq!(vec.get(0), Some(&quot;foo&quot;));</span>
@@ -826,10 +833,7 @@
     <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::VarULE</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">t</span>.<span class="ident">as_unaligned</span>()),
-            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">components</span>.<span class="ident">get</span>(<span class="ident">idx</span>),
-        }
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">get</span>(<span class="ident">idx</span>)
     }
 
     <span class="doccomment">/// Convert this into a mutable vector of the owned `T` type, cloning if necessary.</span>
@@ -845,7 +849,7 @@
     <span class="doccomment">/// let strings = vec![&quot;foo&quot;.to_owned(), &quot;bar&quot;.to_owned(),</span>
     <span class="doccomment">///                    &quot;baz&quot;.to_owned(), &quot;quux&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(vec.len(), 4);</span>
     <span class="doccomment">/// let mutvec = vec.make_mut();</span>
@@ -861,15 +865,14 @@
     <span class="comment">//</span>
     <span class="comment">// This function is crate-public for now since we don&#39;t yet want to stabilize</span>
     <span class="comment">// the internal implementation details</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">make_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">make_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Clone</span>,
     {
         <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
             <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>,
             <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">T::from_unaligned</span>).<span class="ident">collect</span>();
-                <span class="kw">let</span> <span class="ident">new_self</span> <span class="op">=</span> <span class="ident">VarZeroVecInner::Owned</span>(<span class="ident">vec</span>).<span class="ident">into</span>();
+                <span class="kw">let</span> <span class="ident">new_self</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned::from_components</span>(<span class="ident">components</span>).<span class="ident">into</span>();
                 <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">new_self</span>;
                 <span class="comment">// recursion is limited since we are guaranteed to hit the Owned branch</span>
                 <span class="self">self</span>.<span class="ident">make_mut</span>()
@@ -889,7 +892,7 @@
     <span class="doccomment">/// let strings = vec![&quot;foo&quot;.to_owned(), &quot;bar&quot;.to_owned(),</span>
     <span class="doccomment">///                    &quot;baz&quot;.to_owned(), &quot;quux&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(vec.len(), 4);</span>
     <span class="doccomment">/// // has &#39;static lifetime</span>
@@ -912,25 +915,18 @@
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Clone</span>,
     {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">clone</span>();
-        <span class="ident">new</span>.<span class="ident">make_mut</span>();
-        <span class="kw">match</span> <span class="ident">new</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(<span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
-        }
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">to_vec</span>()
     }
 
-    <span class="doccomment">/// If this is borrowed, get the borrowed slice</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_slice_for_borrowed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">b</span>.<span class="ident">entire_slice</span>()),
-        }
+    <span class="doccomment">/// Obtain the internal encoded slice</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This can be passed back to [`Self::parse_byte_slice()`]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_encoded_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">entire_slice</span>()
     }
 
     <span class="doccomment">/// For a slice of `T`, get a list of bytes that can be passed to</span>
-    <span class="doccomment">/// `try_from_bytes` to recoup the same data.</span>
+    <span class="doccomment">/// `parse_byte_slice` to recoup the same data.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns `None` if the slice is too large to be represented in a list of</span>
     <span class="doccomment">/// bytes whose length fits in a `u32`.</span>
@@ -945,7 +941,7 @@
     <span class="doccomment">/// let strings = vec![&quot;foo&quot;.to_owned(), &quot;bar&quot;.to_owned(), &quot;baz&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut borrowed: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut borrowed: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">/// assert_eq!(borrowed, &amp;*strings);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
@@ -953,6 +949,16 @@
     <span class="doccomment">///</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_serializable_bytes</span>(<span class="ident">elements</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="ident">components::get_serializable_bytes</span>(<span class="ident">elements</span>)
+    }
+
+    <span class="doccomment">/// Return whether the [`VarZeroVec`] is operating on owned or borrowed</span>
+    <span class="doccomment">/// data. [`VarZeroVec::into_owned()`] and [`VarZeroVec::make_mut()`] can</span>
+    <span class="doccomment">/// be used to force it into an owned type</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_owned</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
+            <span class="ident">VarZeroVecInner::Owned</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+            <span class="ident">VarZeroVecInner::Borrowed</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        }
     }
 }
 
@@ -974,7 +980,7 @@
     <span class="doccomment">/// let strings = vec![&quot;a&quot;.to_owned(), &quot;b&quot;.to_owned(),</span>
     <span class="doccomment">///                    &quot;f&quot;.to_owned(), &quot;g&quot;.to_owned()];</span>
     <span class="doccomment">/// let bytes = VarZeroVec::get_serializable_bytes(&amp;strings).unwrap();</span>
-    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::try_from_bytes(&amp;bytes)?;</span>
+    <span class="doccomment">/// let mut vec: VarZeroVec&lt;String&gt; = VarZeroVec::parse_byte_slice(&amp;bytes)?;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(vec.binary_search(&quot;f&quot;), Ok(2));</span>
     <span class="doccomment">/// assert_eq!(vec.binary_search(&quot;e&quot;), Err(2));</span>
@@ -984,12 +990,7 @@
     <span class="doccomment">/// [`binary_search`]: https://doc.rust-lang.org/std/primitive.slice.html#method.binary_search</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">T::VarULE</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span> {
-            <span class="ident">VarZeroVecInner::Owned</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">vec</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">probe</span><span class="op">|</span> <span class="ident">probe</span>.<span class="ident">as_unaligned</span>().<span class="ident">cmp</span>(<span class="ident">x</span>))
-            }
-            <span class="ident">VarZeroVecInner::Borrowed</span>(<span class="ident">components</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">components</span>.<span class="ident">binary_search</span>(<span class="ident">x</span>),
-        }
+        <span class="self">self</span>.<span class="ident">get_components</span>().<span class="ident">binary_search</span>(<span class="ident">x</span>)
     }
 }
 
@@ -997,6 +998,15 @@
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T::VarULE</span>;
     <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">index</span>).<span class="ident">expect</span>(<span class="string">&quot;Indexing VarZeroVec out of bounds&quot;</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> [<span class="ident">T</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">AsVarULE</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> [<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">VarZeroVecOwned::from_elements</span>(<span class="ident">other</span>).<span class="ident">into</span>()
     }
 }
 

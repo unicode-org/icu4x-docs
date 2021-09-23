@@ -173,14 +173,6 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -188,7 +180,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::VarZeroVec</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">serde::de</span>::{<span class="self">self</span>, <span class="ident">Deserialize</span>, <span class="ident">Deserializer</span>, <span class="ident">SeqAccess</span>, <span class="ident">Visitor</span>};
-<span class="kw">use</span> <span class="ident">serde::ser</span>::{<span class="self">self</span>, <span class="ident">Serialize</span>, <span class="ident">SerializeSeq</span>, <span class="ident">Serializer</span>};
+<span class="kw">use</span> <span class="ident">serde::ser</span>::{<span class="ident">Serialize</span>, <span class="ident">SerializeSeq</span>, <span class="ident">Serializer</span>};
 <span class="kw">use</span> <span class="ident">std::fmt</span>;
 <span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
 
@@ -219,7 +211,7 @@
     <span class="kw">where</span>
         <span class="ident">E</span>: <span class="ident">de::Error</span>,
     {
-        <span class="ident">VarZeroVec::try_from_bytes</span>(<span class="ident">bytes</span>).<span class="ident">map_err</span>(<span class="ident">de::Error::custom</span>)
+        <span class="ident">VarZeroVec::parse_byte_slice</span>(<span class="ident">bytes</span>).<span class="ident">map_err</span>(<span class="ident">de::Error::custom</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">visit_seq</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">seq</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Value</span>, <span class="ident">A::Error</span><span class="op">&gt;</span>
@@ -234,7 +226,7 @@
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">seq</span>.<span class="ident">next_element</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()<span class="question-mark">?</span> {
             <span class="ident">vec</span>.<span class="ident">push</span>(<span class="ident">value</span>);
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">vec</span>.<span class="ident">into</span>())
+        <span class="prelude-val">Ok</span>((<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">vec</span>).<span class="ident">into</span>())
     }
 }
 
@@ -278,16 +270,8 @@
                 <span class="ident">seq</span>.<span class="ident">serialize_element</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_unaligned</span>(<span class="ident">value</span>))<span class="question-mark">?</span>;
             }
             <span class="ident">seq</span>.<span class="ident">end</span>()
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">slice</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_slice_for_borrowed</span>() {
-            <span class="ident">serializer</span>.<span class="ident">serialize_bytes</span>(<span class="ident">slice</span>)
         } <span class="kw">else</span> {
-            <span class="comment">// This creates an additional Vec allocation to enable code reuse of</span>
-            <span class="comment">// VarZeroVec::to_vec()&#39;s. The alternative is to write a different</span>
-            <span class="comment">// implementation of get_serializable_bytes() which enables us to pull</span>
-            <span class="comment">// out the byte buffer components bit by bit and use serialize_seq + serialize_element</span>
-            <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">VarZeroVec::get_serializable_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">to_vec</span>())
-                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ser::Error::custom</span>(<span class="string">&quot;VarZeroVec too large to be serialized&quot;</span>))<span class="question-mark">?</span>;
-            <span class="ident">serializer</span>.<span class="ident">serialize_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>)
+            <span class="ident">serializer</span>.<span class="ident">serialize_bytes</span>(<span class="self">self</span>.<span class="ident">get_encoded_slice</span>())
         }
     }
 }
@@ -317,7 +301,7 @@
     ];
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_serde_json</span>() {
-        <span class="kw">let</span> <span class="ident">zerovec_orig</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVec::try_from_bytes</span>(<span class="ident">BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
+        <span class="kw">let</span> <span class="ident">zerovec_orig</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVec::parse_byte_slice</span>(<span class="ident">BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
         <span class="kw">let</span> <span class="ident">json_str</span> <span class="op">=</span> <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">zerovec_orig</span>).<span class="ident">expect</span>(<span class="string">&quot;serialize&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">JSON_STR</span>, <span class="ident">json_str</span>);
         <span class="comment">// VarZeroVec should deserialize from JSON to either Vec or VarZeroVec</span>
@@ -327,18 +311,18 @@
         <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">serde_json::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">json_str</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to VarZeroVec&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec_orig</span>.<span class="ident">to_vec</span>(), <span class="ident">zerovec_new</span>.<span class="ident">to_vec</span>());
-        <span class="macro">assert!</span>(<span class="ident">zerovec_new</span>.<span class="ident">get_slice_for_borrowed</span>().<span class="ident">is_none</span>());
+        <span class="macro">assert!</span>(<span class="ident">zerovec_new</span>.<span class="ident">is_owned</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_serde_bincode</span>() {
-        <span class="kw">let</span> <span class="ident">zerovec_orig</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVec::try_from_bytes</span>(<span class="ident">BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
+        <span class="kw">let</span> <span class="ident">zerovec_orig</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVec::parse_byte_slice</span>(<span class="ident">BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
         <span class="kw">let</span> <span class="ident">bincode_buf</span> <span class="op">=</span> <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">zerovec_orig</span>).<span class="ident">expect</span>(<span class="string">&quot;serialize&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">BINCODE_BUF</span>, <span class="ident">bincode_buf</span>);
         <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_buf</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to VarZeroVec&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec_orig</span>.<span class="ident">to_vec</span>(), <span class="ident">zerovec_new</span>.<span class="ident">to_vec</span>());
-        <span class="macro">assert!</span>(<span class="ident">zerovec_new</span>.<span class="ident">get_slice_for_borrowed</span>().<span class="ident">is_some</span>());
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec_new</span>.<span class="ident">is_owned</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -349,7 +333,7 @@
             .<span class="ident">map</span>(<span class="ident">String::from</span>)
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">VarZeroVec::try_from_bytes</span>(<span class="ident">NONASCII_BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
+            <span class="ident">VarZeroVec::parse_byte_slice</span>(<span class="ident">NONASCII_BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec</span>.<span class="ident">to_vec</span>(), <span class="ident">src_vec</span>);
         <span class="kw">let</span> <span class="ident">bincode_buf</span> <span class="op">=</span> <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">zerovec</span>).<span class="ident">expect</span>(<span class="string">&quot;serialize&quot;</span>);
         <span class="kw">let</span> <span class="ident">zerovec_result</span> <span class="op">=</span>

@@ -107,21 +107,21 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
+<span id="110">110</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::blob_schema::BlobSchema</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::path_util</span>;
-<span class="kw">use</span> <span class="ident">icu_provider</span>::{
-    <span class="ident">prelude</span>::<span class="kw-2">*</span>,
-    <span class="ident">serde</span>::{<span class="ident">SerdeDeDataProvider</span>, <span class="ident">SerdeDeDataReceiver</span>},
-};
+<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::serde</span>::{<span class="ident">SerdeDeDataProvider</span>, <span class="ident">SerdeDeDataReceiver</span>};
 <span class="kw">use</span> <span class="ident">serde::de::Deserialize</span>;
 
 <span class="doccomment">/// A data provider loading data statically baked in to the binary.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Although static data is convenient and highly portable, it also increases binary size.</span>
+<span class="doccomment">/// Although static data is convenient and highly portable, it also increases binary size. To</span>
+<span class="doccomment">/// load the data files dynamically at runtime, see [`BlobDataProvider`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// To bake blob data into your binary, use [`include_bytes!`](std::include_bytes), as shown in</span>
 <span class="doccomment">/// the example below.</span>
@@ -158,6 +158,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(response.get().message, &quot;Ave, munde&quot;);</span>
 <span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`BlobDataProvider`]: crate::BlobDataProvider</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StaticDataProvider</span> {
     <span class="ident">blob</span>: <span class="ident">BlobSchema</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
 }
@@ -185,7 +187,7 @@
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
     <span class="comment">// &#39;static is what we want here, because we are deserializing from a static buffer.</span>
-    <span class="ident">M::Yokeable</span>: <span class="ident">serde::de::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
+    <span class="ident">M::Yokeable</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_file</span>(<span class="ident">req</span>)<span class="question-mark">?</span>;

@@ -818,6 +818,51 @@
 <span id="818">818</span>
 <span id="819">819</span>
 <span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1117,7 +1162,6 @@
     <span class="doccomment">/// use icu_provider::prelude::*;</span>
     <span class="doccomment">/// use icu_provider::hello_world::*;</span>
     <span class="doccomment">/// use std::rc::Rc;</span>
-    <span class="doccomment">/// use icu_provider::yoke::Yokeable;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let json_text = &quot;{\&quot;message\&quot;:\&quot;Hello World\&quot;}&quot;;</span>
     <span class="doccomment">/// let json_rc_buffer: Rc&lt;[u8]&gt; = json_text.as_bytes().into();</span>
@@ -1139,6 +1183,52 @@
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">yoke</span> <span class="op">=</span> <span class="ident">Yoke::try_attach_to_cart_badly</span>(<span class="ident">rc_buffer</span>, <span class="ident">f</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">inner</span>: <span class="ident">DataPayloadInner::RcBuf</span>(<span class="ident">yoke</span>),
+        })
+    }
+
+    <span class="doccomment">/// Convert a byte buffer into a [`DataPayload`]. A function must be provided to perform the</span>
+    <span class="doccomment">/// conversion. This can often be a Serde deserialization operation.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function is similar to [`DataPayload::try_from_rc_buffer`], but it accepts a buffer</span>
+    <span class="doccomment">/// that is already yoked to an Rc buffer cart.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # #[cfg(feature = &quot;provider_serde&quot;)] {</span>
+    <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">/// use icu_provider::hello_world::*;</span>
+    <span class="doccomment">/// use std::rc::Rc;</span>
+    <span class="doccomment">/// use icu_provider::yoke::Yoke;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let json_text = &quot;{\&quot;message\&quot;:\&quot;Hello World\&quot;}&quot;;</span>
+    <span class="doccomment">/// let json_rc_buffer: Rc&lt;[u8]&gt; = json_text.as_bytes().into();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let payload = DataPayload::&lt;HelloWorldV1Marker&gt;::try_from_yoked_buffer(</span>
+    <span class="doccomment">///     Yoke::attach_to_rc_cart(json_rc_buffer),</span>
+    <span class="doccomment">///     (),</span>
+    <span class="doccomment">///     |bytes, _, _| {</span>
+    <span class="doccomment">///         serde_json::from_slice(bytes)</span>
+    <span class="doccomment">///     }</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .expect(&quot;JSON is valid&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(&quot;Hello World&quot;, payload.get().message);</span>
+    <span class="doccomment">/// # } // feature = &quot;provider_serde&quot;</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_yoked_buffer</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(
+        <span class="ident">yoked_buffer</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>], <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">capture</span>: <span class="ident">T</span>,
+        <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">fn</span>(
+            <span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] <span class="kw">as</span> <span class="ident">yoke::Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
+            <span class="ident">T</span>,
+            <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> ()<span class="op">&gt;</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">yoke</span> <span class="op">=</span> <span class="ident">yoked_buffer</span>.<span class="ident">try_project_with_capture</span>(<span class="ident">capture</span>, <span class="ident">f</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">inner</span>: <span class="ident">DataPayloadInner::RcBuf</span>(<span class="ident">yoke</span>),
         })

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["export","Utilities for dumping data to an ICU4X filesystem tree."]],"struct":[["StaticDataProvider","A data provider loading data statically baked in to the binary."]]});
+initSidebarItems({"mod":[["export","Utilities for dumping data to an ICU4X filesystem tree."]],"struct":[["BlobDataProvider","A data provider loading data from blobs dynamically created at runtime."],["StaticDataProvider","A data provider loading data statically baked in to the binary."]]});

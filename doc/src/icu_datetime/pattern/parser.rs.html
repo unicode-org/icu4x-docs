@@ -538,11 +538,74 @@
 <span id="538">538</span>
 <span id="539">539</span>
 <span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">error::Error</span>, <span class="ident">Pattern</span>, <span class="ident">PatternItem</span>};
+<span class="kw">use</span> <span class="kw">super</span>::{
+    <span class="ident">error::Error</span>,
+    <span class="ident">generic</span>::{<span class="ident">GenericPattern</span>, <span class="ident">GenericPatternItem</span>},
+    <span class="ident">Pattern</span>, <span class="ident">PatternItem</span>,
+};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::fields::FieldSymbol</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec</span>;
@@ -620,6 +683,40 @@
         }
     }
 
+    <span class="kw">fn</span> <span class="ident">handle_generic_quoted_literal</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">ch</span>: <span class="ident">char</span>,
+        <span class="ident">chars</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">core::iter::Peekable</span><span class="op">&lt;</span><span class="ident">core::str::Chars</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">ch</span> <span class="op">=</span><span class="op">=</span> <span class="string">&#39;\&#39;&#39;</span> {
+            <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span>, <span class="ident">chars</span>.<span class="ident">peek</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="string">&#39;\&#39;&#39;</span>)) {
+                (
+                    <span class="ident">Segment::Literal</span> {
+                        <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">literal</span>, ..
+                    },
+                    <span class="bool-val">true</span>,
+                ) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">literal</span>.<span class="ident">push</span>(<span class="string">&#39;\&#39;&#39;</span>);
+                    <span class="ident">chars</span>.<span class="ident">next</span>();
+                }
+                (<span class="ident">Segment::Literal</span> { <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">quoted</span>, .. }, <span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="kw-2">*</span><span class="ident">quoted</span> <span class="op">=</span> <span class="op">!</span><span class="kw-2">*</span><span class="ident">quoted</span>;
+                }
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+            }
+            <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Segment::Literal</span> {
+            <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">literal</span>,
+            <span class="ident">quoted</span>: <span class="bool-val">true</span>,
+        } <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>
+        {
+            <span class="ident">literal</span>.<span class="ident">push</span>(<span class="ident">ch</span>);
+            <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)
+        }
+    }
+
     <span class="kw">fn</span> <span class="ident">collect_segment</span>(<span class="ident">state</span>: <span class="ident">Segment</span>, <span class="ident">result</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PatternItem</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">state</span> {
             <span class="ident">Segment::Symbol</span> { <span class="ident">symbol</span>, <span class="ident">length</span> } <span class="op">=</span><span class="op">&gt;</span> {
@@ -633,6 +730,26 @@
                     <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">ch</span>.<span class="ident">into</span>());
                 }
             }
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">collect_generic_segment</span>(
+        <span class="ident">state</span>: <span class="ident">Segment</span>,
+        <span class="ident">result</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenericPatternItem</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident">state</span> {
+            <span class="ident">Segment::Literal</span> { <span class="ident">quoted</span>, .. } <span class="kw">if</span> <span class="ident">quoted</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnclosedLiteral</span>);
+            }
+            <span class="ident">Segment::Literal</span> { <span class="ident">literal</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">literal</span>.<span class="ident">is_empty</span>() {
+                    <span class="kw">for</span> <span class="ident">ch</span> <span class="kw">in</span> <span class="ident">literal</span>.<span class="ident">chars</span>() {
+                        <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">ch</span>.<span class="ident">into</span>());
+                    }
+                }
+            }
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -681,24 +798,18 @@
         <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_placeholders</span>(
-        <span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">replacements</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Pattern</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PatternItem</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_generic</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenericPatternItem</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">chars</span>().<span class="ident">peekable</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="macro">vec!</span>[];
 
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">next</span>() {
-            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">handle_quoted_literal</span>(<span class="ident">ch</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chars</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result</span>)<span class="question-mark">?</span> {
+            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">handle_generic_quoted_literal</span>(<span class="ident">ch</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">chars</span>)<span class="question-mark">?</span> {
                 <span class="kw">if</span> <span class="ident">ch</span> <span class="op">=</span><span class="op">=</span> <span class="string">&#39;{&#39;</span> {
-                    <span class="ident"><span class="self">Self</span>::collect_segment</span>(<span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result</span>)<span class="question-mark">?</span>;
+                    <span class="ident"><span class="self">Self</span>::collect_generic_segment</span>(<span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result</span>)<span class="question-mark">?</span>;
 
                     <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">next</span>().<span class="ident">ok_or</span>(<span class="ident">Error::UnclosedPlaceholder</span>)<span class="question-mark">?</span>;
                     <span class="kw">let</span> <span class="ident">idx</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">ch</span>.<span class="ident">to_digit</span>(<span class="number">10</span>).<span class="ident">ok_or</span>(<span class="ident">Error::UnknownSubstitution</span>(<span class="ident">ch</span>))<span class="question-mark">?</span>;
-                    <span class="kw">let</span> <span class="ident">replacement</span> <span class="op">=</span> <span class="ident">replacements</span>
-                        .<span class="ident">get</span>(<span class="ident">idx</span> <span class="kw">as</span> <span class="ident">usize</span>)
-                        .<span class="ident">ok_or</span>(<span class="ident">Error::UnknownSubstitution</span>(<span class="ident">ch</span>))<span class="question-mark">?</span>;
-                    <span class="ident">result</span>.<span class="ident">extend_from_slice</span>(<span class="ident">replacement</span>.<span class="ident">items</span>());
+                    <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">GenericPatternItem::Placeholder</span>(<span class="ident">idx</span> <span class="kw">as</span> <span class="ident">u8</span>));
                     <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">next</span>().<span class="ident">ok_or</span>(<span class="ident">Error::UnclosedPlaceholder</span>)<span class="question-mark">?</span>;
                     <span class="kw">if</span> <span class="ident">ch</span> <span class="op">!</span><span class="op">=</span> <span class="string">&#39;}&#39;</span> {
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnclosedPlaceholder</span>);
@@ -718,9 +829,16 @@
             }
         }
 
-        <span class="ident"><span class="self">Self</span>::collect_segment</span>(<span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result</span>)<span class="question-mark">?</span>;
+        <span class="ident"><span class="self">Self</span>::collect_generic_segment</span>(<span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_placeholders</span>(<span class="self">self</span>, <span class="ident">replacements</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Pattern</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PatternItem</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">generic_items</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">parse_generic</span>()<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">gp</span> <span class="op">=</span> <span class="ident">GenericPattern::from</span>(<span class="ident">generic_items</span>);
+        <span class="prelude-val">Ok</span>(<span class="ident">gp</span>.<span class="ident">combined</span>(<span class="ident">replacements</span>)<span class="question-mark">?</span>.<span class="ident">items</span>)
     }
 }
 

@@ -1206,6 +1206,7 @@
 <span id="1206">1206</span>
 <span id="1207">1207</span>
 <span id="1208">1208</span>
+<span id="1209">1209</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1390,7 +1391,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">skeleton_string</span>.<span class="ident">bytes</span>().<span class="ident">peekable</span>();
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">byte</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>() {
             <span class="comment">// Convert the byte to a valid field symbol.</span>
-            <span class="kw">let</span> <span class="ident">field_symbol</span> <span class="op">=</span> <span class="ident">FieldSymbol::try_from</span>(<span class="ident">byte</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">field_symbol</span> <span class="op">=</span> <span class="ident">FieldSymbol::try_from</span>(<span class="ident">byte</span> <span class="kw">as</span> <span class="ident">char</span>)<span class="question-mark">?</span>;
 
             <span class="comment">// Go through the bytes to count how often it&#39;s repeated.</span>
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">field_length</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">1</span>;
@@ -1507,7 +1508,7 @@
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;symbol unknown {0} in skeleton&quot;</span>)]</span>
     <span class="ident">SymbolUnknown</span>(<span class="ident">char</span>),
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;symbol invalid {0} in skeleton&quot;</span>)]</span>
-    <span class="ident">SymbolInvalid</span>(<span class="ident">char</span>),
+    <span class="ident">SymbolInvalid</span>(<span class="ident">u8</span>),
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;symbol unimplemented {0} in skeleton&quot;</span>)]</span>
     <span class="ident">SymbolUnimplemented</span>(<span class="ident">char</span>),
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;unimplemented field {0} in skeleton&quot;</span>)]</span>
@@ -1535,23 +1536,24 @@
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">symbol_error</span>: <span class="ident">fields::SymbolError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">symbol_error</span> {
             <span class="ident">fields::SymbolError::Invalid</span>(<span class="ident">ch</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::SymbolInvalid</span>(<span class="ident">ch</span>),
-            <span class="ident">fields::SymbolError::Unknown</span>(<span class="ident">byte</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">fields::SymbolError::InvalidIndex</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+            <span class="ident">fields::SymbolError::Unknown</span>(<span class="ident">ch</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="comment">// NOTE: If you remove a symbol due to it now being supported,</span>
                 <span class="comment">//       make sure to regenerate the test data.</span>
                 <span class="comment">//       https://github.com/unicode-org/icu4x/blob/main/provider/testdata/README.md</span>
-                <span class="kw">match</span> <span class="ident">byte</span> {
+                <span class="kw">match</span> <span class="ident">ch</span> {
                     <span class="comment">// TODO(#487) - Flexible day periods</span>
-                    <span class="string">b&#39;B&#39;</span>
+                    <span class="string">&#39;B&#39;</span>
                     <span class="comment">// TODO(#486) - Era</span>
-                    <span class="op">|</span> <span class="string">b&#39;G&#39;</span>
+                    <span class="op">|</span> <span class="string">&#39;G&#39;</span>
                     <span class="comment">// TODO(#502) - Week of month</span>
-                    <span class="op">|</span> <span class="string">b&#39;W&#39;</span>
+                    <span class="op">|</span> <span class="string">&#39;W&#39;</span>
                     <span class="comment">// TODO(#501) - Quarters</span>
-                    <span class="op">|</span> <span class="string">b&#39;Q&#39;</span>
+                    <span class="op">|</span> <span class="string">&#39;Q&#39;</span>
                     <span class="comment">// TODO (#488) - Week of year</span>
-                    <span class="op">|</span> <span class="string">b&#39;w&#39;</span>
-                    <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::SymbolUnimplemented</span>(<span class="ident">byte</span>.<span class="ident">into</span>()),
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::SymbolUnknown</span>(<span class="ident">byte</span>.<span class="ident">into</span>()),
+                    <span class="op">|</span> <span class="string">&#39;w&#39;</span>
+                    <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::SymbolUnimplemented</span>(<span class="ident">ch</span>),
+                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::SymbolUnknown</span>(<span class="ident">ch</span>),
                 }
             }
         }

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1632635453366,
+  "lastUpdate": 1632753945553,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -10499,6 +10499,66 @@ window.BENCHMARK_DATA = {
             "name": "fixed_decimal/overview",
             "value": 130825,
             "range": "± 6314",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3c4852e13703f829b31413e58e51090ed8f457d8",
+          "message": "Set min version of cargo-make for diplomat-get-rev task (#1064)",
+          "timestamp": "2021-09-26T17:27:26-07:00",
+          "tree_id": "caac163edc4dcd0b6b7172ab9ace0971c16c1978",
+          "url": "https://github.com/unicode-org/icu4x/commit/3c4852e13703f829b31413e58e51090ed8f457d8"
+        },
+        "date": 1632702807244,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 128967,
+            "range": "± 7048",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@google.com",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "19e4a15de3a91d9ec74e6942ddbdfcaa63010062",
+          "message": "Use ZeroVec in UnicodeSet (#922)",
+          "timestamp": "2021-09-27T07:40:16-07:00",
+          "tree_id": "eb9a545863c1db55745fbab0dd72b2f307ea246e",
+          "url": "https://github.com/unicode-org/icu4x/commit/19e4a15de3a91d9ec74e6942ddbdfcaa63010062"
+        },
+        "date": 1632753941917,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 105101,
+            "range": "± 6100",
             "unit": "ns/iter"
           }
         ]

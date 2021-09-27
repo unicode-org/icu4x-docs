@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["icu_uniset"] = [{"text":"impl&lt;'data&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/beta/core/convert/trait.TryInto.html\" title=\"trait core::convert::TryInto\">TryInto</a>&lt;<a class=\"struct\" href=\"icu_uniset/struct.UnicodeSet.html\" title=\"struct icu_uniset::UnicodeSet\">UnicodeSet</a>&gt; for <a class=\"struct\" href=\"icu_uniset/provider/struct.UnicodePropertyV1.html\" title=\"struct icu_uniset::provider::UnicodePropertyV1\">UnicodePropertyV1</a>&lt;'data&gt;","synthetic":false,"types":["icu_uniset::provider::UnicodePropertyV1"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

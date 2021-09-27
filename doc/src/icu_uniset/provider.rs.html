@@ -349,6 +349,10 @@
 <span id="349">349</span>
 <span id="350">350</span>
 <span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -360,8 +364,8 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::builder::UnicodeSetBuilder</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uniset::UnicodeSet</span>;
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
-<span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::yoke</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
+
 <span class="comment">//</span>
 <span class="comment">// resource key structs - the structs used directly by users of data provider</span>
 <span class="comment">//</span>
@@ -663,15 +667,17 @@
 }
 
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#1030) - Add missing docs.</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(
     <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>,
     <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>)
 )]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">name</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">inv_list</span>: <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
@@ -686,18 +692,20 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#1030) - Add missing docs.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_uniset</span>(<span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">UnicodeSet</span>, <span class="ident">name</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_owned_uniset</span>(
+        <span class="ident">set</span>: <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+        <span class="ident">name</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
         <span class="ident">UnicodePropertyV1</span> {
             <span class="ident">name</span>,
-            <span class="ident">inv_list</span>: <span class="ident">set</span>.<span class="ident">clone</span>(),
+            <span class="ident">inv_list</span>: <span class="ident">set</span>,
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">UnicodeSet</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::UnicodeSetError</span>;
-    <span class="kw">fn</span> <span class="ident">try_into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UnicodeSet</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">inv_list</span>)
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">prop</span>: <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+        <span class="ident">prop</span>.<span class="ident">inv_list</span>
     }
 }
 </code></pre></div>

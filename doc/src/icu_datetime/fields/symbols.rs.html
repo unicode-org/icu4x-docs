@@ -249,6 +249,98 @@
 <span id="249">249</span>
 <span id="250">250</span>
 <span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -287,6 +379,98 @@
     <span class="ident">Minute</span>,
     <span class="ident">Second</span>(<span class="ident">Second</span>),
     <span class="ident">TimeZone</span>(<span class="ident">TimeZone</span>),
+}
+
+<span class="kw">impl</span> <span class="ident">FieldSymbol</span> {
+    <span class="doccomment">/// Symbols are necessary components of `Pattern` struct which</span>
+    <span class="doccomment">/// uses efficient byte serialization and deserialization via `zerovec`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The `FieldSymbol` impl provides non-public methods that can be used to efficiently</span>
+    <span class="doccomment">/// convert between `u8` and the symbol variant.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The serialization model packages the variant in one byte.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// 1) The top four bits are used to determine the type of the field</span>
+    <span class="doccomment">///    using that type&#39;s `idx()/from_idx()` for the mapping.</span>
+    <span class="doccomment">///    (Examples: `Year`, `Month`, `Hour`)</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// 2) The bottom four bits are used to determine the symbol of the type.</span>
+    <span class="doccomment">///    (Examples: `Year::Calendar`, `Hour::H11`)</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Diagram</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```text</span>
+    <span class="doccomment">/// ┌─┬─┬─┬─┬─┬─┬─┬─┐</span>
+    <span class="doccomment">/// ├─┴─┴─┴─┼─┴─┴─┴─┤</span>
+    <span class="doccomment">/// │ Type  │Symbol │</span>
+    <span class="doccomment">/// └───────┴───────┘</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Optimization</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This model is optimized to package data efficiently when `FieldSymbol`</span>
+    <span class="doccomment">/// is used as a variant of `PatternItem`. See the documentation of `PatternItemULE`</span>
+    <span class="doccomment">/// for details on how it is composed.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Constraints</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This model limits the available number of possible types and symbols to 16 each.</span>
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">idx_in_range</span>(<span class="ident">kv</span>: <span class="kw-2">&amp;</span><span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="ident">kv</span> <span class="op">&amp;</span> <span class="number">0b0000_1111</span>;
+        <span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="ident">kv</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">4</span>;
+        <span class="kw">match</span> <span class="ident">field_type</span> {
+            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Year::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Month::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Day::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Weekday::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayPeriod::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Hour::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">symbol</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
+            <span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Second::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TimeZone::idx_in_range</span>(<span class="kw-2">&amp;</span><span class="ident">symbol</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">idx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+        <span class="kw">let</span> (<span class="ident">high</span>, <span class="ident">low</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">FieldSymbol::Year</span>(<span class="ident">year</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">0</span>, <span class="ident">year</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::Month</span>(<span class="ident">month</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">1</span>, <span class="ident">month</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::Day</span>(<span class="ident">day</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">2</span>, <span class="ident">day</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::Weekday</span>(<span class="ident">wd</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">3</span>, <span class="ident">wd</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::DayPeriod</span>(<span class="ident">dp</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">4</span>, <span class="ident">dp</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::Hour</span>(<span class="ident">hour</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">5</span>, <span class="ident">hour</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::Minute</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="number">6</span>, <span class="number">0</span>),
+            <span class="ident">FieldSymbol::Second</span>(<span class="ident">second</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">7</span>, <span class="ident">second</span>.<span class="ident">idx</span>()),
+            <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">tz</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="number">8</span>, <span class="ident">tz</span>.<span class="ident">idx</span>()),
+        };
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">high</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
+        <span class="ident">result</span> <span class="op">|</span> <span class="ident">low</span>
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_idx</span>(<span class="ident">idx</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">SymbolError</span><span class="op">&gt;</span> {
+        <span class="comment">// extract the top four bits to determine the symbol.</span>
+        <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">idx</span> <span class="op">&amp;</span> <span class="number">0b0000_1111</span>;
+        <span class="comment">// use the bottom four bits out of `u8` to disriminate the field type.</span>
+        <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> <span class="ident">idx</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">4</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">high</span> {
+            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Year</span>(<span class="ident">Year::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Month</span>(<span class="ident">Month::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Day</span>(<span class="ident">Day::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Weekday</span>(<span class="ident">Weekday::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::DayPeriod</span>(<span class="ident">DayPeriod::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Hour</span>(<span class="ident">Hour::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">6</span> <span class="kw">if</span> <span class="ident">low</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Minute</span>,
+            <span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Second</span>(<span class="ident">Second::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::TimeZone</span>(<span class="ident">TimeZone::from_idx</span>(<span class="ident">low</span>)<span class="question-mark">?</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SymbolError::InvalidIndex</span>(<span class="ident">idx</span>)),
+        })
+    }
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
@@ -398,13 +582,13 @@
 }
 
 <span class="macro">field_type!</span>(<span class="ident">Year</span>; {
-    <span class="number">0</span>; <span class="string">&#39;y&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Calendar</span>,
-    <span class="number">1</span>; <span class="string">&#39;Y&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">WeekOf</span>
+    <span class="string">&#39;y&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Calendar</span>,
+    <span class="string">&#39;Y&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">WeekOf</span>
 }; <span class="ident">Numeric</span>);
 
 <span class="macro">field_type!</span>(<span class="ident">Month</span>; {
-    <span class="number">0</span>; <span class="string">&#39;M&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Format</span>,
-    <span class="number">1</span>; <span class="string">&#39;L&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">StandAlone</span>
+    <span class="string">&#39;M&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Format</span>,
+    <span class="string">&#39;L&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">StandAlone</span>
 });
 
 <span class="kw">impl</span> <span class="ident">LengthType</span> <span class="kw">for</span> <span class="ident">Month</span> {
@@ -421,29 +605,29 @@
 }
 
 <span class="macro">field_type!</span>(<span class="ident">Day</span>; {
-    <span class="number">0</span>; <span class="string">&#39;d&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayOfMonth</span>,
-    <span class="number">1</span>; <span class="string">&#39;D&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayOfYear</span>,
-    <span class="number">2</span>; <span class="string">&#39;F&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayOfWeekInMonth</span>,
-    <span class="number">3</span>; <span class="string">&#39;g&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ModifiedJulianDay</span>
+    <span class="string">&#39;d&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayOfMonth</span>,
+    <span class="string">&#39;D&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayOfYear</span>,
+    <span class="string">&#39;F&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DayOfWeekInMonth</span>,
+    <span class="string">&#39;g&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ModifiedJulianDay</span>
 }; <span class="ident">Numeric</span>);
 
 <span class="macro">field_type!</span>(<span class="ident">Hour</span>; {
-    <span class="number">0</span>; <span class="string">&#39;K&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H11</span>,
-    <span class="number">1</span>; <span class="string">&#39;h&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H12</span>,
-    <span class="number">2</span>; <span class="string">&#39;H&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H23</span>,
-    <span class="number">3</span>; <span class="string">&#39;k&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H24</span>
+    <span class="string">&#39;K&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H11</span>,
+    <span class="string">&#39;h&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H12</span>,
+    <span class="string">&#39;H&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H23</span>,
+    <span class="string">&#39;k&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">H24</span>
 }; <span class="ident">Numeric</span>);
 
 <span class="macro">field_type!</span>(<span class="ident">Second</span>; {
-    <span class="number">0</span>; <span class="string">&#39;s&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Second</span>,
-    <span class="number">1</span>; <span class="string">&#39;S&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FractionalSecond</span>,
-    <span class="number">2</span>; <span class="string">&#39;A&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Millisecond</span>
+    <span class="string">&#39;s&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Second</span>,
+    <span class="string">&#39;S&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FractionalSecond</span>,
+    <span class="string">&#39;A&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Millisecond</span>
 }; <span class="ident">Numeric</span>);
 
 <span class="macro">field_type!</span>(<span class="ident">Weekday</span>; {
-    <span class="number">0</span>; <span class="string">&#39;E&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Format</span>,
-    <span class="number">1</span>; <span class="string">&#39;e&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Local</span>,
-    <span class="number">2</span>; <span class="string">&#39;c&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">StandAlone</span>
+    <span class="string">&#39;E&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Format</span>,
+    <span class="string">&#39;e&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Local</span>,
+    <span class="string">&#39;c&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">StandAlone</span>
 });
 
 <span class="kw">impl</span> <span class="ident">LengthType</span> <span class="kw">for</span> <span class="ident">Weekday</span> {
@@ -459,18 +643,18 @@
 }
 
 <span class="macro">field_type!</span>(<span class="ident">DayPeriod</span>; {
-    <span class="number">0</span>; <span class="string">&#39;a&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AmPm</span>,
-    <span class="number">1</span>; <span class="string">&#39;b&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">NoonMidnight</span>
+    <span class="string">&#39;a&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AmPm</span>,
+    <span class="string">&#39;b&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">NoonMidnight</span>
 }; <span class="ident">Text</span>);
 
 <span class="macro">field_type!</span>(<span class="ident">TimeZone</span>; {
-    <span class="number">0</span>; <span class="string">&#39;z&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LowerZ</span>,
-    <span class="number">1</span>; <span class="string">&#39;Z&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperZ</span>,
-    <span class="number">2</span>; <span class="string">&#39;O&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperO</span>,
-    <span class="number">3</span>; <span class="string">&#39;v&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LowerV</span>,
-    <span class="number">4</span>; <span class="string">&#39;V&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperV</span>,
-    <span class="number">5</span>; <span class="string">&#39;x&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LowerX</span>,
-    <span class="number">6</span>; <span class="string">&#39;X&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperX</span>
+    <span class="string">&#39;z&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LowerZ</span>,
+    <span class="string">&#39;Z&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperZ</span>,
+    <span class="string">&#39;O&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperO</span>,
+    <span class="string">&#39;v&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LowerV</span>,
+    <span class="string">&#39;V&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperV</span>,
+    <span class="string">&#39;x&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">LowerX</span>,
+    <span class="string">&#39;X&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpperX</span>
 });
 
 <span class="kw">impl</span> <span class="ident">LengthType</span> <span class="kw">for</span> <span class="ident">TimeZone</span> {

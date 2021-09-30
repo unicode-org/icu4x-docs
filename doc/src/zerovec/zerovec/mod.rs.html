@@ -586,6 +586,65 @@
 <span id="586">586</span>
 <span id="587">587</span>
 <span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -980,6 +1039,67 @@
         <span class="self">self</span>.<span class="ident">as_slice</span>().<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">T::from_unaligned</span>)
     }
 
+    <span class="doccomment">/// Mutates each element according to a given function, meant to be</span>
+    <span class="doccomment">/// a more convenient version of [`ZeroVec::iter_mut()`] which serves fewer use cases.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This will convert the ZeroVec into an owned ZeroVec if not already the case.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use zerovec::ZeroVec;</span>
+    <span class="doccomment">/// use zerovec::ule::AsULE;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let bytes: &amp;[u8] = &amp;[0xD3, 0x00, 0x19, 0x01, 0xA5, 0x01, 0xCD, 0x01];</span>
+    <span class="doccomment">/// let mut zerovec: ZeroVec&lt;u16&gt; = ZeroVec::parse_byte_slice(bytes).expect(&quot;infallible&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// zerovec.for_each_mut(|item| *item += 1);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(zerovec.to_vec(), &amp;[212, 282, 422, 462]);</span>
+    <span class="doccomment">/// assert!(matches!(zerovec, ZeroVec::Owned(_)));</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_each_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>)) {
+        <span class="self">self</span>.<span class="ident">to_mut</span>().<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">T::from_unaligned</span>(<span class="ident">item</span>);
+            <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">aligned</span>);
+            <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">aligned</span>.<span class="ident">as_unaligned</span>()
+        });
+    }
+
+    <span class="doccomment">/// Same as [`ZeroVec::for_each_mut()`], but bubbles up errors.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use zerovec::ZeroVec;</span>
+    <span class="doccomment">/// use zerovec::ule::AsULE;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let bytes: &amp;[u8] = &amp;[0xD3, 0x00, 0x19, 0x01, 0xA5, 0x01, 0xCD, 0x01];</span>
+    <span class="doccomment">/// let mut zerovec: ZeroVec&lt;u16&gt; = ZeroVec::parse_byte_slice(bytes).expect(&quot;infallible&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// zerovec.try_for_each_mut(|item| {</span>
+    <span class="doccomment">///     *item = item.checked_add(1).ok_or(())?;</span>
+    <span class="doccomment">///     Ok(())   </span>
+    <span class="doccomment">/// })?;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(zerovec.to_vec(), &amp;[212, 282, 422, 462]);</span>
+    <span class="doccomment">/// assert!(matches!(zerovec, ZeroVec::Owned(_)));</span>
+    <span class="doccomment">/// # Ok::&lt;(), ()&gt;(())</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_for_each_mut</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">E</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">E</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">to_mut</span>().<span class="ident">iter_mut</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">T::from_unaligned</span>(<span class="ident">item</span>);
+            <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">aligned</span>)<span class="question-mark">?</span>;
+            <span class="kw-2">*</span><span class="ident">item</span> <span class="op">=</span> <span class="ident">aligned</span>.<span class="ident">as_unaligned</span>();
+            <span class="prelude-val">Ok</span>(())
+        })
+    }
+
     <span class="doccomment">/// Converts a borrowed ZeroVec to an owned ZeroVec. No-op if already owned.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
@@ -1004,7 +1124,8 @@
         }
     }
 
-    <span class="doccomment">/// Allows the ZeroVec to be mutated by converting it to an owned variant</span>
+    <span class="doccomment">/// Allows the ZeroVec to be mutated by converting it to an owned variant, and producing</span>
+    <span class="doccomment">/// a mutable vector of ULEs.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
@@ -1016,13 +1137,10 @@
     <span class="doccomment">/// let mut zerovec: ZeroVec&lt;u16&gt; = ZeroVec::parse_byte_slice(bytes).expect(&quot;infallible&quot;);</span>
     <span class="doccomment">/// assert!(matches!(zerovec, ZeroVec::Borrowed(_)));</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// zerovec.make_mut().push(12_u16.as_unaligned());</span>
+    <span class="doccomment">/// zerovec.to_mut().push(12_u16.as_unaligned());</span>
     <span class="doccomment">/// assert!(matches!(zerovec, ZeroVec::Owned(_)));</span>
     <span class="doccomment">/// ```</span>
-    <span class="comment">//</span>
-    <span class="comment">// This function is crate-public for now since we don&#39;t yet want to stabilize</span>
-    <span class="comment">// the internal implementation details</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">make_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">ZeroVec::Owned</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">vec</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>,
             <span class="ident">ZeroVec::Borrowed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -1030,7 +1148,7 @@
                 <span class="kw">let</span> <span class="ident">new_self</span> <span class="op">=</span> <span class="ident">ZeroVec::Owned</span>(<span class="ident">vec</span>);
                 <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">new_self</span>;
                 <span class="comment">// recursion is limited since we are guaranteed to hit the Owned branch</span>
-                <span class="self">self</span>.<span class="ident">make_mut</span>()
+                <span class="self">self</span>.<span class="ident">to_mut</span>()
             }
         }
     }

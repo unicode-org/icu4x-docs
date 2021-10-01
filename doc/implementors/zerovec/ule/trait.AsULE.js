@@ -1,3 +1,4 @@
 (function() {var implementors = {};
+implementors["icu_uniset"] = [{"text":"impl <a class=\"trait\" href=\"zerovec/ule/trait.AsULE.html\" title=\"trait zerovec::ule::AsULE\">AsULE</a> for <a class=\"enum\" href=\"icu_uniset/enum_props/enum.GeneralSubcategory.html\" title=\"enum icu_uniset::enum_props::GeneralSubcategory\">GeneralSubcategory</a>","synthetic":false,"types":["icu_uniset::enum_props::GeneralSubcategory"]},{"text":"impl <a class=\"trait\" href=\"zerovec/ule/trait.AsULE.html\" title=\"trait zerovec::ule::AsULE\">AsULE</a> for <a class=\"struct\" href=\"icu_uniset/enum_props/struct.Script.html\" title=\"struct icu_uniset::enum_props::Script\">Script</a>","synthetic":false,"types":["icu_uniset::enum_props::Script"]}];
 implementors["zerovec"] = [];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

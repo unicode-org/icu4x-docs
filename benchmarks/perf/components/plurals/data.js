@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1633161314378,
+  "lastUpdate": 1633239491109,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -15455,6 +15455,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 24156,
             "range": "± 664",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "75b01f9f4939969ab7bb468f452a5c50dfe15fab",
+          "message": "Move package.json up one level and add better path resolution (#1143)",
+          "timestamp": "2021-10-03T00:25:39-05:00",
+          "tree_id": "3f80725bdb49a01ffef0e81beec81e8f4ecffc1a",
+          "url": "https://github.com/unicode-org/icu4x/commit/75b01f9f4939969ab7bb468f452a5c50dfe15fab"
+        },
+        "date": 1633239345565,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1040,
+            "range": "± 75",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6321,
+            "range": "± 299",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 21164,
+            "range": "± 1809",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f7f0bc43874d7d0b24f44011498f83ef55c1d0ce",
+          "message": "Add try_map_project_[cloned]_with_capture (#1135)",
+          "timestamp": "2021-10-03T00:28:14-05:00",
+          "tree_id": "21fd95b724da056d4e2cbb3184864e82a70b9815",
+          "url": "https://github.com/unicode-org/icu4x/commit/f7f0bc43874d7d0b24f44011498f83ef55c1d0ce"
+        },
+        "date": 1633239487243,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1171,
+            "range": "± 48",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6755,
+            "range": "± 225",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 21905,
+            "range": "± 780",
             "unit": "ns/iter"
           }
         ]

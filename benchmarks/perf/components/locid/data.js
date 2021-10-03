@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1633239323663,
+  "lastUpdate": 1633239564544,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -13889,6 +13889,78 @@ window.BENCHMARK_DATA = {
             "name": "locale/overview",
             "value": 4198,
             "range": "± 4",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f7f0bc43874d7d0b24f44011498f83ef55c1d0ce",
+          "message": "Add try_map_project_[cloned]_with_capture (#1135)",
+          "timestamp": "2021-10-03T00:28:14-05:00",
+          "tree_id": "21fd95b724da056d4e2cbb3184864e82a70b9815",
+          "url": "https://github.com/unicode-org/icu4x/commit/f7f0bc43874d7d0b24f44011498f83ef55c1d0ce"
+        },
+        "date": 1633239460491,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2805,
+            "range": "± 157",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 5160,
+            "range": "± 242",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2d64d81d4661090c0d446b7bd700e65035840a5e",
+          "message": "Update tracking bug for removal of YokeTraitHack (#1134)",
+          "timestamp": "2021-10-03T00:29:22-05:00",
+          "tree_id": "3b946fe94fb1248550596d343b88e32157cc0a96",
+          "url": "https://github.com/unicode-org/icu4x/commit/2d64d81d4661090c0d446b7bd700e65035840a5e"
+        },
+        "date": 1633239560835,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2633,
+            "range": "± 279",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4440,
+            "range": "± 319",
             "unit": "ns/iter"
           }
         ]

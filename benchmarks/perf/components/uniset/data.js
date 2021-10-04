@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1633388509403,
+  "lastUpdate": 1633388741433,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -12329,6 +12329,66 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 51223975,
             "range": "± 2186031",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "ebff2635aa4a83811d34187eba085f9976ebe56f",
+          "message": "Apply last round of feedback on splitting DTF Skeletons.",
+          "timestamp": "2021-10-04T15:58:19-07:00",
+          "tree_id": "c379d6674a2b2a961ba6245cf4aa845026ebf2a6",
+          "url": "https://github.com/unicode-org/icu4x/commit/ebff2635aa4a83811d34187eba085f9976ebe56f"
+        },
+        "date": 1633388706532,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36853750,
+            "range": "± 1894817",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "distinct": true,
+          "id": "5da378032b6a98225436c476938744a6156da8b8",
+          "message": "Make clippy happy",
+          "timestamp": "2021-10-04T15:59:31-07:00",
+          "tree_id": "a827f99d580f3c336dc91b5524b74f7c9d1a9f03",
+          "url": "https://github.com/unicode-org/icu4x/commit/5da378032b6a98225436c476938744a6156da8b8"
+        },
+        "date": 1633388736971,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 32292553,
+            "range": "± 1645704",
             "unit": "ns/iter"
           }
         ]

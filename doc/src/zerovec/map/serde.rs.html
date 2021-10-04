@@ -159,11 +159,20 @@
 <span id="159">159</span>
 <span id="160">160</span>
 <span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">ZeroMap</span>, <span class="ident">ZeroMapKV</span>, <span class="ident">ZeroVecLike</span>};
+<span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">serde::de</span>::{<span class="self">self</span>, <span class="ident">MapAccess</span>, <span class="ident">Visitor</span>};
@@ -175,6 +184,8 @@
 <span class="kw">where</span>
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">K::Container</span>: <span class="ident">Serialize</span>,
     <span class="ident">V::Container</span>: <span class="ident">Serialize</span>,
     <span class="ident">K::SerializeType</span>: <span class="ident">Serialize</span>,
@@ -198,11 +209,12 @@
 }
 
 <span class="doccomment">/// Modified example from https://serde.rs/deserialize-map.html</span>
-<span class="kw">struct</span> <span class="ident">ZeroMapMapVisitor</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
-    <span class="ident">marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span>,
+<span class="kw">struct</span> <span class="ident">ZeroMapMapVisitor</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span> <span class="comment">// it&#39;s a marker type, complexity doesn&#39;t matter</span>
+    <span class="ident">marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMapMapVisitor</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">ZeroMapMapVisitor</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">ZeroMapMapVisitor</span> {
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
@@ -210,12 +222,13 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ZeroMapMapVisitor</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ZeroMapMapVisitor</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span>,
-    <span class="ident">V</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    <span class="ident">K::OwnedType</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    <span class="ident">V::OwnedType</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
 {
     <span class="kw">type</span> <span class="ident">Value</span> <span class="op">=</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>;
 
@@ -231,11 +244,14 @@
 
         <span class="comment">// While there are entries remaining in the input, add them</span>
         <span class="comment">// into our map.</span>
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>)) <span class="op">=</span> <span class="ident">access</span>.<span class="ident">next_entry</span>()<span class="question-mark">?</span> {
+        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>)) <span class="op">=</span> <span class="ident">access</span>.<span class="ident">next_entry</span>::<span class="op">&lt;</span><span class="ident">K::OwnedType</span>, <span class="ident">V::OwnedType</span><span class="op">&gt;</span>()<span class="question-mark">?</span> {
             <span class="comment">// Try to append it at the end, hoping for a sorted map.</span>
             <span class="comment">// If not sorted, return an error</span>
             <span class="comment">// a serialized map that came from another ZeroMap</span>
-            <span class="kw">if</span> <span class="ident">map</span>.<span class="ident">try_append</span>(<span class="ident">key</span>, <span class="ident">value</span>).<span class="ident">is_some</span>() {
+            <span class="kw">if</span> <span class="ident">map</span>
+                .<span class="ident">try_append</span>(<span class="ident">K::owned_as_self</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>), <span class="ident">V::owned_as_self</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>))
+                .<span class="ident">is_some</span>()
+            {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">de::Error::custom</span>(
                     <span class="string">&quot;ZeroMap&#39;s keys must be sorted while deserializing&quot;</span>,
                 ));
@@ -247,14 +263,15 @@
 }
 
 <span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span>,
-    <span class="ident">V</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
     <span class="ident">K::Container</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     <span class="ident">V::Container</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    <span class="ident">K::OwnedType</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    <span class="ident">V::OwnedType</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">D::Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
@@ -288,11 +305,11 @@
         <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">6</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">117</span>, <span class="number">110</span>, <span class="number">111</span>, <span class="number">100</span>, <span class="number">111</span>, <span class="number">115</span>, <span class="number">116</span>, <span class="number">114</span>, <span class="number">101</span>, <span class="number">115</span>,
     ];
 
-    <span class="kw">fn</span> <span class="ident">make_map</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">u32</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">make_map</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">u32</span>, <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">ZeroMap::new</span>();
-        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="number">1</span>, <span class="string">&quot;uno&quot;</span>.<span class="ident">to_owned</span>());
-        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="number">2</span>, <span class="string">&quot;dos&quot;</span>.<span class="ident">to_owned</span>());
-        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="number">3</span>, <span class="string">&quot;tres&quot;</span>.<span class="ident">to_owned</span>());
+        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">1</span>, <span class="string">&quot;uno&quot;</span>);
+        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">2</span>, <span class="string">&quot;dos&quot;</span>);
+        <span class="ident">map</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;tres&quot;</span>);
         <span class="ident">map</span>
     }
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -300,7 +317,7 @@
         <span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">make_map</span>();
         <span class="kw">let</span> <span class="ident">json_str</span> <span class="op">=</span> <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">map</span>).<span class="ident">expect</span>(<span class="string">&quot;serialize&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">JSON_STR</span>, <span class="ident">json_str</span>);
-        <span class="kw">let</span> <span class="ident">new_map</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">serde_json::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">json_str</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize&quot;</span>);
+        <span class="kw">let</span> <span class="ident">new_map</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">serde_json::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">json_str</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize&quot;</span>);
         <span class="macro">assert_eq!</span>(
             <span class="ident">new_map</span>.<span class="ident">iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
             <span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
@@ -312,8 +329,7 @@
         <span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">make_map</span>();
         <span class="kw">let</span> <span class="ident">bincode_bytes</span> <span class="op">=</span> <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">map</span>).<span class="ident">expect</span>(<span class="string">&quot;serialize&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">BINCODE_BYTES</span>, <span class="ident">bincode_bytes</span>);
-        <span class="kw">let</span> <span class="ident">new_map</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_bytes</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize&quot;</span>);
+        <span class="kw">let</span> <span class="ident">new_map</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_bytes</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize&quot;</span>);
         <span class="macro">assert_eq!</span>(
             <span class="ident">new_map</span>.<span class="ident">iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
             <span class="ident">map</span>.<span class="ident">iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()

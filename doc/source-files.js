@@ -34,5 +34,5 @@ sourcesIndex["litemap"] = {"name":"","files":["lib.rs","map.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["impls.rs","lib.rs","ops.rs"]};
 sourcesIndex["yoke"] = {"name":"","files":["is_covariant.rs","lib.rs","macro_impls.rs","serde.rs","trait_hack.rs","yoke.rs","yokeable.rs","zero_copy_from.rs"]};
 sourcesIndex["yoke_derive"] = {"name":"","files":["lib.rs"]};
-sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["kv.rs","mod.rs","serde.rs","vecs.rs"]},{"name":"ule","files":["chars.rs","mod.rs","plain.rs","string.rs","vec.rs"]},{"name":"varzerovec","files":["components.rs","mod.rs","owned.rs","serde.rs","ule.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs"]}],"files":["lib.rs","yoke_impls.rs"]};
+sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["kv.rs","mod.rs","serde.rs","vecs.rs"]},{"name":"ule","files":["chars.rs","error.rs","mod.rs","plain.rs","string.rs","vec.rs"]},{"name":"varzerovec","files":["components.rs","mod.rs","owned.rs","serde.rs","ule.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs"]}],"files":["lib.rs","yoke_impls.rs"]};
 createSourceSidebar();

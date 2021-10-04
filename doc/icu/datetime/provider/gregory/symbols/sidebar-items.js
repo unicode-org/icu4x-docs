@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["day_periods",""],["months",""],["weekdays",""]],"struct":[["DateSymbolsV1",""],["DateSymbolsV1Marker","Marker type for [`DateSymbolsV1`]"]]});

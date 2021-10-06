@@ -1,6 +1,7 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","signum.rs","uint_iterator.rs"]};
+sourcesIndex["formatted_string_builder"] = {"name":"","files":["error.rs","lib.rs","string_builder.rs"]};
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x_datagen"] = {"name":"","files":["datagen.rs"]};
@@ -30,6 +31,7 @@ sourcesIndex["icu_segmenter"] = {"name":"","files":["language.rs","lb_define.rs"
 sourcesIndex["icu_segmenter_lstm"] = {"name":"","files":["error.rs","lib.rs","lstm.rs","math_helper.rs","structs.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["blob.rs","fs.rs","lib.rs","metadata.rs","paths.rs"]};
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","enum_props.rs","lib.rs","props.rs","provider.rs","ule.rs","uniset.rs","utils.rs"]};
+sourcesIndex["list_formatter"] = {"name":"","files":["lib.rs","list_formatter.rs","patterns.rs"]};
 sourcesIndex["litemap"] = {"name":"","files":["lib.rs","map.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["impls.rs","lib.rs","ops.rs"]};
 sourcesIndex["yoke"] = {"name":"","files":["is_covariant.rs","lib.rs","macro_impls.rs","serde.rs","trait_hack.rs","yoke.rs","yokeable.rs","zero_copy_from.rs"]};

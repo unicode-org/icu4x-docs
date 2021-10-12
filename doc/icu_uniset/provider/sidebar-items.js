@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["key",""]],"struct":[["UnicodePropertyV1",""],["UnicodePropertyV1Marker","Marker type for [`UnicodePropertyV1`]"]]});
+initSidebarItems({"mod":[["key","Resource keys for `icu_uniset`"]],"struct":[["UnicodePropertyV1","A set of characters with a particular property."],["UnicodePropertyV1Marker","Marker type for [`UnicodePropertyV1`]"]]});

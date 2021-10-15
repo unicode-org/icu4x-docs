@@ -266,6 +266,51 @@
 <span id="266">266</span>
 <span id="267">267</span>
 <span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -273,7 +318,7 @@
 <span class="doccomment">//! A collection of utilities for representing and working with dates as an input to</span>
 <span class="doccomment">//! formatting operations.</span>
 
-<span class="kw">use</span> <span class="ident">icu_calendar</span>::{<span class="ident">AsCalendar</span>, <span class="ident">Date</span>, <span class="ident">DateTime</span>, <span class="ident">Gregorian</span>};
+<span class="kw">use</span> <span class="ident">icu_calendar</span>::{<span class="ident">arithmetic::week_of</span>, <span class="ident">AsCalendar</span>, <span class="ident">Date</span>, <span class="ident">DateTime</span>, <span class="ident">Gregorian</span>};
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
 
@@ -365,7 +410,7 @@
     <span class="doccomment">/// The year number according to week numbering.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// For example, December 31, 2020 is part of the first week of 2021.</span>
-    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Year</span>;
+    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Year</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// The week of the month according to UTS 35.</span>
     <span class="kw">fn</span> <span class="ident">week_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfMonth</span>;
@@ -373,7 +418,7 @@
     <span class="doccomment">/// The week number of the year.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// For example, December 31, 2020 is part of the first week of 2021.</span>
-    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfYear</span>;
+    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOfYear</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// TODO(#487): Implement flexible day periods.</span>
     <span class="kw">fn</span> <span class="ident">flexible_day_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
@@ -381,8 +426,50 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">DateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">DateTimeInput</span><span class="op">&gt;</span> {
     <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">T</span>,
-    <span class="ident">_first_weekday</span>: <span class="ident">u8</span>,
-    <span class="ident">_anchor_weekday</span>: <span class="ident">u8</span>,
+    <span class="ident">calendar</span>: <span class="ident">week_of::CalendarInfo</span>,
+}
+
+<span class="kw">fn</span> <span class="ident">compute_week_of_year</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DateInput</span><span class="op">&gt;</span>(
+    <span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+    <span class="ident">calendar</span>: <span class="kw-2">&amp;</span><span class="ident">week_of::CalendarInfo</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">DayOfYearInfo</span>, <span class="ident">week_of::WeekOf</span>), <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">doy_info</span> <span class="op">=</span> <span class="ident">datetime</span>
+        .<span class="ident">day_of_year_info</span>()
+        .<span class="ident">ok_or</span>(<span class="ident">DateTimeError::MissingInput</span>(
+            <span class="string">&quot;DateTimeInput::day_of_year_info&quot;</span>,
+        ))<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">week</span> <span class="op">=</span> <span class="ident">week_of::week_of</span>(
+        <span class="ident">calendar</span>,
+        <span class="ident">doy_info</span>.<span class="ident">days_in_prev_year</span> <span class="kw">as</span> <span class="ident">u16</span>,
+        <span class="ident">doy_info</span>.<span class="ident">days_in_year</span> <span class="kw">as</span> <span class="ident">u16</span>,
+        <span class="ident">doy_info</span>.<span class="ident">day_of_year</span> <span class="kw">as</span> <span class="ident">u16</span>,
+        <span class="ident">datetime</span>
+            .<span class="ident">iso_weekday</span>()
+            .<span class="ident">ok_or</span>(<span class="ident">DateTimeError::MissingInput</span>(<span class="string">&quot;DateTimeInput::iso_weekday&quot;</span>))<span class="question-mark">?</span>,
+    )<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>((<span class="ident">doy_info</span>, <span class="ident">week</span>))
+}
+
+<span class="kw">fn</span> <span class="ident">year_week</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DateInput</span><span class="op">&gt;</span>(
+    <span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+    <span class="ident">calendar</span>: <span class="kw-2">&amp;</span><span class="ident">week_of::CalendarInfo</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Year</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> (<span class="ident">doy_info</span>, <span class="ident">week</span>) <span class="op">=</span> <span class="ident">compute_week_of_year</span>(<span class="ident">datetime</span>, <span class="ident">calendar</span>)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">week</span>.<span class="ident">unit</span> {
+        <span class="ident">week_of::RelativeUnit::Previous</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">doy_info</span>.<span class="ident">prev_year</span>,
+        <span class="ident">week_of::RelativeUnit::Current</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">datetime</span>
+            .<span class="ident">year</span>()
+            .<span class="ident">ok_or</span>(<span class="ident">DateTimeError::MissingInput</span>(<span class="string">&quot;DateTimeInput::year&quot;</span>))<span class="question-mark">?</span>,
+        <span class="ident">week_of::RelativeUnit::Next</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">doy_info</span>.<span class="ident">next_year</span>,
+    })
+}
+
+<span class="kw">fn</span> <span class="ident">week_of_year</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DateInput</span><span class="op">&gt;</span>(
+    <span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+    <span class="ident">calendar</span>: <span class="kw-2">&amp;</span><span class="ident">week_of::CalendarInfo</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOfYear</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">week</span>) <span class="op">=</span> <span class="ident">compute_week_of_year</span>(<span class="ident">datetime</span>, <span class="ident">calendar</span>)<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="ident">WeekOfYear</span>(<span class="ident">u32::from</span>(<span class="ident">week</span>.<span class="ident">week</span>)))
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">DateTimeInput</span><span class="op">&gt;</span> <span class="ident">DateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span> {
@@ -390,16 +477,17 @@
         <span class="self">Self</span> {
             <span class="ident">data</span>,
             <span class="comment">// TODO(#488): Implement week calculations.</span>
-            <span class="ident">_first_weekday</span>: <span class="number">1</span>,
-            <span class="ident">_anchor_weekday</span>: <span class="number">4</span>,
+            <span class="ident">calendar</span>: <span class="ident">week_of::CalendarInfo</span> {
+                <span class="ident">first_weekday</span>: <span class="ident">IsoWeekday::Monday</span>,
+                <span class="ident">min_week_days</span>: <span class="number">4</span>,
+            },
         }
     }
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">ZonedDateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">ZonedDateTimeInput</span><span class="op">&gt;</span> {
     <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">T</span>,
-    <span class="ident">_first_weekday</span>: <span class="ident">u8</span>,
-    <span class="ident">_anchor_weekday</span>: <span class="ident">u8</span>,
+    <span class="ident">calendar</span>: <span class="ident">week_of::CalendarInfo</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">ZonedDateTimeInput</span><span class="op">&gt;</span> <span class="ident">ZonedDateTimeInputWithLocale</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span> {
@@ -407,8 +495,10 @@
         <span class="self">Self</span> {
             <span class="ident">data</span>,
             <span class="comment">// TODO(#488): Implement week calculations.</span>
-            <span class="ident">_first_weekday</span>: <span class="number">1</span>,
-            <span class="ident">_anchor_weekday</span>: <span class="number">4</span>,
+            <span class="ident">calendar</span>: <span class="ident">week_of::CalendarInfo</span> {
+                <span class="ident">first_weekday</span>: <span class="ident">IsoWeekday::Monday</span>,
+                <span class="ident">min_week_days</span>: <span class="number">4</span>,
+            },
         }
     }
 }
@@ -418,16 +508,16 @@
         <span class="self">self</span>.<span class="ident">data</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Year</span> {
-        <span class="macro">todo!</span>(<span class="string">&quot;#488&quot;</span>)
+    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Year</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+        <span class="ident">year_week</span>(<span class="self">self</span>.<span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">calendar</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">week_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfMonth</span> {
         <span class="macro">todo!</span>(<span class="string">&quot;#488&quot;</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfYear</span> {
-        <span class="macro">todo!</span>(<span class="string">&quot;#488&quot;</span>)
+    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOfYear</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+        <span class="ident">week_of_year</span>(<span class="self">self</span>.<span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">calendar</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">flexible_day_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
@@ -442,16 +532,16 @@
         <span class="self">self</span>.<span class="ident">data</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Year</span> {
-        <span class="macro">todo!</span>(<span class="string">&quot;#488&quot;</span>)
+    <span class="kw">fn</span> <span class="ident">year_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Year</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+        <span class="ident">year_week</span>(<span class="self">self</span>.<span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">calendar</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">week_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfMonth</span> {
         <span class="macro">todo!</span>(<span class="string">&quot;#488&quot;</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WeekOfYear</span> {
-        <span class="macro">todo!</span>(<span class="string">&quot;#488&quot;</span>)
+    <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOfYear</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+        <span class="ident">week_of_year</span>(<span class="self">self</span>.<span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">calendar</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">flexible_day_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {

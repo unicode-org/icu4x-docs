@@ -138,6 +138,22 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -163,7 +179,7 @@
 <span class="doccomment">/// let c1 = &#39;𑄃&#39;;</span>
 <span class="doccomment">/// let ule = c1.as_unaligned();</span>
 <span class="doccomment">/// assert_eq!(CharULE::as_byte_slice(&amp;[ule]), &amp;[0x03, 0x11, 0x01, 0x00]);</span>
-<span class="doccomment">/// let c2 = char::from_unaligned(&amp;ule);</span>
+<span class="doccomment">/// let c2 = char::from_unaligned(ule);</span>
 <span class="doccomment">/// assert_eq!(c1, c2);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -206,13 +222,13 @@
     <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="ident">CharULE</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">as_unaligned</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::ULE</span> {
-        <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="kw-2">*</span><span class="self">self</span>);
+    <span class="kw">fn</span> <span class="ident">as_unaligned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::ULE</span> {
+        <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="self">self</span>);
         <span class="ident">CharULE</span>(<span class="ident">u</span>.<span class="ident">to_le_bytes</span>())
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::ULE</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="ident"><span class="self">Self</span>::ULE</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="ident">u32::from_le_bytes</span>(<span class="ident">unaligned</span>.<span class="number">0</span>);
         <span class="comment">// Safe because the bytes of CharULE are defined to represent a valid Unicode code point.</span>
         <span class="comment">// TODO: Use char::from_u32_unchecked() when stabilized</span>
@@ -232,13 +248,17 @@
     <span class="kw">fn</span> <span class="ident">test_parse</span>() {
         <span class="comment">// 1-byte, 2-byte, 3-byte, and 4-byte character in UTF-8 (not as relevant in UTF-32)</span>
         <span class="kw">let</span> <span class="ident">chars</span> <span class="op">=</span> [<span class="string">&#39;w&#39;</span>, <span class="string">&#39;ω&#39;</span>, <span class="string">&#39;文&#39;</span>, <span class="string">&#39;𑄃&#39;</span>];
-        <span class="kw">let</span> <span class="ident">char_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CharULE</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">char::as_unaligned</span>).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">char_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CharULE</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">iter</span>().<span class="ident">copied</span>().<span class="ident">map</span>(<span class="ident">char::as_unaligned</span>).<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">char_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">CharULE::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">char_ules</span>);
 
         <span class="comment">// Check parsing</span>
         <span class="kw">let</span> <span class="ident">parsed_ules</span>: <span class="kw-2">&amp;</span>[<span class="ident">CharULE</span>] <span class="op">=</span> <span class="ident">CharULE::parse_byte_slice</span>(<span class="ident">char_bytes</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">char_ules</span>, <span class="ident">parsed_ules</span>);
-        <span class="kw">let</span> <span class="ident">parsed_chars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">parsed_ules</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">char::from_unaligned</span>).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">parsed_chars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">parsed_ules</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">copied</span>()
+            .<span class="ident">map</span>(<span class="ident">char::from_unaligned</span>)
+            .<span class="ident">collect</span>();
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">chars</span>, <span class="ident">parsed_chars</span>.<span class="ident">as_slice</span>());
 
         <span class="comment">// Check EqULE</span>
@@ -250,7 +270,11 @@
 
         <span class="comment">// Compare to u32</span>
         <span class="kw">let</span> <span class="ident">u32s</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">iter</span>().<span class="ident">copied</span>().<span class="ident">map</span>(<span class="ident">u32::from</span>).<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PlainOldULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PlainOldULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">copied</span>()
+            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>)
+            .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">u32_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">PlainOldULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">u32_ules</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">char_bytes</span>, <span class="ident">u32_bytes</span>);
 
@@ -265,14 +289,22 @@
     <span class="kw">fn</span> <span class="ident">test_failures</span>() {
         <span class="comment">// 119 and 120 are valid, but not 0xD800 (high surrogate)</span>
         <span class="kw">let</span> <span class="ident">u32s</span> <span class="op">=</span> [<span class="number">119</span>, <span class="number">0xD800</span>, <span class="number">120</span>];
-        <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PlainOldULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PlainOldULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">copied</span>()
+            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>)
+            .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">u32_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">PlainOldULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">u32_ules</span>);
         <span class="kw">let</span> <span class="ident">parsed_ules_result</span> <span class="op">=</span> <span class="ident">CharULE::parse_byte_slice</span>(<span class="ident">u32_bytes</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">parsed_ules_result</span>, <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
 
         <span class="comment">// 0x20FFFF is out of range for a char</span>
         <span class="kw">let</span> <span class="ident">u32s</span> <span class="op">=</span> [<span class="number">0x20FFFF</span>];
-        <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PlainOldULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PlainOldULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">copied</span>()
+            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>)
+            .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">u32_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">PlainOldULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">u32_ules</span>);
         <span class="kw">let</span> <span class="ident">parsed_ules_result</span> <span class="op">=</span> <span class="ident">CharULE::parse_byte_slice</span>(<span class="ident">u32_bytes</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">parsed_ules_result</span>, <span class="prelude-val">Err</span>(<span class="kw">_</span>)));

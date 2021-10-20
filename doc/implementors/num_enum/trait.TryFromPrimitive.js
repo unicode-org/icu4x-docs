@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["icu_uniset"] = [{"text":"impl TryFromPrimitive for <a class=\"enum\" href=\"icu_uniset/enum_props/enum.GeneralSubcategory.html\" title=\"enum icu_uniset::enum_props::GeneralSubcategory\">GeneralSubcategory</a>","synthetic":false,"types":["icu_uniset::enum_props::GeneralSubcategory"]}];
+implementors["icu_properties"] = [{"text":"impl TryFromPrimitive for <a class=\"enum\" href=\"icu_properties/enum.GeneralSubcategory.html\" title=\"enum icu_properties::GeneralSubcategory\">GeneralSubcategory</a>","synthetic":false,"types":["icu_properties::props::GeneralSubcategory"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

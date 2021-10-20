@@ -314,15 +314,25 @@
 <span id="314">314</span>
 <span id="315">315</span>
 <span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uprops_serde</span>;
+<span class="kw">use</span> <span class="ident">icu_properties::provider::UnicodePropertyV1</span>;
+<span class="kw">use</span> <span class="ident">icu_properties::provider::UnicodePropertyV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::iter::IterableDataProviderCore</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">icu_uniset::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSetBuilder</span>;
 <span class="kw">use</span> <span class="ident">std::fs</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
@@ -434,201 +444,209 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_general_category</span>() {
-    <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
-    <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">icu_properties::provider::key</span>;
 
-    <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_general_category</span>() {
+        <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
+        <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
 
-    <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                <span class="ident">key</span>: <span class="ident">key::GENERAL_CATEGORY_NUMBER_V1</span>,
-                <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
-            },
-        })
-        .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
-        .<span class="ident">take_payload</span>()
-        .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
-
-    <span class="kw">let</span> <span class="ident">digits</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">clone</span>().<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
-
-    <span class="macro">assert!</span>(<span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;5&#39;</span>));
-    <span class="macro">assert!</span>(<span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0665}&#39;</span>)); <span class="comment">// U+0665 ARABIC-INDIC DIGIT FIVE</span>
-    <span class="macro">assert!</span>(<span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{096b}&#39;</span>)); <span class="comment">// U+0969 DEVANAGARI DIGIT FIVE</span>
-
-    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;A&#39;</span>));
-}
-
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_script</span>() {
-    <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
-    <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
-
-    <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
-
-    <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                <span class="ident">key</span>: <span class="ident">key::SCRIPT_THAI_V1</span>,
-                <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
-            },
-        })
-        .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
-        .<span class="ident">take_payload</span>()
-        .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
-
-    <span class="kw">let</span> <span class="ident">thai</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">clone</span>().<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
-
-    <span class="macro">assert!</span>(<span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0e01}&#39;</span>)); <span class="comment">// U+0E01 THAI CHARACTER KO KAI</span>
-    <span class="macro">assert!</span>(<span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0e50}&#39;</span>)); <span class="comment">// U+0E50 THAI DIGIT ZERO</span>
-
-    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;A&#39;</span>));
-    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0e3f}&#39;</span>)); <span class="comment">// U+0E50 THAI CURRENCY SYMBOL BAHT</span>
-}
-
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_gc_groupings</span>() {
-    <span class="kw">use</span> <span class="ident">icu_uniset</span>::{<span class="ident">UnicodeSet</span>, <span class="ident">UnicodeSetBuilder</span>};
-    <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
-
-    <span class="kw">fn</span> <span class="ident">get_uniset_payload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">ResourceKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
         <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
+
         <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
             .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
                 <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>,
+                    <span class="ident">key</span>: <span class="ident">key::GENERAL_CATEGORY_NUMBER_V1</span>,
                     <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
                 },
             })
             .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
             .<span class="ident">take_payload</span>()
             .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
-        <span class="ident">payload</span>
+
+        <span class="kw">let</span> <span class="ident">digits</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">clone</span>().<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;5&#39;</span>));
+        <span class="macro">assert!</span>(<span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0665}&#39;</span>)); <span class="comment">// U+0665 ARABIC-INDIC DIGIT FIVE</span>
+        <span class="macro">assert!</span>(<span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{096b}&#39;</span>)); <span class="comment">// U+0969 DEVANAGARI DIGIT FIVE</span>
+
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">digits</span>.<span class="ident">contains</span>(<span class="string">&#39;A&#39;</span>));
     }
 
-    <span class="kw">let</span> <span class="ident">test_group</span> <span class="op">=</span> <span class="op">|</span><span class="ident">category</span>: <span class="ident">ResourceKey</span>, <span class="ident">subcategories</span>: <span class="kw-2">&amp;</span>[<span class="ident">ResourceKey</span>]<span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">category_set_payload</span> <span class="op">=</span> <span class="ident">get_uniset_payload</span>(<span class="ident">category</span>);
-        <span class="kw">let</span> <span class="ident">category_set</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">category_set_payload</span>
-            .<span class="ident">get</span>()
-            .<span class="ident">clone</span>()
-            .<span class="ident">try_into</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
-        <span class="kw">for</span> <span class="ident">subcategory</span> <span class="kw">in</span> <span class="ident">subcategories</span> {
-            <span class="ident">builder</span>.<span class="ident">add_set</span>(
-                <span class="kw-2">&amp;</span><span class="ident">get_uniset_payload</span>(<span class="kw-2">*</span><span class="ident">subcategory</span>)
-                    .<span class="ident">get</span>()
-                    .<span class="ident">clone</span>()
-                    .<span class="ident">try_into</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>),
-            );
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_script</span>() {
+        <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
+        <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+
+        <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
+
+        <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
+                    <span class="ident">key</span>: <span class="ident">key::SCRIPT_THAI_V1</span>,
+                    <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
+                },
+            })
+            .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
+            .<span class="ident">take_payload</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
+
+        <span class="kw">let</span> <span class="ident">thai</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">clone</span>().<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
+
+        <span class="macro">assert!</span>(<span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0e01}&#39;</span>)); <span class="comment">// U+0E01 THAI CHARACTER KO KAI</span>
+        <span class="macro">assert!</span>(<span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0e50}&#39;</span>)); <span class="comment">// U+0E50 THAI DIGIT ZERO</span>
+
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;A&#39;</span>));
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">thai</span>.<span class="ident">contains</span>(<span class="string">&#39;\u{0e3f}&#39;</span>)); <span class="comment">// U+0E50 THAI CURRENCY SYMBOL BAHT</span>
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_gc_groupings</span>() {
+        <span class="kw">use</span> <span class="ident">icu_uniset</span>::{<span class="ident">UnicodeSet</span>, <span class="ident">UnicodeSetBuilder</span>};
+        <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+
+        <span class="kw">fn</span> <span class="ident">get_uniset_payload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(
+            <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
+            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
+            <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
+                .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                    <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
+                        <span class="ident">key</span>,
+                        <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
+                    },
+                })
+                .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
+                .<span class="ident">take_payload</span>()
+                .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
+            <span class="ident">payload</span>
         }
-        <span class="kw">let</span> <span class="ident">combined_set</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?} {:?}&quot;</span>, <span class="ident">category</span>, <span class="ident">subcategories</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">category_set</span>.<span class="ident">get_inversion_list</span>(),
-            <span class="ident">combined_set</span>.<span class="ident">get_inversion_list</span>()
+
+        <span class="kw">let</span> <span class="ident">test_group</span> <span class="op">=</span> <span class="op">|</span><span class="ident">category</span>: <span class="ident">ResourceKey</span>, <span class="ident">subcategories</span>: <span class="kw-2">&amp;</span>[<span class="ident">ResourceKey</span>]<span class="op">|</span> {
+            <span class="kw">let</span> <span class="ident">category_set_payload</span> <span class="op">=</span> <span class="ident">get_uniset_payload</span>(<span class="ident">category</span>);
+            <span class="kw">let</span> <span class="ident">category_set</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">category_set_payload</span>
+                .<span class="ident">get</span>()
+                .<span class="ident">clone</span>()
+                .<span class="ident">try_into</span>()
+                .<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+            <span class="kw">for</span> <span class="ident">subcategory</span> <span class="kw">in</span> <span class="ident">subcategories</span> {
+                <span class="ident">builder</span>.<span class="ident">add_set</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">get_uniset_payload</span>(<span class="kw-2">*</span><span class="ident">subcategory</span>)
+                        .<span class="ident">get</span>()
+                        .<span class="ident">clone</span>()
+                        .<span class="ident">try_into</span>()
+                        .<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>),
+                );
+            }
+            <span class="kw">let</span> <span class="ident">combined_set</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
+            <span class="macro">println!</span>(<span class="string">&quot;{:?} {:?}&quot;</span>, <span class="ident">category</span>, <span class="ident">subcategories</span>);
+            <span class="macro">assert_eq!</span>(
+                <span class="ident">category_set</span>.<span class="ident">get_inversion_list</span>(),
+                <span class="ident">combined_set</span>.<span class="ident">get_inversion_list</span>()
+            );
+        };
+
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_LETTER_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_UPPERCASE_LETTER_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_LOWERCASE_LETTER_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_TITLECASE_LETTER_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_MODIFIER_LETTER_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_OTHER_LETTER_V1</span>,
+            ],
         );
-    };
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_OTHER_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_CONTROL_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_FORMAT_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_UNASSIGNED_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_PRIVATE_USE_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_SURROGATE_V1</span>,
+            ],
+        );
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_MARK_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_SPACING_MARK_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_ENCLOSING_MARK_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_NONSPACING_MARK_V1</span>,
+            ],
+        );
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_NUMBER_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_DIGIT_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_LETTER_NUMBER_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_OTHER_NUMBER_V1</span>,
+            ],
+        );
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_PUNCTUATION_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_CONNECTOR_PUNCTUATION_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_DASH_PUNCTUATION_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_CLOSE_PUNCTUATION_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_FINAL_PUNCTUATION_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_INITIAL_PUNCTUATION_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_OTHER_PUNCTUATION_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_OPEN_PUNCTUATION_V1</span>,
+            ],
+        );
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_SYMBOL_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_CURRENCY_SYMBOL_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_MODIFIER_SYMBOL_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_MATH_SYMBOL_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_OTHER_SYMBOL_V1</span>,
+            ],
+        );
+        <span class="ident">test_group</span>(
+            <span class="ident">key::GENERAL_CATEGORY_SEPARATOR_V1</span>,
+            <span class="kw-2">&amp;</span>[
+                <span class="ident">key::GENERAL_CATEGORY_LINE_SEPARATOR_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_PARAGRAPH_SEPARATOR_V1</span>,
+                <span class="ident">key::GENERAL_CATEGORY_SPACE_SEPARATOR_V1</span>,
+            ],
+        );
+    }
 
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_LETTER_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_UPPERCASE_LETTER_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_LOWERCASE_LETTER_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_TITLECASE_LETTER_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_MODIFIER_LETTER_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_OTHER_LETTER_V1</span>,
-        ],
-    );
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_OTHER_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_CONTROL_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_FORMAT_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_UNASSIGNED_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_PRIVATE_USE_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_SURROGATE_V1</span>,
-        ],
-    );
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_MARK_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_SPACING_MARK_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_ENCLOSING_MARK_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_NONSPACING_MARK_V1</span>,
-        ],
-    );
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_NUMBER_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_DIGIT_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_LETTER_NUMBER_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_OTHER_NUMBER_V1</span>,
-        ],
-    );
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_PUNCTUATION_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_CONNECTOR_PUNCTUATION_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_DASH_PUNCTUATION_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_CLOSE_PUNCTUATION_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_FINAL_PUNCTUATION_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_INITIAL_PUNCTUATION_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_OTHER_PUNCTUATION_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_OPEN_PUNCTUATION_V1</span>,
-        ],
-    );
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_SYMBOL_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_CURRENCY_SYMBOL_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_MODIFIER_SYMBOL_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_MATH_SYMBOL_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_OTHER_SYMBOL_V1</span>,
-        ],
-    );
-    <span class="ident">test_group</span>(
-        <span class="ident">key::GENERAL_CATEGORY_SEPARATOR_V1</span>,
-        <span class="kw-2">&amp;</span>[
-            <span class="ident">key::GENERAL_CATEGORY_LINE_SEPARATOR_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_PARAGRAPH_SEPARATOR_V1</span>,
-            <span class="ident">key::GENERAL_CATEGORY_SPACE_SEPARATOR_V1</span>,
-        ],
-    );
-}
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_gc_surrogate</span>() {
+        <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
+        <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
 
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_gc_surrogate</span>() {
-    <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
-    <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+        <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
 
-    <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;uprops&quot;</span>);
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertiesDataProvider::new</span>(<span class="ident">root_dir</span>);
+        <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
+                    <span class="ident">key</span>: <span class="ident">key::GENERAL_CATEGORY_SURROGATE_V1</span>,
+                    <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
+                },
+            })
+            .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
+            .<span class="ident">take_payload</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
 
-    <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                <span class="ident">key</span>: <span class="ident">key::GENERAL_CATEGORY_SURROGATE_V1</span>,
-                <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
-            },
-        })
-        .<span class="ident">expect</span>(<span class="string">&quot;The data should be valid&quot;</span>)
-        .<span class="ident">take_payload</span>()
-        .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
+        <span class="kw">let</span> <span class="ident">surrogates</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">clone</span>().<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
 
-    <span class="kw">let</span> <span class="ident">surrogates</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">clone</span>().<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;Valid unicode set&quot;</span>);
+        <span class="macro">assert!</span>(<span class="ident">surrogates</span>.<span class="ident">contains_u32</span>(<span class="number">0xd800</span>));
+        <span class="macro">assert!</span>(<span class="ident">surrogates</span>.<span class="ident">contains_u32</span>(<span class="number">0xd900</span>));
+        <span class="macro">assert!</span>(<span class="ident">surrogates</span>.<span class="ident">contains_u32</span>(<span class="number">0xdfff</span>));
 
-    <span class="macro">assert!</span>(<span class="ident">surrogates</span>.<span class="ident">contains_u32</span>(<span class="number">0xd800</span>));
-    <span class="macro">assert!</span>(<span class="ident">surrogates</span>.<span class="ident">contains_u32</span>(<span class="number">0xd900</span>));
-    <span class="macro">assert!</span>(<span class="ident">surrogates</span>.<span class="ident">contains_u32</span>(<span class="number">0xdfff</span>));
-
-    <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">surrogates</span>.<span class="ident">contains</span>(<span class="string">&#39;A&#39;</span>));
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">surrogates</span>.<span class="ident">contains</span>(<span class="string">&#39;A&#39;</span>));
+    }
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_provider_uprops" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

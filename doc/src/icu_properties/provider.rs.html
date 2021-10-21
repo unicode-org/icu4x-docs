@@ -349,6 +349,59 @@
 <span id="349">349</span>
 <span id="350">350</span>
 <span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -357,6 +410,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Read more about data providers: [`icu_provider`]</span>
 
+<span class="kw">use</span> <span class="ident">icu_codepointtrie::codepointtrie</span>::{<span class="ident">CodePointTrie</span>, <span class="ident">TrieValue</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::yoke</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
 <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
 <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSetBuilder</span>;
@@ -383,10 +437,10 @@
         };
     }
 
-    <span class="macro">define_resource_keys!</span>(<span class="number">265</span>;
+    <span class="macro">define_resource_keys!</span>(<span class="number">267</span>;
 
         <span class="comment">//</span>
-        <span class="comment">// Binary properties</span>
+        <span class="comment">// Binary property UnicodeSets</span>
         <span class="comment">//</span>
 
         (<span class="ident">ASCII_HEX_DIGIT_V1</span>, <span class="string">&quot;AHex&quot;</span>),
@@ -456,7 +510,7 @@
         (<span class="ident">XID_START_V1</span>, <span class="string">&quot;XIDS&quot;</span>),
 
         <span class="comment">//</span>
-        <span class="comment">// Enumerated properties</span>
+        <span class="comment">// Enumerated property prop=val UnicodeSets</span>
         <span class="comment">//</span>
 
         <span class="comment">// Note: The ResourceKey subcategory strings are determined from the</span>
@@ -663,8 +717,22 @@
         (<span class="ident">SCRIPT_YEZIDI_V1</span>, <span class="string">&quot;sc=Yezi&quot;</span>),
         (<span class="ident">SCRIPT_YI_V1</span>, <span class="string">&quot;sc=Yiii&quot;</span>),
         (<span class="ident">SCRIPT_ZANABAZAR_SQUARE_V1</span>, <span class="string">&quot;sc=Zanb&quot;</span>),
+
+        <span class="comment">//</span>
+        <span class="comment">// Enumerated property CodePointMaps</span>
+        <span class="comment">//</span>
+
+        <span class="comment">// ResourceKey subcategory string is the short alias of the property</span>
+
+        (<span class="ident">GENERAL_CATEGORY_V1</span>, <span class="string">&quot;gc&quot;</span>),
+        (<span class="ident">SCRIPT_V1</span>, <span class="string">&quot;sc&quot;</span>),
+
     );
 }
+
+<span class="comment">//</span>
+<span class="comment">// UnicodeProperty</span>
+<span class="comment">//</span>
 
 <span class="doccomment">/// A set of characters with a particular property.</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>]</span>
@@ -699,6 +767,44 @@
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">prop</span>: <span class="ident">UnicodePropertyV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
         <span class="ident">prop</span>.<span class="ident">inv_list</span>
     }
+}
+
+<span class="comment">//</span>
+<span class="comment">// UnicodePropertyMap</span>
+<span class="comment">//</span>
+
+<span class="doccomment">/// A map efficiently storing data about individual characters.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Yokeable</span>, <span class="ident">ZeroCopyFrom</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>)
+)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// A codepoint trie storing the data</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">codepoint_trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">zerovec::ule::AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>: <span class="ident">Clone</span>,
+{
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">UnicodePropertyMapV1</span> {
+            <span class="ident">codepoint_trie</span>: <span class="self">self</span>.<span class="ident">codepoint_trie</span>.<span class="ident">clone</span>(),
+        }
+    }
+}
+
+<span class="doccomment">/// Marker type for UnicodePropertyMapV1.</span>
+<span class="doccomment">/// This is generated by hand because icu_provider::data_struct doesn&#39;t support generics yet.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodePropertyMapV1Marker</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> {
+    <span class="ident">_phantom</span>: <span class="ident">core::marker::PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> <span class="ident">icu_provider::DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UnicodePropertyMapV1Marker</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_properties" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

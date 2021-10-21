@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["codepointtrie",""],["error",""],["planes",""],["provider","Data provider struct definitions for this ICU4X component."]]});
+initSidebarItems({"mod":[["codepointtrie",""],["error",""],["planes",""]]});

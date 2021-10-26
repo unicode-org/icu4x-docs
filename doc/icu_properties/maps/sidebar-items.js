@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["get_general_category","Return a `CodePointTrie` for the General_Category Unicode enumerated property. See [`GeneralCategory`]."],["get_script","Return a `CodePointTrie` for the Script Unicode enumerated property. See [`Script`]."]]});

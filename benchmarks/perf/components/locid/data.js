@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1635454791204,
+  "lastUpdate": 1635464209535,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -15581,6 +15581,78 @@ window.BENCHMARK_DATA = {
             "name": "locale/overview",
             "value": 4419,
             "range": "± 308",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "40dff703ca88306047c47d1187a8a6880e8c4b58",
+          "message": "Switch examples to use static provider to better measure memory impact. (#1241)",
+          "timestamp": "2021-10-28T16:29:17-07:00",
+          "tree_id": "5d17c95204aa764ea02a0247bb3a4dc7a450637e",
+          "url": "https://github.com/unicode-org/icu4x/commit/40dff703ca88306047c47d1187a8a6880e8c4b58"
+        },
+        "date": 1635464150321,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2543,
+            "range": "± 157",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4605,
+            "range": "± 729",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@braniecki.net",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7e3fc02556b180a687e0d9fa3566b5bbfdd419cf",
+          "message": "Move DTF to runtime patterns (#1198)\n\n* Move DTF to runtime patterns\r\n\r\n* Apply reviewers feedback\r\n\r\n* Apply reviewers feedback\r\n\r\n* Apply feedback\r\n\r\n* Apply feedback\r\n\r\n* Apply feedback",
+          "timestamp": "2021-10-28T16:29:48-07:00",
+          "tree_id": "f5ec35332ec40c41ff3330d295c66f599455429e",
+          "url": "https://github.com/unicode-org/icu4x/commit/7e3fc02556b180a687e0d9fa3566b5bbfdd419cf"
+        },
+        "date": 1635464204142,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 3190,
+            "range": "± 204",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 5254,
+            "range": "± 306",
             "unit": "ns/iter"
           }
         ]

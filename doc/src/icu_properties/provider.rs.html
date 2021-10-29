@@ -426,19 +426,18 @@
 
     <span class="doccomment">/// Macro to help define resource keys and store them in a list.</span>
     <span class="macro">macro_rules!</span> <span class="ident">define_resource_keys</span> {
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>:<span class="ident">expr</span>; $((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">k</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">literal</span>)),<span class="op">+</span>,) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">allkeys</span>:<span class="ident">ident</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>:<span class="ident">expr</span>; $((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">k</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>:<span class="ident">literal</span>)),<span class="op">+</span>,) <span class="op">=</span><span class="op">&gt;</span> {
             $(
                 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// These constants don&#39;t need individual documentation.</span>
                 <span class="kw">pub</span> <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">k</span>: <span class="ident">ResourceKey</span> <span class="op">=</span> <span class="macro">resource_key!</span>(<span class="ident">UnicodeSet</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">s</span>, <span class="number">1</span>);
             )<span class="op">+</span>
 
             <span class="doccomment">/// The set of all resource keys supported by [`icu_uniset`](crate).</span>
-            <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ALL_KEYS</span>: [<span class="ident">ResourceKey</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>] <span class="op">=</span> [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">k</span>,)<span class="op">+</span>];
+            <span class="kw">pub</span> <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">allkeys</span>: [<span class="ident">ResourceKey</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>] <span class="op">=</span> [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">k</span>,)<span class="op">+</span>];
         };
     }
 
-    <span class="macro">define_resource_keys!</span>(<span class="number">267</span>;
-
+    <span class="macro">define_resource_keys!</span>(<span class="ident">ALL_SET_KEYS</span>; <span class="number">265</span>;
         <span class="comment">//</span>
         <span class="comment">// Binary property UnicodeSets</span>
         <span class="comment">//</span>
@@ -717,7 +716,9 @@
         (<span class="ident">SCRIPT_YEZIDI_V1</span>, <span class="string">&quot;sc=Yezi&quot;</span>),
         (<span class="ident">SCRIPT_YI_V1</span>, <span class="string">&quot;sc=Yiii&quot;</span>),
         (<span class="ident">SCRIPT_ZANABAZAR_SQUARE_V1</span>, <span class="string">&quot;sc=Zanb&quot;</span>),
+    );
 
+    <span class="macro">define_resource_keys!</span>(<span class="ident">ALL_MAP_KEYS</span>; <span class="number">2</span>;
         <span class="comment">//</span>
         <span class="comment">// Enumerated property CodePointMaps</span>
         <span class="comment">//</span>
@@ -726,7 +727,6 @@
 
         (<span class="ident">GENERAL_CATEGORY_V1</span>, <span class="string">&quot;gc&quot;</span>),
         (<span class="ident">SCRIPT_V1</span>, <span class="string">&quot;sc&quot;</span>),
-
     );
 }
 
@@ -782,7 +782,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> {
     <span class="doccomment">/// A codepoint trie storing the data</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">codepoint_trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">code_point_trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span><span class="op">&gt;</span>
@@ -791,7 +791,7 @@
 {
     <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">UnicodePropertyMapV1</span> {
-            <span class="ident">codepoint_trie</span>: <span class="self">self</span>.<span class="ident">codepoint_trie</span>.<span class="ident">clone</span>(),
+            <span class="ident">code_point_trie</span>: <span class="self">self</span>.<span class="ident">code_point_trie</span>.<span class="ident">clone</span>(),
         }
     }
 }

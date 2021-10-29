@@ -26,21 +26,127 @@
 <span id="26">26</span>
 <span id="27">27</span>
 <span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="doccomment">//! `icu_properties` is a utility crate of the [`ICU4X`] project.</span>
+<span class="doccomment">//! `icu_properties` is one of the [`ICU4X`] components.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This component provides definitions of [Unicode Properties] and APIs for</span>
 <span class="doccomment">//! retrieving property data in an appropriate data structure.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Currently, only binary property APIs are supported, with APIs that return</span>
-<span class="doccomment">//! a [`UnicodeSet`]. See the [`sets`] module for more details.</span>
+<span class="doccomment">//! APIs that return a [`UnicodeSet`] exist for binary properties and certain enumerated</span>
+<span class="doccomment">//! properties. See the [`sets`] module for more details.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! APIs that return a [`CodePointTrie`] exist for certain enumerated properties. See the</span>
+<span class="doccomment">//! [`maps`] module for more details.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Examples</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Property data as `UnicodeSet`s</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! use icu::properties::{sets, GeneralCategory};</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // A binary property as a `UnicodeSet`</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let payload =</span>
+<span class="doccomment">//!     sets::get_emoji(&amp;provider)</span>
+<span class="doccomment">//!         .expect(&quot;The data should be valid&quot;);</span>
+<span class="doccomment">//! let data_struct = payload.get();</span>
+<span class="doccomment">//! let emoji = &amp;data_struct.inv_list;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! assert!(emoji.contains(&#39;🎃&#39;));  // U+1F383 JACK-O-LANTERN</span>
+<span class="doccomment">//! assert!(!emoji.contains(&#39;木&#39;));  // U+6728</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // An individual enumerated property value as a `UnicodeSet`</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let payload =</span>
+<span class="doccomment">//!     sets::get_for_general_category(&amp;provider, GeneralCategory::LineSeparator)</span>
+<span class="doccomment">//!         .expect(&quot;The data should be valid&quot;);</span>
+<span class="doccomment">//! let data_struct = payload.get();</span>
+<span class="doccomment">//! let line_sep = &amp;data_struct.inv_list;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! assert!(line_sep.contains_u32(0x2028));</span>
+<span class="doccomment">//! assert!(!line_sep.contains_u32(0x2029));</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Property data as `CodePointTrie`s</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! use icu::properties::{maps, Script};</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let payload =</span>
+<span class="doccomment">//!     maps::get_script(&amp;provider)</span>
+<span class="doccomment">//!         .expect(&quot;The data should be valid&quot;);</span>
+<span class="doccomment">//! let data_struct = payload.get();</span>
+<span class="doccomment">//! let script = &amp;data_struct.code_point_trie;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! assert_eq!(script.get(&#39;🎃&#39; as u32), Script::Common);  // U+1F383 JACK-O-LANTERN</span>
+<span class="doccomment">//! assert_eq!(script.get(&#39;木&#39; as u32), Script::Han);  // U+6728</span>
+<span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`ICU4X`]: ../icu/index.html</span>
 <span class="doccomment">//! [Unicode Properties]: https://unicode-org.github.io/icu/userguide/strings/properties.html</span>
 <span class="doccomment">//! [`UnicodeSet`]: icu_uniset::UnicodeSet</span>
+<span class="doccomment">//! [`CodePointTrie`]: icu_codepointtrie::codepointtrie::CodePointTrie</span>
 <span class="doccomment">//! [`sets`]: crate::sets</span>
 
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">test</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)), <span class="ident">no_std</span>)]</span>

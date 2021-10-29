@@ -235,6 +235,7 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
+<span id="238">238</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -358,7 +359,7 @@
         <span class="comment">// The CLDR keys for available_formats can have duplicate skeletons with either</span>
         <span class="comment">// an additional variant, or with multiple variants for different plurals.</span>
         <span class="kw">for</span> (<span class="ident">skeleton_str</span>, <span class="ident">pattern_str</span>) <span class="kw">in</span> <span class="ident">other</span>.<span class="ident">available_formats</span>.<span class="number">0</span>.<span class="ident">iter</span>() {
-            <span class="kw">let</span> (<span class="ident">skeleton_str</span>, <span class="ident">variant_str</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">skeleton_str</span>.<span class="ident">split_once</span>(<span class="string">&quot;-count-&quot;</span>) {
+            <span class="kw">let</span> (<span class="ident">skeleton_str</span>, <span class="ident">plural_form_str</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">skeleton_str</span>.<span class="ident">split_once</span>(<span class="string">&quot;-count-&quot;</span>) {
                 <span class="prelude-val">Some</span>((<span class="ident">s</span>, <span class="ident">v</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">s</span>, <span class="ident">v</span>),
                 <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">skeleton_str</span>.<span class="ident">as_ref</span>(), <span class="string">&quot;other&quot;</span>),
             };
@@ -366,11 +367,11 @@
             <span class="ident">patterns</span>
                 .<span class="ident">entry</span>(<span class="ident">skeleton_str</span>.<span class="ident">to_string</span>())
                 .<span class="ident">and_modify</span>(<span class="op">|</span><span class="ident">map</span><span class="op">|</span> {
-                    <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">variant_str</span>.<span class="ident">to_string</span>(), <span class="ident">pattern_str</span>.<span class="ident">to_string</span>());
+                    <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">plural_form_str</span>.<span class="ident">to_string</span>(), <span class="ident">pattern_str</span>.<span class="ident">to_string</span>());
                 })
                 .<span class="ident">or_insert_with</span>(<span class="op">|</span><span class="op">|</span> {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
-                    <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">variant_str</span>.<span class="ident">to_string</span>(), <span class="ident">pattern_str</span>.<span class="ident">to_string</span>());
+                    <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">plural_form_str</span>.<span class="ident">to_string</span>(), <span class="ident">pattern_str</span>.<span class="ident">to_string</span>());
                     <span class="ident">map</span>
                 });
         }
@@ -381,6 +382,7 @@
             <span class="kw">let</span> <span class="ident">skeleton</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Skeleton::try_from</span>(<span class="ident">skeleton_str</span>.<span class="ident">as_str</span>()) {
                 <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
                 <span class="prelude-val">Err</span>(<span class="ident">SkeletonError::SymbolUnimplemented</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+                <span class="prelude-val">Err</span>(<span class="ident">SkeletonError::SkeletonHasVariant</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
                 <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(
                     <span class="string">&quot;Unexpected skeleton error while parsing skeleton {:?} {}&quot;</span>,
                     <span class="ident">skeleton_str</span>, <span class="ident">err</span>

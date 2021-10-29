@@ -233,19 +233,16 @@
 <span id="233">233</span>
 <span id="234">234</span>
 <span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::cldr_json</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr_langid::CldrLangID</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::reader</span>::{<span class="ident">get_subdirectories</span>, <span class="ident">open_reader</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::reader</span>::{<span class="ident">get_langid_subdirectories</span>, <span class="ident">open_reader</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CldrPaths</span>;
 <span class="kw">use</span> <span class="ident">icu_datetime</span>::{<span class="ident">provider</span>::<span class="kw-2">*</span>, <span class="ident">skeleton::SkeletonError</span>};
+<span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::PluralCategory</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::iter</span>::{<span class="ident">IterableDataProviderCore</span>, <span class="ident">KeyedDataProvider</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
@@ -260,7 +257,7 @@
 <span class="doccomment">/// A data provider reading from CLDR JSON dates files.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DateSkeletonPatternsProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
-    <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">CldrLangID</span>, <span class="ident">cldr_json::LangDates</span>)<span class="op">&gt;</span>,
+    <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">LanguageIdentifier</span>, <span class="ident">cldr_json::LangDates</span>)<span class="op">&gt;</span>,
     <span class="ident">_phantom</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> ()<span class="op">&gt;</span>, <span class="comment">// placeholder for when we need the lifetime param</span>
 }
 
@@ -271,7 +268,7 @@
 
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">cldr_paths</span>.<span class="ident">cldr_dates</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">locale_dirs</span> <span class="op">=</span> <span class="ident">get_subdirectories</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">locale_dirs</span> <span class="op">=</span> <span class="ident">get_langid_subdirectories</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
 
         <span class="kw">for</span> <span class="ident">dir</span> <span class="kw">in</span> <span class="ident">locale_dirs</span> {
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="string">&quot;ca-gregorian.json&quot;</span>);
@@ -302,11 +299,8 @@
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">gregory::DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">DateSkeletonPatternsProvider::supports_key</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">cldr_langid</span>: <span class="ident">CldrLangID</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>.<span class="ident">clone</span>().<span class="ident">into</span>();
-        <span class="kw">let</span> <span class="ident">dates</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>
-            .<span class="ident">data</span>
-            .<span class="ident">binary_search_by_key</span>(<span class="op">&amp;&amp;</span><span class="ident">cldr_langid</span>, <span class="op">|</span>(<span class="ident">lid</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">lid</span>)
-        {
+        <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">dates</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>, <span class="op">|</span>(<span class="ident">lid</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">lid</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>[<span class="ident">idx</span>].<span class="number">1</span>.<span class="ident">dates</span>,
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataError::MissingResourceOptions</span>(<span class="ident">req</span>.<span class="ident">clone</span>())),
         };
@@ -337,7 +331,7 @@
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">l</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">ResourceOptions</span> {
                 <span class="ident">variant</span>: <span class="prelude-val">None</span>,
                 <span class="comment">// TODO: Avoid the clone</span>
-                <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="ident">l</span>.<span class="ident">langid</span>.<span class="ident">clone</span>()),
+                <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="ident">l</span>.<span class="ident">clone</span>()),
             })
             .<span class="ident">collect</span>();
         <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">list</span>.<span class="ident">into_iter</span>()))

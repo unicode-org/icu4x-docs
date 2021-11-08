@@ -515,14 +515,12 @@
 <span id="515">515</span>
 <span id="516">516</span>
 <span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident">anyhow::Context</span>;
 <span class="kw">use</span> <span class="ident">clap</span>::{<span class="ident">App</span>, <span class="ident">Arg</span>, <span class="ident">ArgGroup</span>, <span class="ident">ArgMatches</span>};
+<span class="kw">use</span> <span class="ident">eyre::WrapErr</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::provider::key</span>::{<span class="ident">ALL_MAP_KEYS</span>, <span class="ident">ALL_SET_KEYS</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::export::DataExporter</span>;
@@ -548,7 +546,7 @@
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
-<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">matches</span> <span class="op">=</span> <span class="ident">App::new</span>(<span class="string">&quot;ICU4X Data Exporter&quot;</span>)
         .<span class="ident">version</span>(<span class="string">&quot;0.0.1&quot;</span>)
         .<span class="ident">author</span>(<span class="string">&quot;The ICU4X Project Developers&quot;</span>)
@@ -748,11 +746,11 @@
     }
 
     <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;KEY_FILE&quot;</span>) {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Key file is not yet supported (see #192)&quot;</span>,);
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Key file is not yet supported (see #192)&quot;</span>,);
     }
 
     <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;DRY_RUN&quot;</span>) {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Dry-run is not yet supported&quot;</span>);
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Dry-run is not yet supported&quot;</span>);
     }
 
     <span class="comment">// TODO: Build up this list from --keys and --key-file</span>
@@ -765,7 +763,7 @@
         <span class="prelude-val">Some</span>(
             <span class="ident">locale_strs</span>
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">LanguageIdentifier::from_str</span>(<span class="ident">s</span>).<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()))
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>, <span class="ident">anyhow::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>, <span class="ident">eyre::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
         )
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;TEST_LOCALES&quot;</span>) {
         <span class="prelude-val">Some</span>(<span class="ident">icu_testdata::metadata::load</span>()<span class="question-mark">?</span>.<span class="ident">package_metadata</span>.<span class="ident">locales</span>)
@@ -806,7 +804,7 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn</span> <span class="ident">get_fs_exporter</span>(<span class="ident">matches</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">FilesystemExporter</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_fs_exporter</span>(<span class="ident">matches</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="ident">FilesystemExporter</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">syntax</span> <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;SYNTAX&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;json&quot;</span>);
 
     <span class="kw">let</span> <span class="ident">output_path</span>: <span class="ident">PathBuf</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;OUTPUT_TESTDATA&quot;</span>) {
@@ -814,7 +812,7 @@
     } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of_os</span>(<span class="string">&quot;OUTPUT&quot;</span>) {
         <span class="ident">PathBuf::from</span>(<span class="ident">v</span>)
     } <span class="kw">else</span> {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;--out must be specified for --format=dir&quot;</span>);
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;--out must be specified for --format=dir&quot;</span>);
     };
 
     <span class="macro">log::info!</span>(<span class="string">&quot;Writing to filesystem tree at: {}&quot;</span>, <span class="ident">output_path</span>.<span class="ident">display</span>());
@@ -851,9 +849,9 @@
     <span class="prelude-val">Ok</span>(<span class="ident">exporter</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">get_blob_exporter</span>(<span class="ident">matches</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_blob_exporter</span>(<span class="ident">matches</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;SYNTAX&quot;</span>) <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;json&quot;</span>) {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Cannot use --format=blob with --syntax=json&quot;</span>);
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Cannot use --format=blob with --syntax=json&quot;</span>);
     }
 
     <span class="kw">let</span> <span class="ident">output_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;OUTPUT_TESTDATA&quot;</span>) {
@@ -869,7 +867,7 @@
 
     <span class="kw">let</span> <span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path_buf</span>) <span class="op">=</span> <span class="ident">output_path</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;OVERWRITE&quot;</span>) <span class="op">&amp;&amp;</span> <span class="ident">path_buf</span>.<span class="ident">exists</span>() {
-            <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Output path is present: {:?}&quot;</span>, <span class="ident">path_buf</span>);
+            <span class="macro">eyre::bail!</span>(<span class="string">&quot;Output path is present: {:?}&quot;</span>, <span class="ident">path_buf</span>);
         }
         <span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">path_buf</span>.<span class="ident">to_string_lossy</span>().<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">temp</span> <span class="op">=</span> <span class="ident">std::fs::File::create</span>(<span class="ident">path_buf</span>).<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">context</span>)<span class="question-mark">?</span>;
@@ -887,7 +885,7 @@
     <span class="ident">exporter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>),
     <span class="ident">allowed_locales</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">LanguageIdentifier</span>]<span class="op">&gt;</span>,
     <span class="ident">allowed_keys</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">locale_subset</span> <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>);
     <span class="kw">let</span> <span class="ident">cldr_paths</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
         <span class="ident">Box::new</span>(<span class="ident">CldrAllInOneDownloader::try_new_from_github</span>(<span class="ident">tag</span>, <span class="ident">locale_subset</span>)<span class="question-mark">?</span>.<span class="ident">download</span>()<span class="question-mark">?</span>)
@@ -902,7 +900,7 @@
             <span class="ident">locale_subset</span>: <span class="string">&quot;full&quot;</span>.<span class="ident">to_string</span>(),
         })
     } <span class="kw">else</span> {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Either --cldr-tag or --input-root must be specified&quot;</span>,)
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Either --cldr-tag or --input-root must be specified&quot;</span>,)
     };
 
     <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">get_all_cldr_keys</span>();
@@ -940,16 +938,15 @@
     <span class="ident">matches</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>,
     <span class="ident">exporter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>),
     <span class="ident">allowed_keys</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">toml_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;INPUT_ROOT&quot;</span>) {
         <span class="ident">PathBuf::from</span>(<span class="ident">path</span>)
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
         <span class="ident">icu_testdata::paths::uprops_toml_root</span>()
     } <span class="kw">else</span> {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Value for --input-root must be specified&quot;</span>,)
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Value for --input-root must be specified&quot;</span>,)
     };
-    <span class="comment">// TODO(#574): Remove the unwrap when this file is moved to eyre</span>
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">PropertiesDataProvider::try_new</span>(<span class="ident">toml_root</span>).<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">PropertiesDataProvider::try_new</span>(<span class="ident">toml_root</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">ALL_SET_KEYS</span>;
     <span class="kw">let</span> <span class="ident">keys</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">allowed_keys</span>) <span class="op">=</span> <span class="ident">allowed_keys</span> {
@@ -978,16 +975,15 @@
     <span class="ident">matches</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>,
     <span class="ident">exporter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>),
     <span class="ident">allowed_keys</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">toml_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;INPUT_ROOT&quot;</span>) {
         <span class="ident">PathBuf::from</span>(<span class="ident">path</span>)
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
         <span class="ident">icu_testdata::paths::uprops_toml_root</span>()
     } <span class="kw">else</span> {
-        <span class="macro">anyhow::bail!</span>(<span class="string">&quot;Value for --input-root must be specified&quot;</span>,)
+        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Value for --input-root must be specified&quot;</span>,)
     };
-    <span class="comment">// TODO(#574): Remove the unwrap when this file is moved to eyre</span>
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertyCodePointTrieProvider::try_new</span>(<span class="ident">toml_root</span>).<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertyCodePointTrieProvider::try_new</span>(<span class="ident">toml_root</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">ALL_MAP_KEYS</span>;
     <span class="kw">let</span> <span class="ident">keys</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">allowed_keys</span>) <span class="op">=</span> <span class="ident">allowed_keys</span> {
@@ -1016,7 +1012,7 @@
     <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ArgMatches</span>,
     <span class="ident">exporter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>),
     <span class="ident">allowed_locales</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">LanguageIdentifier</span>]<span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">raw_provider</span> <span class="op">=</span> <span class="ident">HelloWorldProvider::new_with_placeholder_data</span>();
     <span class="kw">let</span> <span class="ident">filtered_provider</span>;
     <span class="kw">let</span> <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">IterableDataProvider</span><span class="op">&lt;</span><span class="ident">SerdeSeDataStructMarker</span><span class="op">&gt;</span>;

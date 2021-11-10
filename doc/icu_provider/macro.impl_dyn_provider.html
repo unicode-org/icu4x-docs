@@ -25,15 +25,15 @@ shorthands <code>ERASED</code> or <code>SERDE_SE</code>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::erased::ErasedDataStructMarker</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::marker::CowStringMarker</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::marker::CowStrMarker</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">const</span> <span class="ident">DEMO_KEY</span>: <span class="ident">ResourceKey</span> <span class="op">=</span> <span class="macro">icu_provider::resource_key!</span>(<span class="ident">x</span>, <span class="string">&quot;foo&quot;</span>, <span class="string">&quot;bar&quot;</span>, <span class="number">1</span>);
 
 <span class="comment">// A small DataProvider that returns owned strings</span>
 <span class="kw">struct</span> <span class="ident">MyProvider</span>(<span class="kw">pub</span> <span class="ident">String</span>);
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">CowStringMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MyProvider</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">CowStrMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MyProvider</span> {
     <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>)
-            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">CowStringMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+            <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">CowStrMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>.<span class="ident">match_key</span>(<span class="ident">DEMO_KEY</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
@@ -44,7 +44,7 @@ shorthands <code>ERASED</code> or <code>SERDE_SE</code>.</p>
 
 <span class="comment">// Implement DataProvider&lt;ErasedDataStructMarker&gt;</span>
 <span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">MyProvider</span>, {
-    <span class="ident">DEMO_KEY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CowStringMarker</span>,
+    <span class="ident">DEMO_KEY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CowStrMarker</span>,
 }, <span class="ident">ERASED</span>);
 
 <span class="comment">// Usage example</span>
@@ -52,7 +52,7 @@ shorthands <code>ERASED</code> or <code>SERDE_SE</code>.</p>
 <span class="kw">let</span> <span class="ident">resp</span>: <span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
     .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DEMO_KEY</span>.<span class="ident">into</span>())
     .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed&quot;</span>);
-<span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CowStringMarker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">resp</span>
+<span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CowStrMarker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">resp</span>
     .<span class="ident">take_payload</span>()
     .<span class="ident">expect</span>(<span class="string">&quot;Payload should be present&quot;</span>)
     .<span class="ident">downcast</span>()
@@ -60,9 +60,9 @@ shorthands <code>ERASED</code> or <code>SERDE_SE</code>.</p>
 <span class="macro">assert_eq!</span>(<span class="string">&quot;demo&quot;</span>, <span class="ident">payload</span>.<span class="ident">get</span>());</code></pre></div>
 <p>Using the wildcard <code>_</code> match:</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// Send all keys to the `CowStringMarker` provider.</span>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// Send all keys to the `CowStrMarker` provider.</span>
 <span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">MyProvider</span>, {
-    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CowStringMarker</span>,
+    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CowStrMarker</span>,
 }, <span class="ident">ERASED</span>);</code></pre></div>
 </div></details></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="icu_provider" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
     <script src="../main.js"></script>

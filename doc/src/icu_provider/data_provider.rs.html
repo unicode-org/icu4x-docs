@@ -1027,6 +1027,20 @@
 <span id="1027">1027</span>
 <span id="1028">1028</span>
 <span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1124,11 +1138,26 @@
     <span class="kw">pub</span> <span class="ident">data_langid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
 }
 
+<span class="doccomment">/// Dummy trait that lets us `dyn Drop`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `dyn Drop` isn&#39;t legal (and doesn&#39;t make sense since `Drop` is not</span>
+<span class="doccomment">/// implement on all destructible types). However, all trait objects come with</span>
+<span class="doccomment">/// a destructor, so we can just use an empty trait to get a destructor object.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This should eventually be moved into the yoke crate once it&#39;s cleaner</span>
+<span class="doccomment">/// https://github.com/unicode-org/icu4x/issues/1284</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">ErasedDestructor</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>: <span class="ident">IsCovariant</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">T</span>: <span class="ident">IsCovariant</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ErasedDestructor</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">T</span> {}
+
+<span class="doccomment">/// All that Yoke needs from the Cart type is the destructor. We can</span>
+<span class="doccomment">/// use a trait object to handle that.</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">ErasedCart</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Rc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDestructor</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;data</span><span class="op">&gt;</span>;
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">DataPayloadInner</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
-    <span class="ident">RcStruct</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">M::Cart</span><span class="op">&gt;</span><span class="op">&gt;</span>),
+    <span class="ident">RcStruct</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, <span class="ident">ErasedCart</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>),
     <span class="ident">Owned</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, ()<span class="op">&gt;</span>),
     <span class="ident">RcBuf</span>(<span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>),
 }
@@ -1183,14 +1212,14 @@
 <span class="doccomment">/// [`ErasedDataStructMarker`]: crate::erased::ErasedDataStructMarker</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">inner</span>: <span class="ident">DataPayloadInner</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>: <span class="ident">Debug</span>,
 {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">core::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::fmt::Result</span> {
@@ -1212,7 +1241,7 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
 {
     <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
@@ -1228,7 +1257,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">PartialEq</span>,
 {
     <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
@@ -1238,7 +1267,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Eq</span>,
 {
 }
@@ -1253,8 +1282,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
-    <span class="ident">M::Yokeable</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">M::Cart</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="doccomment">/// Convert an [`Rc`]`&lt;`[`Cart`]`&gt;` into a [`DataPayload`].</span>
     <span class="doccomment">///</span>
@@ -1281,16 +1309,24 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`Cart`]: crate::marker::DataMarker::Cart</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_partial_owned</span>(<span class="ident">data</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">M::Cart</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_partial_owned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">M::Yokeable</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+        <span class="ident">T</span>: <span class="lifetime">&#39;data</span> <span class="op">+</span> <span class="ident">IsCovariant</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">let</span> <span class="ident">yoke</span> <span class="op">=</span> <span class="kw">unsafe</span> {
+            <span class="comment">// safe because we&#39;re not throwing away any actual data, simply type-erasing it</span>
+            <span class="ident">Yoke::attach_to_rc_cart</span>(<span class="ident">data</span>).<span class="ident">replace_cart</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span> <span class="kw">as</span> <span class="ident">ErasedCart</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>)
+        };
         <span class="self">Self</span> {
-            <span class="ident">inner</span>: <span class="ident">DataPayloadInner::RcStruct</span>(<span class="ident">Yoke::attach_to_rc_cart</span>(<span class="ident">data</span>)),
+            <span class="ident">inner</span>: <span class="ident">DataPayloadInner::RcStruct</span>(<span class="ident">yoke</span>),
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="doccomment">/// Convert a byte buffer into a [`DataPayload`]. A function must be provided to perform the</span>
     <span class="doccomment">/// conversion. This can often be a Serde deserialization operation.</span>
@@ -1523,9 +1559,8 @@
     <span class="doccomment">/// // target type, and the Cart should correspond to the type being transformed.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">///     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">///     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1550,7 +1585,7 @@
         ) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">M2::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M2</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">M2</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">M::Cart</span><span class="op">&gt;</span>,
+        <span class="ident">M2</span>: <span class="ident">DataMarker</span>,
     {
         <span class="kw">use</span> <span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span> {
@@ -1581,9 +1616,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1608,7 +1642,7 @@
         ) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">M2::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M2</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">M2</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">M::Cart</span><span class="op">&gt;</span>,
+        <span class="ident">M2</span>: <span class="ident">DataMarker</span>,
     {
         <span class="kw">use</span> <span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span> {
@@ -1640,9 +1674,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1669,9 +1702,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1700,7 +1732,7 @@
         ) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">M2::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M2</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">M2</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">M::Cart</span><span class="op">&gt;</span>,
+        <span class="ident">M2</span>: <span class="ident">DataMarker</span>,
     {
         <span class="kw">use</span> <span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span> {
@@ -1732,9 +1764,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1766,7 +1797,7 @@
         ) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">M2::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M2</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">M2</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">M::Cart</span><span class="op">&gt;</span>,
+        <span class="ident">M2</span>: <span class="ident">DataMarker</span>,
     {
         <span class="kw">use</span> <span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span> {
@@ -1798,9 +1829,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1831,9 +1861,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1866,7 +1895,7 @@
         ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M2::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M2</span><span class="op">&gt;</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">M2</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">M::Cart</span><span class="op">&gt;</span>,
+        <span class="ident">M2</span>: <span class="ident">DataMarker</span>,
     {
         <span class="kw">use</span> <span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span> {
@@ -1898,9 +1927,8 @@
     <span class="doccomment">/// # use icu_provider::prelude::*;</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # struct HelloWorldV1MessageMarker;</span>
-    <span class="doccomment">/// # impl&lt;&#39;data&gt; DataMarker&lt;&#39;data&gt; for HelloWorldV1MessageMarker {</span>
+    <span class="doccomment">/// # impl DataMarker for HelloWorldV1MessageMarker {</span>
     <span class="doccomment">/// #     type Yokeable = Cow&lt;&#39;static, str&gt;;</span>
-    <span class="doccomment">/// #     type Cart = HelloWorldV1&lt;&#39;data&gt;;</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let p1: DataPayload&lt;HelloWorldV1Marker&gt; = DataPayload::from_owned(HelloWorldV1 {</span>
@@ -1936,7 +1964,7 @@
         ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M2::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M2</span><span class="op">&gt;</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">M2</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">Cart</span> <span class="op">=</span> <span class="ident">M::Cart</span><span class="op">&gt;</span>,
+        <span class="ident">M2</span>: <span class="ident">DataMarker</span>,
     {
         <span class="kw">use</span> <span class="ident">DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span> {
@@ -1956,7 +1984,7 @@
 <span class="doccomment">/// A response object containing an object as payload and metadata about it.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="doccomment">/// Metadata about the returned object.</span>
     <span class="kw">pub</span> <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata</span>,
@@ -1967,7 +1995,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="doccomment">/// Takes ownership of the underlying payload. Error if not present.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1978,7 +2006,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
@@ -1989,7 +2017,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>: <span class="ident">Debug</span>,
 {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">core::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::fmt::Result</span> {
@@ -2015,7 +2043,7 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
 {
     <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
@@ -2048,7 +2076,7 @@
 <span class="doccomment">/// - [`InvariantDataProvider`](crate::inv::InvariantDataProvider)</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
 {
     <span class="doccomment">/// Query the provider for data, returning the result.</span>
     <span class="doccomment">///</span>

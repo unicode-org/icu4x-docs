@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1636583909293,
+  "lastUpdate": 1636588953614,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -12485,6 +12485,90 @@ window.BENCHMARK_DATA = {
             "name": "datetime/zoned_datetime_overview",
             "value": 355822,
             "range": "± 18715",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fe24e7b9309bb87eb43c3bfde7c74412c818a059",
+          "message": "Impl Debug/PartialEq on PairULE (#1287)",
+          "timestamp": "2021-11-10T15:54:13-08:00",
+          "tree_id": "3437c2cc8d3f14828b25ca72d60e937f90522e18",
+          "url": "https://github.com/unicode-org/icu4x/commit/fe24e7b9309bb87eb43c3bfde7c74412c818a059"
+        },
+        "date": 1636588917150,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 117033,
+            "range": "± 3710",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1391830,
+            "range": "± 4077",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 339381,
+            "range": "± 735",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "771b837e5f30a2a8e89dcde088dd2404a9a6a4bd",
+          "message": "Fix up some intra doc links (#1288)",
+          "timestamp": "2021-11-10T15:54:29-08:00",
+          "tree_id": "fd50229087ec30a6e6668075580ba5bfbd75851d",
+          "url": "https://github.com/unicode-org/icu4x/commit/771b837e5f30a2a8e89dcde088dd2404a9a6a4bd"
+        },
+        "date": 1636588947343,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 110623,
+            "range": "± 7777",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1273691,
+            "range": "± 64509",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 343513,
+            "range": "± 22951",
             "unit": "ns/iter"
           }
         ]

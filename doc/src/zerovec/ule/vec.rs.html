@@ -30,14 +30,30 @@
 <span id="30">30</span>
 <span id="31">31</span>
 <span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule</span>::<span class="kw-2">*</span>;
 
-<span class="comment">// This is safe to implement because from_byte_slice_unchecked returns</span>
-<span class="comment">// the same value as parse_byte_slice</span>
+<span class="comment">// Safety (based on the safety checklist on the VarULE trait):</span>
+<span class="comment">//  1. [T] does not include any uninitialized or padding bytes (achieved by being a slice of a ULE type)</span>
+<span class="comment">//  2. [T] is aligned to 1 byte (achieved by being a slice of a ULE type)</span>
+<span class="comment">//  3. The impl of `validate_byte_slice()` returns an error if any byte is not valid.</span>
+<span class="comment">//  4. The impl of `validate_byte_slice()` returns an error if the slice cannot be used in its entirety</span>
+<span class="comment">//  5. The impl of `from_byte_slice_unchecked()` returns a reference to the same data.</span>
+<span class="comment">//  6. `as_byte_slice()` is equivalent to a regular transmute of the underlying data; `parse_byte_slice()`</span>
+<span class="comment">//     is equivalent to `validate_byte_slice()` followed by `from_byte_slice_unchecked()` due to</span>
+<span class="comment">//     the guarantee from `ULE`</span>
+<span class="comment">//  7. `[T]` byte equality is semantic equality (relying on the guideline of the underlying `ULE` type)</span>
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">VarULE</span> <span class="kw">for</span> [<span class="ident">T</span>]
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">ULE</span>,

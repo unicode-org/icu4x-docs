@@ -267,36 +267,12 @@
 <span id="267">267</span>
 <span id="268">268</span>
 <span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="doccomment">//! Collection of traits for providers that support type erasure of data structs.</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::ErasedCart</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::yoke</span>::<span class="kw-2">*</span>;
@@ -374,7 +350,6 @@
     <span class="kw">fn</span> <span class="ident">upcast</span>(<span class="ident">other</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ErasedDataStructMarker</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DataPayloadInner</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">owned</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ErasedDataStruct</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">other</span>.<span class="ident">inner</span> {
-            <span class="ident">RcStruct</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::new</span>(<span class="ident">yoke</span>),
             <span class="ident">Owned</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::new</span>(<span class="ident">yoke</span>),
             <span class="ident">RcBuf</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::new</span>(<span class="ident">yoke</span>),
         };
@@ -433,18 +408,8 @@
             <span class="ident">Owned</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">any_box</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">yoke</span>.<span class="ident">into_yokeable</span>().<span class="number">0</span>.<span class="ident">into_any</span>();
                 <span class="comment">// `any_box` is the Yoke that was converted into the `dyn ErasedDataStruct`. It</span>
-                <span class="comment">// could have been either the RcStruct or the Owned variant of Yoke.</span>
-                <span class="comment">// Check first for Case 2: an RcStruct Yoke.</span>
-                <span class="kw">let</span> <span class="ident">y1</span> <span class="op">=</span> <span class="ident">any_box</span>.<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, <span class="ident">ErasedCart</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-                <span class="kw">let</span> <span class="ident">any_box</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">y1</span> {
-                    <span class="prelude-val">Ok</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">DataPayload</span> {
-                            <span class="ident">inner</span>: <span class="ident">RcStruct</span>(<span class="kw-2">*</span><span class="ident">yoke</span>),
-                        })
-                    }
-                    <span class="prelude-val">Err</span>(<span class="ident">any_box</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">any_box</span>,
-                };
-                <span class="comment">// Check for Case 3: an Owned Yoke.</span>
+                <span class="comment">// could have been either the RcBuf or the Owned variant of Yoke.</span>
+                <span class="comment">// Check for an Owned Yoke.</span>
                 <span class="kw">let</span> <span class="ident">y2</span> <span class="op">=</span> <span class="ident">any_box</span>.<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, ()<span class="op">&gt;</span><span class="op">&gt;</span>();
                 <span class="kw">let</span> <span class="ident">any_box</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">y2</span> {
                     <span class="prelude-val">Ok</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -454,7 +419,7 @@
                     }
                     <span class="prelude-val">Err</span>(<span class="ident">any_box</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">any_box</span>,
                 };
-                <span class="comment">// Check for Case 4: an RcBuf Yoke.</span>
+                <span class="comment">// Check for  an RcBuf Yoke.</span>
                 <span class="kw">let</span> <span class="ident">y2</span> <span class="op">=</span> <span class="ident">any_box</span>.<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>();
                 <span class="kw">let</span> <span class="ident">any_box</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">y2</span> {
                     <span class="prelude-val">Ok</span>(<span class="ident">yoke</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -473,7 +438,7 @@
             <span class="comment">// This is unreachable because an ErasedDataStruct payload can only be constructed as fully owned</span>
             <span class="comment">// (It is impossible for clients to construct an ErasedDataStruct payload manually since ErasedDataStructBox</span>
             <span class="comment">// has a private field)</span>
-            <span class="ident">RcStruct</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">RcBuf</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+            <span class="ident">RcBuf</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
         }
     }
 }
@@ -545,17 +510,6 @@
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dynutil::UpcastDataPayload</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::marker::CowStrMarker</span>;
     <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_erased_case_2</span>() {
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
-        <span class="kw">let</span> <span class="ident">original</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">CowStrMarker</span><span class="op">&gt;</span><span class="ident">::from_partial_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">upcasted</span> <span class="op">=</span> <span class="ident">ErasedDataStructMarker::upcast</span>(<span class="ident">original</span>);
-        <span class="kw">let</span> <span class="ident">downcasted</span> <span class="op">=</span> <span class="ident">upcasted</span>
-            .<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">CowStrMarker</span><span class="op">&gt;</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;Type conversion&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">downcasted</span>.<span class="ident">get</span>(), <span class="string">&quot;foo&quot;</span>);
-    }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_erased_case_3</span>() {

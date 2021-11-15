@@ -153,6 +153,14 @@
 <span id="153">153</span>
 <span id="154">154</span>
 <span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -210,26 +218,26 @@
 <span class="doccomment">//! When parsed, the resulting [`AST`] will look like this:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! use icu::plurals::rules::parse_condition;</span>
-<span class="doccomment">//! use icu::plurals::rules::ast::*;</span>
+<span class="doccomment">//! use icu::plurals::rules::reference::parse_condition;</span>
+<span class="doccomment">//! use icu::plurals::rules::reference::ast::*;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let input = &quot;i = 1 and v = 0 @integer 1&quot;;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let ast = parse_condition(input.as_bytes())</span>
 <span class="doccomment">//!     .expect(&quot;Parsing failed.&quot;);</span>
-<span class="doccomment">//! assert_eq!(ast, Condition(Box::new([</span>
-<span class="doccomment">//!     AndCondition(Box::new([</span>
+<span class="doccomment">//! assert_eq!(ast, Condition(vec![</span>
+<span class="doccomment">//!     AndCondition(vec![</span>
 <span class="doccomment">//!         Relation {</span>
 <span class="doccomment">//!             expression: Expression {</span>
 <span class="doccomment">//!                 operand: Operand::I,</span>
 <span class="doccomment">//!                 modulus: None,</span>
 <span class="doccomment">//!             },</span>
 <span class="doccomment">//!             operator: Operator::Eq,</span>
-<span class="doccomment">//!             range_list: RangeList(Box::new([</span>
+<span class="doccomment">//!             range_list: RangeList(vec![</span>
 <span class="doccomment">//!                 RangeListItem::Value(</span>
 <span class="doccomment">//!                     Value(1)</span>
 <span class="doccomment">//!                 )</span>
-<span class="doccomment">//!             ]))</span>
+<span class="doccomment">//!             ])</span>
 <span class="doccomment">//!         },</span>
 <span class="doccomment">//!         Relation {</span>
 <span class="doccomment">//!             expression: Expression {</span>
@@ -237,14 +245,14 @@
 <span class="doccomment">//!                 modulus: None,</span>
 <span class="doccomment">//!             },</span>
 <span class="doccomment">//!             operator: Operator::Eq,</span>
-<span class="doccomment">//!             range_list: RangeList(Box::new([</span>
+<span class="doccomment">//!             range_list: RangeList(vec![</span>
 <span class="doccomment">//!                 RangeListItem::Value(</span>
 <span class="doccomment">//!                     Value(0)</span>
 <span class="doccomment">//!                 )</span>
-<span class="doccomment">//!             ]))</span>
+<span class="doccomment">//!             ])</span>
 <span class="doccomment">//!         },</span>
-<span class="doccomment">//!     ])),</span>
-<span class="doccomment">//! ])));</span>
+<span class="doccomment">//!     ]),</span>
+<span class="doccomment">//! ]));</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Finally, we can pass this [`AST`] (in fact, just the [`Condition`] node),</span>
@@ -252,7 +260,8 @@
 <span class="doccomment">//! matches:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! use icu::plurals::rules::{test_condition, parse_condition};</span>
+<span class="doccomment">//! use icu::plurals::rules::reference::test_condition;</span>
+<span class="doccomment">//! use icu::plurals::rules::reference::parse_condition;</span>
 <span class="doccomment">//! use icu::plurals::PluralOperands;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let input = &quot;i = 1 and v = 0 @integer 1&quot;;</span>
@@ -285,6 +294,17 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For example, in Russian [`PluralCategory::One`] matches numbers such as `11`, `21`, `121` etc.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! # Runtime vs. Resolver Rules</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! `ICU4X` provides two sets of rules AST and APIs to manage it:</span>
+<span class="doccomment">//!  * `reference` is the canonical implementation of the specification intended for</span>
+<span class="doccomment">//!                tooling and testing to use.</span>
+<span class="doccomment">//!                This module provides APIs for parsing, editing and serialization</span>
+<span class="doccomment">//!                of the rules.</span>
+<span class="doccomment">//!  * `runtime`   is a non-public, non-mutable runtime version optimized for</span>
+<span class="doccomment">//!                performance and low memory overhead. This version provides</span>
+<span class="doccomment">//!                runtime resolver used by the `PluralRules` itself.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! [`PluralCategory`]: super::PluralCategory</span>
 <span class="doccomment">//! [`PluralCategories`]: super::PluralCategory</span>
 <span class="doccomment">//! [`PluralCategory::One`]: super::PluralCategory::One</span>
@@ -298,16 +318,12 @@
 <span class="doccomment">//! [`Condition`]: super::rules::ast::Condition</span>
 <span class="doccomment">//! [`Sample`]: super::rules::ast::Samples</span>
 <span class="doccomment">//! [`AST`]: super::rules::ast</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ast</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">lexer</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">parser</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">resolver</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">serializer</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">reference</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">lexer::Lexer</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">parser</span>::{<span class="ident">parse</span>, <span class="ident">parse_condition</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">resolver::test_condition</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">serializer::serialize</span>;
+<span class="comment">// Need to expose it for `icu::provider_cldr` use, but we don&#39;t</span>
+<span class="comment">// have a reason to make it fully public, so hiding docs for now.</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">runtime</span>;
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="icu_plurals" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>

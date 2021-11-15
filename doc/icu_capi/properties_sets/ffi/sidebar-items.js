@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XCodePointSetData","An ICU4X Unicode Set Property object, capable of querying whether a code point is contained in a set based on a Unicode property. See the Rust docs for more information."],["ICU4XCodePointSetDataResult",""]]});

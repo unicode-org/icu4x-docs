@@ -403,17 +403,6 @@
 <span id="403">403</span>
 <span id="404">404</span>
 <span id="405">405</span>
-<span id="406">406</span>
-<span id="407">407</span>
-<span id="408">408</span>
-<span id="409">409</span>
-<span id="410">410</span>
-<span id="411">411</span>
-<span id="412">412</span>
-<span id="413">413</span>
-<span id="414">414</span>
-<span id="415">415</span>
-<span id="416">416</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -426,7 +415,6 @@
 <span class="kw">use</span> <span class="ident">icu_provider::iter</span>::{<span class="ident">IterableDataProviderCore</span>, <span class="ident">KeyedDataProvider</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">TinyStr4</span>, <span class="ident">TinyStr8</span>};
 
 <span class="doccomment">/// All keys that this module is able to produce.</span>
@@ -434,12 +422,11 @@
 
 <span class="doccomment">/// A data provider reading from CLDR JSON likely subtags rule files.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AliasesProvider</span> {
     <span class="ident">data</span>: <span class="ident">cldr_json::Resource</span>,
-    <span class="ident">_phantom</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> ()<span class="op">&gt;</span>, <span class="comment">// placeholder for when we need the lifetime param</span>
 }
 
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
     <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">cldr_paths</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_json::Resource</span> <span class="op">=</span> {
@@ -449,36 +436,27 @@
                 .<span class="ident">join</span>(<span class="string">&quot;aliases.json&quot;</span>);
             <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>
         };
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">data</span>,
-            <span class="ident">_phantom</span>: <span class="ident">PhantomData</span>,
-        })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">data</span> })
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">serde_json::error::Error</span>;
     <span class="doccomment">/// Attempt to parse a JSON string.</span>
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_json::Resource</span> <span class="op">=</span> <span class="ident">serde_json::from_str</span>(<span class="ident">s</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">data</span>,
-            <span class="ident">_phantom</span>: <span class="ident">PhantomData</span>,
-        })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">data</span> })
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">KeyedDataProvider</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">KeyedDataProvider</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
     <span class="kw">fn</span> <span class="ident">supports_key</span>(<span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">key::ALIASES_V1</span>.<span class="ident">match_key</span>(<span class="kw-2">*</span><span class="ident">resc_key</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">AliasesV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">AliasesV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">AliasesV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">AliasesV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">AliasesProvider::supports_key</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">options</span>.<span class="ident">langid</span>;
 
@@ -497,11 +475,11 @@
     }
 }
 
-<span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>, {
+<span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">AliasesProvider</span>, {
     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AliasesV1Marker</span>,
-}, <span class="ident">SERDE_SE</span>, <span class="lifetime">&#39;data</span>);
+}, <span class="ident">SERDE_SE</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">IterableDataProviderCore</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">IterableDataProviderCore</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">_resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,

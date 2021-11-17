@@ -134,6 +134,27 @@
 <span id="134">134</span>
 <span id="135">135</span>
 <span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -151,7 +172,7 @@
 
     <span class="doccomment">/// Path to checkout of cldr-dates:</span>
     <span class="doccomment">/// &lt;https://github.com/unicode-cldr/cldr-dates-full&gt;</span>
-    <span class="kw">fn</span> <span class="ident">cldr_dates</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">cldr_dates_gregorian</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Path to checkout of cldr-numbers:</span>
     <span class="doccomment">/// &lt;https://github.com/unicode-cldr/cldr-numbers-full&gt;</span>
@@ -160,6 +181,27 @@
     <span class="doccomment">/// Path to checkout of cldr-misc</span>
     <span class="doccomment">/// &lt;https://github.com/unicode-cldr/cldr-misc-full&gt;</span>
     <span class="kw">fn</span> <span class="ident">cldr_misc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Path to checkout of CLDR dates repository for given calendar</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// `cal` should be a BCP-47 calendar identifier</span>
+    <span class="kw">fn</span> <span class="ident">cldr_dates</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cal</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">cal</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;gregory&quot;</span> {
+            <span class="self">self</span>.<span class="ident">cldr_dates_gregorian</span>()
+        } <span class="kw">else</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Custom</span>(<span class="macro">format!</span>(<span class="string">&quot;Unsupported calendar {}&quot;</span>, <span class="ident">cal</span>), <span class="prelude-val">None</span>));
+        }
+    }
+
+    <span class="doccomment">/// Returns a list of (CLDR name, BCP name, path) for each supported calendar</span>
+    <span class="kw">fn</span> <span class="ident">cldr_dates_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">PathBuf</span>)<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">greg</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cldr_dates_gregorian</span>() {
+            <span class="ident">vec</span>.<span class="ident">push</span>((<span class="string">&quot;gregorian&quot;</span>, <span class="string">&quot;gregory&quot;</span>, <span class="ident">greg</span>));
+        }
+        <span class="comment">// more calendars here</span>
+        <span class="ident">vec</span>
+    }
 }
 
 <span class="doccomment">/// An implementation of [`CldrPaths`] for multiple separate local CLDR JSON directories per</span>
@@ -182,7 +224,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CldrPathsLocal</span> {
     <span class="kw">pub</span> <span class="ident">cldr_core</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">MissingSourceError</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">cldr_dates</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">MissingSourceError</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">cldr_dates_gregorian</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">MissingSourceError</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cldr_numbers</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">MissingSourceError</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cldr_misc</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">MissingSourceError</span><span class="op">&gt;</span>,
 }
@@ -191,8 +233,8 @@
     <span class="kw">fn</span> <span class="ident">cldr_core</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">cldr_core</span>.<span class="ident">clone</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
     }
-    <span class="kw">fn</span> <span class="ident">cldr_dates</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">cldr_dates</span>.<span class="ident">clone</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
+    <span class="kw">fn</span> <span class="ident">cldr_dates_gregorian</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">cldr_dates_gregorian</span>.<span class="ident">clone</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
     }
     <span class="kw">fn</span> <span class="ident">cldr_numbers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">cldr_numbers</span>.<span class="ident">clone</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
@@ -206,7 +248,7 @@
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">cldr_core</span>: <span class="prelude-val">Err</span>(<span class="ident">MissingSourceError</span> { <span class="ident">src</span>: <span class="string">&quot;cldr-core&quot;</span> }),
-            <span class="ident">cldr_dates</span>: <span class="prelude-val">Err</span>(<span class="ident">MissingSourceError</span> { <span class="ident">src</span>: <span class="string">&quot;cldr-dates&quot;</span> }),
+            <span class="ident">cldr_dates_gregorian</span>: <span class="prelude-val">Err</span>(<span class="ident">MissingSourceError</span> { <span class="ident">src</span>: <span class="string">&quot;cldr-dates&quot;</span> }),
             <span class="ident">cldr_numbers</span>: <span class="prelude-val">Err</span>(<span class="ident">MissingSourceError</span> {
                 <span class="ident">src</span>: <span class="string">&quot;cldr-numbers&quot;</span>,
             }),
@@ -243,7 +285,7 @@
     <span class="kw">fn</span> <span class="ident">cldr_core</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">cldr_json_root</span>.<span class="ident">clone</span>().<span class="ident">join</span>(<span class="string">&quot;cldr-core&quot;</span>))
     }
-    <span class="kw">fn</span> <span class="ident">cldr_dates</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cldr_dates_gregorian</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>
             .<span class="ident">cldr_json_root</span>
             .<span class="ident">clone</span>()

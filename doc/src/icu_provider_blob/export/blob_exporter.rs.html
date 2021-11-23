@@ -73,9 +73,6 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -86,6 +83,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::serde::SerdeSeDataStructMarker</span>;
 <span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
+<span class="kw">use</span> <span class="ident">zerovec::ZeroMap</span>;
 
 <span class="doccomment">/// A data exporter that writes data to a single-file blob.</span>
 <span class="doccomment">/// See the module-level docs for an example.</span>
@@ -135,18 +133,14 @@
     }
 
     <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="comment">// Convert from LiteMap&lt;String, Vec&gt; to LiteMap&lt;&amp;str, &amp;[]&gt;</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">schema</span> <span class="op">=</span> <span class="ident">BlobSchemaV1</span> {
-            <span class="ident">resources</span>: <span class="ident">LiteMap::with_capacity</span>(<span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">len</span>()),
-        };
+        <span class="comment">// Convert from LiteMap&lt;String, Vec&lt;u8&gt;&gt; to ZeroVecBorrowed&lt;&amp;str, &amp;[u8]&gt;</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zm</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="ident">str</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ZeroMap::with_capacity</span>(<span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">len</span>());
         <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">iter</span>() {
-            <span class="ident">schema</span>
-                .<span class="ident">resources</span>
-                .<span class="ident">try_append</span>(<span class="ident">k</span>, <span class="ident">v</span>)
-                .<span class="ident">ok_or</span>(())
-                .<span class="ident">expect_err</span>(<span class="string">&quot;Same order&quot;</span>);
+            <span class="ident">zm</span>.<span class="ident">try_append</span>(<span class="ident">k</span>, <span class="ident">v</span>).<span class="ident">ok_or</span>(()).<span class="ident">expect_err</span>(<span class="string">&quot;Same order&quot;</span>);
         }
-        <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">schema</span>);
+        <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">BlobSchemaV1</span> {
+            <span class="ident">resources</span>: <span class="ident">zm</span>.<span class="ident">as_borrowed</span>(),
+        });
         <span class="macro">log::info!</span>(<span class="string">&quot;Serializing blob to output stream...&quot;</span>);
         <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())<span class="question-mark">?</span>;

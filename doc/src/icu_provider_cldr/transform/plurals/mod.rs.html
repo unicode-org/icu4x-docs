@@ -177,6 +177,14 @@
 <span id="177">177</span>
 <span id="178">178</span>
 <span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -214,7 +222,11 @@
                 .<span class="ident">join</span>(<span class="string">&quot;plurals.json&quot;</span>);
             <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_serde::plurals::Resource</span> <span class="op">=</span>
                 <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
-            <span class="ident">data</span>.<span class="ident">supplemental</span>.<span class="ident">plurals_type_cardinal</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rules</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">supplemental</span>.<span class="ident">plurals_type_cardinal</span>;
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">rules</span>.<span class="ident">as_mut</span>() {
+                <span class="ident">v</span>.<span class="number">0</span>.<span class="ident">sort</span>()
+            }
+            <span class="ident">rules</span>
         };
         <span class="kw">let</span> <span class="ident">ordinal_rules</span> <span class="op">=</span> {
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">cldr_paths</span>
@@ -223,7 +235,11 @@
                 .<span class="ident">join</span>(<span class="string">&quot;ordinals.json&quot;</span>);
             <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_serde::plurals::Resource</span> <span class="op">=</span>
                 <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
-            <span class="ident">data</span>.<span class="ident">supplemental</span>.<span class="ident">plurals_type_ordinal</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rules</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">supplemental</span>.<span class="ident">plurals_type_ordinal</span>;
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">rules</span>.<span class="ident">as_mut</span>() {
+                <span class="ident">v</span>.<span class="number">0</span>.<span class="ident">sort</span>()
+            }
+            <span class="ident">rules</span>
         };
         <span class="prelude-val">Ok</span>(<span class="ident">PluralsProvider</span> {
             <span class="ident">cardinal_rules</span>,
@@ -264,9 +280,9 @@
         <span class="kw">let</span> <span class="ident">cldr_rules</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_rules_for</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
         <span class="comment">// TODO: Implement language fallback?</span>
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">cldr_rules</span>.<span class="number">0</span>.<span class="ident">get</span>(<span class="ident">langid</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">req</span>.<span class="ident">clone</span>().<span class="ident">into</span>()),
+        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">r</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">cldr_rules</span>.<span class="number">0</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>, <span class="op">|</span>(<span class="ident">l</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">l</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">cldr_rules</span>.<span class="number">0</span>[<span class="ident">idx</span>],
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">req</span>.<span class="ident">clone</span>().<span class="ident">into</span>()),
         };
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata</span> {

@@ -217,6 +217,8 @@
 <span id="217">217</span>
 <span id="218">218</span>
 <span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -229,7 +231,6 @@
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::iter</span>::{<span class="ident">IterableDataProviderCore</span>, <span class="ident">KeyedDataProvider</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
@@ -245,7 +246,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NumbersProvider</span> {
     <span class="ident">cldr_numbering_systems_data</span>: <span class="ident">cldr_serde::numbering_systems::Resource</span>,
-    <span class="ident">cldr_numbers_data</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span>, <span class="ident">cldr_serde::numbers::LangNumbers</span><span class="op">&gt;</span>,
+    <span class="ident">cldr_numbers_data</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">LanguageIdentifier</span>, <span class="ident">cldr_serde::numbers::LangNumbers</span>)<span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NumbersProvider</span> {
@@ -261,14 +262,14 @@
         };
 
         <span class="comment">// Load data for each locale:</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cldr_numbers_data</span> <span class="op">=</span> <span class="ident">LiteMap::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cldr_numbers_data</span> <span class="op">=</span> <span class="macro">vec!</span>[];
         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">cldr_paths</span>.<span class="ident">cldr_numbers</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>);
         <span class="kw">let</span> <span class="ident">locale_dirs</span> <span class="op">=</span> <span class="ident">get_langid_subdirectories</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">dir</span> <span class="kw">in</span> <span class="ident">locale_dirs</span> {
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="string">&quot;numbers.json&quot;</span>);
-            <span class="kw">let</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::numbers::Resource</span> <span class="op">=</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::numbers::Resource</span> <span class="op">=</span>
                 <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
-            <span class="ident">cldr_numbers_data</span>.<span class="ident">extend_from_litemap</span>(<span class="ident">resource</span>.<span class="ident">main</span>.<span class="number">0</span>);
+            <span class="ident">cldr_numbers_data</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">resource</span>.<span class="ident">main</span>.<span class="number">0</span>);
         }
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
@@ -326,9 +327,12 @@
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::supports_key</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">cldr_numbers_data</span>.<span class="ident">get</span>(<span class="ident">langid</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">numbers</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataError::MissingResourceOptions</span>(<span class="ident">req</span>.<span class="ident">clone</span>())),
+        <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>
+            .<span class="ident">cldr_numbers_data</span>
+            .<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>, <span class="op">|</span>(<span class="ident">lid</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">lid</span>)
+        {
+            <span class="prelude-val">Ok</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cldr_numbers_data</span>[<span class="ident">idx</span>].<span class="number">1</span>.<span class="ident">numbers</span>,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataError::MissingResourceOptions</span>(<span class="ident">req</span>.<span class="ident">clone</span>())),
         };
         <span class="kw">let</span> <span class="ident">nsname</span> <span class="op">=</span> <span class="ident">numbers</span>.<span class="ident">default_numbering_system</span>;
 

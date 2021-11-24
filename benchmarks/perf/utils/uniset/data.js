@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1637767068103,
+  "lastUpdate": 1637781293265,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -15329,6 +15329,126 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 34494794,
             "range": "± 97896",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7418270529534848b000a195299802c74e9971ff",
+          "message": "Migrate the various map impls in the CLDR transformer to LiteMap (#1341)",
+          "timestamp": "2021-11-24T11:07:30-08:00",
+          "tree_id": "54277d03057779d7e9bfb95a3db4faaf77f3470d",
+          "url": "https://github.com/unicode-org/icu4x/commit/7418270529534848b000a195299802c74e9971ff"
+        },
+        "date": 1637781223697,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 37915990,
+            "range": "± 1645146",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d7e2d1bbfe836885979d6ad7e2cdd22d3b91edda",
+          "message": "Add extend_from_litemap to LiteMap (#1340)",
+          "timestamp": "2021-11-24T11:07:03-08:00",
+          "tree_id": "b8670c5ee7651cf859eff9c112033d4b06e4de49",
+          "url": "https://github.com/unicode-org/icu4x/commit/d7e2d1bbfe836885979d6ad7e2cdd22d3b91edda"
+        },
+        "date": 1637781228814,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 33487091,
+            "range": "± 1453029",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "92dbabdbf4f81f55492d65dcfde9a003aaa9de24",
+          "message": "Remove DataPayloadInner and migrate to a single Yoke type (#1342)",
+          "timestamp": "2021-11-24T11:07:48-08:00",
+          "tree_id": "16b9957252cb5158b6f9e499a38fe0945886838d",
+          "url": "https://github.com/unicode-org/icu4x/commit/92dbabdbf4f81f55492d65dcfde9a003aaa9de24"
+        },
+        "date": 1637781271575,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 41078082,
+            "range": "± 122383",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b42c3594c9c109816ba59f3f7a0a948ebf53f6ad",
+          "message": "ZeroVec::clone_from_slice --> ZeroVec::alloc_from_slice (#1343)",
+          "timestamp": "2021-11-24T11:07:58-08:00",
+          "tree_id": "3fb31ed25169382eb10dad3e42b0b5c0aa439f83",
+          "url": "https://github.com/unicode-org/icu4x/commit/b42c3594c9c109816ba59f3f7a0a948ebf53f6ad"
+        },
+        "date": 1637781285762,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 40994615,
+            "range": "± 173594",
             "unit": "ns/iter"
           }
         ]

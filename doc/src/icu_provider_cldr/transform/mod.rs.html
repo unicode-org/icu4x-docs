@@ -178,26 +178,32 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">mod</span> <span class="ident">aliases</span>;
-<span class="kw">mod</span> <span class="ident">dates</span>;
-<span class="kw">mod</span> <span class="ident">likelysubtags</span>;
+<span class="doccomment">//! This module contains the core transformer code from CLDR JSON to ICU4X Data Provider.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Every ICU4X component should have its own private submodule and then export the types from here.</span>
+
+<span class="kw">mod</span> <span class="ident">datetime</span>;
+<span class="kw">mod</span> <span class="ident">decimal</span>;
 <span class="kw">mod</span> <span class="ident">list</span>;
-<span class="kw">mod</span> <span class="ident">numbers</span>;
+<span class="kw">mod</span> <span class="ident">locale_canonicalizer</span>;
 <span class="kw">mod</span> <span class="ident">plurals</span>;
 <span class="kw">mod</span> <span class="ident">time_zones</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">aliases::AliasesProvider</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dates</span>::{
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">datetime</span>::{
     <span class="ident">patterns::DatePatternsProvider</span>, <span class="ident">skeletons::DateSkeletonPatternsProvider</span>,
     <span class="ident">symbols::DateSymbolsProvider</span>,
 };
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">likelysubtags::LikelySubtagsProvider</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">decimal::NumbersProvider</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">list::ListProvider</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">numbers::NumbersProvider</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">locale_canonicalizer::aliases::AliasesProvider</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">locale_canonicalizer::likely_subtags::LikelySubtagsProvider</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">plurals::PluralsProvider</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::support::LazyCldrProvider</span>;
@@ -211,12 +217,12 @@
 <span class="doccomment">/// Returns a list of all [`ResourceKeys`](ResourceKey) that this provider can produce.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_all_cldr_keys</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">aliases::ALL_KEYS</span>);
-    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">dates::symbols::ALL_KEYS</span>);
-    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">dates::skeletons::ALL_KEYS</span>);
-    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">dates::patterns::ALL_KEYS</span>);
-    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">likelysubtags::ALL_KEYS</span>);
-    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">numbers::ALL_KEYS</span>);
+    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">locale_canonicalizer::aliases::ALL_KEYS</span>);
+    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">datetime::symbols::ALL_KEYS</span>);
+    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">datetime::skeletons::ALL_KEYS</span>);
+    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">datetime::patterns::ALL_KEYS</span>);
+    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">locale_canonicalizer::likely_subtags::ALL_KEYS</span>);
+    <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">decimal::ALL_KEYS</span>);
     <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">plurals::ALL_KEYS</span>);
     <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">time_zones::ALL_KEYS</span>);
     <span class="ident">result</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="ident">list::ALL_KEYS</span>);

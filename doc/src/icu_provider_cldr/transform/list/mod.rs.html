@@ -208,11 +208,11 @@
 <span id="208">208</span>
 <span id="209">209</span>
 <span id="210">210</span>
-<span id="211">211</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr_serde</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::reader</span>::{<span class="ident">get_langid_subdirectories</span>, <span class="ident">open_reader</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CldrPaths</span>;
@@ -221,8 +221,6 @@
 <span class="kw">use</span> <span class="ident">icu_provider::iter</span>::{<span class="ident">IterableDataProviderCore</span>, <span class="ident">KeyedDataProvider</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-
-<span class="kw">mod</span> <span class="ident">cldr_serde</span>;
 
 <span class="doccomment">/// All keys that this module is able to produce.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ALL_KEYS</span>: [<span class="ident">ResourceKey</span>; <span class="number">3</span>] <span class="op">=</span> [
@@ -236,7 +234,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ListProvider</span> {
     <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(
         <span class="ident">LanguageIdentifier</span>,
-        <span class="ident">cldr_serde::list_patterns_json::LangListPatterns</span>,
+        <span class="ident">cldr_serde::list_patterns::LangListPatterns</span>,
     )<span class="op">&gt;</span>,
 }
 
@@ -246,7 +244,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="macro">vec!</span>[];
         <span class="kw">for</span> <span class="ident">dir</span> <span class="kw">in</span> <span class="ident">get_langid_subdirectories</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>.<span class="ident">cldr_misc</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>))<span class="question-mark">?</span> {
             <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="string">&quot;listPatterns.json&quot;</span>);
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::list_patterns_json::Resource</span> <span class="op">=</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::list_patterns::Resource</span> <span class="op">=</span>
                 <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
             <span class="ident">data</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">resource</span>.<span class="ident">main</span>.<span class="number">0</span>);
         }
@@ -319,7 +317,7 @@
 }
 
 <span class="kw">fn</span> <span class="ident">parse_and_patterns</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-    <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns_json::ListPatterns</span>,
+    <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns::ListPatterns</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">icu_list::error::Error</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="ident">ListFormatterPatternsV1::new</span>(
         <span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
@@ -338,7 +336,7 @@
 }
 
 <span class="kw">fn</span> <span class="ident">parse_or_patterns</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-    <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns_json::ListPatterns</span>,
+    <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns::ListPatterns</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">icu_list::error::Error</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="ident">ListFormatterPatternsV1::new</span>(
         <span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
@@ -357,7 +355,7 @@
 }
 
 <span class="kw">fn</span> <span class="ident">parse_unit_patterns</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-    <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns_json::ListPatterns</span>,
+    <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns::ListPatterns</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">icu_list::error::Error</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="ident">ListFormatterPatternsV1::new</span>(
         <span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,

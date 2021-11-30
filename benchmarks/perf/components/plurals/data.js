@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1637859657903,
+  "lastUpdate": 1638239256252,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -20243,6 +20243,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 23372,
             "range": "± 1163",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fd5eb4b373b48870b7ffd4dd19946fdcc46e2cd9",
+          "message": "Remove attach_to_option_cart() (#1348)",
+          "timestamp": "2021-11-29T17:39:44-08:00",
+          "tree_id": "dff9d68f81b1d9c112ea3ed080853f8f8b7f24be",
+          "url": "https://github.com/unicode-org/icu4x/commit/fd5eb4b373b48870b7ffd4dd19946fdcc46e2cd9"
+        },
+        "date": 1638237132268,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1292,
+            "range": "± 24",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6555,
+            "range": "± 1506",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 22854,
+            "range": "± 1369",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fcf248c8a8ff1c6da7e18800a21ee4c95a3b97ca",
+          "message": "Implement era formatting (#1346)\n\n* Add era field parsing\r\n\r\n* Handle eras in components bag\r\n\r\n* Apply era formatting\r\n\r\n* Add tests for buddhist date formatting",
+          "timestamp": "2021-11-29T18:18:45-08:00",
+          "tree_id": "2bc3073d9d69c2d89d93c86684541854e1c17582",
+          "url": "https://github.com/unicode-org/icu4x/commit/fcf248c8a8ff1c6da7e18800a21ee4c95a3b97ca"
+        },
+        "date": 1638239249362,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1164,
+            "range": "± 68",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5858,
+            "range": "± 690",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 21513,
+            "range": "± 1632",
             "unit": "ns/iter"
           }
         ]

@@ -516,6 +516,33 @@
 <span id="516">516</span>
 <span id="517">517</span>
 <span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -563,7 +590,7 @@
 <span class="doccomment">//! use icu::datetime::options::components;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let bag = components::Bag {</span>
-<span class="doccomment">//!     year: Some(components::Numeric::Numeric),</span>
+<span class="doccomment">//!     year: Some(components::Year::Numeric),</span>
 <span class="doccomment">//!     month: Some(components::Month::Long),</span>
 <span class="doccomment">//!     day: Some(components::Numeric::Numeric),</span>
 <span class="doccomment">//!</span>
@@ -605,7 +632,7 @@
     <span class="doccomment">/// Include the era, such as &quot;AD&quot; or &quot;CE&quot;.</span>
     <span class="kw">pub</span> <span class="ident">era</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Text</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Include the year, such as &quot;1970&quot; or &quot;70&quot;.</span>
-    <span class="kw">pub</span> <span class="ident">year</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Numeric</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">year</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Year</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Include the month, such as &quot;April&quot; or &quot;Apr&quot;.</span>
     <span class="kw">pub</span> <span class="ident">month</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Month</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Include the week, such as &quot;1st&quot; or &quot;1&quot;.</span>
@@ -656,12 +683,14 @@
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">year</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">year</span> {
             <span class="comment">// Unimplemented year fields:</span>
-            <span class="comment">// Y - Week of Year</span>
             <span class="comment">// u - Extended year</span>
             <span class="comment">// U - Cyclic year name</span>
             <span class="comment">// r - Related Gregorian year</span>
             <span class="ident">fields</span>.<span class="ident">push</span>(<span class="ident">Field</span> {
-                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::Year</span>(<span class="ident">fields::Year::Calendar</span>),
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::Year</span>(<span class="kw">match</span> <span class="ident">year</span> {
+                    <span class="ident">Year::Numeric</span> <span class="op">|</span> <span class="ident">Year::TwoDigit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields::Year::Calendar</span>,
+                    <span class="ident">Year::NumericWeekOf</span> <span class="op">|</span> <span class="ident">Year::TwoDigitWeekOf</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fields::Year::WeekOf</span>,
+                }),
                 <span class="ident">length</span>: <span class="kw">match</span> <span class="ident">year</span> {
                     <span class="comment">// Calendar year (numeric).</span>
                     <span class="comment">// y       2, 20, 201, 2017, 20173</span>
@@ -669,8 +698,8 @@
                     <span class="comment">// yyy     002, 020, 201, 2017, 20173    (not implemented)</span>
                     <span class="comment">// yyyy    0002, 0020, 0201, 2017, 20173 (not implemented)</span>
                     <span class="comment">// yyyyy+  ...                           (not implemented)</span>
-                    <span class="ident">Numeric::Numeric</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FieldLength::One</span>,
-                    <span class="ident">Numeric::TwoDigit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FieldLength::TwoDigit</span>,
+                    <span class="ident">Year::Numeric</span> <span class="op">|</span> <span class="ident">Year::NumericWeekOf</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FieldLength::One</span>,
+                    <span class="ident">Year::TwoDigit</span> <span class="op">|</span> <span class="ident">Year::TwoDigitWeekOf</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FieldLength::TwoDigit</span>,
                 },
             });
         }
@@ -843,49 +872,71 @@
 <span class="doccomment">/// A numeric component for the `components::`[`Bag`]. It is used for the year, day, hour, minute,</span>
 <span class="doccomment">/// and second.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Numeric</span> {
     <span class="doccomment">/// Display the numeric value. For instance in a year this would be &quot;1970&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;numeric&quot;</span>))]</span>
     <span class="ident">Numeric</span>,
     <span class="doccomment">/// Display the two digit value. For instance in a year this would be &quot;70&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;two-digit&quot;</span>))]</span>
     <span class="ident">TwoDigit</span>,
 }
 
 <span class="doccomment">/// A text component for the `components::`[`Bag`]. It is used for the era and weekday.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Text</span> {
     <span class="doccomment">/// Display the long form of the text, such as &quot;Wednesday&quot; for the weekday.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;long&quot;</span>))]</span>
     <span class="ident">Long</span>,
     <span class="doccomment">/// Display the short form of the text, such as &quot;Wed&quot; for the weekday.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;short&quot;</span>))]</span>
     <span class="ident">Short</span>,
     <span class="doccomment">/// Display the narrow form of the text, such as &quot;W&quot; for the weekday.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;narrow&quot;</span>))]</span>
     <span class="ident">Narrow</span>,
+}
+
+<span class="doccomment">/// Options for displaying a Year for the `components::`[`Bag`].</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Year</span> {
+    <span class="doccomment">/// The numeric value of the year, such as &quot;2018&quot; for 2018-12-31.</span>
+    <span class="ident">Numeric</span>,
+    <span class="doccomment">/// The two-digit value of the year, such as &quot;18&quot; for 2018-12-31.</span>
+    <span class="ident">TwoDigit</span>,
+    <span class="doccomment">/// The numeric value of the year in &quot;week-of-year&quot;, such as &quot;2019&quot; in</span>
+    <span class="doccomment">/// &quot;week 01 of 2019&quot; for the week of 2018-12-31 according to the ISO calendar.</span>
+    <span class="ident">NumericWeekOf</span>,
+    <span class="doccomment">/// The numeric value of the year in &quot;week-of-year&quot;, such as &quot;19&quot; in</span>
+    <span class="doccomment">/// &quot;week 01 &#39;19&quot; for the week of 2018-12-31 according to the ISO calendar.</span>
+    <span class="ident">TwoDigitWeekOf</span>,
 }
 
 <span class="doccomment">/// Options for displaying a Month for the `components::`[`Bag`].</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Month</span> {
     <span class="doccomment">/// The numeric value of the month, such as &quot;4&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;numeric&quot;</span>))]</span>
     <span class="ident">Numeric</span>,
     <span class="doccomment">/// The two-digit value of the month, such as &quot;04&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;two-digit&quot;</span>))]</span>
     <span class="ident">TwoDigit</span>,
     <span class="doccomment">/// The two-digit value of the month, such as &quot;April&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;long&quot;</span>))]</span>
     <span class="ident">Long</span>,
     <span class="doccomment">/// The short value of the month, such as &quot;Apr&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;short&quot;</span>))]</span>
     <span class="ident">Short</span>,
     <span class="doccomment">/// The narrow value of the month, such as &quot;A&quot;.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;narrow&quot;</span>))]</span>
     <span class="ident">Narrow</span>,
 }
 
@@ -896,7 +947,11 @@
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="comment">// TODO(#488): make visible once fully supported.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Week</span> {
     <span class="doccomment">/// The week of the month, such as &quot;3&quot;.</span>
     <span class="ident">WeekOfMonth</span>,
@@ -911,19 +966,21 @@
 <span class="doccomment">/// Note that the initial implementation is focusing on only supporting ECMA-402 compatible</span>
 <span class="doccomment">/// options.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">TimeZoneName</span> {
     <span class="comment">// UTS-35 fields: z..zzz</span>
     <span class="comment">//</span>
     <span class="doccomment">/// Short localized form, without the location. (e.g.: PST, GMT-8)</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;shortSpecific&quot;</span>))]</span>
     <span class="ident">ShortSpecific</span>,
 
     <span class="comment">// UTS-35 fields: zzzz</span>
     <span class="comment">// Per UTS-35: [long form] specific non-location (falling back to long localized GMT)</span>
     <span class="comment">//</span>
     <span class="doccomment">/// Long localized form, without the location (e.g., Pacific Standard Time, Nordamerikanische Westküsten-Normalzeit)</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;longSpecific&quot;</span>))]</span>
     <span class="ident">LongSpecific</span>,
 
     <span class="comment">// UTS-35 fields: O, OOOO</span>
@@ -935,21 +992,18 @@
     <span class="comment">//   https://github.com/unicode-org/cldr-json/blob/c23635f13946292e40077fd62aee6a8e122e7689/cldr-json/cldr-dates-full/main/es-MX/timeZoneNames.json#L13</span>
     <span class="comment">//</span>
     <span class="doccomment">/// Localized GMT format, in the locale&#39;s preferred hour format. (e.g., GMT-0800),</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;gmtOffset&quot;</span>))]</span>
     <span class="ident">GmtOffset</span>,
 
     <span class="comment">// UTS-35 fields: v</span>
     <span class="comment">//   * falling back to generic location (See UTS 35 for more specific rules)</span>
     <span class="comment">//   * falling back to short localized GMT</span>
     <span class="doccomment">/// Short generic non-location format (e.g.: PT, Los Angeles, Zeit).</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;shortGeneric&quot;</span>))]</span>
     <span class="ident">ShortGeneric</span>,
 
     <span class="comment">// UTS-35 fields: vvvv</span>
     <span class="comment">//  * falling back to generic location (See UTS 35 for more specific rules)</span>
     <span class="comment">//  * falling back to long localized GMT</span>
     <span class="doccomment">/// Long generic non-location format (e.g.: Pacific Time, Nordamerikanische Westküstenzeit),</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;longGeneric&quot;</span>))]</span>
     <span class="ident">LongGeneric</span>,
 }
 
@@ -991,7 +1045,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_component_bag_to_vec_field</span>() {
         <span class="kw">let</span> <span class="ident">bag</span> <span class="op">=</span> <span class="ident">Bag</span> {
-            <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
+            <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">Year::Numeric</span>),
             <span class="ident">month</span>: <span class="prelude-val">Some</span>(<span class="ident">Month::Long</span>),
             <span class="ident">week</span>: <span class="prelude-val">Some</span>(<span class="ident">Week::WeekOfMonth</span>),
             <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
@@ -1019,7 +1073,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_component_bag_to_vec_field2</span>() {
         <span class="kw">let</span> <span class="ident">bag</span> <span class="op">=</span> <span class="ident">Bag</span> {
-            <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
+            <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">Year::Numeric</span>),
             <span class="ident">month</span>: <span class="prelude-val">Some</span>(<span class="ident">Month::TwoDigit</span>),
             <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
             ..<span class="ident">Default::default</span>()

@@ -398,13 +398,16 @@
 <span id="398">398</span>
 <span id="399">399</span>
 <span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::date</span>::{<span class="ident">DateTimeInput</span>, <span class="ident">DateTimeInputWithLocale</span>, <span class="ident">LocalizedDateTimeInput</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DateTimeFormatError</span> <span class="kw">as</span> <span class="ident">Error</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>, <span class="ident">Week</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>, <span class="ident">Week</span>, <span class="ident">Year</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pattern</span>::{
     <span class="ident">runtime</span>::{<span class="ident">Pattern</span>, <span class="ident">PatternPlurals</span>},
     <span class="ident">PatternItem</span>,
@@ -574,15 +577,18 @@
                 )<span class="question-mark">?</span>;
             <span class="ident">w</span>.<span class="ident">write_str</span>(<span class="ident">symbol</span>)<span class="question-mark">?</span>
         }
-        <span class="ident">FieldSymbol::Year</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format_number</span>(
-            <span class="ident">w</span>,
-            <span class="ident">datetime</span>
-                .<span class="ident">datetime</span>()
-                .<span class="ident">year</span>()
-                .<span class="ident">ok_or</span>(<span class="ident">Error::MissingInputField</span>)<span class="question-mark">?</span>
-                .<span class="ident">number</span> <span class="kw">as</span> <span class="ident">isize</span>,
-            <span class="ident">field</span>.<span class="ident">length</span>,
-        )<span class="question-mark">?</span>,
+        <span class="ident">FieldSymbol::Year</span>(<span class="ident">year</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">year</span> {
+            <span class="ident">Year::Calendar</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format_number</span>(
+                <span class="ident">w</span>,
+                <span class="ident">datetime</span>
+                    .<span class="ident">datetime</span>()
+                    .<span class="ident">year</span>()
+                    .<span class="ident">ok_or</span>(<span class="ident">Error::MissingInputField</span>)<span class="question-mark">?</span>
+                    .<span class="ident">number</span> <span class="kw">as</span> <span class="ident">isize</span>,
+                <span class="ident">field</span>.<span class="ident">length</span>,
+            )<span class="question-mark">?</span>,
+            <span class="ident">Year::WeekOf</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format_number</span>(<span class="ident">w</span>, <span class="ident">datetime</span>.<span class="ident">year_week</span>()<span class="question-mark">?</span>.<span class="ident">number</span> <span class="kw">as</span> <span class="ident">isize</span>, <span class="ident">field</span>.<span class="ident">length</span>)<span class="question-mark">?</span>,
+        },
         <span class="ident">FieldSymbol::Month</span>(<span class="ident">month</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">field</span>.<span class="ident">length</span> {
             <span class="ident">FieldLength::One</span> <span class="op">|</span> <span class="ident">FieldLength::TwoDigit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">format_number</span>(
                 <span class="ident">w</span>,

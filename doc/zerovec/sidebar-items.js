@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ZeroVec","A zero-copy vector for fixed-width types."]],"mod":[["map","See [`ZeroMap`] for details."],["ule","Traits over unaligned little-endian data (ULE, pronounced “yule”)."],["varzerovec",""]]});
+initSidebarItems({"mod":[["map","See [`ZeroMap`] for details."],["ule","Traits over unaligned little-endian data (ULE, pronounced “yule”)."],["varzerovec",""],["zerovec",""]]});

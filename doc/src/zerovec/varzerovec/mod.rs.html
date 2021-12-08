@@ -565,6 +565,24 @@
 <span id="565">565</span>
 <span id="566">566</span>
 <span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -591,11 +609,21 @@
 <span class="doccomment">/// desirable to borrow data from an unaligned byte slice, such as zero-copy deserialization, and</span>
 <span class="doccomment">/// where `T`&#39;s data is variable-length (e.g. `String`)</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// `T` must implement [`VarULE`], which is already implemented for [`str`] and `[T]` where</span>
-<span class="doccomment">/// `T` implements [`ULE`]. It is also implemented on `VarZeroVecULE&lt;T&gt;` for nesting.</span>
+<span class="doccomment">/// `T` must implement [`VarULE`], which is already implemented for [`str`] and `[u8]`. For storing more</span>
+<span class="doccomment">/// complicated series of elements, it is implemented on `ZeroVecULE&lt;T&gt;` as well as `VarZeroVecULE&lt;T&gt;`</span>
+<span class="doccomment">/// for nesting.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// `VarZeroVec&lt;T&gt;` behaves much like [`Cow`](alloc::borrow::Cow), where it can be constructed from owned data</span>
-<span class="doccomment">/// but can also borrow from some buffer.</span>
+<span class="doccomment">/// For example, here are some owned types and their zero-copy equivalents:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// - `Vec&lt;String&gt;`: `VarZeroVec&lt;&#39;a, str&gt;`</span>
+<span class="doccomment">/// - `Vec&lt;Vec&lt;u8&gt;&gt;&gt;`: `VarZeroVec&lt;&#39;a, [u8]&gt;`</span>
+<span class="doccomment">/// - `Vec&lt;Vec&lt;u32&gt;&gt;`: `VarZeroVec&lt;&#39;a, ZeroVecULE&lt;u32&gt;&gt;`</span>
+<span class="doccomment">/// - `Vec&lt;Vec&lt;String&gt;&gt;`: `VarZeroVec&lt;&#39;a, VarZeroVecULE&lt;str&gt;&gt;`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// For creating zero-copy vectors of fixed-size types, see [`ZeroVec`](crate::ZeroVec).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `VarZeroVec&lt;T&gt;` behaves much like [`Cow`](alloc::borrow::Cow), where it can be constructed from</span>
+<span class="doccomment">/// owned data (and then mutated!) but can also borrow from some buffer.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # How it Works</span>
 <span class="doccomment">///</span>
@@ -636,33 +664,33 @@
 <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;Utf8Error&gt;&gt;(())</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Here&#39;s another example with `[T]`:</span>
+<span class="doccomment">/// Here&#39;s another example with `ZeroVecULE&lt;T&gt;` (similar to `[T]`):</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```rust</span>
 <span class="doccomment">/// # use std::str::Utf8Error;</span>
 <span class="doccomment">/// # use zerovec::VarZeroVecError;</span>
 <span class="doccomment">/// use zerovec::VarZeroVec;</span>
 <span class="doccomment">/// use zerovec::ZeroVec;</span>
+<span class="doccomment">/// use zerovec::zerovec::ZeroVecULE;</span>
 <span class="doccomment">/// use zerovec::ule::*;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // The little-endian bytes correspond to the list of integers.</span>
-<span class="doccomment">/// let numbers: Vec&lt;Vec&lt;PlainOldULE&lt;4&gt;&gt;&gt; = vec![</span>
-<span class="doccomment">///     vec![12.into(), 25.into(), 38.into()],</span>
-<span class="doccomment">///     vec![39179.into(), 100.into()],</span>
-<span class="doccomment">///     vec![42.into(), 55555.into()],</span>
-<span class="doccomment">///     vec![12345.into(), 54321.into(), 9.into()],</span>
+<span class="doccomment">/// // The structured list correspond to the list of integers.</span>
+<span class="doccomment">/// let numbers: Vec&lt;Vec&lt;u32&gt;&gt; = vec![</span>
+<span class="doccomment">///     vec![12, 25, 38],</span>
+<span class="doccomment">///     vec![39179, 100],</span>
+<span class="doccomment">///     vec![42, 55555],</span>
+<span class="doccomment">///     vec![12345, 54321, 9],</span>
 <span class="doccomment">/// ];</span>
 <span class="doccomment">/// let bytes = &amp;[4, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 20, 0, 0, 0, 28, 0, 0, 0,</span>
 <span class="doccomment">///              12, 0, 0, 0, 25, 0, 0, 0, 38, 0, 0, 0, 11, 153, 0, 0, 100, 0,</span>
 <span class="doccomment">///              0, 0, 42, 0, 0, 0, 3, 217, 0, 0, 57, 48, 0, 0, 49, 212, 0, 0,</span>
 <span class="doccomment">///              9, 0, 0, 0];</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec: VarZeroVec&lt;[PlainOldULE&lt;4&gt;]&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
+<span class="doccomment">/// let zerovec: VarZeroVec&lt;ZeroVecULE&lt;u32&gt;&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(zerovec.get(2).and_then(|v| v.get(1)), Some(&amp;55555.into()));</span>
-<span class="doccomment">/// assert_eq!(zerovec, &amp;*numbers);</span>
+<span class="doccomment">/// assert_eq!(zerovec.get(2).and_then(|v| v.get(1)), Some(55555));</span>
 <span class="doccomment">/// for (zv, v) in zerovec.iter().zip(numbers.iter()) {</span>
-<span class="doccomment">///     assert_eq!(zv, v);   </span>
+<span class="doccomment">///     assert_eq!(zv, &amp;**v);   </span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// # Ok::&lt;(), VarZeroVecError&lt;ULEError&lt;_&gt;&gt;&gt;(())</span>
 <span class="doccomment">/// ```</span>
@@ -1119,6 +1147,14 @@
         <span class="comment">// to `T::VarULE::eq()`</span>
         <span class="self">self</span>.<span class="ident">get_encoded_slice</span>().<span class="ident">eq</span>(<span class="ident">other</span>.<span class="ident">get_encoded_slice</span>())
     }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">VarULE</span>,
+    <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">T</span>: <span class="ident">Eq</span>,
+{
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">A</span><span class="op">&gt;</span> <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> [<span class="ident">A</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span>

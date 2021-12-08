@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ZeroVec","A zero-copy vector for fixed-width types."]],"struct":[["ZeroVecULE","A type similar to [`ZeroVec`] that can be used inside `VarZeroVec<T>`."]]});

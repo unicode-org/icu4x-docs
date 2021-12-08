@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FormattedStringBuilderError",""]],"struct":[["LayeredFormattedStringBuilder","A FormattedStringBuilder with L levels of type annotations. "]],"type":[["FormattedStringBuilder",""]]});

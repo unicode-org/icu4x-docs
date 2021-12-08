@@ -1,7 +1,7 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","signum.rs","uint_iterator.rs"]};
-sourcesIndex["formatted_string_builder"] = {"name":"","files":["error.rs","lib.rs","string_builder.rs"]};
+sourcesIndex["formatted_string"] = {"name":"","files":["error.rs","formatted_string.rs","lib.rs"]};
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x_datagen"] = {"name":"","files":["datagen.rs"]};
@@ -29,7 +29,7 @@ sourcesIndex["icu_provider_cldr"] = {"name":"","dirs":[{"name":"cldr_serde","fil
 sourcesIndex["icu_provider_fs"] = {"name":"","dirs":[{"name":"export","dirs":[{"name":"serializers","files":["bincode.rs","json.rs","mod.rs"]}],"files":["aliasing.rs","fs_exporter.rs","mod.rs"]}],"files":["deserializer.rs","error.rs","fs_data_provider.rs","lib.rs","manifest.rs"]};
 sourcesIndex["icu_provider_macros"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu_provider_uprops"] = {"name":"","files":["bin_uniset.rs","enum_codepointtrie.rs","enum_uniset.rs","lib.rs","provider.rs","reader.rs","uprops_helpers.rs","uprops_serde.rs"]};
-sourcesIndex["icu_segmenter"] = {"name":"","files":["indices.rs","language.rs","lb_define.rs","lib.rs","line_breaker.rs","lstm.rs","properties_defines.rs","properties_other.rs","property_table.rs","rule_table.rs"]};
+sourcesIndex["icu_segmenter"] = {"name":"","files":["indices.rs","language.rs","lb_define.rs","lib.rs","line_breaker.rs","lstm.rs","properties_defines.rs","properties_other.rs","property_table.rs","rule_segmenter.rs","rule_table.rs","word.rs"]};
 sourcesIndex["icu_segmenter_lstm"] = {"name":"","files":["error.rs","lib.rs","lstm.rs","math_helper.rs","structs.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["blob.rs","fs.rs","lib.rs","metadata.rs","paths.rs"]};
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","uniset.rs","utils.rs"]};

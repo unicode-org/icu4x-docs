@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1638938368745,
+  "lastUpdate": 1638988778610,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -20621,6 +20621,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 20091,
             "range": "± 1280",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "m_kato@ga2.so-net.ne.jp",
+            "name": "Makoto Kato",
+            "username": "makotokato"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7d774380d73d8726f84259818884dc7c883cdcb3",
+          "message": "Implement word segmenter using rule based segmenter (#1273)\n\n* Implement word segmenter using rule based segmenter\r\n\r\n* Fix cargo make generate-readmes.\r\n\r\n* Update segmenter table generation\r\n\r\n- Use builtin data for SA\r\n- Expand codepoint for property\r\n\r\n* UAX documents should use https URL\r\n\r\n* Change data format to toml.\r\n\r\n* Convert json file to toml fomrat\r\n\r\n* cargo make generate-readmes\r\n\r\n* Fix per review comment",
+          "timestamp": "2021-12-08T14:27:42+09:00",
+          "tree_id": "d3e79a1bbf16f1d5b5a88da1869b2d08fba62794",
+          "url": "https://github.com/unicode-org/icu4x/commit/7d774380d73d8726f84259818884dc7c883cdcb3"
+        },
+        "date": 1638941787338,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1272,
+            "range": "± 28",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5993,
+            "range": "± 166",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 21895,
+            "range": "± 454",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fd504b0bf0264c391823eeb86a39a10a83730518",
+          "message": "Using a trait for FormattedString (#1345)",
+          "timestamp": "2021-12-08T19:31:12+01:00",
+          "tree_id": "aeba2241aaa974589048d758bfc7000965f3b911",
+          "url": "https://github.com/unicode-org/icu4x/commit/fd504b0bf0264c391823eeb86a39a10a83730518"
+        },
+        "date": 1638988771262,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1124,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5290,
+            "range": "± 16",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 18949,
+            "range": "± 29",
             "unit": "ns/iter"
           }
         ]

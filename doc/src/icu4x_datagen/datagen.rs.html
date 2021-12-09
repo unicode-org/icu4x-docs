@@ -537,6 +537,11 @@
 <span id="537">537</span>
 <span id="538">538</span>
 <span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -922,16 +927,21 @@
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">locale_subset</span> <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>);
     <span class="kw">let</span> <span class="ident">cldr_paths</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
-        <span class="ident">Box::new</span>(<span class="ident">CldrAllInOneDownloader::try_new_from_github</span>(<span class="ident">tag</span>, <span class="ident">locale_subset</span>)<span class="question-mark">?</span>.<span class="ident">download</span>()<span class="question-mark">?</span>)
+        <span class="ident">Box::new</span>(
+            <span class="ident">CldrAllInOneDownloader::try_new_from_github</span>(<span class="ident">tag</span>, <span class="ident">locale_subset</span>)<span class="question-mark">?</span>
+                .<span class="ident">download</span>(<span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_ROOT&quot;</span>).<span class="ident">map</span>(<span class="ident">PathBuf::from</span>))<span class="question-mark">?</span>,
+        )
     } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>) {
         <span class="ident">Box::new</span>(<span class="ident">CldrPathsAllInOne</span> {
             <span class="ident">cldr_json_root</span>: <span class="ident">PathBuf::from</span>(<span class="ident">path</span>),
             <span class="ident">locale_subset</span>: <span class="ident">locale_subset</span>.<span class="ident">to_string</span>(),
+            <span class="ident">uprops_root</span>: <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_ROOT&quot;</span>).<span class="ident">map</span>(<span class="ident">PathBuf::from</span>),
         })
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
         <span class="ident">Box::new</span>(<span class="ident">CldrPathsAllInOne</span> {
             <span class="ident">cldr_json_root</span>: <span class="ident">icu_testdata::paths::cldr_json_root</span>(),
             <span class="ident">locale_subset</span>: <span class="string">&quot;full&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">uprops_root</span>: <span class="prelude-val">Some</span>(<span class="ident">icu_testdata::paths::uprops_toml_root</span>()),
         })
     } <span class="kw">else</span> {
         <span class="macro">eyre::bail!</span>(<span class="string">&quot;Either --cldr-tag or --cldr-root must be specified&quot;</span>,)

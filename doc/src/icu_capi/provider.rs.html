@@ -145,10 +145,6 @@
 <span id="145">145</span>
 <span id="146">146</span>
 <span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -162,7 +158,7 @@
     ))]</span>
     <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 
-    <span class="kw">use</span> <span class="ident">icu_provider::serde::SerdeDeDataProvider</span>;
+    <span class="kw">use</span> <span class="ident">icu_provider::prelude::BufferProvider</span>;
     <span class="kw">use</span> <span class="ident">icu_provider_blob::BlobDataProvider</span>;
     <span class="kw">use</span> <span class="ident">icu_provider_blob::StaticDataProvider</span>;
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(
@@ -174,7 +170,7 @@
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
     <span class="doccomment">/// An ICU4X data provider, capable of loading ICU4X data keys from some source.</span>
     <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu_provider/prelude/trait.DataProvider.html) for more information.</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XDataProvider</span>(<span class="kw">pub</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerdeDeDataProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>);
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XDataProvider</span>(<span class="kw">pub</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BufferProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>);
 
     <span class="doccomment">/// A result type for `ICU4XDataProvider::create`.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
@@ -194,13 +190,10 @@
                 <span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;wasm32&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;none&quot;</span>))
             ))]</span>
             <span class="kw">match</span> <span class="ident">FsDataProvider::try_new</span>(<span class="ident">path</span>.<span class="ident">to_string</span>()) {
-                <span class="prelude-val">Ok</span>(<span class="ident">fs</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">let</span> <span class="ident">erased</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">fs</span>);
-                    <span class="ident">ICU4XCreateDataProviderResult</span> {
-                        <span class="ident">provider</span>: <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">ICU4XDataProvider</span>(<span class="ident">erased</span>))),
-                        <span class="ident">success</span>: <span class="bool-val">true</span>,
-                    }
-                }
+                <span class="prelude-val">Ok</span>(<span class="ident">fs</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
+                    <span class="ident">provider</span>: <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">ICU4XDataProvider</span>(<span class="ident">Box::new</span>(<span class="ident">fs</span>)))),
+                    <span class="ident">success</span>: <span class="bool-val">true</span>,
+                },
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
                     <span class="ident">provider</span>: <span class="prelude-val">None</span>,
                     <span class="ident">success</span>: <span class="bool-val">false</span>,
@@ -226,9 +219,8 @@
                 <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_smaller_static_provider</span>();
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smaller_static&quot;</span>))]</span>
                 <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_static_provider</span>();
-                <span class="kw">let</span> <span class="ident">erased</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">provider</span>);
                 <span class="ident">ICU4XCreateDataProviderResult</span> {
-                    <span class="ident">provider</span>: <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">ICU4XDataProvider</span>(<span class="ident">erased</span>))),
+                    <span class="ident">provider</span>: <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">ICU4XDataProvider</span>(<span class="ident">Box::new</span>(<span class="ident">provider</span>)))),
                     <span class="ident">success</span>: <span class="bool-val">true</span>,
                 }
             }

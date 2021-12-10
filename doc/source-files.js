@@ -1,5 +1,6 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["deduplicating_array"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","signum.rs","uint_iterator.rs"]};
 sourcesIndex["formatted_string"] = {"name":"","files":["error.rs","formatted_string.rs","lib.rs"]};
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
@@ -16,7 +17,7 @@ sourcesIndex["icu_codepointtrie"] = {"name":"","files":["codepointtrie.rs","erro
 sourcesIndex["icu_datagen"] = {"name":"","files":["main.rs"]};
 sourcesIndex["icu_datetime"] = {"name":"","dirs":[{"name":"fields","files":["length.rs","macros.rs","mod.rs","symbols.rs","ule.rs"]},{"name":"format","files":["datetime.rs","mod.rs","time_zone.rs","zoned_datetime.rs"]},{"name":"mock","files":["mod.rs","time_zone.rs","zoned_datetime.rs"]},{"name":"options","files":["components.rs","length.rs","mod.rs","preferences.rs"]},{"name":"pattern","dirs":[{"name":"common","files":["mod.rs","serde.rs"]},{"name":"item","files":["generic.rs","mod.rs","ule.rs"]},{"name":"reference","files":["display.rs","generic.rs","mod.rs","parser.rs","pattern.rs"]},{"name":"runtime","files":["generic.rs","helpers.rs","mod.rs","pattern.rs","plural.rs"]}],"files":["error.rs","hour_cycle.rs","mod.rs"]},{"name":"provider","dirs":[{"name":"calendar","files":["mod.rs","skeletons.rs","symbols.rs"]}],"files":["date_time.rs","mod.rs","time_zones.rs"]},{"name":"raw","files":["datetime.rs","mod.rs","zoned_datetime.rs"]},{"name":"skeleton","files":["error.rs","helpers.rs","mod.rs","reference.rs","runtime.rs","serde.rs"]}],"files":["calendar.rs","date.rs","datetime.rs","error.rs","lib.rs","time_zone.rs","zoned_datetime.rs"]};
 sourcesIndex["icu_decimal"] = {"name":"","files":["error.rs","format.rs","grouper.rs","lib.rs","options.rs","provider.rs","sign_selector.rs"]};
-sourcesIndex["icu_list"] = {"name":"","files":["deduplicating_array.rs","error.rs","lib.rs","list_formatter.rs","options.rs","provider.rs","string_matcher.rs"]};
+sourcesIndex["icu_list"] = {"name":"","files":["error.rs","lib.rs","list_formatter.rs","options.rs","provider.rs","string_matcher.rs"]};
 sourcesIndex["icu_locale_canonicalizer"] = {"name":"","files":["lib.rs","locale_canonicalizer.rs","provider.rs"]};
 sourcesIndex["icu_locid"] = {"name":"","dirs":[{"name":"extensions","dirs":[{"name":"other","files":["key.rs","mod.rs"]},{"name":"private","files":["key.rs","mod.rs"]},{"name":"transform","files":["fields.rs","key.rs","mod.rs","value.rs"]},{"name":"unicode","files":["attribute.rs","attributes.rs","key.rs","keywords.rs","mod.rs","value.rs"]}],"files":["mod.rs"]},{"name":"parser","files":["errors.rs","langid.rs","locale.rs","mod.rs"]},{"name":"serde","files":["langid.rs","mod.rs"]},{"name":"subtags","files":["language.rs","mod.rs","region.rs","script.rs","variant.rs","variants.rs"]}],"files":["helpers.rs","langid.rs","lib.rs","locale.rs"]};
 sourcesIndex["icu_locid_macros"] = {"name":"","files":["lib.rs","token_stream.rs"]};

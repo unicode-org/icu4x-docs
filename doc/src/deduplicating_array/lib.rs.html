@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `experimental&#x2F;list_formatter&#x2F;src&#x2F;deduplicating_array.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>deduplicating_array.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../icu_list/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `utils&#x2F;deduplicating_array&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../deduplicating_array/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -251,7 +251,73 @@
 <span id="251">251</span>
 <span id="252">252</span>
 <span id="253">253</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">serde::de</span>::{<span class="ident">Deserialize</span>, <span class="ident">Deserializer</span>, <span class="ident">EnumAccess</span>, <span class="ident">Visitor</span>};
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+</pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
+<span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
+<span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
+
+<span class="doccomment">//! A serde serialization strategy that uses `PartialEq` to reduce serialized size.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This create can be used with Serde derive like this:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! # #[derive(Clone, PartialEq, serde::Deserialize, serde::Serialize)]</span>
+<span class="doccomment">//! # struct Bar(String);</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! #[derive(serde::Deserialize, serde::Serialize)]</span>
+<span class="doccomment">//! pub struct Foo {</span>
+<span class="doccomment">//!     #[serde(with = &quot;deduplicating_array&quot;)]</span>
+<span class="doccomment">//!     data: [Bar; 12],</span>
+<span class="doccomment">//!     // ...</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! `Bar`s that are equal to a `Bar`s that appears earlier in the array will not be serialized</span>
+<span class="doccomment">//! (instead, the index of the first occurence is serialized). Deserialization clones the first</span>
+<span class="doccomment">//! `Bar` into all the indices where it occurs (hence `Bar` has to implement `Clone`).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Human readable serialization represents skipped values as singleton arrays containing the</span>
+<span class="doccomment">//! target index, e.g. the Rust array `[&quot;Foo&quot;, &quot;Bar&quot;, &quot;Foo&quot;]` will serialize to JSON `[&quot;Foo&quot;, &quot;Bar&quot;, [0]]`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This implies that singleton integer arrays cannot be used as array elements (they do work in Bincode,</span>
+<span class="doccomment">//! but there&#39;s really not much point in using them).</span>
+
+<span class="attribute">#![<span class="ident">no_std</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>;
+
+<span class="kw">use</span> <span class="ident">alloc::fmt</span>::{<span class="ident">Error</span>, <span class="ident">Formatter</span>};
+<span class="kw">use</span> <span class="ident">alloc::format</span>;
+<span class="kw">use</span> <span class="ident">serde::de</span>::{<span class="ident">Deserialize</span>, <span class="ident">Deserializer</span>, <span class="ident">EnumAccess</span>, <span class="ident">Visitor</span>};
 <span class="kw">use</span> <span class="ident">serde::ser</span>::{<span class="ident">Serialize</span>, <span class="ident">Serializer</span>};
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(<span class="ident">array</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>; <span class="ident">N</span>], <span class="ident">serializer</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S::Ok</span>, <span class="ident">S::Error</span><span class="op">&gt;</span>
@@ -300,10 +366,9 @@
                     <span class="comment">// Fallbacks should always be to a previous value,</span>
                     <span class="comment">// which makes the assume_init_ref safe</span>
                     <span class="kw">if</span> <span class="ident">j</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">i</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">D::Error::custom</span>(<span class="macro">alloc::format!</span>(
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">D::Error::custom</span>(<span class="macro">format!</span>(
                             <span class="string">&quot;Illegal forward fallback {}-&gt;{}&quot;</span>,
-                            <span class="ident">i</span>,
-                            <span class="ident">j</span>
+                            <span class="ident">i</span>, <span class="ident">j</span>
                         )));
                     }
                     <span class="ident">array</span>[<span class="ident">i</span>].<span class="ident">write</span>(<span class="ident">array</span>[<span class="ident">j</span>].<span class="ident">assume_init_ref</span>().<span class="ident">clone</span>());
@@ -322,10 +387,9 @@
                     <span class="comment">// Fallbacks should always be to a previous value,</span>
                     <span class="comment">// which makes the assume_init_ref safe</span>
                     <span class="kw">if</span> <span class="ident">j</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">i</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">D::Error::custom</span>(<span class="macro">alloc::format!</span>(
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">D::Error::custom</span>(<span class="macro">format!</span>(
                             <span class="string">&quot;Illegal forward fallback {}-&gt;{}&quot;</span>,
-                            <span class="ident">i</span>,
-                            <span class="ident">j</span>
+                            <span class="ident">i</span>, <span class="ident">j</span>
                         )));
                     }
                     <span class="ident">array</span>[<span class="ident">i</span>].<span class="ident">write</span>(<span class="ident">array</span>[<span class="ident">j</span>].<span class="ident">assume_init_ref</span>().<span class="ident">clone</span>());
@@ -409,10 +473,7 @@
         <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="ident">R</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Visitor</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DedupeVisitor</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
             <span class="kw">type</span> <span class="ident">Value</span> <span class="op">=</span> <span class="ident">MachineDe</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>;
 
-            <span class="kw">fn</span> <span class="ident">expecting</span>(
-                <span class="kw-2">&amp;</span><span class="self">self</span>,
-                <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">alloc::fmt::Formatter</span>,
-            ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">alloc::fmt::Error</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">expecting</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
                 <span class="ident">formatter</span>.<span class="ident">write_str</span>(<span class="string">&quot;Element or fallback reference.&quot;</span>)
             }
 
@@ -440,8 +501,9 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
+    <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
+    <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
     <span class="kw">use</span> <span class="ident">serde</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 
     <span class="comment">// Putting a Cow directly into the array doesn&#39;t borrow</span>
     <span class="comment">// for some reason, even with default array deserialization</span>
@@ -505,6 +567,6 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_list" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="deduplicating_array" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
     <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

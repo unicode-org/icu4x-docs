@@ -197,6 +197,8 @@
 <span id="197">197</span>
 <span id="198">198</span>
 <span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -204,7 +206,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::options</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">alloc::string</span>::{<span class="ident">String</span>, <span class="ident">ToString</span>};
+<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">formatted_string</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
@@ -248,48 +250,58 @@
     <span class="kw">fn</span> <span class="ident">format_internal</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span>, <span class="ident">B</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;c</span> <span class="self">self</span>,
         <span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
-        <span class="ident">empty</span>: <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
-        <span class="ident">single</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
-        <span class="ident">apply_pattern</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">PatternParts</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>, <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
+        <span class="comment">// Empty builder</span>
+        <span class="kw-2">mut</span> <span class="ident">builder</span>: <span class="ident">B</span>,
+        <span class="comment">// Produces value + builder</span>
+        <span class="ident">apply_value</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
+        <span class="comment">// Produces value + parts.between + builder + parts.after</span>
+        <span class="ident">apply_pattern</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">PatternParts</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>, <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span> {
-        <span class="kw">let</span> <span class="ident">pattern</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>();
         <span class="kw">match</span> <span class="ident">values</span>.<span class="ident">len</span>() {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty</span>(),
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">single</span>(<span class="ident">values</span>[<span class="number">0</span>]),
+            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">builder</span>,
+            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">apply_value</span>(<span class="ident">values</span>[<span class="number">0</span>], <span class="ident">builder</span>),
             <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">apply_pattern</span>(
                 <span class="ident">values</span>[<span class="number">0</span>],
-                <span class="kw-2">&amp;</span><span class="ident">pattern</span>.<span class="ident">pair</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]),
-                <span class="ident">single</span>(<span class="ident">values</span>[<span class="number">1</span>]),
+                <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">pair</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]),
+                <span class="ident">apply_value</span>(<span class="ident">values</span>[<span class="number">1</span>], <span class="ident">builder</span>),
             ),
             <span class="ident">n</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">apply_pattern</span>(
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">apply_pattern</span>(
                     <span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">2</span>],
-                    <span class="kw-2">&amp;</span><span class="ident">pattern</span>.<span class="ident">end</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>]),
-                    <span class="ident">single</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>]),
+                    <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">end</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>]),
+                    <span class="ident">apply_value</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>], <span class="ident">builder</span>),
                 );
-                <span class="kw">let</span> <span class="ident">middle</span> <span class="op">=</span> <span class="ident">pattern</span>.<span class="ident">middle</span>(<span class="self">self</span>.<span class="ident">width</span>);
+                <span class="kw">let</span> <span class="ident">middle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">middle</span>(<span class="self">self</span>.<span class="ident">width</span>);
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> (<span class="number">1</span>..<span class="ident">n</span> <span class="op">-</span> <span class="number">2</span>).<span class="ident">rev</span>() {
-                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">apply_pattern</span>(<span class="ident">values</span>[<span class="ident">i</span>], <span class="kw-2">&amp;</span><span class="ident">middle</span>.<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>]), <span class="ident">builder</span>);
+                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">apply_pattern</span>(<span class="ident">values</span>[<span class="ident">i</span>], <span class="ident">middle</span>.<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>]), <span class="ident">builder</span>);
                 }
                 <span class="ident">apply_pattern</span>(
                     <span class="ident">values</span>[<span class="number">0</span>],
-                    <span class="kw-2">&amp;</span><span class="ident">pattern</span>.<span class="ident">start</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]),
+                    <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">start</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]),
                     <span class="ident">builder</span>,
                 )
             }
         }
     }
 
+    <span class="kw">fn</span> <span class="ident">size_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="ident">values</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">len</span>()).<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>()
+            <span class="op">+</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">size_hint</span>(<span class="self">self</span>.<span class="ident">width</span>, <span class="ident">values</span>.<span class="ident">len</span>())
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
         <span class="self">self</span>.<span class="ident">format_internal</span>(
             <span class="ident">values</span>,
-            <span class="op">|</span><span class="op">|</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>(),
-            <span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">to_string</span>(),
+            <span class="ident">String::with_capacity</span>(<span class="self">self</span>.<span class="ident">size_hint</span>(<span class="ident">values</span>)),
+            <span class="op">|</span><span class="ident">value</span>, <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
+                <span class="ident">builder</span>.<span class="ident">push_str</span>(<span class="ident">value</span>);
+                <span class="ident">builder</span>
+            },
             <span class="op">|</span><span class="ident">value</span>, (<span class="ident">between</span>, <span class="ident">after</span>), <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
-                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">builder</span> <span class="op">+</span> <span class="ident">after</span>;
+                <span class="comment">// TODO(robertbastian): String doesn&#39;t have O(1) prepend</span>
                 <span class="ident">builder</span>.<span class="ident">insert_str</span>(<span class="number">0</span>, <span class="ident">between</span>);
                 <span class="ident">builder</span>.<span class="ident">insert_str</span>(<span class="number">0</span>, <span class="ident">value</span>);
-                <span class="ident">builder</span>
+                <span class="ident">builder</span> <span class="op">+</span> <span class="ident">after</span>
             },
         )
     }
@@ -297,16 +309,16 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FormattedString</span><span class="op">&lt;</span><span class="ident">FieldType</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">format_internal</span>(
             <span class="ident">values</span>,
-            <span class="ident">FormattedString</span>::<span class="op">&lt;</span><span class="ident">FieldType</span><span class="op">&gt;</span><span class="ident">::new</span>,
-            <span class="op">|</span><span class="ident">value</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">FormattedString</span>::<span class="op">&lt;</span><span class="ident">FieldType</span><span class="op">&gt;</span><span class="ident">::new</span>();
+            <span class="ident">FormattedString::with_capacity</span>(<span class="self">self</span>.<span class="ident">size_hint</span>(<span class="ident">values</span>)),
+            <span class="op">|</span><span class="ident">value</span>, <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
                 <span class="ident">builder</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>, <span class="ident">FieldType::Element</span>);
                 <span class="ident">builder</span>
             },
             <span class="op">|</span><span class="ident">value</span>, (<span class="ident">between</span>, <span class="ident">after</span>), <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
-                <span class="ident">builder</span>.<span class="ident">append</span>(<span class="ident">after</span>, <span class="ident">FieldType::Literal</span>);
-                <span class="ident">builder</span>.<span class="ident">prepend</span>(<span class="ident">between</span>, <span class="ident">FieldType::Literal</span>);
+                <span class="comment">// TODO(robertbastian): FormattedString doesn&#39;t have O(1) prepend</span>
+                <span class="ident">builder</span>.<span class="ident">prepend</span>(<span class="kw-2">&amp;</span><span class="ident">between</span>, <span class="ident">FieldType::Literal</span>);
                 <span class="ident">builder</span>.<span class="ident">prepend</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>, <span class="ident">FieldType::Element</span>);
+                <span class="ident">builder</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="ident">after</span>, <span class="ident">FieldType::Literal</span>);
                 <span class="ident">builder</span>
             },
         )
@@ -316,38 +328,21 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 
     <span class="kw">const</span> <span class="ident">VALUES</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>, <span class="string">&quot;three&quot;</span>, <span class="string">&quot;four&quot;</span>, <span class="string">&quot;five&quot;</span>];
 
-    <span class="kw">fn</span> <span class="ident">formatter</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ListFormatter</span> {
-        <span class="kw">let</span> <span class="ident">pattern</span> <span class="op">=</span> <span class="ident">ListFormatterPatternsV1::new</span>([
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}: {1}&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}, {1}&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}. {1}!&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_regex_and_strs</span>(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;{0} :o {1}&quot;</span>, <span class="string">&quot;{0}; {1}&quot;</span>)
-                .<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}: {1}&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}, {1}&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}. {1}!&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_regex_and_strs</span>(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;{0} :o {1}&quot;</span>, <span class="string">&quot;{0}; {1}&quot;</span>)
-                .<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}: {1}&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}, {1}&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_str</span>(<span class="string">&quot;{0}. {1}!&quot;</span>).<span class="ident">unwrap</span>(),
-            <span class="ident">ConditionalListJoinerPattern::from_regex_and_strs</span>(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;{0} :o {1}&quot;</span>, <span class="string">&quot;{0}; {1}&quot;</span>)
-                .<span class="ident">unwrap</span>(),
-        ]);
-
+    <span class="kw">fn</span> <span class="ident">formatter</span>(<span class="ident">width</span>: <span class="ident">Width</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ListFormatter</span> {
         <span class="ident">ListFormatter</span> {
-            <span class="ident">data</span>: <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">pattern</span>),
-            <span class="ident">width</span>: <span class="ident">Width::default</span>(),
+            <span class="ident">data</span>: <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(
+                <span class="ident"><span class="kw">crate</span>::provider::test::test_patterns</span>(),
+            ),
+            <span class="ident">width</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_format</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>();
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Wide</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">0</span>]), <span class="string">&quot;&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">1</span>]), <span class="string">&quot;one&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">2</span>]), <span class="string">&quot;one; two&quot;</span>);
@@ -358,7 +353,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_format_to_parts</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>();
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Wide</span>);
 
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">0</span>]).<span class="ident">as_ref</span>(), <span class="string">&quot;&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">1</span>]).<span class="ident">as_ref</span>(), <span class="string">&quot;one&quot;</span>);
@@ -391,9 +386,18 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_conditional</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>();
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Narrow</span>);
 
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;Beta&quot;</span>, <span class="string">&quot;Alpha&quot;</span>]), <span class="string">&quot;Beta :o Alpha&quot;</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">strings_dont_have_spare_capacity</span>() {
+        <span class="kw">let</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Short</span>).<span class="ident">format</span>(<span class="ident">VALUES</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">string</span>.<span class="ident">capacity</span>(), <span class="ident">string</span>.<span class="ident">len</span>());
+
+        <span class="kw">let</span> <span class="ident">labelled_string</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Short</span>).<span class="ident">format</span>(<span class="ident">VALUES</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">labelled_string</span>.<span class="ident">capacity</span>(), <span class="ident">labelled_string</span>.<span class="ident">len</span>());
     }
 }
 </code></pre></div>

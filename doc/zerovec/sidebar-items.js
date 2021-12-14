@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["map","See [`ZeroMap`] for details."],["ule","Traits over unaligned little-endian data (ULE, pronounced “yule”)."],["varzerovec",""],["zerovec",""]]});
+initSidebarItems({"enum":[["ZeroVecError","A generic error type to be used for decoding slices of ULE types"]],"mod":[["map","See [`ZeroMap`] for details."],["ule","Traits over unaligned little-endian data (ULE, pronounced “yule”)."],["varzerovec",""],["zerovec",""]]});

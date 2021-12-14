@@ -445,7 +445,7 @@
     <span class="doccomment">/// - `indices[len - 1]..things.len()` must index into a valid section of</span>
     <span class="doccomment">///   `things`, such that it parses to a `T::VarULE`</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_byte_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParseErrorFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_byte_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ZeroVecError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">VarZeroVecBorrowed</span> {
                 <span class="ident">indices</span>: <span class="kw-2">&amp;</span>[],
@@ -454,20 +454,20 @@
                 <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
             });
         }
-        <span class="kw">let</span> <span class="ident">len_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get</span>(<span class="number">0</span>..<span class="number">4</span>).<span class="ident">ok_or</span>(<span class="ident">VarZeroVecError::FormatError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">len_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get</span>(<span class="number">0</span>..<span class="number">4</span>).<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">len_ule</span> <span class="op">=</span> <span class="ident">PlainOldULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::parse_byte_slice</span>(<span class="ident">len_bytes</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">VarZeroVecError::FormatError</span>)<span class="question-mark">?</span>;
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span>
-            <span class="ident">u32::from_unaligned</span>(<span class="kw-2">*</span><span class="ident">len_ule</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">ok_or</span>(<span class="ident">VarZeroVecError::FormatError</span>)<span class="question-mark">?</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">u32::from_unaligned</span>(<span class="kw-2">*</span><span class="ident">len_ule</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>)
+            <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="ident">indices_bytes</span> <span class="op">=</span> <span class="ident">slice</span>
             .<span class="ident">get</span>(<span class="number">4</span>..<span class="number">4</span> <span class="op">*</span> <span class="ident">len</span> <span class="op">+</span> <span class="number">4</span>)
-            .<span class="ident">ok_or</span>(<span class="ident">VarZeroVecError::FormatError</span>)<span class="question-mark">?</span>;
+            .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">indices</span> <span class="op">=</span> <span class="ident">PlainOldULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::parse_byte_slice</span>(<span class="ident">indices_bytes</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">VarZeroVecError::FormatError</span>)<span class="question-mark">?</span>;
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">things</span> <span class="op">=</span> <span class="ident">slice</span>
             .<span class="ident">get</span>(<span class="number">4</span> <span class="op">*</span> <span class="ident">len</span> <span class="op">+</span> <span class="number">4</span>..)
-            .<span class="ident">ok_or</span>(<span class="ident">VarZeroVecError::FormatError</span>)<span class="question-mark">?</span>;
+            .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">borrowed</span> <span class="op">=</span> <span class="ident">VarZeroVecBorrowed</span> {
             <span class="ident">indices</span>,
@@ -571,7 +571,7 @@
     <span class="doccomment">/// This method is NOT allowed to call any other methods on VarZeroVecBorrowed since all other methods</span>
     <span class="doccomment">/// assume that the slice has been passed through iter_checked</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">iter_checked</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>, <span class="ident">ParseErrorFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">iter_checked</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>, <span class="ident">ZeroVecError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">last</span> <span class="op">=</span> <span class="ident">iter::from_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
             <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="self">self</span>.<span class="ident">indices</span>[<span class="self">self</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>]);
@@ -579,7 +579,7 @@
                 <span class="prelude-val">Some</span>(
                     <span class="self">self</span>.<span class="ident">things</span>
                         .<span class="ident">get</span>(<span class="ident">start</span>..<span class="ident">end</span>)
-                        .<span class="ident">ok_or</span>(<span class="ident">VarZeroVecError::FormatError</span>),
+                        .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>),
                 )
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
@@ -594,10 +594,10 @@
                 <span class="comment">// the .get() here automatically verifies that end&gt;=start</span>
                 <span class="self">self</span>.<span class="ident">things</span>
                     .<span class="ident">get</span>(<span class="ident">start</span>..<span class="ident">end</span>)
-                    .<span class="ident">ok_or</span>(<span class="ident">VarZeroVecError::FormatError</span>)
+                    .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)
             })
             .<span class="ident">chain</span>(<span class="ident">last</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">T::parse_byte_slice</span>(<span class="ident">s</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">T::parse_byte_slice</span>(<span class="ident">s</span>)))
     }
 
     <span class="doccomment">/// Create an iterator over the Ts contained in VarZeroVecBorrowed</span>

@@ -156,11 +156,6 @@
 <span id="156">156</span>
 <span id="157">157</span>
 <span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -212,21 +207,16 @@
 <span class="comment">//  5. The other ULE methods use the default impl.</span>
 <span class="comment">//  6. CharULE byte equality is semantic equality</span>
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">ULE</span> <span class="kw">for</span> <span class="ident">CharULE</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">ULEError</span><span class="op">&lt;</span><span class="ident">core::char::CharTryFromError</span><span class="op">&gt;</span>;
-
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">validate_byte_slice</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">validate_byte_slice</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">ZeroVecError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">4</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ULEError::InvalidLength</span> {
-                <span class="ident">ty</span>: <span class="string">&quot;char&quot;</span>,
-                <span class="ident">len</span>: <span class="ident">bytes</span>.<span class="ident">len</span>(),
-            });
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ZeroVecError::length</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>(<span class="ident">bytes</span>.<span class="ident">len</span>()));
         }
         <span class="comment">// Validate the bytes</span>
         <span class="kw">for</span> <span class="ident">chunk</span> <span class="kw">in</span> <span class="ident">bytes</span>.<span class="ident">chunks_exact</span>(<span class="number">4</span>) {
             <span class="comment">// TODO: Use slice::as_chunks() when stabilized</span>
             <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="ident">u32::from_le_bytes</span>([<span class="ident">chunk</span>[<span class="number">0</span>], <span class="ident">chunk</span>[<span class="number">1</span>], <span class="ident">chunk</span>[<span class="number">2</span>], <span class="ident">chunk</span>[<span class="number">3</span>]]);
-            <span class="ident">char::try_from</span>(<span class="ident">u</span>)<span class="question-mark">?</span>;
+            <span class="ident">char::try_from</span>(<span class="ident">u</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ZeroVecError::parse</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>())<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }

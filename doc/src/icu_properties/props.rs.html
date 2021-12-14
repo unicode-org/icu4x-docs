@@ -749,6 +749,17 @@
 <span id="749">749</span>
 <span id="750">750</span>
 <span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -770,8 +781,10 @@
     <span class="ident">CanonicalCombiningClass</span> <span class="op">=</span> <span class="number">0x1002</span>,
     <span class="doccomment">/// The East_Asian_Width property. See [`EastAsianWidth`].</span>
     <span class="ident">EastAsianWidth</span> <span class="op">=</span> <span class="number">0x1004</span>,
-    <span class="doccomment">/// The General Category property.</span>
+    <span class="doccomment">/// The General_Category property.</span>
     <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="number">0x1005</span>,
+    <span class="doccomment">/// A pseudo-property that is used to represent groupings of `GeneralCategory`.</span>
+    <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="number">0x2000</span>,
     <span class="doccomment">/// The Line_Break enumerated property. See [`LineBreak`].</span>
     <span class="ident">LineBreak</span> <span class="op">=</span> <span class="number">0x1008</span>,
     <span class="doccomment">/// The Script property. See [`Script`].</span>
@@ -788,216 +801,224 @@
     <span class="ident">InvalidCode</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>, <span class="comment">// TODO(#1160) - taken from ICU4C UProperty::UCHAR_INVALID_CODE</span>
 }
 
-<span class="doccomment">/// Enumerated Unicode general category types.</span>
-<span class="doccomment">/// GeneralSubcategory only supports specific subcategories (eg `UppercaseLetter`).</span>
-<span class="doccomment">/// It does not support grouped categories (eg `Letter`). For grouped categories, use [`GeneralCategory`].</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>, <span class="ident">TryFromPrimitive</span>, <span class="ident">UnsafeFromPrimitive</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GeneralSubcategory</span> {
-    <span class="doccomment">/// A reserved unassigned code point or a noncharacter</span>
-    <span class="ident">Unassigned</span> <span class="op">=</span> <span class="number">0</span>,
-
-    <span class="doccomment">/// An uppercase letter</span>
-    <span class="ident">UppercaseLetter</span> <span class="op">=</span> <span class="number">1</span>,
-    <span class="doccomment">/// A lowercase letter</span>
-    <span class="ident">LowercaseLetter</span> <span class="op">=</span> <span class="number">2</span>,
-    <span class="doccomment">/// A digraphic letter, with first part uppercase</span>
-    <span class="ident">TitlecaseLetter</span> <span class="op">=</span> <span class="number">3</span>,
-    <span class="doccomment">/// A modifier letter</span>
-    <span class="ident">ModifierLetter</span> <span class="op">=</span> <span class="number">4</span>,
-    <span class="doccomment">/// Other letters, including syllables and ideographs</span>
-    <span class="ident">OtherLetter</span> <span class="op">=</span> <span class="number">5</span>,
-
-    <span class="doccomment">/// A nonspacing combining mark (zero advance width)</span>
-    <span class="ident">NonspacingMark</span> <span class="op">=</span> <span class="number">6</span>,
-    <span class="doccomment">/// A spacing combining mark (positive advance width)</span>
-    <span class="ident">SpacingMark</span> <span class="op">=</span> <span class="number">8</span>,
-    <span class="doccomment">/// An enclosing combining mark</span>
-    <span class="ident">EnclosingMark</span> <span class="op">=</span> <span class="number">7</span>,
-
-    <span class="doccomment">/// A decimal digit</span>
-    <span class="ident">DecimalNumber</span> <span class="op">=</span> <span class="number">9</span>,
-    <span class="doccomment">/// A letterlike numeric character</span>
-    <span class="ident">LetterNumber</span> <span class="op">=</span> <span class="number">10</span>,
-    <span class="doccomment">/// A numeric character of other type</span>
-    <span class="ident">OtherNumber</span> <span class="op">=</span> <span class="number">11</span>,
-
-    <span class="doccomment">/// A space character (of various non-zero widths)</span>
-    <span class="ident">SpaceSeparator</span> <span class="op">=</span> <span class="number">12</span>,
-    <span class="doccomment">/// U+2028 LINE SEPARATOR only</span>
-    <span class="ident">LineSeparator</span> <span class="op">=</span> <span class="number">13</span>,
-    <span class="doccomment">/// U+2029 PARAGRAPH SEPARATOR only</span>
-    <span class="ident">ParagraphSeparator</span> <span class="op">=</span> <span class="number">14</span>,
-
-    <span class="doccomment">/// A C0 or C1 control code</span>
-    <span class="ident">Control</span> <span class="op">=</span> <span class="number">15</span>,
-    <span class="doccomment">/// A format control character</span>
-    <span class="ident">Format</span> <span class="op">=</span> <span class="number">16</span>,
-    <span class="doccomment">/// A private-use character</span>
-    <span class="ident">PrivateUse</span> <span class="op">=</span> <span class="number">17</span>,
-    <span class="doccomment">/// A surrogate code point</span>
-    <span class="ident">Surrogate</span> <span class="op">=</span> <span class="number">18</span>,
-
-    <span class="doccomment">/// A dash or hyphen punctuation mark</span>
-    <span class="ident">DashPunctuation</span> <span class="op">=</span> <span class="number">19</span>,
-    <span class="doccomment">/// An opening punctuation mark (of a pair)</span>
-    <span class="ident">OpenPunctuation</span> <span class="op">=</span> <span class="number">20</span>,
-    <span class="doccomment">/// A closing punctuation mark (of a pair)</span>
-    <span class="ident">ClosePunctuation</span> <span class="op">=</span> <span class="number">21</span>,
-    <span class="doccomment">/// A connecting punctuation mark, like a tie</span>
-    <span class="ident">ConnectorPunctuation</span> <span class="op">=</span> <span class="number">22</span>,
-    <span class="doccomment">/// An initial quotation mark</span>
-    <span class="ident">InitialPunctuation</span> <span class="op">=</span> <span class="number">28</span>,
-    <span class="doccomment">/// A final quotation mark</span>
-    <span class="ident">FinalPunctuation</span> <span class="op">=</span> <span class="number">29</span>,
-    <span class="doccomment">/// A punctuation mark of other type</span>
-    <span class="ident">OtherPunctuation</span> <span class="op">=</span> <span class="number">23</span>,
-
-    <span class="doccomment">/// A symbol of mathematical use</span>
-    <span class="ident">MathSymbol</span> <span class="op">=</span> <span class="number">24</span>,
-    <span class="doccomment">/// A currency sign</span>
-    <span class="ident">CurrencySymbol</span> <span class="op">=</span> <span class="number">25</span>,
-    <span class="doccomment">/// A non-letterlike modifier symbol</span>
-    <span class="ident">ModifierSymbol</span> <span class="op">=</span> <span class="number">26</span>,
-    <span class="doccomment">/// A symbol of other type</span>
-    <span class="ident">OtherSymbol</span> <span class="op">=</span> <span class="number">27</span>,
-}
-
 <span class="doccomment">/// Enumerated property General_Category.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// General_Category specifies the most general classification of a code point, usually</span>
 <span class="doccomment">/// determined based on the primary characteristic of the assigned character. For example, is the</span>
 <span class="doccomment">/// character a letter, a mark, a number, punctuation, or a symbol, and if so, of what type?</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The discriminants correspond to the `U_GC_XX_MASK` constants in ICU4C.</span>
-<span class="doccomment">/// Unlike [`GeneralSubcategory`], this supports groups of general categories: for example, `Letter`</span>
-<span class="doccomment">/// is the union of `UppercaseLetter`, `LowercaseLetter`, etc.</span>
+<span class="doccomment">/// GeneralCategory only supports specific subcategories (eg `UppercaseLetter`).</span>
+<span class="doccomment">/// It does not support grouped categories (eg `Letter`). For grouped categories, use [`GeneralCategoryGroup`].</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>, <span class="ident">TryFromPrimitive</span>, <span class="ident">UnsafeFromPrimitive</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>))]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GeneralCategory</span> {
+    <span class="doccomment">/// (`Cn`) A reserved unassigned code point or a noncharacter</span>
+    <span class="ident">Unassigned</span> <span class="op">=</span> <span class="number">0</span>,
+
+    <span class="doccomment">/// (`Lu`) An uppercase letter</span>
+    <span class="ident">UppercaseLetter</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="doccomment">/// (`Ll`) A lowercase letter</span>
+    <span class="ident">LowercaseLetter</span> <span class="op">=</span> <span class="number">2</span>,
+    <span class="doccomment">/// (`Lt`) A digraphic letter, with first part uppercase</span>
+    <span class="ident">TitlecaseLetter</span> <span class="op">=</span> <span class="number">3</span>,
+    <span class="doccomment">/// (`Lm`) A modifier letter</span>
+    <span class="ident">ModifierLetter</span> <span class="op">=</span> <span class="number">4</span>,
+    <span class="doccomment">/// (`Lo`) Other letters, including syllables and ideographs</span>
+    <span class="ident">OtherLetter</span> <span class="op">=</span> <span class="number">5</span>,
+
+    <span class="doccomment">/// (`Mn`) A nonspacing combining mark (zero advance width)</span>
+    <span class="ident">NonspacingMark</span> <span class="op">=</span> <span class="number">6</span>,
+    <span class="doccomment">/// (`Mc`) A spacing combining mark (positive advance width)</span>
+    <span class="ident">SpacingMark</span> <span class="op">=</span> <span class="number">8</span>,
+    <span class="doccomment">/// (`Me`) An enclosing combining mark</span>
+    <span class="ident">EnclosingMark</span> <span class="op">=</span> <span class="number">7</span>,
+
+    <span class="doccomment">/// (`Nd`) A decimal digit</span>
+    <span class="ident">DecimalNumber</span> <span class="op">=</span> <span class="number">9</span>,
+    <span class="doccomment">/// (`Nl`) A letterlike numeric character</span>
+    <span class="ident">LetterNumber</span> <span class="op">=</span> <span class="number">10</span>,
+    <span class="doccomment">/// (`No`) A numeric character of other type</span>
+    <span class="ident">OtherNumber</span> <span class="op">=</span> <span class="number">11</span>,
+
+    <span class="doccomment">/// (`Zs`) A space character (of various non-zero widths)</span>
+    <span class="ident">SpaceSeparator</span> <span class="op">=</span> <span class="number">12</span>,
+    <span class="doccomment">/// (`Zl`) U+2028 LINE SEPARATOR only</span>
+    <span class="ident">LineSeparator</span> <span class="op">=</span> <span class="number">13</span>,
+    <span class="doccomment">/// (`Zp`) U+2029 PARAGRAPH SEPARATOR only</span>
+    <span class="ident">ParagraphSeparator</span> <span class="op">=</span> <span class="number">14</span>,
+
+    <span class="doccomment">/// (`Cc`) A C0 or C1 control code</span>
+    <span class="ident">Control</span> <span class="op">=</span> <span class="number">15</span>,
+    <span class="doccomment">/// (`Cf`) A format control character</span>
+    <span class="ident">Format</span> <span class="op">=</span> <span class="number">16</span>,
+    <span class="doccomment">/// (`Co`) A private-use character</span>
+    <span class="ident">PrivateUse</span> <span class="op">=</span> <span class="number">17</span>,
+    <span class="doccomment">/// (`Cs`) A surrogate code point</span>
+    <span class="ident">Surrogate</span> <span class="op">=</span> <span class="number">18</span>,
+
+    <span class="doccomment">/// (`Pd`) A dash or hyphen punctuation mark</span>
+    <span class="ident">DashPunctuation</span> <span class="op">=</span> <span class="number">19</span>,
+    <span class="doccomment">/// (`Ps`) An opening punctuation mark (of a pair)</span>
+    <span class="ident">OpenPunctuation</span> <span class="op">=</span> <span class="number">20</span>,
+    <span class="doccomment">/// (`Pe`) A closing punctuation mark (of a pair)</span>
+    <span class="ident">ClosePunctuation</span> <span class="op">=</span> <span class="number">21</span>,
+    <span class="doccomment">/// (`Pc`) A connecting punctuation mark, like a tie</span>
+    <span class="ident">ConnectorPunctuation</span> <span class="op">=</span> <span class="number">22</span>,
+    <span class="doccomment">/// (`Pi`) An initial quotation mark</span>
+    <span class="ident">InitialPunctuation</span> <span class="op">=</span> <span class="number">28</span>,
+    <span class="doccomment">/// (`Pf`) A final quotation mark</span>
+    <span class="ident">FinalPunctuation</span> <span class="op">=</span> <span class="number">29</span>,
+    <span class="doccomment">/// (`Po`) A punctuation mark of other type</span>
+    <span class="ident">OtherPunctuation</span> <span class="op">=</span> <span class="number">23</span>,
+
+    <span class="doccomment">/// (`Sm`) A symbol of mathematical use</span>
+    <span class="ident">MathSymbol</span> <span class="op">=</span> <span class="number">24</span>,
+    <span class="doccomment">/// (`Sc`) A currency sign</span>
+    <span class="ident">CurrencySymbol</span> <span class="op">=</span> <span class="number">25</span>,
+    <span class="doccomment">/// (`Sk`) A non-letterlike modifier symbol</span>
+    <span class="ident">ModifierSymbol</span> <span class="op">=</span> <span class="number">26</span>,
+    <span class="doccomment">/// (`So`) A symbol of other type</span>
+    <span class="ident">OtherSymbol</span> <span class="op">=</span> <span class="number">27</span>,
+}
+
+<span class="doccomment">/// Groupings of multiple General_Category property values.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Instances of `GeneralCategoryGroup` represent the defined multi-category</span>
+<span class="doccomment">/// values that are useful for users in certain contexts, such as regex. In</span>
+<span class="doccomment">/// other words, unlike [`GeneralCategory`], this supports groups of general</span>
+<span class="doccomment">/// categories: for example, `Letter` /// is the union of `UppercaseLetter`,</span>
+<span class="doccomment">/// `LowercaseLetter`, etc.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See &lt;https://www.unicode.org/reports/tr44/&gt; .</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The discriminants correspond to the `U_GC_XX_MASK` constants in ICU4C.</span>
+<span class="doccomment">/// Unlike [`GeneralCategory`], this supports groups of general categories: for example, `Letter`</span>
+<span class="doccomment">/// is the union of `UppercaseLetter`, `LowercaseLetter`, etc.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See `UCharCategory` and `U_GET_GC_MASK` in ICU4C.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GeneralCategory</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">u32</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GeneralCategoryGroup</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">u32</span>);
 
 <span class="kw">use</span> <span class="ident">GeneralCategory</span> <span class="kw">as</span> <span class="ident">GC</span>;
-<span class="kw">use</span> <span class="ident">GeneralSubcategory</span> <span class="kw">as</span> <span class="ident">GS</span>;
+<span class="kw">use</span> <span class="ident">GeneralCategoryGroup</span> <span class="kw">as</span> <span class="ident">GCG</span>;
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_upper_case_globals</span>)]</span>
-<span class="kw">impl</span> <span class="ident">GeneralCategory</span> {
+<span class="kw">impl</span> <span class="ident">GeneralCategoryGroup</span> {
     <span class="doccomment">/// (`Lu`) An uppercase letter</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">UppercaseLetter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">UppercaseLetter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Ll`) A lowercase letter</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LowercaseLetter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LowercaseLetter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Lt`) A digraphic letter, with first part uppercase</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">TitlecaseLetter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">TitlecaseLetter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Lm`) A modifier letter</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ModifierLetter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ModifierLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ModifierLetter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ModifierLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Lo`) Other letters, including syllables and ideographs</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherLetter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherLetter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`LC`) The union of UppercaseLetter, LowercaseLetter, and TitlecaseLetter</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CasedLetter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CasedLetter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`L`) The union of all letter categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Letter</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ModifierLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Letter</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::UppercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LowercaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::TitlecaseLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ModifierLetter</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherLetter</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// (`Mn`) A nonspacing combining mark (zero advance width)</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NonspacingMark</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::NonspacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NonspacingMark</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::NonspacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Mc`) A spacing combining mark (positive advance width)</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EnclosingMark</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::EnclosingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EnclosingMark</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::EnclosingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Me`) An enclosing combining mark</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SpacingMark</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::SpacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SpacingMark</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::SpacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`M`) The union of all mark categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Mark</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::NonspacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::EnclosingMark</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::SpacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Mark</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::NonspacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::EnclosingMark</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::SpacingMark</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// (`Nd`) A decimal digit</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DecimalNumber</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::DecimalNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DecimalNumber</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::DecimalNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Nl`) A letterlike numeric character</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LetterNumber</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LetterNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LetterNumber</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LetterNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`No`) A numeric character of other type</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherNumber</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherNumber</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`N`) The union of all number categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Number</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::DecimalNumber</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LetterNumber</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Number</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::DecimalNumber</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LetterNumber</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherNumber</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// (`Zs`) A space character (of various non-zero widths)</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SpaceSeparator</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::SpaceSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SpaceSeparator</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::SpaceSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Zl`) U+2028 LINE SEPARATOR only</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LineSeparator</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LineSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LineSeparator</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LineSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Zp`) U+2029 PARAGRAPH SEPARATOR only</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ParagraphSeparator</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ParagraphSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ParagraphSeparator</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ParagraphSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Z`) The union of all separator categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Separator</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::SpaceSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::LineSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ParagraphSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Separator</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::SpaceSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::LineSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ParagraphSeparator</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// (`Cc`) A C0 or C1 control code</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Control</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Control</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Control</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Control</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Cf`) A format control character</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Format</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Format</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Format</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Format</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Co`) A private-use character</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PrivateUse</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::PrivateUse</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PrivateUse</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::PrivateUse</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Cs`) A surrogate code point</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Surrogate</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Surrogate</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Surrogate</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Surrogate</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Cn`) A reserved unassigned code point or a noncharacter</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Unassigned</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Unassigned</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Unassigned</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Unassigned</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`C`) The union of all control code, reserved, and unassigned categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Other</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Control</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Format</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::PrivateUse</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Surrogate</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::Unassigned</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Other</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Control</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Format</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::PrivateUse</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Surrogate</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::Unassigned</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// (`Pd`) A dash or hyphen punctuation mark</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DashPunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::DashPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DashPunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::DashPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Ps`) An opening punctuation mark (of a pair)</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OpenPunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OpenPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OpenPunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OpenPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Pe`) A closing punctuation mark (of a pair)</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ClosePunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ClosePunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ClosePunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ClosePunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Pc`) A connecting punctuation mark, like a tie</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ConnectorPunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ConnectorPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ConnectorPunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span>
+        <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ConnectorPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Pi`) An initial quotation mark</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">InitialPunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::InitialPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">InitialPunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::InitialPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Pf`) A final quotation mark</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FinalPunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::FinalPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FinalPunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::FinalPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Po`) A punctuation mark of other type</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherPunctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherPunctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`P`) The union of all punctuation categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Punctuation</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::DashPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OpenPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ClosePunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ConnectorPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::InitialPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::FinalPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Punctuation</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::DashPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OpenPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ClosePunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ConnectorPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::InitialPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::FinalPunctuation</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// (`Sm`) A symbol of mathematical use</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MathSymbol</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::MathSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MathSymbol</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::MathSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Sc`) A currency sign</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CurrencySymbol</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::CurrencySymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CurrencySymbol</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::CurrencySymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`Sk`) A non-letterlike modifier symbol</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ModifierSymbol</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ModifierSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ModifierSymbol</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ModifierSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`So`) A symbol of other type</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherSymbol</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OtherSymbol</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
     <span class="doccomment">/// (`S`) The union of all symbol categories</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Symbol</span>: <span class="ident">GeneralCategory</span> <span class="op">=</span> <span class="ident">GC</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::MathSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::CurrencySymbol</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::ModifierSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>)
-        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GS::OtherSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">Symbol</span>: <span class="ident">GeneralCategoryGroup</span> <span class="op">=</span> <span class="ident">GCG</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::MathSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::CurrencySymbol</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::ModifierSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">GC::OtherSymbol</span> <span class="kw">as</span> <span class="ident">u32</span>));
 
     <span class="doccomment">/// Return whether the code point belongs in the provided multi-value category.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::properties::{maps, GeneralSubcategory, GeneralCategory};</span>
+    <span class="doccomment">/// use icu::properties::{maps, GeneralCategory, GeneralCategoryGroup};</span>
     <span class="doccomment">/// use icu_codepointtrie::CodePointTrie;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
@@ -1007,48 +1028,49 @@
     <span class="doccomment">/// let data_struct = payload.get();</span>
     <span class="doccomment">/// let gc = &amp;data_struct.code_point_trie;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(gc.get(&#39;A&#39; as u32), GeneralSubcategory::UppercaseLetter);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::CasedLetter.contains(gc.get(&#39;A&#39; as u32)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;A&#39; as u32), GeneralCategory::UppercaseLetter);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::CasedLetter.contains(gc.get(&#39;A&#39; as u32)));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // U+0B1E ORIYA LETTER NYA</span>
-    <span class="doccomment">/// assert_eq!(gc.get(&#39;ଞ&#39; as u32), GeneralSubcategory::OtherLetter);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Letter.contains(gc.get(&#39;ଞ&#39; as u32)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::CasedLetter.contains(gc.get(&#39;ଞ&#39; as u32)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;ଞ&#39; as u32), GeneralCategory::OtherLetter);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Letter.contains(gc.get(&#39;ଞ&#39; as u32)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::CasedLetter.contains(gc.get(&#39;ଞ&#39; as u32)));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // U+0301 COMBINING ACUTE ACCENT</span>
-    <span class="doccomment">/// assert_eq!(gc.get(0x0301), GeneralSubcategory::NonspacingMark);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Mark.contains(gc.get(0x0301)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::Letter.contains(gc.get(0x0301)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(0x0301), GeneralCategory::NonspacingMark);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Mark.contains(gc.get(0x0301)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::Letter.contains(gc.get(0x0301)));</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(gc.get(&#39;0&#39; as u32), GeneralSubcategory::DecimalNumber);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Number.contains(gc.get(&#39;0&#39; as u32)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::Mark.contains(gc.get(&#39;0&#39; as u32)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;0&#39; as u32), GeneralCategory::DecimalNumber);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Number.contains(gc.get(&#39;0&#39; as u32)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::Mark.contains(gc.get(&#39;0&#39; as u32)));</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(gc.get(&#39;(&#39; as u32), GeneralSubcategory::OpenPunctuation);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Punctuation.contains(gc.get(&#39;(&#39; as u32)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::Number.contains(gc.get(&#39;(&#39; as u32)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;(&#39; as u32), GeneralCategory::OpenPunctuation);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Punctuation.contains(gc.get(&#39;(&#39; as u32)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::Number.contains(gc.get(&#39;(&#39; as u32)));</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(gc.get(&#39;✓&#39; as u32), GeneralSubcategory::OtherSymbol);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Symbol.contains(gc.get(&#39;✓&#39; as u32)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::Punctuation.contains(gc.get(&#39;✓&#39; as u32)));</span>
+    <span class="doccomment">/// // U+2713 CHECK MARK</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;✓&#39; as u32), GeneralCategory::OtherSymbol);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Symbol.contains(gc.get(&#39;✓&#39; as u32)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::Punctuation.contains(gc.get(&#39;✓&#39; as u32)));</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(gc.get(&#39; &#39; as u32), GeneralSubcategory::SpaceSeparator);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Separator.contains(gc.get(&#39; &#39; as u32)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::Symbol.contains(gc.get(&#39; &#39; as u32)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39; &#39; as u32), GeneralCategory::SpaceSeparator);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Separator.contains(gc.get(&#39; &#39; as u32)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::Symbol.contains(gc.get(&#39; &#39; as u32)));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // U+E007F CANCEL TAG</span>
-    <span class="doccomment">/// assert_eq!(gc.get(0xE007F), GeneralSubcategory::Format);</span>
-    <span class="doccomment">/// assert!(GeneralCategory::Other.contains(gc.get(0xE007F)));</span>
-    <span class="doccomment">/// assert!(!GeneralCategory::Separator.contains(gc.get(0xE007F)));</span>
+    <span class="doccomment">/// assert_eq!(gc.get(0xE007F), GeneralCategory::Format);</span>
+    <span class="doccomment">/// assert!(GeneralCategoryGroup::Other.contains(gc.get(0xE007F)));</span>
+    <span class="doccomment">/// assert!(!GeneralCategoryGroup::Separator.contains(gc.get(0xE007F)));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">GeneralSubcategory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">GeneralCategory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="number">0</span> <span class="op">!</span><span class="op">=</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">val</span> <span class="kw">as</span> <span class="ident">u32</span>)) <span class="op">&amp;</span> <span class="self">self</span>.<span class="number">0</span>
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">GeneralSubcategory</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GeneralCategory</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">subcategory</span>: <span class="ident">GeneralSubcategory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">GeneralCategory</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">subcategory</span> <span class="kw">as</span> <span class="ident">u32</span>))
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">GeneralCategory</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GeneralCategoryGroup</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">subcategory</span>: <span class="ident">GeneralCategory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">GeneralCategoryGroup</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">subcategory</span> <span class="kw">as</span> <span class="ident">u32</span>))
     }
 }
 

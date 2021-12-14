@@ -273,27 +273,12 @@
 <span id="273">273</span>
 <span id="274">274</span>
 <span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule::AsULE</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ZeroVec</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ZeroSlice</span>, <span class="ident">ZeroVec</span>};
 
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 
@@ -382,7 +367,7 @@
     <span class="doccomment">/// Creates a new, empty `ZeroMapBorrowed&lt;K, V&gt;`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note: Since [`ZeroMapBorrowed`] is not mutable, the return value will be a stub unless</span>
-    <span class="doccomment">/// converted into a [`ZeroMap`].</span>
+    <span class="doccomment">/// converted into a [`ZeroMap`](super::ZeroMap).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -417,7 +402,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is able to return values that live longer than the map itself</span>
     <span class="doccomment">/// since they borrow directly from the backing buffer. This is the</span>
-    <span class="doccomment">/// primary advantage of using [`ZeroMapBorrowed`] over [`ZeroMap`].</span>
+    <span class="doccomment">/// primary advantage of using [`ZeroMapBorrowed`](super::ZeroMapBorrowed) over [`ZeroMap`](super::ZeroMap).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use zerovec::ZeroMap;</span>
@@ -491,14 +476,12 @@
 <span class="kw">where</span>
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Container</span> <span class="op">=</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span>,
+    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
     <span class="doccomment">/// For cases when `V` is fixed-size, obtain a direct copy of `V` instead of `V::ULE`</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">binary_search</span>(<span class="ident">key</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
-        <span class="op">&lt;</span>[<span class="ident">V::ULE</span>]<span class="op">&gt;</span><span class="ident">::get</span>(<span class="self">self</span>.<span class="ident">values</span>, <span class="ident">index</span>)
-            .<span class="ident">copied</span>()
-            .<span class="ident">map</span>(<span class="ident">V::from_unaligned</span>)
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="ident">index</span>)
     }
 
     <span class="doccomment">/// Similar to [`Self::iter()`] except it returns a direct copy of the values instead of references</span>
@@ -506,15 +489,8 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_copied_values</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="op">&lt;</span><span class="ident">K</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span>, <span class="ident">V</span>)<span class="op">&gt;</span> {
-        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> {
-            (
-                <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>(),
-                <span class="op">&lt;</span>[<span class="ident">V::ULE</span>]<span class="op">&gt;</span><span class="ident">::get</span>(<span class="self">self</span>.<span class="ident">values</span>, <span class="ident">idx</span>)
-                    .<span class="ident">copied</span>()
-                    .<span class="ident">map</span>(<span class="ident">V::from_unaligned</span>)
-                    .<span class="ident">unwrap</span>(),
-            )
-        })
+        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">len</span>())
+            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> (<span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>(), <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>()))
     }
 }
 
@@ -522,26 +498,20 @@
 <span class="kw">where</span>
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Container</span> <span class="op">=</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Container</span> <span class="op">=</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">K</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span>,
-    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span>,
+    <span class="ident">K</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
     <span class="doccomment">/// Similar to [`Self::iter()`] except it returns a direct copy of the keys values instead of references</span>
     <span class="doccomment">/// to `K::ULE` and `V::ULE`, in cases when `K` and `V` are fixed-size</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::needless_lifetimes</span>)]</span> <span class="comment">// Lifetime is necessary in impl Trait</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_copied</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
-        <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">keys</span>;
-        <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">values</span>;
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="op">&lt;</span>[<span class="ident">K::ULE</span>]<span class="op">&gt;</span><span class="ident">::len</span>(<span class="ident">keys</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_copied</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
+        <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">keys</span>;
+        <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">values</span>;
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">len</span>();
         (<span class="number">0</span>..<span class="ident">len</span>).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> {
             (
-                <span class="op">&lt;</span>[<span class="ident">K::ULE</span>]<span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">keys</span>, <span class="ident">idx</span>)
-                    .<span class="ident">copied</span>()
-                    .<span class="ident">map</span>(<span class="ident">K::from_unaligned</span>)
-                    .<span class="ident">unwrap</span>(),
-                <span class="op">&lt;</span>[<span class="ident">V::ULE</span>]<span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">values</span>, <span class="ident">idx</span>)
-                    .<span class="ident">copied</span>()
-                    .<span class="ident">map</span>(<span class="ident">V::from_unaligned</span>)
-                    .<span class="ident">unwrap</span>(),
+                <span class="ident">ZeroSlice::get</span>(<span class="ident">keys</span>, <span class="ident">idx</span>).<span class="ident">unwrap</span>(),
+                <span class="ident">ZeroSlice::get</span>(<span class="ident">values</span>, <span class="ident">idx</span>).<span class="ident">unwrap</span>(),
             )
         })
     }

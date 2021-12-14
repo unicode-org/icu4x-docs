@@ -386,7 +386,6 @@
 <span id="386">386</span>
 <span id="387">387</span>
 <span id="388">388</span>
-<span id="389">389</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -395,7 +394,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::varzerovec::owned::VarZeroVecOwned</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::varzerovec::VarZeroVecBorrowed</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::VarZeroVec</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ZeroVec</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ZeroSlice</span>, <span class="ident">ZeroVec</span>};
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
@@ -512,16 +511,16 @@
         <span class="ident"><span class="self">Self</span>::new</span>()
     }
     <span class="kw">fn</span> <span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">binary_search</span>(<span class="ident">k</span>)
+        <span class="ident">ZeroSlice::binary_search</span>(<span class="self">self</span>, <span class="ident">k</span>)
     }
     <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_ule_ref</span>(<span class="ident">index</span>)
     }
     <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">len</span>()
+        <span class="ident">ZeroSlice::len</span>(<span class="self">self</span>)
     }
     <span class="kw">fn</span> <span class="ident">is_ascending</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">as_slice</span>()
+        <span class="self">self</span>.<span class="ident">as_ule_slice</span>()
             .<span class="ident">windows</span>(<span class="number">2</span>)
             .<span class="ident">all</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">T::from_unaligned</span>(<span class="ident">w</span>[<span class="number">1</span>]).<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_unaligned</span>(<span class="ident">w</span>[<span class="number">0</span>])) <span class="op">=</span><span class="op">=</span> <span class="ident">Ordering::Greater</span>)
     }
@@ -535,26 +534,25 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ZeroVecLike</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>]
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ZeroVecLike</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span>,
 {
     <span class="kw">type</span> <span class="ident">GetType</span> <span class="op">=</span> <span class="ident">T::ULE</span>;
     <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw-2">&amp;</span>[]
+        <span class="ident">ZeroSlice::from_ule_slice</span>(<span class="kw-2">&amp;</span>[])
     }
     <span class="kw">fn</span> <span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="ident">ZeroVec</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::Borrowed</span>(<span class="self">self</span>).<span class="ident">binary_search</span>(<span class="ident">k</span>)
+        <span class="ident">ZeroSlice::binary_search</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="ident">k</span>)
     }
     <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
-        <span class="op">&lt;</span>[<span class="ident">T::ULE</span>]<span class="op">&gt;</span><span class="ident">::get</span>(<span class="self">self</span>, <span class="ident">index</span>)
+        <span class="self">self</span>.<span class="ident">get_ule_ref</span>(<span class="ident">index</span>)
     }
     <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="op">&lt;</span>[<span class="ident">T::ULE</span>]<span class="op">&gt;</span><span class="ident">::len</span>(<span class="self">self</span>)
+        <span class="ident">ZeroSlice::len</span>(<span class="kw-2">*</span><span class="self">self</span>)
     }
     <span class="kw">fn</span> <span class="ident">is_ascending</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">ZeroVec</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::Borrowed</span>(<span class="self">self</span>)
-            .<span class="ident">as_slice</span>()
+        <span class="self">self</span>.<span class="ident">as_ule_slice</span>()
             .<span class="ident">windows</span>(<span class="number">2</span>)
             .<span class="ident">all</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">T::from_unaligned</span>(<span class="ident">w</span>[<span class="number">1</span>]).<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">T::from_unaligned</span>(<span class="ident">w</span>[<span class="number">0</span>])) <span class="op">=</span><span class="op">=</span> <span class="ident">Ordering::Greater</span>)
     }
@@ -568,21 +566,21 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">BorrowedZeroVecLike</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>]
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">BorrowedZeroVecLike</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span>,
 {
     <span class="kw">fn</span> <span class="ident">get_borrowed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T::ULE</span><span class="op">&gt;</span> {
-        <span class="op">&lt;</span>[<span class="ident">T::ULE</span>]<span class="op">&gt;</span><span class="ident">::get</span>(<span class="self">self</span>, <span class="ident">index</span>)
+        <span class="self">self</span>.<span class="ident">as_ule_slice</span>().<span class="ident">get</span>(<span class="ident">index</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MutableZeroVecLike</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span>,
+    <span class="ident">T</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
     <span class="kw">type</span> <span class="ident">OwnedType</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">type</span> <span class="ident">BorrowedVariant</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>];
+    <span class="kw">type</span> <span class="ident">BorrowedVariant</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) {
         <span class="self">self</span>.<span class="ident">to_mut</span>().<span class="ident">insert</span>(<span class="ident">index</span>, <span class="ident">value</span>.<span class="ident">as_unaligned</span>())
     }
@@ -606,18 +604,18 @@
         <span class="self">self</span>.<span class="ident">to_mut</span>().<span class="ident">reserve</span>(<span class="ident">addl</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">as_borrowed</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>] {
-        <span class="self">self</span>.<span class="ident">as_slice</span>()
+    <span class="kw">fn</span> <span class="ident">as_borrowed</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>
     }
-    <span class="kw">fn</span> <span class="ident">as_borrowed_inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>]<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_borrowed_inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ZeroVec::Borrowed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">b</span>)
+            <span class="prelude-val">Some</span>(<span class="ident">ZeroSlice::from_ule_slice</span>(<span class="ident">b</span>))
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
         }
     }
-    <span class="kw">fn</span> <span class="ident">from_borrowed</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">ZeroVec::Borrowed</span>(<span class="ident">b</span>)
+    <span class="kw">fn</span> <span class="ident">from_borrowed</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">b</span>.<span class="ident">as_zerovec</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">owned_as_t</span>(<span class="ident">o</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::OwnedType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {

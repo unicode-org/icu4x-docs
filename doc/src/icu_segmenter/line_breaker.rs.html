@@ -932,23 +932,6 @@
 <span id="932">932</span>
 <span id="933">933</span>
 <span id="934">934</span>
-<span id="935">935</span>
-<span id="936">936</span>
-<span id="937">937</span>
-<span id="938">938</span>
-<span id="939">939</span>
-<span id="940">940</span>
-<span id="941">941</span>
-<span id="942">942</span>
-<span id="943">943</span>
-<span id="944">944</span>
-<span id="945">945</span>
-<span id="946">946</span>
-<span id="947">947</span>
-<span id="948">948</span>
-<span id="949">949</span>
-<span id="950">950</span>
-<span id="951">951</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -964,6 +947,7 @@
 
 <span class="kw">use</span> <span class="ident">core::char</span>;
 <span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 <span class="kw">use</span> <span class="ident">unicode_width::UnicodeWidthChar</span>;
 
 <span class="doccomment">/// An enum specifies the strictness of line-breaking rules. It can be passed as</span>
@@ -972,7 +956,7 @@
 <span class="doccomment">/// Each enum value has the same meaning with respect to the `line-break`</span>
 <span class="doccomment">/// property values in the CSS Text spec. See the details in</span>
 <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#line-break-property&gt;.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LineBreakRule</span> {
     <span class="doccomment">/// Breaks text using the least restrictive set of line-breaking rules.</span>
     <span class="doccomment">/// Typically used for short lines, such as in newspapers.</span>
@@ -1000,7 +984,7 @@
 <span class="doccomment">/// Each enum value has the same meaning with respect to the `word-break`</span>
 <span class="doccomment">/// property values in the CSS Text spec. See the details in</span>
 <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#word-break-property&gt;</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">WordBreakRule</span> {
     <span class="doccomment">/// Words break according to their customary rules. See the details in</span>
     <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#valdef-word-break-normal&gt;.</span>
@@ -1013,6 +997,92 @@
     <span class="doccomment">/// Breaking is forbidden within &quot;word&quot;.</span>
     <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#valdef-word-break-keep-all&gt;</span>
     <span class="ident">KeepAll</span>,
+}
+
+<span class="doccomment">/// Options to tailor line breaking behavior, such as for CSS.</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakOptions</span> {
+    <span class="doccomment">/// Strictness of line-breaking rules. See [`LineBreakRule`].</span>
+    <span class="kw">pub</span> <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule</span>,
+
+    <span class="doccomment">/// Line break opportunities between letters. See [`WordBreakRule`].</span>
+    <span class="kw">pub</span> <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule</span>,
+
+    <span class="doccomment">/// Use `true` as a hint to the line breaker that the writing</span>
+    <span class="doccomment">/// system is Chinese or Japanese. This allows more break opportunities when</span>
+    <span class="doccomment">/// `LineBreakRule` is `Normal` or `Loose`. See</span>
+    <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#line-break-property&gt; for details.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This option has no effect in Latin-1 mode.</span>
+    <span class="kw">pub</span> <span class="ident">ja_zh</span>: <span class="ident">bool</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">LineBreakOptions</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule::Strict</span>,
+            <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule::Normal</span>,
+            <span class="ident">ja_zh</span>: <span class="bool-val">false</span>,
+        }
+    }
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakSegmenter</span> {
+    <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">LineBreakSegmenter</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="comment">// Note: This will be able to return an Error once DataProvider is added</span>
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">options</span>: <span class="ident">Default::default</span>(),
+        })
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_with_options</span>(<span class="ident">options</span>: <span class="ident">LineBreakOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="comment">// Note: This will be able to return an Error once DataProvider is added</span>
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">options</span> })
+    }
+
+    <span class="doccomment">/// Create a line break iterator for an `str` (a UTF-8 string).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_str</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">char</span><span class="op">&gt;</span> {
+        <span class="ident">LineBreakIterator</span> {
+            <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>(),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">segmenter</span>: <span class="self">self</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create a line break iterator for a Latin-1 (8-bit) string.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_latin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u8</span>],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Latin1Char</span><span class="op">&gt;</span> {
+        <span class="ident">LineBreakIterator</span> {
+            <span class="ident">iter</span>: <span class="ident">Latin1Indices::new</span>(<span class="ident">input</span>),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">segmenter</span>: <span class="self">self</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create a line break iterator for a UTF-16 string.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf16</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u16</span>],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Utf16Char</span><span class="op">&gt;</span> {
+        <span class="ident">LineBreakIterator</span> {
+            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">segmenter</span>: <span class="self">self</span>,
+        }
+    }
 }
 
 <span class="kw">fn</span> <span class="ident">get_linebreak_property_utf32_with_rule</span>(
@@ -1218,7 +1288,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 <span class="doccomment">/// A trait allowing for LineBreakIterator to be generalized to multiple string iteration methods.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This is implemented by ICU4X for several common string types.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The iterator over characters.</span>
     <span class="kw">type</span> <span class="ident">IterAttr</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">usize</span>, <span class="ident"><span class="self">Self</span>::CharType</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>;
 
@@ -1227,39 +1297,41 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
     <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">c</span>: <span class="ident"><span class="self">Self</span>::CharType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
 
     <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(
-        <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">c</span>: <span class="ident"><span class="self">Self</span>::CharType</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
 
-    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
     <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
-        <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
 }
 
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 <span class="doccomment">/// The struct implementing the [`Iterator`] trait over the line break</span>
 <span class="doccomment">/// opportunities of the given string. Please see the [module-level</span>
 <span class="doccomment">/// documentation] for its usages.</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// Lifetimes:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// - `&#39;l` = lifetime of the [`LineBreakSegmenter`] object from which this iterator was created</span>
+<span class="doccomment">/// - `&#39;s` = lifetime of the string being segmented</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// [`Iterator`]: core::iter::Iterator</span>
 <span class="doccomment">/// [module-level documentation]: ../index.html</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
     <span class="ident">iter</span>: <span class="ident">Y::IterAttr</span>,
     <span class="ident">len</span>: <span class="ident">usize</span>,
     <span class="ident">current_pos_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Y::CharType</span>)<span class="op">&gt;</span>,
     <span class="ident">result_cache</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule</span>,
-    <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule</span>,
-    <span class="ident">ja_zh</span>: <span class="ident">bool</span>,
+    <span class="ident">segmenter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakSegmenter</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">usize</span>;
 
     <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
@@ -1297,7 +1369,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             <span class="kw">let</span> <span class="ident">right_prop</span> <span class="op">=</span> <span class="ident">Y::get_linebreak_property</span>(<span class="self">self</span>);
 
             <span class="comment">// CSS word-break property handling</span>
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">word_break_rule</span> {
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span> {
                 <span class="ident">WordBreakRule::BreakAll</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="ident">left_prop</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">left_prop</span> {
                         <span class="ident">AL</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ID</span>,
@@ -1315,7 +1387,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             }
 
             <span class="comment">// CSS line-break property handling</span>
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">line_break_rule</span> {
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span> {
                 <span class="ident">LineBreakRule::Normal</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">if</span> <span class="ident">Y::is_break_by_normal</span>(<span class="self">self</span>) {
                         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
@@ -1327,7 +1399,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
                         <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">into</span>(),
                         <span class="ident">left_prop</span>,
                         <span class="ident">right_prop</span>,
-                        <span class="self">self</span>.<span class="ident">ja_zh</span>,
+                        <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
                     ) {
                         <span class="kw">if</span> <span class="ident">breakable</span> {
                             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
@@ -1342,7 +1414,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             };
 
             <span class="comment">// UAX14 doesn&#39;t have Thai etc, so use another way.</span>
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">word_break_rule</span> <span class="op">!</span><span class="op">=</span> <span class="ident">WordBreakRule::BreakAll</span>
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span> <span class="op">!</span><span class="op">=</span> <span class="ident">WordBreakRule::BreakAll</span>
                 <span class="op">&amp;&amp;</span> <span class="ident">Y::use_complex_breaking</span>(<span class="ident">left_codepoint</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
                 <span class="op">&amp;&amp;</span> <span class="ident">Y::use_complex_breaking</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
             {
@@ -1400,7 +1472,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">is_eof</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
@@ -1451,60 +1523,27 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     }
 }
 
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">char</span><span class="op">&gt;</span>;
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">char</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a line break iterator for an `str` (a UTF-8 string).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIterator</span> {
-        <span class="ident">LineBreakIterator</span> {
-            <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>(),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule::Strict</span>,
-            <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule::Normal</span>,
-            <span class="ident">ja_zh</span>: <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Create line break iterator with CSS rules for an `str` (a UTF-8 string).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `ja_zh` - Use `true` as a hint to the line breaker that the writing</span>
-    <span class="doccomment">/// system is Chinese or Japanese. This allows more break opportunities when</span>
-    <span class="doccomment">/// `LineBreakRule` is `Normal` or `Loose`. See</span>
-    <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#line-break-property&gt; for details.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_break_rule</span>(
-        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-        <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule</span>,
-        <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule</span>,
-        <span class="ident">ja_zh</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIterator</span> {
-        <span class="ident">LineBreakIterator</span> {
-            <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>(),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">line_break_rule</span>,
-            <span class="ident">word_break_rule</span>,
-            <span class="ident">ja_zh</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">char</span> {
-    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">char</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">char</span>;
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="ident"><span class="self">Self</span>::get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>, <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span>, <span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">c</span>, <span class="ident">iterator</span>.<span class="ident">line_break_rule</span>, <span class="ident">iterator</span>.<span class="ident">word_break_rule</span>)
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+        <span class="ident">get_linebreak_property_with_rule</span>(
+            <span class="ident">c</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
+        )
     }
 
-    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">is_break_utf32_by_normal</span>(<span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">iterator</span>.<span class="ident">ja_zh</span>)
+    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">is_break_utf32_by_normal</span>(
+            <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+        )
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1512,7 +1551,10 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="ident">use_complex_breaking_utf32</span>(<span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
+        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">ret</span>) <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="ident">input</span>) {
             <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">input</span>.<span class="ident">len</span>());
             <span class="kw">return</span> <span class="ident">ret</span>;
@@ -1521,7 +1563,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     }
 
     <span class="comment">/*
-        fn handle_complex_language(iterator: &amp;LineBreakIterator, left_codepoint: char) -&gt; Option&lt;usize&gt; {
+        fn handle_complex_language(iterator: &amp;LineBreakIterator&lt;char&gt;, left_codepoint: char) -&gt; Option&lt;usize&gt; {
             let start_iter = self.iter.clone();
             let start_point = self.current_pos_data;
             loop {
@@ -1544,58 +1586,25 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Latin1Char</span>(<span class="kw">pub</span> <span class="ident">u8</span>);
 
-<span class="doccomment">/// Latin-1 version of line break iterator.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LineBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Latin1Char</span><span class="op">&gt;</span>;
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Latin1Char</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a line break iterator for a Latin-1 (8-bit) string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorLatin1</span> {
-        <span class="ident">LineBreakIteratorLatin1</span> {
-            <span class="ident">iter</span>: <span class="ident">Latin1Indices::new</span>(<span class="ident">input</span>),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule::Strict</span>,
-            <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule::Normal</span>,
-            <span class="ident">ja_zh</span>: <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Create a line break iterator with CSS rules for a Latin-1 (8-bit)</span>
-    <span class="doccomment">/// string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_break_rule</span>(
-        <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-        <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule</span>,
-        <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorLatin1</span> {
-        <span class="ident">LineBreakIteratorLatin1</span> {
-            <span class="ident">iter</span>: <span class="ident">Latin1Indices::new</span>(<span class="ident">input</span>),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">line_break_rule</span>,
-            <span class="ident">word_break_rule</span>,
-            <span class="ident">ja_zh</span>: <span class="bool-val">false</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Latin1Char</span> {
-    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Latin1Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Latin1Char</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Latin1Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">u8</span>; <span class="comment">// TODO: Latin1Char</span>
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorLatin1</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="comment">// No CJ on Latin1</span>
         <span class="ident"><span class="self">Self</span>::get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>, <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorLatin1</span>, <span class="ident">c</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="comment">// No CJ on Latin1</span>
         <span class="ident">get_linebreak_property_latin1</span>(<span class="ident">c</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorLatin1</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">is_break_utf32_by_normal</span>(<span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">iterator</span>.<span class="ident">ja_zh</span>)
+    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">is_break_utf32_by_normal</span>(
+            <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+        )
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1604,7 +1613,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     }
 
     <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
-        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorLatin1</span>,
+        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">_input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="macro">panic!</span>(<span class="string">&quot;not reachable&quot;</span>);
@@ -1614,65 +1623,27 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 <span class="comment">// TODO: This should be u16</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Utf16Char</span>(<span class="kw">pub</span> <span class="ident">u32</span>);
 
-<span class="doccomment">/// UTF-16 version of line break iterator.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LineBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Utf16Char</span><span class="op">&gt;</span>;
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Utf16Char</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create a line break iterator for a UTF-16 string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorUtf16</span> {
-        <span class="ident">LineBreakIteratorUtf16</span> {
-            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule::Strict</span>,
-            <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule::Normal</span>,
-            <span class="ident">ja_zh</span>: <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Create a line break iterator with CSS rules for a UTF-16 string.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// * `ja_zh` - Use `true` as a hint to the line breaker that the writing</span>
-    <span class="doccomment">/// system is Chinese or Japanese. This allows more break opportunities when</span>
-    <span class="doccomment">/// [`LineBreakRule`] is `Normal` or `Loose`. See</span>
-    <span class="doccomment">/// &lt;https://drafts.csswg.org/css-text-3/#line-break-property&gt; for details.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_break_rule</span>(
-        <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
-        <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule</span>,
-        <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule</span>,
-        <span class="ident">ja_zh</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LineBreakIteratorUtf16</span> {
-        <span class="ident">LineBreakIteratorUtf16</span> {
-            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">line_break_rule</span>,
-            <span class="ident">word_break_rule</span>,
-            <span class="ident">ja_zh</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Utf16Char</span> {
-    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf16Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Utf16Char</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf16Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">u32</span>; <span class="comment">// TODO: Utf16Char</span>
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorUtf16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="ident"><span class="self">Self</span>::get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>, <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorUtf16</span>, <span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="ident">get_linebreak_property_utf32_with_rule</span>(
             <span class="ident">c</span>,
-            <span class="ident">iterator</span>.<span class="ident">line_break_rule</span>,
-            <span class="ident">iterator</span>.<span class="ident">word_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorUtf16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">is_break_utf32_by_normal</span>(<span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">iterator</span>.<span class="ident">ja_zh</span>)
+    <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">is_break_utf32_by_normal</span>(
+            <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>,
+            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+        )
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1681,7 +1652,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     }
 
     <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
-        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIteratorUtf16</span>,
+        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">ret</span>) <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="ident">input</span>) {
@@ -1694,14 +1665,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lb_define</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::line_breaker::get_linebreak_property_with_rule</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::line_breaker::is_break</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LineBreakIterator</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LineBreakIteratorLatin1</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LineBreakIteratorUtf16</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LineBreakRule</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::WordBreakRule</span>;
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">codepoint</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">codepoint</span>, <span class="ident">LineBreakRule::Strict</span>, <span class="ident">WordBreakRule::Normal</span>)
@@ -1821,82 +1785,84 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">linebreak</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;hello world&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LineBreakSegmenter::try_new</span>().<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;hello world&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">6</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">11</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, <span class="ident">iter</span>.<span class="ident">next</span>());
 
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;$10 $10&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;$10 $10&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">7</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
 
         <span class="comment">// LB10</span>
 
         <span class="comment">// LB14</span>
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;[  abc def&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;[  abc def&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">7</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">10</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, <span class="ident">iter</span>.<span class="ident">next</span>());
 
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u8</span>; <span class="number">10</span>] <span class="op">=</span> [<span class="number">0x5B</span>, <span class="number">0x20</span>, <span class="number">0x20</span>, <span class="number">0x61</span>, <span class="number">0x62</span>, <span class="number">0x63</span>, <span class="number">0x20</span>, <span class="number">0x64</span>, <span class="number">0x65</span>, <span class="number">0x66</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u8</span> <span class="op">=</span> <span class="ident">LineBreakIteratorLatin1::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u8</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_latin1</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">7</span>), <span class="ident">iter_u8</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">10</span>), <span class="ident">iter_u8</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, <span class="ident">iter_u8</span>.<span class="ident">next</span>());
 
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u16</span>; <span class="number">10</span>] <span class="op">=</span> [<span class="number">0x5B</span>, <span class="number">0x20</span>, <span class="number">0x20</span>, <span class="number">0x61</span>, <span class="number">0x62</span>, <span class="number">0x63</span>, <span class="number">0x20</span>, <span class="number">0x64</span>, <span class="number">0x65</span>, <span class="number">0x66</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">LineBreakIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">7</span>), <span class="ident">iter_u16</span>.<span class="ident">next</span>());
 
         <span class="comment">// LB15</span>
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;abc\u{0022}  (def&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;abc\u{0022}  (def&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">10</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
 
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u8</span>; <span class="number">10</span>] <span class="op">=</span> [<span class="number">0x61</span>, <span class="number">0x62</span>, <span class="number">0x63</span>, <span class="number">0x22</span>, <span class="number">0x20</span>, <span class="number">0x20</span>, <span class="number">0x28</span>, <span class="number">0x64</span>, <span class="number">0x65</span>, <span class="number">0x66</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u8</span> <span class="op">=</span> <span class="ident">LineBreakIteratorLatin1::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u8</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_latin1</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">10</span>), <span class="ident">iter_u8</span>.<span class="ident">next</span>());
 
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u16</span>; <span class="number">10</span>] <span class="op">=</span> [<span class="number">0x61</span>, <span class="number">0x62</span>, <span class="number">0x63</span>, <span class="number">0x22</span>, <span class="number">0x20</span>, <span class="number">0x20</span>, <span class="number">0x28</span>, <span class="number">0x64</span>, <span class="number">0x65</span>, <span class="number">0x66</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">LineBreakIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">10</span>), <span class="ident">iter_u16</span>.<span class="ident">next</span>());
 
         <span class="comment">// LB16</span>
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;\u{0029}\u{203C}&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;\u{0029}\u{203C}&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;\u{0029}  \u{203C}&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;\u{0029}  \u{203C}&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">6</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
 
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u16</span>; <span class="number">4</span>] <span class="op">=</span> [<span class="number">0x29</span>, <span class="number">0x20</span>, <span class="number">0x20</span>, <span class="number">0x203c</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">LineBreakIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">4</span>), <span class="ident">iter_u16</span>.<span class="ident">next</span>());
 
         <span class="comment">// LB17</span>
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;\u{2014}\u{2014}aa&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;\u{2014}\u{2014}aa&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">6</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;\u{2014}  \u{2014}aa&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;\u{2014}  \u{2014}aa&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">8</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
 
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;\u{2014}\u{2014}  \u{2014}\u{2014}123 abc&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;\u{2014}\u{2014}  \u{2014}\u{2014}123 abc&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">14</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">18</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">21</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
 
         <span class="comment">// LB25</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;(0,1)+(2,3)&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;(0,1)+(2,3)&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">11</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u16</span>; <span class="number">11</span>] <span class="op">=</span> [
             <span class="number">0x28</span>, <span class="number">0x30</span>, <span class="number">0x2C</span>, <span class="number">0x31</span>, <span class="number">0x29</span>, <span class="number">0x2B</span>, <span class="number">0x28</span>, <span class="number">0x32</span>, <span class="number">0x2C</span>, <span class="number">0x33</span>, <span class="number">0x29</span>,
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">LineBreakIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">11</span>), <span class="ident">iter_u16</span>.<span class="ident">next</span>());
 
         <span class="kw">let</span> <span class="ident">input</span>: [<span class="ident">u16</span>; <span class="number">13</span>] <span class="op">=</span> [
             <span class="number">0x2014</span>, <span class="number">0x2014</span>, <span class="number">0x20</span>, <span class="number">0x20</span>, <span class="number">0x2014</span>, <span class="number">0x2014</span>, <span class="number">0x31</span>, <span class="number">0x32</span>, <span class="number">0x33</span>, <span class="number">0x20</span>, <span class="number">0x61</span>, <span class="number">0x62</span>, <span class="number">0x63</span>,
         ];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">LineBreakIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter_u16</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">6</span>), <span class="ident">iter_u16</span>.<span class="ident">next</span>());
 
-        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">LineBreakIterator::new</span>(<span class="string">&quot;\u{1F3FB} \u{1F3FB}&quot;</span>);
+        <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;\u{1F3FB} \u{1F3FB}&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">5</span>), <span class="ident">iter</span>.<span class="ident">next</span>());
     }
 }

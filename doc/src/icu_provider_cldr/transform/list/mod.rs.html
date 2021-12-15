@@ -342,11 +342,6 @@
 <span id="342">342</span>
 <span id="343">343</span>
 <span id="344">344</span>
-<span id="345">345</span>
-<span id="346">346</span>
-<span id="347">347</span>
-<span id="348">348</span>
-<span id="349">349</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -427,29 +422,25 @@
             <span class="kw">match</span> <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span> {
                 <span class="comment">// Replace &quot; y &quot; with &quot; e &quot; before /i/ sounds.</span>
                 <span class="comment">// https://unicode.org/reports/tr35/tr35-general.html#:~:text=important.%20For%20example%3A-,Spanish,AND,-Use%20%E2%80%98e%E2%80%99%20instead</span>
-                <span class="ident">key::LIST_FORMAT_AND_V1</span> <span class="op">|</span> <span class="ident">key::LIST_FORMAT_UNIT_V1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">patterns</span>.<span class="ident">replace_patterns</span>(
-                    <span class="string">&quot;{0} y {1}&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">ConditionalListJoinerPattern::from_regex_and_strs</span>(
+                <span class="ident">key::LIST_FORMAT_AND_V1</span> <span class="op">|</span> <span class="ident">key::LIST_FORMAT_UNIT_V1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">patterns</span>
+                    .<span class="ident">make_conditional</span>(
+                        <span class="string">&quot;{0} y {1}&quot;</span>,
                         <span class="comment">// Starts with i or (hi but not hia/hie)</span>
                         <span class="string">&quot;i|hi([^ae]|$)&quot;</span>,
                         <span class="string">&quot;{0} e {1}&quot;</span>,
-                        <span class="string">&quot;{0} y {1}&quot;</span>,
                     )
                     .<span class="ident">unwrap</span>(),
-                ),
                 <span class="comment">// Replace &quot; o &quot; with &quot; u &quot; before /o/ sound.</span>
                 <span class="comment">// https://unicode.org/reports/tr35/tr35-general.html#:~:text=agua%20e%20hielo-,OR,-Use%20%E2%80%98u%E2%80%99%20instead</span>
-                <span class="ident">key::LIST_FORMAT_OR_V1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">patterns</span>.<span class="ident">replace_patterns</span>(
-                    <span class="string">&quot;{0} o {1}&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">ConditionalListJoinerPattern::from_regex_and_strs</span>(
+                <span class="ident">key::LIST_FORMAT_OR_V1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">patterns</span>
+                    .<span class="ident">make_conditional</span>(
+                        <span class="string">&quot;{0} o {1}&quot;</span>,
                         <span class="comment">// Starts with o, ho, 8 (including 80, 800, ...), or 11 either alone or followed</span>
                         <span class="comment">// by thousand groups and/or decimals (excluding e.g. 110, 1100, ...)</span>
                         <span class="string">r&quot;o|ho|8|(11(\.?\d\d\d)*(,\d*)?([^\.,\d]|$))&quot;</span>,
                         <span class="string">&quot;{0} u {1}&quot;</span>,
-                        <span class="string">&quot;{0} o {1}&quot;</span>,
                     )
                     .<span class="ident">unwrap</span>(),
-                ),
                 <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
             }
         }
@@ -457,9 +448,9 @@
         <span class="kw">if</span> <span class="ident">langid</span>.<span class="ident">language</span> <span class="op">=</span><span class="op">=</span> <span class="macro">langid!</span>(<span class="string">&quot;he&quot;</span>).<span class="ident">language</span> {
             <span class="comment">// Add dashes between ו and non-Hebrew characters</span>
             <span class="comment">// https://unicode.org/reports/tr35/tr35-general.html#:~:text=is%20not%20mute.-,Hebrew,AND,-Use%20%E2%80%98%2D%D7%95%E2%80%99%20instead</span>
-            <span class="ident">patterns</span>.<span class="ident">replace_patterns</span>(
-                <span class="string">&quot;{0} \u{05D5}{1}&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(), <span class="comment">// ״{0} ו {1}״</span>
-                <span class="ident">ConditionalListJoinerPattern::from_regex_and_strs</span>(
+            <span class="ident">patterns</span>
+                .<span class="ident">make_conditional</span>(
+                    <span class="string">&quot;{0} \u{05D5}{1}&quot;</span>, <span class="comment">// ״{0} ו {1}״</span>
                     <span class="comment">// Starts with a non-Hebrew letter</span>
                     <span class="kw-2">&amp;</span><span class="macro">format!</span>(
                         <span class="string">&quot;[^{}]&quot;</span>,
@@ -478,10 +469,8 @@
                         .<span class="ident">fold</span>(<span class="ident">String::new</span>(), <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">b</span>)
                     ),
                     <span class="string">&quot;{0} \u{05D5}-{1}&quot;</span>, <span class="comment">// ״{0} ו- {1}״</span>
-                    <span class="string">&quot;{0} \u{05D5}{1}&quot;</span>,  <span class="comment">// ״{0} ו {1}״</span>
                 )
-                .<span class="ident">unwrap</span>(),
-            );
+                .<span class="ident">unwrap</span>();
         }
 
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
@@ -522,58 +511,58 @@
 <span class="kw">fn</span> <span class="ident">parse_and_patterns</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
     <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns::ListPatterns</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">icu_list::error::Error</span><span class="op">&gt;</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">ListFormatterPatternsV1::new</span>([
-        <span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-    ]))
+    <span class="ident">ListFormatterPatternsV1::try_new</span>([
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard</span>.<span class="ident">pair</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_short</span>.<span class="ident">pair</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">standard_narrow</span>.<span class="ident">pair</span>,
+    ])
 }
 
 <span class="kw">fn</span> <span class="ident">parse_or_patterns</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
     <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns::ListPatterns</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">icu_list::error::Error</span><span class="op">&gt;</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">ListFormatterPatternsV1::new</span>([
-        <span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-    ]))
+    <span class="ident">ListFormatterPatternsV1::try_new</span>([
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or</span>.<span class="ident">pair</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_short</span>.<span class="ident">pair</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">or_narrow</span>.<span class="ident">pair</span>,
+    ])
 }
 
 <span class="kw">fn</span> <span class="ident">parse_unit_patterns</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
     <span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::list_patterns::ListPatterns</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">icu_list::error::Error</span><span class="op">&gt;</span> {
-    <span class="prelude-val">Ok</span>(<span class="ident">ListFormatterPatternsV1::new</span>([
-        <span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">start</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">middle</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">end</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-        <span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">pair</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
-    ]))
+    <span class="ident">ListFormatterPatternsV1::try_new</span>([
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit</span>.<span class="ident">pair</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_short</span>.<span class="ident">pair</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">start</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">middle</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">end</span>,
+        <span class="kw-2">&amp;</span><span class="ident">raw</span>.<span class="ident">unit_narrow</span>.<span class="ident">pair</span>,
+    ])
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -609,8 +598,9 @@
         <span class="macro">assert_eq!</span>(
             <span class="ident">provide</span>(<span class="macro">langid!</span>(<span class="string">&quot;fr&quot;</span>), <span class="ident">key::LIST_FORMAT_OR_V1</span>)
                 .<span class="ident">get</span>()
-                .<span class="ident">end</span>(<span class="ident">Width::Wide</span>),
-            <span class="kw-2">&amp;</span><span class="string">&quot;{0} ou {1}&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()
+                .<span class="ident">end</span>(<span class="ident">Width::Wide</span>)
+                .<span class="ident">parts</span>(<span class="string">&quot;&quot;</span>),
+            (<span class="string">&quot; ou &quot;</span>, <span class="string">&quot;&quot;</span>)
         );
     }
 

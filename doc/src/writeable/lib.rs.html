@@ -176,6 +176,28 @@
 <span id="176">176</span>
 <span id="177">177</span>
 <span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -219,7 +241,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     fn write_len(&amp;self) -&gt; LengthHint {</span>
 <span class="doccomment">//!         // &quot;Hello, &quot; + &#39;!&#39; + length of name</span>
-<span class="doccomment">//!         LengthHint::Exact(8 + self.name.len())</span>
+<span class="doccomment">//!         LengthHint::exact(8 + self.name.len())</span>
 <span class="doccomment">//!     }</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
@@ -239,20 +261,44 @@
 
 <span class="doccomment">/// A hint to help consumers of Writeable pre-allocate bytes before they call write_to.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// LengthHint implements std::ops::Add and similar traits for easy composition.</span>
+<span class="doccomment">/// This behaves like Iterator::size_hint: it is a tuple where the first element is the</span>
+<span class="doccomment">/// lower bound, and the second element is the upper bound. If the upper bound is `None`</span>
+<span class="doccomment">/// either there is no known upper bound, or the upper bound is larger than usize.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// See this issue for more info: &lt;https://github.com/unicode-org/icu4x/issues/370&gt;.</span>
+<span class="doccomment">/// LengthHint implements std::ops::{Add, Mul} and similar traits for easy composition.</span>
+<span class="doccomment">/// During computation, the lower bound will saturate at usize::MAX, while the upper</span>
+<span class="doccomment">/// bound will become None if usize::MAX is exceeded.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LengthHint</span> {
-    <span class="doccomment">/// Default value: no hint is provided.</span>
-    <span class="ident">Undefined</span>,
-
-    <span class="doccomment">/// An exact length hint. This value is expected to equal the actual length from write_to.</span>
-    <span class="ident">Exact</span>(<span class="ident">usize</span>),
-}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LengthHint</span>(<span class="kw">pub</span> <span class="ident">usize</span>, <span class="kw">pub</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">LengthHint</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">undefined</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="number">0</span>, <span class="prelude-val">None</span>)
+    }
+
+    <span class="doccomment">/// This is the exact length from write_to.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exact</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">n</span>, <span class="prelude-val">Some</span>(<span class="ident">n</span>))
+    }
+
+    <span class="doccomment">/// This is at least the length from write_to.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_least</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">n</span>, <span class="prelude-val">None</span>)
+    }
+
+    <span class="doccomment">/// This is at most the length from write_to.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_most</span>(<span class="ident">n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="ident">n</span>))
+    }
+
+    <span class="doccomment">/// The length from write_to is in between n and m.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">between</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">m</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">Ord::min</span>(<span class="ident">n</span>, <span class="ident">m</span>), <span class="prelude-val">Some</span>(<span class="ident">Ord::max</span>(<span class="ident">n</span>, <span class="ident">m</span>)))
+    }
+
     <span class="doccomment">/// Returns a recommendation for the number of bytes to pre-allocate.</span>
+    <span class="doccomment">/// If an upper bound exists, this is used, otherwise the lower bound</span>
+    <span class="doccomment">/// (which might be 0).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -265,17 +311,14 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::Undefined</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-            <span class="ident"><span class="self">Self</span>::Exact</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">len</span>,
+            <span class="self">Self</span>(<span class="ident">lower_bound</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">lower_bound</span>,
+            <span class="self">Self</span>(<span class="ident">_lower_bound</span>, <span class="prelude-val">Some</span>(<span class="ident">upper_bound</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">upper_bound</span>,
         }
     }
 
     <span class="doccomment">/// Returns whether the LengthHint indicates that the string is exactly 0 bytes long.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::Undefined</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-            <span class="ident"><span class="self">Self</span>::Exact</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">len</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
-        }
+        <span class="self">self</span>.<span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="number">0</span>)
     }
 }
 
@@ -288,7 +331,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Override this method if it can be computed quickly.</span>
     <span class="kw">fn</span> <span class="ident">write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LengthHint</span> {
-        <span class="ident">LengthHint::Undefined</span>
+        <span class="ident">LengthHint::undefined</span>()
     }
 
     <span class="doccomment">/// Creates a new String with the data from this Writeable. Like ToString,</span>
@@ -306,8 +349,7 @@
 <span class="doccomment">/// Testing macro for types implementing Writeable. The first argument should be a string, and</span>
 <span class="doccomment">/// the second argument should be a `&amp;dyn Writeable`.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The macro tests for equality of both string content and string length. If your Writeable</span>
-<span class="doccomment">/// implementation returns an inexact string length, don&#39;t use this macro.</span>
+<span class="doccomment">/// The macro tests for equality of both string content and verifies the size hint.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -323,7 +365,7 @@
 <span class="doccomment">///         sink.write_str(&quot;foo&quot;)</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">///     fn write_len(&amp;self) -&gt; LengthHint {</span>
-<span class="doccomment">///         LengthHint::Exact(3)</span>
+<span class="doccomment">///         LengthHint::exact(3)</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
@@ -337,8 +379,9 @@
             <span class="kw">use</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable</span>;
             <span class="kw">let</span> <span class="ident">writeable</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">actual_writeable</span>;
             <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>, <span class="ident">writeable</span>.<span class="ident">writeable_to_string</span>());
-            <span class="kw">if</span> <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::LengthHint::Exact</span>(<span class="ident">len</span>) <span class="op">=</span> <span class="ident">writeable</span>.<span class="ident">write_len</span>() {
-                <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>.<span class="ident">len</span>(), <span class="ident">len</span>);
+            <span class="macro">assert!</span>(<span class="ident">writeable</span>.<span class="ident">write_len</span>().<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>.<span class="ident">len</span>());
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">upper</span>) <span class="op">=</span> <span class="ident">writeable</span>.<span class="ident">write_len</span>().<span class="number">1</span> {
+                <span class="macro">assert!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">upper</span>);
             }
         }
     };
@@ -348,8 +391,9 @@
             <span class="kw">use</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable</span>;
             <span class="kw">let</span> <span class="ident">writeable</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">actual_writeable</span>;
             <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>, <span class="ident">writeable</span>.<span class="ident">writeable_to_string</span>(), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::LengthHint::Exact</span>(<span class="ident">len</span>) <span class="op">=</span> <span class="ident">writeable</span>.<span class="ident">write_len</span>() {
-                <span class="macro">assert_eq!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>.<span class="ident">len</span>(), <span class="ident">len</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
+            <span class="macro">assert!</span>(<span class="ident">writeable</span>.<span class="ident">write_len</span>().<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>.<span class="ident">len</span>(), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">upper</span>) <span class="op">=</span> <span class="ident">writeable</span>.<span class="ident">write_len</span>().<span class="number">1</span> {
+                <span class="macro">assert!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">upper</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
             }
         }
     };

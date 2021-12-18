@@ -490,6 +490,32 @@
 <span id="490">490</span>
 <span id="491">491</span>
 <span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -498,7 +524,7 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>};
 <span class="kw">use</span> <span class="ident">core::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
-<span class="kw">use</span> <span class="ident">tinystr::tinystr8</span>;
+<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr16</span>, <span class="ident">tinystr8</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="doccomment">/// The ISO Calendar</span>
@@ -561,7 +587,7 @@
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">IsoYear</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">types::Year</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">year</span>: <span class="ident">IsoYear</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">types::Year</span> {
         <span class="ident">types::Year</span> {
-            <span class="ident">era</span>: <span class="ident">types::Era</span>(<span class="macro">tinystr8!</span>(<span class="string">&quot;default&quot;</span>)),
+            <span class="ident">era</span>: <span class="ident">types::Era</span>(<span class="macro">tinystr16!</span>(<span class="string">&quot;default&quot;</span>)),
             <span class="ident">number</span>: <span class="ident">year</span>.<span class="number">0</span>,
             <span class="ident">related_iso</span>: <span class="ident">year</span>.<span class="number">0</span>,
         }
@@ -606,6 +632,22 @@
             <span class="self">self</span>.<span class="ident">year</span>.<span class="number">0</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
             <span class="comment">// adding 13 since months are 1-indexed</span>
             <span class="self">self</span>.<span class="ident">month</span>.<span class="number">0</span> <span class="op">=</span> (<span class="number">13</span> <span class="op">+</span> (<span class="ident">new_month</span> <span class="op">%</span> <span class="number">12</span>)) <span class="kw">as</span> <span class="ident">u8</span>
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">jan_1</span>(<span class="ident">year</span>: <span class="ident">IsoYear</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">day</span>: <span class="ident">IsoDay</span>(<span class="number">1</span>),
+            <span class="ident">month</span>: <span class="ident">IsoMonth</span>(<span class="number">1</span>),
+            <span class="ident">year</span>,
+        }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">dec_31</span>(<span class="ident">year</span>: <span class="ident">IsoYear</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">day</span>: <span class="ident">IsoDay</span>(<span class="number">31</span>),
+            <span class="ident">month</span>: <span class="ident">IsoMonth</span>(<span class="number">12</span>),
+            <span class="ident">year</span>,
         }
     }
 }
@@ -856,6 +898,16 @@
         <span class="kw">let</span> <span class="ident">prev_month_days</span> <span class="op">=</span> (<span class="number">30</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">month</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> <span class="ident">offset</span>) <span class="kw">as</span> <span class="ident">u32</span>;
 
         <span class="ident">prev_month_days</span> <span class="op">+</span> <span class="ident">date</span>.<span class="ident">day</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u32</span>
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">IsoDateInner</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident"><span class="kw">crate</span>::provider::EraStartDate</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">IsoDateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">year</span>: <span class="ident">other</span>.<span class="ident">year</span>.<span class="number">0</span>,
+            <span class="ident">month</span>: <span class="ident">other</span>.<span class="ident">month</span>.<span class="number">0</span>,
+            <span class="ident">day</span>: <span class="ident">other</span>.<span class="ident">day</span>.<span class="number">0</span>,
+        }
     }
 }
 

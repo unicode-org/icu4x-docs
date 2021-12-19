@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1639893392695,
+  "lastUpdate": 1639901831017,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -16589,6 +16589,66 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 34925705,
             "range": "± 1683009",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a6799976ee0ba76708393f13efd3466f198bed57",
+          "message": "Fail gracefully when building provider_fs on alternate platforms (#1414)",
+          "timestamp": "2021-12-19T00:09:31-08:00",
+          "tree_id": "07ddb9723cef5b64460a026f4969f479f562f407",
+          "url": "https://github.com/unicode-org/icu4x/commit/a6799976ee0ba76708393f13efd3466f198bed57"
+        },
+        "date": 1639901816219,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 30386761,
+            "range": "± 2043579",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "55aeb880fc1e2dd86717227b0e7b918d2e444ec4",
+          "message": "Rename PlainOldULE to RawBytesULE (#1413)",
+          "timestamp": "2021-12-19T00:09:40-08:00",
+          "tree_id": "6ea2fc3a0e5dbba74634602b8a60a02b88db8121",
+          "url": "https://github.com/unicode-org/icu4x/commit/55aeb880fc1e2dd86717227b0e7b918d2e444ec4"
+        },
+        "date": 1639901823447,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 36010558,
+            "range": "± 427740",
             "unit": "ns/iter"
           }
         ]

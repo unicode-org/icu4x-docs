@@ -240,7 +240,7 @@
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">VarZeroVec</span>, <span class="ident">VarZeroVecBorrowed</span>};
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">VarZeroSlice</span>, <span class="ident">VarZeroVec</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
@@ -316,7 +316,7 @@
 }
 
 <span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
@@ -328,7 +328,7 @@
     {
         <span class="kw">if</span> <span class="ident">deserializer</span>.<span class="ident">is_human_readable</span>() {
             <span class="prelude-val">Err</span>(<span class="ident">de::Error::custom</span>(
-                <span class="string">&quot;VarZeroVecBorrowed cannot be deserialized from human-readable formats&quot;</span>,
+                <span class="string">&quot;&amp;VarZeroSlice cannot be deserialized from human-readable formats&quot;</span>,
             ))
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VarZeroVec::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
@@ -336,7 +336,7 @@
                 <span class="ident">b</span>
             } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">de::Error::custom</span>(
-                    <span class="string">&quot;VarZeroVecBorrowed can only deserialize in zero-copy ways&quot;</span>,
+                    <span class="string">&quot;&amp;VarZeroSlice can only deserialize in zero-copy ways&quot;</span>,
                 ));
             };
             <span class="prelude-val">Ok</span>(<span class="ident">borrowed</span>)
@@ -360,13 +360,13 @@
             }
             <span class="ident">seq</span>.<span class="ident">end</span>()
         } <span class="kw">else</span> {
-            <span class="ident">serializer</span>.<span class="ident">serialize_bytes</span>(<span class="self">self</span>.<span class="ident">as_encoded_bytes</span>())
+            <span class="ident">serializer</span>.<span class="ident">serialize_bytes</span>(<span class="self">self</span>.<span class="ident">as_bytes</span>())
         }
     }
 }
 
 <span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
@@ -374,7 +374,7 @@
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">Serializer</span>,
     {
-        <span class="ident">VarZeroVec::from</span>(<span class="kw-2">*</span><span class="self">self</span>).<span class="ident">serialize</span>(<span class="ident">serializer</span>)
+        <span class="self">self</span>.<span class="ident">as_varzerovec</span>().<span class="ident">serialize</span>(<span class="ident">serializer</span>)
     }
 }
 
@@ -390,9 +390,9 @@
     }
 
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">::serde::Serialize</span>, <span class="ident">::serde::Deserialize</span>)]</span>
-    <span class="kw">struct</span> <span class="ident">DeriveTest_VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="kw">struct</span> <span class="ident">DeriveTest_VarZeroSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
         <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">borrow</span>)]</span>
-        <span class="ident">_data</span>: <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">_data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
     }
 
     <span class="comment">// [&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;, &quot;dolor&quot;, &quot;quux&quot;, &quot;lorem ipsum&quot;];</span>
@@ -442,12 +442,12 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_vzv_borrowed</span>() {
-        <span class="kw">let</span> <span class="ident">zerovec_orig</span>: <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">VarZeroVecBorrowed::parse_byte_slice</span>(<span class="ident">BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
+        <span class="kw">let</span> <span class="ident">zerovec_orig</span>: <span class="kw-2">&amp;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">VarZeroSlice::parse_byte_slice</span>(<span class="ident">BYTES</span>).<span class="ident">expect</span>(<span class="string">&quot;parse&quot;</span>);
         <span class="kw">let</span> <span class="ident">bincode_buf</span> <span class="op">=</span> <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">zerovec_orig</span>).<span class="ident">expect</span>(<span class="string">&quot;serialize&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">BINCODE_BUF</span>, <span class="ident">bincode_buf</span>);
-        <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_buf</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to VarZeroVecBorrowed&quot;</span>);
+        <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="kw-2">&amp;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_buf</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to VarZeroSlice&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec_orig</span>.<span class="ident">to_vec</span>(), <span class="ident">zerovec_new</span>.<span class="ident">to_vec</span>());
     }
 

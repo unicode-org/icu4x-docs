@@ -601,53 +601,6 @@
 <span id="601">601</span>
 <span id="602">602</span>
 <span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
-<span id="635">635</span>
-<span id="636">636</span>
-<span id="637">637</span>
-<span id="638">638</span>
-<span id="639">639</span>
-<span id="640">640</span>
-<span id="641">641</span>
-<span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
-<span id="645">645</span>
-<span id="646">646</span>
-<span id="647">647</span>
-<span id="648">648</span>
-<span id="649">649</span>
-<span id="650">650</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -664,10 +617,10 @@
 
 <span class="doccomment">/// A fully-owned [`VarZeroVec`]. This type has no lifetime but has the same</span>
 <span class="doccomment">/// internal buffer representation of [`VarZeroVec`], making it cheaply convertible to</span>
-<span class="doccomment">/// [`VarZeroVec`] and [`VarZeroVecBorrowed`].</span>
+<span class="doccomment">/// [`VarZeroVec`] and [`VarZeroSlice`].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
     <span class="ident">marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="comment">// safety invariant: must parse into a valid VarZeroVecBorrowed</span>
+    <span class="comment">// safety invariant: must parse into a valid VarZeroVecComponents</span>
     <span class="ident">entire_slice</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 }
 
@@ -688,6 +641,13 @@
     <span class="ident">Remove</span>,
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">as_slice</span>()
+    }
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Construct an empty VarZeroVecOwned</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
@@ -697,11 +657,11 @@
         }
     }
 
-    <span class="doccomment">/// Construct a VarZeroVecOwned from a [`VarZeroVecBorrowed`] by cloning the internal data</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_borrowed</span>(<span class="ident">borrowed</span>: <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="doccomment">/// Construct a VarZeroVecOwned from a [`VarZeroSlice`] by cloning the internal data</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
-            <span class="ident">entire_slice</span>: <span class="ident">borrowed</span>.<span class="ident">as_encoded_bytes</span>().<span class="ident">to_vec</span>(),
+            <span class="ident">entire_slice</span>: <span class="ident">slice</span>.<span class="ident">as_bytes</span>().<span class="ident">into</span>(),
         }
     }
 
@@ -713,11 +673,20 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
             <span class="comment">// TODO(#1410): Rethink length errors in VZV.</span>
-            <span class="ident">entire_slice</span>: <span class="ident">borrowed::get_serializable_bytes</span>(<span class="ident">elements</span>).<span class="ident">ok_or</span>(
+            <span class="ident">entire_slice</span>: <span class="ident">components::get_serializable_bytes</span>(<span class="ident">elements</span>).<span class="ident">ok_or</span>(
                 <span class="string">&quot;Attempted to build VarZeroVec out of elements that \
                                      cumulatively are larger than a u32 in size&quot;</span>,
             )<span class="question-mark">?</span>,
         })
+    }
+
+    <span class="doccomment">/// Obtain this `VarZeroVec` as a [`VarZeroSlice`]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">entire_slice</span>;
+        <span class="kw">unsafe</span> {
+            <span class="comment">// safety: the slice is known to come from a valid parsed VZV</span>
+            <span class="ident">VarZeroSlice::from_byte_slice_unchecked</span>(<span class="ident">slice</span>)
+        }
     }
 
     <span class="doccomment">/// Try to allocate a buffer with enough capacity for `capacity`</span>
@@ -735,35 +704,6 @@
     <span class="doccomment">/// just allocate enough space for 4-byte Ts</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">reserve</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">capacity</span>: <span class="ident">usize</span>) {
         <span class="self">self</span>.<span class="ident">entire_slice</span>.<span class="ident">reserve</span>(<span class="ident">capacity</span> <span class="op">*</span> <span class="number">8</span>)
-    }
-
-    <span class="doccomment">/// Obtain a [`VarZeroVecBorrowed`] borrowing from the internal buffer</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_borrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> {
-            <span class="comment">// safety: VarZeroVecOwned is guaranteed to parse here</span>
-            <span class="ident">VarZeroVecBorrowed::from_bytes_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entire_slice</span>)
-        }
-    }
-
-    <span class="doccomment">/// Get the number of elements in this vector</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">len</span>()
-    }
-
-    <span class="doccomment">/// Returns `true` if the vector contains no elements.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">is_empty</span>()
-    }
-
-    <span class="doccomment">/// Obtain an iterator over VarZeroVecOwned&#39;s elements</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">iter</span>()
-    }
-
-    <span class="doccomment">/// Get one of VarZeroVecOwned&#39;s elements, returning None if the index is out of bounds</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">get</span>(<span class="ident">idx</span>)
     }
 
     <span class="doccomment">/// Get the position of a specific element in the data segment.</span>
@@ -853,7 +793,7 @@
     <span class="doccomment">/// If you wish to repeatedly call methods on this [`VarZeroVecOwned`],</span>
     <span class="doccomment">/// it is more efficient to perform this conversion first</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_varzerovec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">into</span>()
+        <span class="self">self</span>.<span class="ident">as_slice</span>().<span class="ident">into</span>()
     }
 
     <span class="doccomment">/// Empty the vector</span>
@@ -861,20 +801,9 @@
         <span class="self">self</span>.<span class="ident">entire_slice</span>.<span class="ident">clear</span>()
     }
 
-    <span class="doccomment">/// Convert this vector to a regular vector of boxed DSTs</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">to_vec</span>()
-    }
-
-    <span class="doccomment">/// Get a reference to the entire backing buffer of this vector</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_encoded_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entire_slice</span>
-    }
-
     <span class="doccomment">/// Consume this vector and return the backing buffer</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_encoded_bytes</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_bytes</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">entire_slice</span>
     }
 
@@ -1125,35 +1054,12 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">T</span>: <span class="ident">VarULE</span>,
-    <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">T</span>: <span class="ident">Ord</span>,
-{
-    <span class="doccomment">/// Binary searches a sorted `VarZeroVecOwned&lt;T&gt;` for the given element. FoGeneralr more information, see</span>
-    <span class="doccomment">/// the primitive function [`binary_search`].</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// [`binary_search`]: https://doc.rust-lang.org/std/primitive.slice.html#method.binary_search</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">as_borrowed</span>().<span class="ident">binary_search</span>(<span class="ident">x</span>)
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
-        <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">index</span>).<span class="ident">expect</span>(<span class="string">&quot;Indexing VarZeroVec out of bounds&quot;</span>)
-    }
-}
-
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">fmt::Debug</span>,
 {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
-        <span class="ident">f</span>.<span class="ident">debug_list</span>().<span class="ident">entries</span>(<span class="self">self</span>.<span class="ident">iter</span>()).<span class="ident">finish</span>()
+        <span class="ident">VarZeroSlice::fmt</span>(<span class="self">self</span>, <span class="ident">f</span>)
     }
 }
 
@@ -1175,9 +1081,9 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">VarULE</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::from_borrowed</span>(<span class="ident">other</span>)
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">VarULE</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VarZeroVecOwned</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="ident">other</span>)
     }
 }
 
@@ -1250,9 +1156,9 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_removing_last_element_clears</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::try_from_elements</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;buy some apples&quot;</span>]).<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec</span>.<span class="ident">as_borrowed</span>().<span class="ident">as_encoded_bytes</span>().<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec</span>.<span class="ident">as_bytes</span>().<span class="ident">is_empty</span>());
         <span class="ident">zerovec</span>.<span class="ident">remove</span>(<span class="number">0</span>);
-        <span class="macro">assert!</span>(<span class="ident">zerovec</span>.<span class="ident">as_borrowed</span>().<span class="ident">as_encoded_bytes</span>().<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(<span class="ident">zerovec</span>.<span class="ident">as_bytes</span>().<span class="ident">is_empty</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>

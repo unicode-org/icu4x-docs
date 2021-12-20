@@ -641,6 +641,13 @@
 <span id="641">641</span>
 <span id="642">642</span>
 <span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -694,22 +701,23 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_borrowed</span>(<span class="ident">borrowed</span>: <span class="ident">VarZeroVecBorrowed</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
-            <span class="ident">entire_slice</span>: <span class="ident">borrowed</span>.<span class="ident">entire_slice</span>().<span class="ident">into</span>(),
+            <span class="ident">entire_slice</span>: <span class="ident">borrowed</span>.<span class="ident">as_encoded_bytes</span>().<span class="ident">to_vec</span>(),
         }
     }
 
     <span class="doccomment">/// Construct a VarZeroVecOwned from a list of elements</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_elements</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(<span class="ident">elements</span>: <span class="kw-2">&amp;</span>[<span class="ident">A</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_elements</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(<span class="ident">elements</span>: <span class="kw-2">&amp;</span>[<span class="ident">A</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">A</span>: <span class="ident">custom::EncodeAsVarULE</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     {
-        <span class="self">Self</span> {
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
-            <span class="ident">entire_slice</span>: <span class="ident">borrowed::get_serializable_bytes</span>(<span class="ident">elements</span>).<span class="ident">expect</span>(
+            <span class="comment">// TODO(#1410): Rethink length errors in VZV.</span>
+            <span class="ident">entire_slice</span>: <span class="ident">borrowed::get_serializable_bytes</span>(<span class="ident">elements</span>).<span class="ident">ok_or</span>(
                 <span class="string">&quot;Attempted to build VarZeroVec out of elements that \
                                      cumulatively are larger than a u32 in size&quot;</span>,
-            ),
-        }
+            )<span class="question-mark">?</span>,
+        })
     }
 
     <span class="doccomment">/// Try to allocate a buffer with enough capacity for `capacity`</span>
@@ -763,7 +771,7 @@
     <span class="doccomment">/// If `idx == self.len()`, it will return the size of the data segment (where a new element would go).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Safety</span>
-    <span class="doccomment">/// `idx &lt;= self.len()` and `self.entire_slice()` is well-formed.</span>
+    <span class="doccomment">/// `idx &lt;= self.len()` and `self.as_encoded_bytes()` is well-formed.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">element_position_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>();
         <span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">idx</span> <span class="op">=</span><span class="op">=</span> <span class="ident">len</span> {
@@ -778,7 +786,7 @@
     <span class="doccomment">/// Get the range of a specific element in the data segment.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Safety</span>
-    <span class="doccomment">/// `idx &lt; self.len()` and `self.entire_slice()` is well-formed.</span>
+    <span class="doccomment">/// `idx &lt; self.len()` and `self.as_encoded_bytes()` is well-formed.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">element_range_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::ops::Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">element_position_unchecked</span>(<span class="ident">idx</span>);
         <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">element_position_unchecked</span>(<span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span>);
@@ -789,7 +797,7 @@
     <span class="doccomment">/// Set the number of elements in the list without any checks.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Safety</span>
-    <span class="doccomment">/// No safe functions may be called until `self.entire_slice()` is well-formed.</span>
+    <span class="doccomment">/// No safe functions may be called until `self.as_encoded_bytes()` is well-formed.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">set_len</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">len</span>: <span class="ident">u32</span>) {
         <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">entire_slice</span>[..<span class="number">4</span>])[<span class="number">0</span>] <span class="op">=</span>
             <span class="ident">len</span>.<span class="ident">into</span>();
@@ -803,7 +811,7 @@
     <span class="doccomment">/// Return the slice representing the given `index`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Safety</span>
-    <span class="doccomment">/// The index must be valid, and self.entire_slice() must be well-formed</span>
+    <span class="doccomment">/// The index must be valid, and self.as_encoded_bytes() must be well-formed</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">index_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entire_slice</span>[<span class="ident"><span class="self">Self</span>::index_range</span>(<span class="ident">index</span>)])
             [<span class="number">0</span>]
@@ -812,7 +820,7 @@
     <span class="doccomment">/// Return the mutable slice representing the given `index`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ## Safety</span>
-    <span class="doccomment">/// The index must be valid. self.entire_slice() must have allocated space</span>
+    <span class="doccomment">/// The index must be valid. self.as_encoded_bytes() must have allocated space</span>
     <span class="doccomment">/// for this index, but need not have its length appropriately set.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">index_data_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">entire_slice</span>.<span class="ident">as_mut_ptr</span>();
@@ -860,8 +868,14 @@
 
     <span class="doccomment">/// Get a reference to the entire backing buffer of this vector</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entire_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_encoded_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">entire_slice</span>
+    }
+
+    <span class="doccomment">/// Consume this vector and return the backing buffer</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_encoded_bytes</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">entire_slice</span>
     }
 
     <span class="doccomment">/// Invalidate and resize the data at an index, optionally inserting or removing the index.</span>
@@ -1224,7 +1238,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_remove_integrity</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="string">&quot;apples&quot;</span>, <span class="string">&quot;bananas&quot;</span>, <span class="string">&quot;eeples&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;baneenees&quot;</span>, <span class="string">&quot;five&quot;</span>, <span class="string">&quot;&quot;</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::from_elements</span>(<span class="kw-2">&amp;</span><span class="ident">items</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::try_from_elements</span>(<span class="kw-2">&amp;</span><span class="ident">items</span>).<span class="ident">unwrap</span>();
 
         <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> [<span class="number">0</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>] {
             <span class="ident">items</span>.<span class="ident">remove</span>(<span class="ident">index</span>);
@@ -1235,10 +1249,10 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_removing_last_element_clears</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::from_elements</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;buy some apples&quot;</span>]);
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec</span>.<span class="ident">as_borrowed</span>().<span class="ident">entire_slice</span>().<span class="ident">is_empty</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::try_from_elements</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;buy some apples&quot;</span>]).<span class="ident">unwrap</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec</span>.<span class="ident">as_borrowed</span>().<span class="ident">as_encoded_bytes</span>().<span class="ident">is_empty</span>());
         <span class="ident">zerovec</span>.<span class="ident">remove</span>(<span class="number">0</span>);
-        <span class="macro">assert!</span>(<span class="ident">zerovec</span>.<span class="ident">as_borrowed</span>().<span class="ident">entire_slice</span>().<span class="ident">is_empty</span>());
+        <span class="macro">assert!</span>(<span class="ident">zerovec</span>.<span class="ident">as_borrowed</span>().<span class="ident">as_encoded_bytes</span>().<span class="ident">is_empty</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1250,7 +1264,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_replace_integrity</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="string">&quot;apples&quot;</span>, <span class="string">&quot;bananas&quot;</span>, <span class="string">&quot;eeples&quot;</span>, <span class="string">&quot;&quot;</span>, <span class="string">&quot;baneenees&quot;</span>, <span class="string">&quot;five&quot;</span>, <span class="string">&quot;&quot;</span>];
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::from_elements</span>(<span class="kw-2">&amp;</span><span class="ident">items</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">VarZeroVecOwned</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::try_from_elements</span>(<span class="kw-2">&amp;</span><span class="ident">items</span>).<span class="ident">unwrap</span>();
 
         <span class="comment">// Replace with an element of the same size (and the first element)</span>
         <span class="ident">items</span>[<span class="number">0</span>] <span class="op">=</span> <span class="string">&quot;blablah&quot;</span>;

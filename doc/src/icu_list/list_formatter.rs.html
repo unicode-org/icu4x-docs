@@ -199,6 +199,26 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -250,36 +270,67 @@
     <span class="kw">fn</span> <span class="ident">format_internal</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span>, <span class="ident">B</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;c</span> <span class="self">self</span>,
         <span class="ident">values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
-        <span class="comment">// Empty builder</span>
         <span class="kw-2">mut</span> <span class="ident">builder</span>: <span class="ident">B</span>,
-        <span class="comment">// Produces value + builder</span>
-        <span class="ident">apply_value</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
-        <span class="comment">// Produces value + parts.between + builder + parts.after</span>
-        <span class="ident">apply_pattern</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">PatternParts</span><span class="op">&lt;</span><span class="lifetime">&#39;c</span><span class="op">&gt;</span>, <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
+        <span class="ident">append_value</span>: <span class="kw">fn</span>(<span class="ident">B</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
+        <span class="ident">append_literal</span>: <span class="kw">fn</span>(<span class="ident">B</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span> {
         <span class="kw">match</span> <span class="ident">values</span>.<span class="ident">len</span>() {
             <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">builder</span>,
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">apply_value</span>(<span class="ident">values</span>[<span class="number">0</span>], <span class="ident">builder</span>),
-            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">apply_pattern</span>(
-                <span class="ident">values</span>[<span class="number">0</span>],
-                <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">pair</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]),
-                <span class="ident">apply_value</span>(<span class="ident">values</span>[<span class="number">1</span>], <span class="ident">builder</span>),
-            ),
+            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="number">0</span>]),
+            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="comment">// Pair(values[0], values[1]) = pair_before + values[0] + pair_between + values[1] + pair_after</span>
+                <span class="kw">let</span> (<span class="ident">before</span>, <span class="ident">between</span>, <span class="ident">after</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">pair</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">before</span>);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="number">0</span>]);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">between</span>);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="number">1</span>]);
+                <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">after</span>)
+            }
             <span class="ident">n</span> <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">apply_pattern</span>(
-                    <span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">2</span>],
-                    <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">end</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>]),
-                    <span class="ident">apply_value</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>], <span class="ident">builder</span>),
-                );
-                <span class="kw">let</span> <span class="ident">middle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">middle</span>(<span class="self">self</span>.<span class="ident">width</span>);
-                <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> (<span class="number">1</span>..<span class="ident">n</span> <span class="op">-</span> <span class="number">2</span>).<span class="ident">rev</span>() {
-                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">apply_pattern</span>(<span class="ident">values</span>[<span class="ident">i</span>], <span class="ident">middle</span>.<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>]), <span class="ident">builder</span>);
+                <span class="comment">// Start(values[0], middle(..., middle(values[n-3], End(values[n-2], values[n-1]))...)) =</span>
+                <span class="comment">// start_before + values[0] + start_between + (middle_before + values[1..n-3] + middle_between)* +</span>
+                <span class="comment">// end_before + values[n-2] + end_between + values[n-1] + end_after + middle_after* + start_after</span>
+
+                <span class="kw">let</span> (<span class="ident">start_before</span>, <span class="ident">start_between</span>, <span class="ident">start_after</span>) <span class="op">=</span>
+                    <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">start</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]);
+
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">start_before</span>);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="number">0</span>]);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">start_between</span>);
+
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">middle_after</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">middle_after_count</span> <span class="op">=</span> <span class="number">0</span>;
+                <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">1</span>..<span class="ident">n</span> <span class="op">-</span> <span class="number">2</span> {
+                    <span class="kw">let</span> (<span class="ident">before</span>, <span class="ident">between</span>, <span class="ident">after</span>) <span class="op">=</span>
+                        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">middle</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>]);
+                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">before</span>);
+                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="ident">i</span>]);
+                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">between</span>);
+
+                    <span class="kw">if</span> <span class="op">!</span><span class="ident">after</span>.<span class="ident">is_empty</span>() {
+                        <span class="kw">if</span> <span class="ident">middle_after_count</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                            <span class="ident">middle_after</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">after</span>);
+                        } <span class="kw">else</span> {
+                            <span class="comment">// We&#39;re assuming that all middle_afters are the same. If we ever</span>
+                            <span class="comment">// use conditional patterns for middle they could actually be</span>
+                            <span class="comment">// different, so we&#39;d need to use a stack to track what to append.</span>
+                            <span class="macro">debug_assert_eq!</span>(<span class="ident">middle_after</span>, <span class="prelude-val">Some</span>(<span class="ident">after</span>));
+                        }
+                        <span class="ident">middle_after_count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                    }
                 }
-                <span class="ident">apply_pattern</span>(
-                    <span class="ident">values</span>[<span class="number">0</span>],
-                    <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">start</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="number">1</span>]),
-                    <span class="ident">builder</span>,
-                )
+
+                <span class="kw">let</span> (<span class="ident">end_before</span>, <span class="ident">end_between</span>, <span class="ident">end_after</span>) <span class="op">=</span>
+                    <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">end</span>(<span class="self">self</span>.<span class="ident">width</span>).<span class="ident">parts</span>(<span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>]);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">end_before</span>);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">2</span>]);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">end_between</span>);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_value</span>(<span class="ident">builder</span>, <span class="ident">values</span>[<span class="ident">n</span> <span class="op">-</span> <span class="number">1</span>]);
+                <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">end_after</span>);
+                <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">middle_after_count</span> {
+                    <span class="ident">builder</span> <span class="op">=</span> <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">middle_after</span>.<span class="ident">unwrap</span>());
+                }
+                <span class="ident">append_literal</span>(<span class="ident">builder</span>, <span class="ident">start_after</span>)
             }
         }
     }
@@ -293,16 +344,8 @@
         <span class="self">self</span>.<span class="ident">format_internal</span>(
             <span class="ident">values</span>,
             <span class="ident">String::with_capacity</span>(<span class="self">self</span>.<span class="ident">size_hint</span>(<span class="ident">values</span>)),
-            <span class="op">|</span><span class="ident">value</span>, <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
-                <span class="ident">builder</span>.<span class="ident">push_str</span>(<span class="ident">value</span>);
-                <span class="ident">builder</span>
-            },
-            <span class="op">|</span><span class="ident">value</span>, (<span class="ident">between</span>, <span class="ident">after</span>), <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
-                <span class="comment">// TODO(robertbastian): String doesn&#39;t have O(1) prepend</span>
-                <span class="ident">builder</span>.<span class="ident">insert_str</span>(<span class="number">0</span>, <span class="ident">between</span>);
-                <span class="ident">builder</span>.<span class="ident">insert_str</span>(<span class="number">0</span>, <span class="ident">value</span>);
-                <span class="ident">builder</span> <span class="op">+</span> <span class="ident">after</span>
-            },
+            <span class="op">|</span><span class="ident">builder</span>, <span class="ident">value</span><span class="op">|</span> <span class="ident">builder</span> <span class="op">+</span> <span class="ident">value</span>,
+            <span class="op">|</span><span class="ident">builder</span>, <span class="ident">literal</span><span class="op">|</span> <span class="ident">builder</span> <span class="op">+</span> <span class="ident">literal</span>,
         )
     }
 
@@ -310,15 +353,12 @@
         <span class="self">self</span>.<span class="ident">format_internal</span>(
             <span class="ident">values</span>,
             <span class="ident">FormattedString::with_capacity</span>(<span class="self">self</span>.<span class="ident">size_hint</span>(<span class="ident">values</span>)),
-            <span class="op">|</span><span class="ident">value</span>, <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
+            <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">builder</span>, <span class="ident">value</span><span class="op">|</span> {
                 <span class="ident">builder</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>, <span class="ident">FieldType::Element</span>);
                 <span class="ident">builder</span>
             },
-            <span class="op">|</span><span class="ident">value</span>, (<span class="ident">between</span>, <span class="ident">after</span>), <span class="kw-2">mut</span> <span class="ident">builder</span><span class="op">|</span> {
-                <span class="comment">// TODO(robertbastian): FormattedString doesn&#39;t have O(1) prepend</span>
-                <span class="ident">builder</span>.<span class="ident">prepend</span>(<span class="kw-2">&amp;</span><span class="ident">between</span>, <span class="ident">FieldType::Literal</span>);
-                <span class="ident">builder</span>.<span class="ident">prepend</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>, <span class="ident">FieldType::Element</span>);
-                <span class="ident">builder</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="ident">after</span>, <span class="ident">FieldType::Literal</span>);
+            <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">builder</span>, <span class="ident">literal</span><span class="op">|</span> {
+                <span class="ident">builder</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="ident">literal</span>, <span class="ident">FieldType::Literal</span>);
                 <span class="ident">builder</span>
             },
         )
@@ -345,10 +385,10 @@
         <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Wide</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">0</span>]), <span class="string">&quot;&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">1</span>]), <span class="string">&quot;one&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">2</span>]), <span class="string">&quot;one; two&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">3</span>]), <span class="string">&quot;one: two. three!&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">4</span>]), <span class="string">&quot;one: two, three. four!&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="ident">VALUES</span>), <span class="string">&quot;one: two, three, four. five!&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">2</span>]), <span class="string">&quot;$one;two+&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">3</span>]), <span class="string">&quot;@one:*two.three!#&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">4</span>]), <span class="string">&quot;@one:&amp;two,*three.four!?#&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="ident">VALUES</span>), <span class="string">&quot;@one:&amp;two,&amp;three,*four.five!??#&quot;</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -359,29 +399,29 @@
         <span class="macro">assert_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">1</span>]).<span class="ident">as_ref</span>(), <span class="string">&quot;one&quot;</span>);
         <span class="macro">assert_eq!</span>(
             <span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">2</span>]).<span class="ident">as_ref</span>(),
-            <span class="string">&quot;one; two&quot;</span>
+            <span class="string">&quot;$one;two+&quot;</span>
         );
         <span class="macro">assert_eq!</span>(
             <span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">3</span>]).<span class="ident">as_ref</span>(),
-            <span class="string">&quot;one: two. three!&quot;</span>
+            <span class="string">&quot;@one:*two.three!#&quot;</span>
         );
         <span class="macro">assert_eq!</span>(
             <span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="kw-2">&amp;</span><span class="ident">VALUES</span>[<span class="number">0</span>..<span class="number">4</span>]).<span class="ident">as_ref</span>(),
-            <span class="string">&quot;one: two, three. four!&quot;</span>
+            <span class="string">&quot;@one:&amp;two,*three.four!?#&quot;</span>
         );
         <span class="kw">let</span> <span class="ident">parts</span> <span class="op">=</span> <span class="ident">formatter</span>.<span class="ident">format_to_parts</span>(<span class="ident">VALUES</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">as_ref</span>(), <span class="string">&quot;one: two, three, four. five!&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">as_ref</span>(), <span class="string">&quot;@one:&amp;two,&amp;three,*four.five!??#&quot;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">0</span>), [<span class="ident">FieldType::Element</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">0</span>), [<span class="ident">FieldType::Literal</span>]);
         <span class="macro">assert!</span>(<span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">0</span>, <span class="number">0</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">2</span>), [<span class="ident">FieldType::Element</span>]);
         <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">2</span>, <span class="number">0</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">3</span>), [<span class="ident">FieldType::Literal</span>]);
-        <span class="macro">assert!</span>(<span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">3</span>, <span class="number">0</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">4</span>), [<span class="ident">FieldType::Literal</span>]);
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">4</span>, <span class="number">0</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">5</span>), [<span class="ident">FieldType::Element</span>]);
+        <span class="macro">assert!</span>(<span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">4</span>, <span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">5</span>), [<span class="ident">FieldType::Literal</span>]);
         <span class="macro">assert!</span>(<span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">5</span>, <span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">parts</span>.<span class="ident">fields_at</span>(<span class="number">6</span>), [<span class="ident">FieldType::Element</span>]);
+        <span class="macro">assert!</span>(<span class="ident">parts</span>.<span class="ident">is_field_start</span>(<span class="number">6</span>, <span class="number">0</span>));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -396,7 +436,7 @@
         <span class="kw">let</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Short</span>).<span class="ident">format</span>(<span class="ident">VALUES</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">string</span>.<span class="ident">capacity</span>(), <span class="ident">string</span>.<span class="ident">len</span>());
 
-        <span class="kw">let</span> <span class="ident">labelled_string</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Short</span>).<span class="ident">format</span>(<span class="ident">VALUES</span>);
+        <span class="kw">let</span> <span class="ident">labelled_string</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Short</span>).<span class="ident">format_to_parts</span>(<span class="ident">VALUES</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">labelled_string</span>.<span class="ident">capacity</span>(), <span class="ident">labelled_string</span>.<span class="ident">len</span>());
     }
 }

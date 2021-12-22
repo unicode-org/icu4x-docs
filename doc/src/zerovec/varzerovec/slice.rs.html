@@ -299,6 +299,52 @@
 <span id="299">299</span>
 <span id="300">300</span>
 <span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -308,6 +354,7 @@
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::mem</span>;
 <span class="kw">use</span> <span class="ident">core::ops::Index</span>;
+<span class="kw">use</span> <span class="ident">core::ops::Range</span>;
 
 <span class="doccomment">/// A zero-copy &quot;slice&quot;, that works for unsized types, i.e. the zero-copy version of `[T]`</span>
 <span class="doccomment">/// where `T` is not `Sized`.</span>
@@ -515,7 +562,7 @@
     <span class="ident">T</span>: <span class="ident">Ord</span>,
 {
     <span class="doccomment">/// Binary searches a sorted `VarZeroVec&lt;T&gt;` for the given element. For more information, see</span>
-    <span class="doccomment">/// the primitive function [`binary_search`].</span>
+    <span class="doccomment">/// the standard library function [`binary_search`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
@@ -536,6 +583,51 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">as_components</span>().<span class="ident">binary_search</span>(<span class="ident">x</span>)
+    }
+
+    <span class="doccomment">/// Binary searches a `VarZeroVec&lt;T&gt;` for the given element within a certain sorted range.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the range is out of bounds, returns `None`. Otherwise, returns a `Result` according</span>
+    <span class="doccomment">/// to the behavior of the standard library function [`binary_search`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The index is returned relative to the start of the range.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// # use std::str::Utf8Error;</span>
+    <span class="doccomment">/// # use zerovec::ule::ZeroVecError;</span>
+    <span class="doccomment">/// # use zerovec::VarZeroVec;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let strings = vec![&quot;a&quot;, &quot;b&quot;, &quot;f&quot;, &quot;g&quot;, &quot;m&quot;, &quot;n&quot;, &quot;q&quot;];</span>
+    <span class="doccomment">/// let vec = VarZeroVec::&lt;str&gt;::from(&amp;strings);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Same behavior as binary_search when the range covers the whole slice:</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;g&quot;, 0..7), Some(Ok(3)));</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;h&quot;, 0..7), Some(Err(4)));</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Will not look outside of the range:</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;g&quot;, 0..1), Some(Err(1)));</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;g&quot;, 6..7), Some(Err(0)));</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Will return indices relative to the start of the range:</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;g&quot;, 1..6), Some(Ok(2)));</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;h&quot;, 1..6), Some(Err(3)));</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Will return None if the range is out of bounds:</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;x&quot;, 100..200), None);</span>
+    <span class="doccomment">/// assert_eq!(vec.binary_search_in_range(&quot;x&quot;, 0..200), None);</span>
+    <span class="doccomment">/// # Ok::&lt;(), ZeroVecError&gt;(())</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [`binary_search`]: https://doc.rust-lang.org/std/primitive.slice.html#method.binary_search</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search_in_range</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+        <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">as_components</span>().<span class="ident">binary_search_in_range</span>(<span class="ident">x</span>, <span class="ident">range</span>)
     }
 }
 

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["TrieResult",""]],"struct":[["Char16Trie","This struct represents a de-serialized Char16Trie that was exported from ICU binary data."],["Char16TrieIterator","This struct represents an iterator over a Char16Trie."]]});

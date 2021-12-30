@@ -220,13 +220,6 @@
 <span id="220">220</span>
 <span id="221">221</span>
 <span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -234,9 +227,6 @@
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
-<span class="kw">use</span> <span class="ident">alloc::format</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 
@@ -261,7 +251,7 @@
     <span class="doccomment">/// use icu_locid_macros::{language, langid};</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = HelloWorldProvider::new_with_placeholder_data()</span>
-    <span class="doccomment">///     .filterable()</span>
+    <span class="doccomment">///     .filterable(&quot;Demo no-English filter&quot;)</span>
     <span class="doccomment">///     .filter_by_langid(|langid| langid.language != language!(&quot;en&quot;));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // German requests should succeed:</span>
@@ -284,7 +274,10 @@
     <span class="doccomment">/// };</span>
     <span class="doccomment">/// let response: Result&lt;DataResponse&lt;HelloWorldV1Marker&gt;, _&gt; =</span>
     <span class="doccomment">///     provider.load_payload(&amp;req_en);</span>
-    <span class="doccomment">/// assert!(matches!(response, Err(DataError::FilteredResource(_, _))));</span>
+    <span class="doccomment">/// assert!(matches!(</span>
+    <span class="doccomment">///     response,</span>
+    <span class="doccomment">///     Err(DataError { kind: DataErrorKind::FilteredResource, .. })</span>
+    <span class="doccomment">/// ));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // English should not appear in the iterator result:</span>
     <span class="doccomment">/// let supported_langids = provider.supported_options_for_key(&amp;key::HELLO_WORLD_V1)</span>
@@ -301,19 +294,6 @@
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="lifetime">&#39;a</span>,
     {
-        <span class="self">self</span>.<span class="ident">filter_by_langid_with_description</span>(<span class="ident">predicate</span>, <span class="string">&quot;Locale filter&quot;</span>.<span class="ident">to_string</span>())
-    }
-
-    <span class="doccomment">/// Same as [`Self::filter_by_langid`] but with an extra argument to set a custom</span>
-    <span class="doccomment">/// description for debugging.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">filter_by_langid_with_description</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-        <span class="self">self</span>,
-        <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">LanguageIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-        <span class="ident">description</span>: <span class="ident">String</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="lifetime">&#39;a</span>,
-    {
         <span class="kw">let</span> <span class="ident">old_predicate</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">predicate</span>;
         <span class="ident">RequestFilterDataProvider</span> {
             <span class="ident">inner</span>: <span class="self">self</span>.<span class="ident">inner</span>,
@@ -326,7 +306,7 @@
                     <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
                 }
             }),
-            <span class="ident">description</span>,
+            <span class="ident">filter_name</span>: <span class="self">self</span>.<span class="ident">filter_name</span>,
         }
     }
 
@@ -349,7 +329,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let allowlist = vec![langid!(&quot;de&quot;), langid!(&quot;zh&quot;)];</span>
     <span class="doccomment">/// let provider = HelloWorldProvider::new_with_placeholder_data()</span>
-    <span class="doccomment">///     .filterable()</span>
+    <span class="doccomment">///     .filterable(&quot;Demo German+Chinese filter&quot;)</span>
     <span class="doccomment">///     .filter_by_langid_allowlist_strict(&amp;allowlist);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // German requests should succeed:</span>
@@ -372,10 +352,13 @@
     <span class="doccomment">/// };</span>
     <span class="doccomment">/// let response: Result&lt;DataResponse&lt;HelloWorldV1Marker&gt;, _&gt; =</span>
     <span class="doccomment">///     provider.load_payload(&amp;req_en);</span>
-    <span class="doccomment">/// assert!(matches!(response, Err(DataError::FilteredResource(_, _))));</span>
+    <span class="doccomment">/// assert!(matches!(</span>
+    <span class="doccomment">///     response,</span>
+    <span class="doccomment">///     Err(DataError { kind: DataErrorKind::FilteredResource, .. })</span>
+    <span class="doccomment">/// ));</span>
     <span class="doccomment">/// assert_eq!(</span>
-    <span class="doccomment">///     &quot;Resource was filtered: Locale filter (allowlist: [de, zh]): core/helloworld@1/en-US&quot;,</span>
-    <span class="doccomment">///     response.unwrap_err().to_string()</span>
+    <span class="doccomment">///     response.unwrap_err().str_context,</span>
+    <span class="doccomment">///     Some(&quot;Demo German+Chinese filter&quot;)</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">filter_by_langid_allowlist_strict</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
@@ -397,7 +380,7 @@
                     <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
                 }
             }),
-            <span class="ident">description</span>: <span class="macro">format!</span>(<span class="string">&quot;Locale filter (allowlist: {:?})&quot;</span>, <span class="ident">allowlist</span>),
+            <span class="ident">filter_name</span>: <span class="self">self</span>.<span class="ident">filter_name</span>,
         }
     }
 
@@ -412,7 +395,7 @@
     <span class="doccomment">/// use icu_locid_macros::langid;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = HelloWorldProvider::new_with_placeholder_data()</span>
-    <span class="doccomment">///     .filterable()</span>
+    <span class="doccomment">///     .filterable(&quot;Demo require-langid filter&quot;)</span>
     <span class="doccomment">///     .require_langid();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Requests with a langid should succeed:</span>
@@ -435,7 +418,10 @@
     <span class="doccomment">/// };</span>
     <span class="doccomment">/// let response: Result&lt;DataResponse&lt;HelloWorldV1Marker&gt;, _&gt; =</span>
     <span class="doccomment">///     provider.load_payload(&amp;req_no_langid);</span>
-    <span class="doccomment">/// assert!(matches!(response, Err(DataError::FilteredResource(_, _))));</span>
+    <span class="doccomment">/// assert!(matches!(</span>
+    <span class="doccomment">///     response,</span>
+    <span class="doccomment">///     Err(DataError { kind: DataErrorKind::FilteredResource, .. })</span>
+    <span class="doccomment">/// ));</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">require_langid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
@@ -452,7 +438,7 @@
                 }
                 <span class="ident">request</span>.<span class="ident">resource_path</span>.<span class="ident">options</span>.<span class="ident">langid</span>.<span class="ident">is_some</span>()
             }),
-            <span class="ident">description</span>: <span class="string">&quot;Locale is required&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">filter_name</span>: <span class="self">self</span>.<span class="ident">filter_name</span>,
         }
     }
 }

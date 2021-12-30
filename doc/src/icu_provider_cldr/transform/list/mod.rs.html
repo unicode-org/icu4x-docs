@@ -345,6 +345,10 @@
 <span id="345">345</span>
 <span id="346">346</span>
 <span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -410,7 +414,7 @@
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">langid</span>) {
             <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">list_patterns</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataError::MissingResourceOptions</span>(<span class="ident">req</span>.<span class="ident">clone</span>())),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="ident">req</span>)),
         };
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">patterns</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span> {
@@ -419,7 +423,9 @@
             <span class="ident">key::LIST_FORMAT_UNIT_V1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">parse_unit_patterns</span>(<span class="ident">data</span>),
             <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
         }
-        .<span class="ident">map_err</span>(<span class="ident">DataError::new_resc_error</span>)<span class="question-mark">?</span>;
+        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+            <span class="ident">DataError::custom</span>(<span class="string">&quot;CLDR JSON list pattern parsing&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>)
+        })<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="ident">langid</span>.<span class="ident">language</span> <span class="op">=</span><span class="op">=</span> <span class="macro">langid!</span>(<span class="string">&quot;es&quot;</span>).<span class="ident">language</span> {
             <span class="kw">match</span> <span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span> {
@@ -461,10 +467,12 @@
                             <span class="kw-2">&amp;</span><span class="ident">icu_provider_uprops::PropertiesDataProvider::try_new</span>(
                                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">uprops_path</span>
                             )
-                            .<span class="ident">map_err</span>(<span class="ident">DataError::new_resc_error</span>)<span class="question-mark">?</span>,
+                            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Properties data provider error&quot;</span>)
+                                .<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>,
                             <span class="ident">icu_properties::Script::Hebrew</span>,
                         )
-                        .<span class="ident">map_err</span>(<span class="ident">DataError::new_resc_error</span>)<span class="question-mark">?</span>
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not find Hebrew script set&quot;</span>)
+                            .<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>
                         .<span class="ident">get</span>()
                         .<span class="ident">inv_list</span>
                         .<span class="ident">iter_ranges</span>()

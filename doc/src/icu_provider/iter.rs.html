@@ -75,14 +75,12 @@
 <span id="75">75</span>
 <span id="76">76</span>
 <span id="77">77</span>
-<span id="78">78</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="doccomment">//! Collection of iteration APIs for [`DataProvider`].</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 
@@ -95,7 +93,7 @@
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A super-trait combining [`DataProvider`] and [`IterableDataProviderCore`], auto-implemented</span>
@@ -122,17 +120,17 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">KeyedDataProvider</span> {
     <span class="doccomment">/// Given a [`ResourceKey`], checks whether this type of [`DataProvider`] supports it.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns Ok if the key is supported, or an Error with more information if not. The Error</span>
-    <span class="doccomment">/// should be [`MissingResourceKey`].</span>
+    <span class="doccomment">/// Returns Ok if the key is supported, or an Error with more information if not.</span>
+    <span class="doccomment">/// The Error should be [`MissingResourceKey`].</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// [`MissingResourceKey`]: crate::error::Error::MissingResourceKey</span>
-    <span class="kw">fn</span> <span class="ident">supports_key</span>(<span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// [`MissingResourceKey`]: crate::error::DataErrorKind::MissingResourceKey</span>
+    <span class="kw">fn</span> <span class="ident">supports_key</span>(<span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Auto-implemented function that enables chaining of [`KeyedDataProviders`] while preserving</span>
     <span class="doccomment">/// [`MissingResourceKey`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`KeyedDataProviders`]: KeyedDataProvider</span>
-    <span class="doccomment">/// [`MissingResourceKey`]: crate::error::Error::MissingResourceKey</span>
+    <span class="doccomment">/// [`MissingResourceKey`]: crate::error::DataErrorKind::MissingResourceKey</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -141,11 +139,11 @@
     <span class="doccomment">///     .or_else(|err| DataProviderB::or_else_supports_key(err, resc_key))</span>
     <span class="doccomment">///     .or_else(|err| DataProviderC::or_else_supports_key(err, resc_key))</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">or_else_supports_key</span>(<span class="ident">err</span>: <span class="ident">Error</span>, <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">or_else_supports_key</span>(<span class="ident">err</span>: <span class="ident">DataError</span>, <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident"><span class="self">Self</span>::supports_key</span>(<span class="ident">resc_key</span>) {
             <span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
             <span class="prelude-val">Err</span>(<span class="ident">new_err</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Error::MissingResourceKey</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">err</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="ident">DataErrorKind::MissingResourceKey</span> <span class="op">=</span> <span class="ident">err</span>.<span class="ident">kind</span> {
                     <span class="prelude-val">Err</span>(<span class="ident">err</span>)
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Err</span>(<span class="ident">new_err</span>)

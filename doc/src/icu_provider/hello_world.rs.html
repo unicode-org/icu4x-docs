@@ -180,17 +180,51 @@
 <span id="180">180</span>
 <span id="181">181</span>
 <span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="doccomment">//! Data provider returning multilingual &quot;Hello World&quot; strings for testing.</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buffer_provider::BufferFormat</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iter::IterableProvider</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::yoke</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
+<span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
+<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::fmt::Debug</span>;
@@ -279,7 +313,8 @@
                 (<span class="string">&quot;is&quot;</span>, <span class="string">&quot;Halló, heimur&quot;</span>),
                 (<span class="string">&quot;ja&quot;</span>, <span class="string">&quot;こんにちは世界&quot;</span>),
                 (<span class="string">&quot;la&quot;</span>, <span class="string">&quot;Ave, munde&quot;</span>),
-                (<span class="string">&quot;ro&quot;</span>, <span class="string">&quot;Salut,lume!&quot;</span>),
+                (<span class="string">&quot;pt&quot;</span>, <span class="string">&quot;Olá, mundo&quot;</span>),
+                (<span class="string">&quot;ro&quot;</span>, <span class="string">&quot;Salut, lume&quot;</span>),
                 (<span class="string">&quot;ru&quot;</span>, <span class="string">&quot;Привет, мир&quot;</span>),
                 (<span class="string">&quot;vi&quot;</span>, <span class="string">&quot;Xin chào thế giới&quot;</span>),
                 (<span class="string">&quot;zh&quot;</span>, <span class="string">&quot;你好世界&quot;</span>),
@@ -293,6 +328,11 @@
             })
             .<span class="ident">collect</span>(),
         }
+    }
+
+    <span class="doccomment">/// Converts this provider into one that serves JSON blobs of the same data.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_json_provider</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HelloWorldJsonProvider</span> {
+        <span class="ident">HelloWorldJsonProvider</span>(<span class="self">self</span>)
     }
 }
 
@@ -325,6 +365,26 @@
 <span class="macro">impl_dyn_provider!</span>(<span class="ident">HelloWorldProvider</span>, {
     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HelloWorldV1Marker</span>,
 }, <span class="ident">SERDE_SE</span>);
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HelloWorldJsonProvider</span>(<span class="ident">HelloWorldProvider</span>);
+
+<span class="kw">impl</span> <span class="ident">BufferProvider</span> <span class="kw">for</span> <span class="ident">HelloWorldJsonProvider</span> {
+    <span class="kw">fn</span> <span class="ident">load_buffer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_payload</span>(<span class="ident">req</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">metadata</span>, <span class="ident">old_payload</span>) <span class="op">=</span>
+            <span class="ident">DataResponse</span>::<span class="op">&lt;</span><span class="ident">HelloWorldV1Marker</span><span class="op">&gt;</span><span class="ident">::take_metadata_and_payload</span>(<span class="ident">result</span>)<span class="question-mark">?</span>;
+        <span class="ident">metadata</span>.<span class="ident">buffer_format</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">BufferFormat::Json</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">String::new</span>();
+        <span class="ident">buffer</span>.<span class="ident">push_str</span>(<span class="string">&quot;{\&quot;message\&quot;:\&quot;&quot;</span>);
+        <span class="ident">helpers::escape_for_json</span>(<span class="kw-2">&amp;</span><span class="ident">old_payload</span>.<span class="ident">get</span>().<span class="ident">message</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>);
+        <span class="ident">buffer</span>.<span class="ident">push_str</span>(<span class="string">&quot;\&quot;}&quot;</span>);
+        <span class="kw">let</span> <span class="ident">boxed_u8</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">into_boxed_str</span>().<span class="ident">into</span>();
+        <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
+            <span class="ident">metadata</span>,
+            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_rc_buffer</span>(<span class="ident">Rc::from</span>(<span class="ident">boxed_u8</span>))),
+        })
+    }
+}
 
 <span class="kw">impl</span> <span class="ident">IterableProvider</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::needless_collect</span>)]</span> <span class="comment">// https://github.com/rust-lang/rust-clippy/issues/7526</span>

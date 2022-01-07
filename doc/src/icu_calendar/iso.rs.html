@@ -516,6 +516,85 @@
 <span id="516">516</span>
 <span id="517">517</span>
 <span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -525,6 +604,9 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>};
 <span class="kw">use</span> <span class="ident">core::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
 <span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr16</span>, <span class="ident">tinystr8</span>};
+
+<span class="comment">// The georgian epoch is equivalent to first day in fixed day measurement</span>
+<span class="kw">const</span> <span class="ident">EPOCH</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">1</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="doccomment">/// The ISO Calendar</span>
@@ -619,7 +701,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">IsoDateInner</span> {
-    <span class="kw">fn</span> <span class="ident">add_months</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">months</span>: <span class="ident">i32</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_months</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">months</span>: <span class="ident">i32</span>) {
         <span class="comment">// Get a zero-indexed new month</span>
         <span class="kw">let</span> <span class="ident">new_month</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">month</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> <span class="ident">months</span>;
         <span class="kw">if</span> <span class="ident">new_month</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0</span> {
@@ -884,6 +966,82 @@
         } <span class="kw">else</span> {
             <span class="number">365</span>
         }
+    }
+
+    <span class="comment">// Fixed is day count representation of calendars starting from Jan 1st of year 1.</span>
+    <span class="comment">// The fixed calculations algorithms are from the Calendrical Calculations book.</span>
+    <span class="comment">//</span>
+    <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L1167-L1189</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">fixed_from_iso</span>(<span class="ident">date</span>: <span class="ident">IsoDateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+        <span class="comment">// Calculate days per year</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fixed</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="ident">EPOCH</span> <span class="op">-</span> <span class="number">1</span> <span class="op">+</span> <span class="number">365</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">year</span>.<span class="number">0</span> <span class="op">-</span> <span class="number">1</span>);
+        <span class="comment">// Adjust for leap year logic</span>
+        <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> ((<span class="ident">date</span>.<span class="ident">year</span>.<span class="number">0</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">/</span> <span class="number">4</span>) <span class="op">-</span> ((<span class="ident">date</span>.<span class="ident">year</span>.<span class="number">0</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">/</span> <span class="number">100</span>) <span class="op">+</span> ((<span class="ident">date</span>.<span class="ident">year</span>.<span class="number">0</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">/</span> <span class="number">400</span>);
+        <span class="comment">// Days of current year</span>
+        <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> (<span class="number">367</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">month</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">-</span> <span class="number">362</span>) <span class="op">/</span> <span class="number">12</span>;
+        <span class="comment">// Leap year adjustment for the current year</span>
+        <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">month</span>.<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">2</span> {
+            <span class="number">0</span>
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_leap_year</span>(<span class="ident">date</span>.<span class="ident">year</span>) {
+            <span class="op">-</span><span class="number">1</span>
+        } <span class="kw">else</span> {
+            <span class="op">-</span><span class="number">2</span>
+        };
+        <span class="comment">// Days passed in current month</span>
+        <span class="ident">fixed</span> <span class="op">+</span> (<span class="ident">date</span>.<span class="ident">day</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">i32</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">fixed_from_iso_integers</span>(<span class="ident">year</span>: <span class="ident">i32</span>, <span class="ident">month</span>: <span class="ident">i32</span>, <span class="ident">day</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+        <span class="ident"><span class="self">Self</span>::fixed_from_iso</span>(
+            <span class="kw-2">*</span><span class="ident">Date::new_iso_date_from_integers</span>(<span class="ident">year</span>, <span class="ident">month</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">day</span> <span class="kw">as</span> <span class="ident">u8</span>)
+                .<span class="ident">unwrap</span>()
+                .<span class="ident">inner</span>(),
+        )
+    }
+
+    <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L1191-L1217</span>
+    <span class="kw">fn</span> <span class="ident">iso_year_from_fixed</span>(<span class="ident">date</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+        <span class="comment">// 400 year cycles have 146097 days</span>
+        <span class="kw">let</span> <span class="ident">n_400</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">/</span> <span class="number">146097</span>;
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">%</span> <span class="number">146097</span>;
+
+        <span class="comment">// 100 year cycles have 36524 days</span>
+        <span class="kw">let</span> <span class="ident">n_100</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">/</span> <span class="number">36524</span>;
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">%</span> <span class="number">36524</span>;
+
+        <span class="comment">// 4 year cycles have 1461 days</span>
+        <span class="kw">let</span> <span class="ident">n_4</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">/</span> <span class="number">1461</span>;
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">%</span> <span class="number">1461</span>;
+
+        <span class="kw">let</span> <span class="ident">n_1</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">/</span> <span class="number">365</span>;
+
+        <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="number">400</span> <span class="op">*</span> <span class="ident">n_400</span> <span class="op">+</span> <span class="number">100</span> <span class="op">*</span> <span class="ident">n_100</span> <span class="op">+</span> <span class="number">4</span> <span class="op">*</span> <span class="ident">n_4</span> <span class="op">+</span> <span class="ident">n_1</span>;
+
+        <span class="kw">if</span> <span class="ident">n_400</span> <span class="op">=</span><span class="op">=</span> <span class="number">4</span> <span class="op">|</span><span class="op">|</span> <span class="ident">n_4</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+            <span class="ident">year</span>
+        } <span class="kw">else</span> {
+            <span class="ident">year</span> <span class="op">+</span> <span class="number">1</span>
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">iso_new_year</span>(<span class="ident">year</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+        <span class="ident"><span class="self">Self</span>::fixed_from_iso_integers</span>(<span class="ident">year</span>, <span class="number">1</span>, <span class="number">1</span>)
+    }
+
+    <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L1237-L1258</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">iso_from_fixed</span>(<span class="ident">date</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Date</span><span class="op">&lt;</span><span class="ident">Iso</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::iso_year_from_fixed</span>(<span class="ident">date</span>);
+        <span class="kw">let</span> <span class="ident">prior_days</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::iso_new_year</span>(<span class="ident">year</span>);
+        <span class="kw">let</span> <span class="ident">correction</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&lt;</span> <span class="ident"><span class="self">Self</span>::fixed_from_iso_integers</span>(<span class="ident">year</span>, <span class="number">3</span>, <span class="number">1</span>) {
+            <span class="number">0</span>
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_leap_year</span>(<span class="ident">IsoYear::from</span>(<span class="ident">year</span>)) {
+            <span class="number">1</span>
+        } <span class="kw">else</span> {
+            <span class="number">2</span>
+        };
+        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> (<span class="number">12</span> <span class="op">*</span> (<span class="ident">prior_days</span> <span class="op">+</span> <span class="ident">correction</span>) <span class="op">+</span> <span class="number">373</span>) <span class="op">/</span> <span class="number">367</span>;
+        <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_iso_integers</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="number">1</span>) <span class="op">+</span> <span class="number">1</span>;
+        <span class="ident">Date::new_iso_date_from_integers</span>(<span class="ident">year</span>, <span class="ident">month</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">day</span> <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">unwrap</span>()
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">day_of_year</span>(<span class="ident">date</span>: <span class="ident">IsoDateInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {

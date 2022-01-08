@@ -990,6 +990,12 @@
 <span id="990">990</span>
 <span id="991">991</span>
 <span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
+<span id="995">995</span>
+<span id="996">996</span>
+<span id="997">997</span>
+<span id="998">998</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1020,7 +1026,9 @@
 <span class="doccomment">/// not the actual lifetime of the data, rather it is a convenient way to erase</span>
 <span class="doccomment">/// the lifetime and make it dynamic.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// `C` is the &quot;cart&quot;, which `Y` may contain references to.</span>
+<span class="doccomment">/// `C` is the &quot;cart&quot;, which `Y` may contain references to. After the yoke is constructed,</span>
+<span class="doccomment">/// the cart serves little purpose except to guarantee that `Y`&#39;s references remain valid</span>
+<span class="doccomment">/// for as long as the yoke remains in memory (by calling the destructor at the appropriate moment).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The primary constructor for [`Yoke`] is [`Yoke::attach_to_cart()`]. Several variants of that</span>
 <span class="doccomment">/// constructor are provided to serve numerous types of call sites and `Yoke` signatures.</span>
@@ -1230,7 +1238,7 @@
     <span class="doccomment">/// let yoke = Yoke::&lt;</span>
     <span class="doccomment">///     &amp;&#39;static str,</span>
     <span class="doccomment">///     Box&lt;String&gt;</span>
-    <span class="doccomment">/// &gt;::attach_to_box_cart(Box::new(local_data));</span>
+    <span class="doccomment">/// &gt;::attach_to_zero_copy_cart(Box::new(local_data));</span>
     <span class="doccomment">/// assert_eq!(*yoke.get(), &quot;foo&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Get back the cart</span>
@@ -1248,7 +1256,7 @@
     <span class="doccomment">/// let mut yoke = Yoke::&lt;</span>
     <span class="doccomment">///     Cow&lt;&#39;static, str&gt;,</span>
     <span class="doccomment">///     Box&lt;String&gt;</span>
-    <span class="doccomment">/// &gt;::attach_to_box_cart(Box::new(local_data));</span>
+    <span class="doccomment">/// &gt;::attach_to_zero_copy_cart(Box::new(local_data));</span>
     <span class="doccomment">/// assert_eq!(yoke.get(), &quot;foo&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Override data in the cart</span>
@@ -1281,6 +1289,7 @@
     <span class="doccomment">/// `Yoke` only really cares about destructors for its carts so it&#39;s fine to erase other</span>
     <span class="doccomment">/// information about the cart, as long as the backing data will still be destroyed at the</span>
     <span class="doccomment">/// same time.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">replace_cart</span><span class="op">&lt;</span><span class="ident">C2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">C2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C2</span><span class="op">&gt;</span> {
         <span class="ident">Yoke</span> {
             <span class="ident">yokeable</span>: <span class="self">self</span>.<span class="ident">yokeable</span>,
@@ -1379,6 +1388,7 @@
     }
 
     <span class="doccomment">/// Helper function allowing one to wrap the cart type in an `Option&lt;T&gt;`.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_cart_in_option</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// safe because the cart is preserved, just wrapped</span>
@@ -1521,9 +1531,9 @@
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_clone</span>() {
     <span class="kw">let</span> <span class="ident">local_data</span> <span class="op">=</span> <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>();
-    <span class="kw">let</span> <span class="ident">y1</span> <span class="op">=</span> <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">alloc::borrow::Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::attach_to_rc_cart</span>(<span class="ident">Rc::new</span>(
-        <span class="ident">local_data</span>,
-    ));
+    <span class="kw">let</span> <span class="ident">y1</span> <span class="op">=</span> <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">alloc::borrow::Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::attach_to_zero_copy_cart</span>(
+        <span class="ident">Rc::new</span>(<span class="ident">local_data</span>),
+    );
 
     <span class="comment">// Test basic clone</span>
     <span class="kw">let</span> <span class="ident">y2</span> <span class="op">=</span> <span class="ident">y1</span>.<span class="ident">clone</span>();
@@ -1856,21 +1866,23 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Helper function allowing one to wrap the cart type in a `Box&lt;T&gt;`,</span>
-    <span class="doccomment">/// can be paired with [`Yoke::erase_box_cart()`]</span>
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type in a `Box&lt;T&gt;`.</span>
+    <span class="doccomment">/// Can be paired with [`Yoke::erase_box_cart()`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Available with the `&quot;alloc&quot;` feature enabled.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_cart_in_box</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// safe because the cart is preserved, just wrapped</span>
             <span class="self">self</span>.<span class="ident">replace_cart</span>(<span class="ident">Box::new</span>)
         }
     }
-    <span class="doccomment">/// Helper function allowing one to wrap the cart type in an `Rc&lt;T&gt;`,</span>
-    <span class="doccomment">/// can be paired with [`Yoke::erase_rc_cart()`], or generally used</span>
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type in an `Rc&lt;T&gt;`.</span>
+    <span class="doccomment">/// Can be paired with [`Yoke::erase_rc_cart()`], or generally used</span>
     <span class="doccomment">/// to make the [`Yoke`] cloneable.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Available with the `&quot;alloc&quot;` feature enabled.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_cart_in_rc</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// safe because the cart is preserved, just wrapped</span>

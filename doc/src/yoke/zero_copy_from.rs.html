@@ -190,62 +190,6 @@
 <span id="190">190</span>
 <span id="191">191</span>
 <span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
-<span id="232">232</span>
-<span id="233">233</span>
-<span id="234">234</span>
-<span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -255,11 +199,9 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">alloc::borrow</span>::{<span class="ident">Cow</span>, <span class="ident">ToOwned</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
+<span class="kw">use</span> <span class="ident">core::ops::Deref</span>;
+<span class="kw">use</span> <span class="ident">stable_deref_trait::StableDeref</span>;
 
 <span class="doccomment">/// Trait for types that can be crated from a reference to a cart type `C` with no allocations.</span>
 <span class="doccomment">///</span>
@@ -333,15 +275,21 @@
     <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Construct a [`Yoke`]`&lt;Y, &amp;C&gt;` from a borrowed cart by zero-copy cloning the cart to `Y` and</span>
-    <span class="doccomment">/// then yokeing that object to the cart.</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span><span class="ident">::Target</span><span class="op">&gt;</span>,
+    <span class="ident">C</span>: <span class="ident">StableDeref</span> <span class="op">+</span> <span class="ident">Deref</span>,
+{
+    <span class="doccomment">/// Construct a [`Yoke`]`&lt;Y, C&gt;` from a cart implementing `StableDeref` by zero-copy cloning</span>
+    <span class="doccomment">/// the cart to `Y` and then yokeing that object to the cart.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This results in a [`Yoke`] bound to the lifetime of the reference to the borrowed cart.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The type `Y` must implement [`ZeroCopyFrom`]`&lt;C&gt;`.</span>
+    <span class="doccomment">/// The type `Y` must implement [`ZeroCopyFrom`]`&lt;C::Target&gt;`. This trait is auto-implemented</span>
+    <span class="doccomment">/// on many common types and can be custom implemented or derived in order to make it easier</span>
+    <span class="doccomment">/// to construct a `Yoke`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Attach to a cart:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use yoke::Yoke;</span>
@@ -349,74 +297,14 @@
     <span class="doccomment">///  </span>
     <span class="doccomment">/// let yoke = Yoke::&lt;</span>
     <span class="doccomment">///     Cow&lt;&#39;static, str&gt;,</span>
-    <span class="doccomment">///     &amp;str</span>
-    <span class="doccomment">/// &gt;::attach_to_borrowed_cart(&quot;demo&quot;);</span>
+    <span class="doccomment">///     String</span>
+    <span class="doccomment">/// &gt;::attach_to_zero_copy_cart(&quot;demo&quot;.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;demo&quot;, yoke.get());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_borrowed_cart</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">Y</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">C</span><span class="op">&gt;</span><span class="ident">::attach_to_cart_badly</span>(<span class="ident">cart</span>, <span class="ident">Y::zero_copy_from</span>)
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Construct a [`Yoke`]`&lt;Y, Box&lt;C&gt;&gt;` from a boxed cart by zero-copy cloning the cart to `Y` and</span>
-    <span class="doccomment">/// then yokeing that object to the cart.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This results in a [`Yoke`] bound to the lifetime of data within the cart. If the cart is</span>
-    <span class="doccomment">/// fully owned, then the resulting [`Yoke`] will be `&#39;static`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The type `Y` must implement [`ZeroCopyFrom`]`&lt;C&gt;`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use yoke::Yoke;</span>
-    <span class="doccomment">/// use std::borrow::Cow;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let box_cart = Box::new(&quot;demo&quot;.to_string());</span>
-    <span class="doccomment">///  </span>
-    <span class="doccomment">/// let yoke = Yoke::&lt;</span>
-    <span class="doccomment">///     Cow&lt;&#39;static, str&gt;,</span>
-    <span class="doccomment">///     Box&lt;String&gt;</span>
-    <span class="doccomment">/// &gt;::attach_to_box_cart(box_cart);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;demo&quot;, yoke.get());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_box_cart</span>(<span class="ident">cart</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::attach_to_cart_badly</span>(<span class="ident">cart</span>, <span class="ident">Y::zero_copy_from</span>)
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Construct a [`Yoke`]`&lt;Y, Rc&lt;C&gt;&gt;` from a reference-counted cart by zero-copy cloning the</span>
-    <span class="doccomment">/// cart to `Y` and then yokeing that object to the cart.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This results in a [`Yoke`] bound to the lifetime of data within the cart. If the cart is</span>
-    <span class="doccomment">/// fully owned, then the resulting [`Yoke`] will be `&#39;static`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The type `Y` must implement [`ZeroCopyFrom`]`&lt;C&gt;`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use yoke::Yoke;</span>
-    <span class="doccomment">/// use std::borrow::Cow;</span>
-    <span class="doccomment">/// use std::rc::Rc;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let rc_cart = Rc::from(&quot;demo&quot;.to_string());</span>
-    <span class="doccomment">///  </span>
-    <span class="doccomment">/// let yoke = Yoke::&lt;</span>
-    <span class="doccomment">///     Cow&lt;&#39;static, str&gt;,</span>
-    <span class="doccomment">///     Rc&lt;String&gt;</span>
-    <span class="doccomment">/// &gt;::attach_to_rc_cart(rc_cart);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;demo&quot;, yoke.get());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_rc_cart</span>(<span class="ident">cart</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::attach_to_cart_badly</span>(<span class="ident">cart</span>, <span class="ident">Y::zero_copy_from</span>)
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_zero_copy_cart</span>(<span class="ident">cart</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="ident">::attach_to_cart_badly</span>(<span class="ident">cart</span>, <span class="ident">Y::zero_copy_from</span>)
     }
 }
 

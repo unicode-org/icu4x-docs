@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1641928157070,
+  "lastUpdate": 1641935410852,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -20837,6 +20837,78 @@ window.BENCHMARK_DATA = {
             "name": "locale/overview",
             "value": 4264,
             "range": "± 213",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "247b113f749ad327c15edb84e925b916ae7f75a1",
+          "message": "Add -Ccodegen-units=1 (#1492)",
+          "timestamp": "2022-01-11T13:01:09-08:00",
+          "tree_id": "b05d99fe80aca8e4279a32c0be4f3f80f1f2b57f",
+          "url": "https://github.com/unicode-org/icu4x/commit/247b113f749ad327c15edb84e925b916ae7f75a1"
+        },
+        "date": 1641935371276,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2744,
+            "range": "± 188",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4529,
+            "range": "± 414",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8b26c199bcc07cb383ccbe6a41772e6fce714bc4",
+          "message": "Make most Yokeable impls inline (#1493)",
+          "timestamp": "2022-01-11T13:02:02-08:00",
+          "tree_id": "0e2a30c9c0739e991de1733b2e4b7dabcc4a48ce",
+          "url": "https://github.com/unicode-org/icu4x/commit/8b26c199bcc07cb383ccbe6a41772e6fce714bc4"
+        },
+        "date": 1641935401174,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2677,
+            "range": "± 179",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4703,
+            "range": "± 218",
             "unit": "ns/iter"
           }
         ]

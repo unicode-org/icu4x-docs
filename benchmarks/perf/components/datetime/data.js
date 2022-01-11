@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1641928197790,
+  "lastUpdate": 1641935450610,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -17231,6 +17231,90 @@ window.BENCHMARK_DATA = {
             "name": "datetime/zoned_datetime_overview",
             "value": 430112,
             "range": "± 37293",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "247b113f749ad327c15edb84e925b916ae7f75a1",
+          "message": "Add -Ccodegen-units=1 (#1492)",
+          "timestamp": "2022-01-11T13:01:09-08:00",
+          "tree_id": "b05d99fe80aca8e4279a32c0be4f3f80f1f2b57f",
+          "url": "https://github.com/unicode-org/icu4x/commit/247b113f749ad327c15edb84e925b916ae7f75a1"
+        },
+        "date": 1641935396406,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 141214,
+            "range": "± 6810",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1580711,
+            "range": "± 84883",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 457807,
+            "range": "± 19518",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "sffc@google.com",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8b26c199bcc07cb383ccbe6a41772e6fce714bc4",
+          "message": "Make most Yokeable impls inline (#1493)",
+          "timestamp": "2022-01-11T13:02:02-08:00",
+          "tree_id": "0e2a30c9c0739e991de1733b2e4b7dabcc4a48ce",
+          "url": "https://github.com/unicode-org/icu4x/commit/8b26c199bcc07cb383ccbe6a41772e6fce714bc4"
+        },
+        "date": 1641935439918,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 127885,
+            "range": "± 6362",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1486472,
+            "range": "± 69275",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 431214,
+            "range": "± 24655",
             "unit": "ns/iter"
           }
         ]

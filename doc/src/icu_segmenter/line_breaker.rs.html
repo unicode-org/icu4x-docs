@@ -943,6 +943,43 @@
 <span id="943">943</span>
 <span id="944">944</span>
 <span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -952,14 +989,13 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::language</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lb_define</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::property_table</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rule_table</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="ident">alloc::vec</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::char</span>;
 <span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">unicode_width::UnicodeWidthChar</span>;
 
 <span class="comment">// Use the LSTM when the feature is enabled.</span>
@@ -1052,19 +1088,33 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakSegmenter</span> {
     <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
+    <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">LineBreakSegmenter</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="comment">// Note: This will be able to return an Error once DataProvider is added</span>
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">options</span>: <span class="ident">Default::default</span>(),
-        })
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    {
+        <span class="ident"><span class="self">Self</span>::try_new_with_options</span>(<span class="ident">provider</span>, <span class="ident">Default::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_with_options</span>(<span class="ident">options</span>: <span class="ident">LineBreakOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="comment">// Note: This will be able to return an Error once DataProvider is added</span>
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">options</span> })
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_with_options</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(
+        <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
+        <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    {
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
+                    <span class="ident">key</span>: <span class="ident">key::LINE_BREAK_DATA_V1</span>,
+                    <span class="ident">options</span>: <span class="ident">Default::default</span>(),
+                },
+            })<span class="question-mark">?</span>
+            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">options</span>, <span class="ident">payload</span> })
     }
 
     <span class="doccomment">/// Create a line break iterator for an `str` (a UTF-8 string).</span>
@@ -1074,7 +1124,8 @@
             <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">segmenter</span>: <span class="self">self</span>,
+            <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
+            <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
         }
     }
 
@@ -1088,7 +1139,8 @@
             <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">segmenter</span>: <span class="self">self</span>,
+            <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
+            <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
         }
     }
 
@@ -1102,19 +1154,21 @@
             <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">segmenter</span>: <span class="self">self</span>,
+            <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
+            <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
         }
     }
 }
 
 <span class="kw">fn</span> <span class="ident">get_linebreak_property_utf32_with_rule</span>(
+    <span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakPropertyTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
     <span class="ident">codepoint</span>: <span class="ident">u32</span>,
     <span class="ident">line_break_rule</span>: <span class="ident">LineBreakRule</span>,
     <span class="ident">word_break_rule</span>: <span class="ident">WordBreakRule</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
     <span class="kw">if</span> <span class="ident">codepoint</span> <span class="op">&lt;</span> <span class="number">0x20000</span> {
         <span class="kw">let</span> <span class="ident">codepoint</span> <span class="op">=</span> <span class="ident">codepoint</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">let</span> <span class="ident">prop</span> <span class="op">=</span> <span class="ident">UAX14_PROPERTY_TABLE</span>[<span class="ident">codepoint</span> <span class="op">/</span> <span class="number">1024</span>][(<span class="ident">codepoint</span> <span class="op">&amp;</span> <span class="number">0x3ff</span>)];
+        <span class="kw">let</span> <span class="ident">prop</span> <span class="op">=</span> <span class="ident">property_table</span>[<span class="ident">codepoint</span> <span class="op">/</span> <span class="number">1024</span>][(<span class="ident">codepoint</span> <span class="op">&amp;</span> <span class="number">0x3ff</span>)];
 
         <span class="kw">if</span> <span class="ident">word_break_rule</span> <span class="op">=</span><span class="op">=</span> <span class="ident">WordBreakRule::BreakAll</span>
             <span class="op">|</span><span class="op">|</span> <span class="ident">line_break_rule</span> <span class="op">=</span><span class="op">=</span> <span class="ident">LineBreakRule::Loose</span>
@@ -1142,18 +1196,24 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">get_linebreak_property_latin1</span>(<span class="ident">codepoint</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">get_linebreak_property_latin1</span>(<span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakPropertyTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">codepoint</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">codepoint</span> <span class="op">=</span> <span class="ident">codepoint</span> <span class="kw">as</span> <span class="ident">usize</span>;
-    <span class="ident">UAX14_PROPERTY_TABLE</span>[<span class="ident">codepoint</span> <span class="op">/</span> <span class="number">1024</span>][(<span class="ident">codepoint</span> <span class="op">&amp;</span> <span class="number">0x3ff</span>)]
+    <span class="ident">property_table</span>[<span class="ident">codepoint</span> <span class="op">/</span> <span class="number">1024</span>][(<span class="ident">codepoint</span> <span class="op">&amp;</span> <span class="number">0x3ff</span>)]
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(
+    <span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakPropertyTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
     <span class="ident">codepoint</span>: <span class="ident">char</span>,
     <span class="ident">linebreak_rule</span>: <span class="ident">LineBreakRule</span>,
     <span class="ident">wordbreak_rule</span>: <span class="ident">WordBreakRule</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-    <span class="ident">get_linebreak_property_utf32_with_rule</span>(<span class="ident">codepoint</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">linebreak_rule</span>, <span class="ident">wordbreak_rule</span>)
+    <span class="ident">get_linebreak_property_utf32_with_rule</span>(
+        <span class="ident">property_table</span>,
+        <span class="ident">codepoint</span> <span class="kw">as</span> <span class="ident">u32</span>,
+        <span class="ident">linebreak_rule</span>,
+        <span class="ident">wordbreak_rule</span>,
+    )
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1233,8 +1293,8 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">is_break_from_table</span>(<span class="ident">rule_table</span>: <span class="kw-2">&amp;</span>[<span class="ident">i8</span>], <span class="ident">property_count</span>: <span class="ident">usize</span>, <span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="kw">let</span> <span class="ident">rule</span> <span class="op">=</span> <span class="ident">get_break_state_from_table</span>(<span class="ident">rule_table</span>, <span class="ident">property_count</span>, <span class="ident">left</span>, <span class="ident">right</span>);
+<span class="kw">fn</span> <span class="ident">is_break_from_table</span>(<span class="ident">rule_table</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakRuleTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">let</span> <span class="ident">rule</span> <span class="op">=</span> <span class="ident">get_break_state_from_table</span>(<span class="ident">rule_table</span>, <span class="ident">left</span>, <span class="ident">right</span>);
     <span class="kw">if</span> <span class="ident">rule</span> <span class="op">=</span><span class="op">=</span> <span class="ident">KEEP_RULE</span> {
         <span class="kw">return</span> <span class="bool-val">false</span>;
     }
@@ -1243,11 +1303,6 @@
         <span class="kw">return</span> <span class="bool-val">false</span>;
     }
     <span class="bool-val">true</span>
-}
-
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">is_break</span>(<span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="ident">is_break_from_table</span>(<span class="kw-2">&amp;</span><span class="ident">UAX14_RULE_TABLE</span>, <span class="ident">PROP_COUNT</span>, <span class="ident">left</span>, <span class="ident">right</span>)
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1278,18 +1333,16 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">get_break_state_from_table</span>(<span class="ident">rule_table</span>: <span class="kw-2">&amp;</span>[<span class="ident">i8</span>], <span class="ident">property_count</span>: <span class="ident">usize</span>, <span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i8</span> {
-    <span class="ident">rule_table</span>[((<span class="ident">left</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> <span class="number">1</span>) <span class="op">*</span> <span class="ident">property_count</span> <span class="op">+</span> (<span class="ident">right</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> <span class="number">1</span>]
+<span class="kw">fn</span> <span class="ident">get_break_state_from_table</span>(<span class="ident">rule_table</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakRuleTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i8</span> {
+    <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> ((<span class="ident">left</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> <span class="number">1</span>) <span class="op">*</span> (<span class="ident">rule_table</span>.<span class="ident">property_count</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">+</span> (<span class="ident">right</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> <span class="number">1</span>;
+    <span class="comment">// We use unwrap_or to fall back to the base case and prevent panics on bad data.</span>
+    <span class="ident">rule_table</span>.<span class="ident">table_data</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">unwrap_or</span>(<span class="ident">KEEP_RULE</span>)
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">get_break_state</span>(<span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i8</span> {
-    <span class="ident">get_break_state_from_table</span>(<span class="kw-2">&amp;</span><span class="ident">UAX14_RULE_TABLE</span>, <span class="ident">PROP_COUNT</span>, <span class="ident">left</span>, <span class="ident">right</span>)
-}
-
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">use_complex_breaking_utf32</span>(<span class="ident">codepoint</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">use_complex_breaking_utf32</span>(<span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakPropertyTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">codepoint</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">line_break_property</span> <span class="op">=</span> <span class="ident">get_linebreak_property_utf32_with_rule</span>(
+        <span class="ident">property_table</span>,
         <span class="ident">codepoint</span>,
         <span class="ident">LineBreakRule::Strict</span>,
         <span class="ident">WordBreakRule::Normal</span>,
@@ -1317,7 +1370,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="doccomment">/// The character type.</span>
     <span class="kw">type</span> <span class="ident">CharType</span>: <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">c</span>: <span class="ident"><span class="self">Self</span>::CharType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident"><span class="self">Self</span>::CharType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
 
     <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
 
@@ -1350,7 +1403,8 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="ident">len</span>: <span class="ident">usize</span>,
     <span class="ident">current_pos_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Y::CharType</span>)<span class="op">&gt;</span>,
     <span class="ident">result_cache</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="ident">segmenter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakSegmenter</span>,
+    <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>,
+    <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakOptions</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
@@ -1391,7 +1445,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             <span class="kw">let</span> <span class="ident">right_prop</span> <span class="op">=</span> <span class="ident">Y::get_linebreak_property</span>(<span class="self">self</span>);
 
             <span class="comment">// CSS word-break property handling</span>
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span> {
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span> {
                 <span class="ident">WordBreakRule::BreakAll</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="ident">left_prop</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">left_prop</span> {
                         <span class="ident">AL</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ID</span>,
@@ -1409,7 +1463,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             }
 
             <span class="comment">// CSS line-break property handling</span>
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span> {
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span> {
                 <span class="ident">LineBreakRule::Normal</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">if</span> <span class="ident">Y::is_break_by_normal</span>(<span class="self">self</span>) {
                         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
@@ -1421,7 +1475,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
                         <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">into</span>(),
                         <span class="ident">left_prop</span>,
                         <span class="ident">right_prop</span>,
-                        <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+                        <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
                     ) {
                         <span class="kw">if</span> <span class="ident">breakable</span> {
                             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
@@ -1436,9 +1490,9 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             };
 
             <span class="comment">// UAX14 doesn&#39;t have Thai etc, so use another way.</span>
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span> <span class="op">!</span><span class="op">=</span> <span class="ident">WordBreakRule::BreakAll</span>
-                <span class="op">&amp;&amp;</span> <span class="ident">Y::use_complex_breaking</span>(<span class="ident">left_codepoint</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
-                <span class="op">&amp;&amp;</span> <span class="ident">Y::use_complex_breaking</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span> <span class="op">!</span><span class="op">=</span> <span class="ident">WordBreakRule::BreakAll</span>
+                <span class="op">&amp;&amp;</span> <span class="ident">Y::use_complex_breaking</span>(<span class="self">self</span>, <span class="ident">left_codepoint</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
+                <span class="op">&amp;&amp;</span> <span class="ident">Y::use_complex_breaking</span>(<span class="self">self</span>, <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
             {
                 <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handle_complex_language</span>(<span class="ident">left_codepoint</span>.<span class="ident">unwrap</span>().<span class="number">1</span>);
                 <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">is_some</span>() {
@@ -1448,7 +1502,8 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             }
 
             <span class="comment">// If break_state is equals or grater than 0, it is alias of property.</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">break_state</span> <span class="op">=</span> <span class="ident">get_break_state</span>(<span class="ident">left_prop</span>, <span class="ident">right_prop</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">break_state</span> <span class="op">=</span>
+                <span class="ident">get_break_state_from_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">rule_table</span>, <span class="ident">left_prop</span>, <span class="ident">right_prop</span>);
             <span class="kw">if</span> <span class="ident">break_state</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0_i8</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">previous_iter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">clone</span>();
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">previous_pos_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_pos_data</span>;
@@ -1457,7 +1512,11 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
                     <span class="self">self</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>();
                     <span class="kw">if</span> <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
                         <span class="comment">// Reached EOF. But we are analyzing multiple characters now, so next break may be previous point.</span>
-                        <span class="kw">let</span> <span class="ident">break_state</span> <span class="op">=</span> <span class="ident">get_break_state</span>(<span class="ident">break_state</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">EOT</span>);
+                        <span class="kw">let</span> <span class="ident">break_state</span> <span class="op">=</span> <span class="ident">get_break_state_from_table</span>(
+                            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">rule_table</span>,
+                            <span class="ident">break_state</span> <span class="kw">as</span> <span class="ident">u8</span>,
+                            <span class="ident">EOT</span>,
+                        );
                         <span class="kw">if</span> <span class="ident">break_state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">PREVIOUS_BREAK_RULE</span> {
                             <span class="self">self</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">previous_iter</span>;
                             <span class="self">self</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">previous_pos_data</span>;
@@ -1468,7 +1527,8 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
                     }
 
                     <span class="kw">let</span> <span class="ident">prop</span> <span class="op">=</span> <span class="ident">Y::get_linebreak_property</span>(<span class="self">self</span>);
-                    <span class="ident">break_state</span> <span class="op">=</span> <span class="ident">get_break_state</span>(<span class="ident">break_state</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">prop</span>);
+                    <span class="ident">break_state</span> <span class="op">=</span>
+                        <span class="ident">get_break_state_from_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">rule_table</span>, <span class="ident">break_state</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">prop</span>);
                     <span class="kw">if</span> <span class="ident">break_state</span> <span class="op">&lt;</span> <span class="number">0</span> {
                         <span class="kw">break</span>;
                     }
@@ -1487,7 +1547,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
             }
 
-            <span class="kw">if</span> <span class="ident">is_break</span>(<span class="ident">left_prop</span>, <span class="ident">right_prop</span>) {
+            <span class="kw">if</span> <span class="ident">is_break_from_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">rule_table</span>, <span class="ident">left_prop</span>, <span class="ident">right_prop</span>) {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
             }
         }
@@ -1518,7 +1578,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
                 <span class="kw">break</span>;
             }
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">Y::use_complex_breaking</span>(<span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">Y::use_complex_breaking</span>(<span class="self">self</span>, <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>) {
                 <span class="kw">break</span>;
             }
         }
@@ -1555,22 +1615,23 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
     <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="ident">get_linebreak_property_with_rule</span>(
+            <span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>,
             <span class="ident">c</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
         )
     }
 
     <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">is_break_utf32_by_normal</span>(
             <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
         )
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">use_complex_breaking_utf32</span>(<span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>)
+    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">use_complex_breaking_utf32</span>(<span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>, <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
@@ -1617,20 +1678,20 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="ident"><span class="self">Self</span>::get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>, <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="comment">// No CJ on Latin1</span>
-        <span class="ident">get_linebreak_property_latin1</span>(<span class="ident">c</span>)
+        <span class="ident">get_linebreak_property_latin1</span>(<span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>, <span class="ident">c</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">is_break_utf32_by_normal</span>(
             <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
         )
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">_c</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">_iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">_c</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="bool-val">false</span>
     }
 
@@ -1655,22 +1716,23 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
     <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
         <span class="ident">get_linebreak_property_utf32_with_rule</span>(
+            <span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>,
             <span class="ident">c</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
         )
     }
 
     <span class="kw">fn</span> <span class="ident">is_break_by_normal</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="ident">is_break_utf32_by_normal</span>(
             <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span> <span class="kw">as</span> <span class="ident">u32</span>,
-            <span class="ident">iterator</span>.<span class="ident">segmenter</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">ja_zh</span>,
         )
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">use_complex_breaking_utf32</span>(<span class="ident">c</span>)
+    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="ident">use_complex_breaking_utf32</span>(<span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>, <span class="ident">c</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
@@ -1690,7 +1752,13 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="kw">fn</span> <span class="ident">get_linebreak_property</span>(<span class="ident">codepoint</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-        <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">codepoint</span>, <span class="ident">LineBreakRule::Strict</span>, <span class="ident">WordBreakRule::Normal</span>)
+        <span class="kw">let</span> <span class="ident">property_table</span> <span class="op">=</span> <span class="ident">Default::default</span>();
+        <span class="ident">get_linebreak_property_with_rule</span>(
+            <span class="kw-2">&amp;</span><span class="ident">property_table</span>,
+            <span class="ident">codepoint</span>,
+            <span class="ident">LineBreakRule::Strict</span>,
+            <span class="ident">WordBreakRule::Normal</span>,
+        )
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1709,6 +1777,11 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="macro">assert_eq!</span>(<span class="ident">get_linebreak_property</span>(<span class="string">&#39;\u{50005}&#39;</span>), <span class="ident">XX</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">get_linebreak_property</span>(<span class="string">&#39;\u{17D6}&#39;</span>), <span class="ident">NS</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">get_linebreak_property</span>(<span class="string">&#39;\u{2014}&#39;</span>), <span class="ident">B2</span>);
+    }
+
+    <span class="kw">fn</span> <span class="ident">is_break</span>(<span class="ident">left</span>: <span class="ident">u8</span>, <span class="ident">right</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">let</span> <span class="ident">rule_table</span> <span class="op">=</span> <span class="ident">Default::default</span>();
+        <span class="ident">is_break_from_table</span>(<span class="kw-2">&amp;</span><span class="ident">rule_table</span>, <span class="ident">left</span>, <span class="ident">right</span>)
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1807,7 +1880,8 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">linebreak</span>() {
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LineBreakSegmenter::try_new</span>().<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_provider::inv::InvariantDataProvider</span>;
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LineBreakSegmenter::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;hello world&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">6</span>), <span class="ident">iter</span>.<span class="ident">next</span>());

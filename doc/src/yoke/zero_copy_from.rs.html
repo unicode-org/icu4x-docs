@@ -185,22 +185,11 @@
 <span id="185">185</span>
 <span id="186">186</span>
 <span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::trait_hack::YokeTraitHack</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Yoke</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Yokeable</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
@@ -234,34 +223,9 @@
 <span class="doccomment">///     message: Cow&lt;&#39;data, str&gt;,</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// unsafe impl&lt;&#39;a&gt; Yokeable&lt;&#39;a&gt; for MyStruct&lt;&#39;static&gt; {</span>
-<span class="doccomment">///     // (not shown; see `Yokeable` for examples)</span>
-<span class="doccomment">/// #    type Output = MyStruct&lt;&#39;a&gt;;</span>
-<span class="doccomment">/// #    fn transform(&amp;&#39;a self) -&gt; &amp;&#39;a Self::Output {</span>
-<span class="doccomment">/// #        self</span>
-<span class="doccomment">/// #    }</span>
-<span class="doccomment">/// #    fn transform_owned(self) -&gt; MyStruct&lt;&#39;a&gt; {</span>
-<span class="doccomment">/// #        // covariant lifetime cast, can be done safely</span>
-<span class="doccomment">/// #        self</span>
-<span class="doccomment">/// #    }</span>
-<span class="doccomment">/// #    unsafe fn make(from: Self::Output) -&gt; Self {</span>
-<span class="doccomment">/// #        std::mem::transmute(from)</span>
-<span class="doccomment">/// #    }</span>
-<span class="doccomment">/// #    fn transform_mut&lt;F&gt;(&amp;&#39;a mut self, f: F)</span>
-<span class="doccomment">/// #    where</span>
-<span class="doccomment">/// #        F: &#39;static + for&lt;&#39;b&gt; FnOnce(&amp;&#39;b mut Self::Output),</span>
-<span class="doccomment">/// #    {</span>
-<span class="doccomment">/// #        unsafe {</span>
-<span class="doccomment">/// #            f(std::mem::transmute::&lt;&amp;&#39;a mut Self, &amp;&#39;a mut Self::Output&gt;(</span>
-<span class="doccomment">/// #                self,</span>
-<span class="doccomment">/// #            ))</span>
-<span class="doccomment">/// #        }</span>
-<span class="doccomment">/// #    }</span>
-<span class="doccomment">/// }</span>
-<span class="doccomment">///</span>
 <span class="doccomment">/// // Reference from a borrowed version of self</span>
-<span class="doccomment">/// impl&lt;&#39;data&gt; ZeroCopyFrom&lt;MyStruct&lt;&#39;data&gt;&gt; for MyStruct&lt;&#39;static&gt; {</span>
-<span class="doccomment">///     fn zero_copy_from&lt;&#39;b&gt;(cart: &amp;&#39;b MyStruct&lt;&#39;data&gt;) -&gt; MyStruct&lt;&#39;b&gt; {</span>
+<span class="doccomment">/// impl&lt;&#39;zcf&gt; ZeroCopyFrom&lt;&#39;zcf, MyStruct&lt;&#39;_&gt;&gt; for MyStruct&lt;&#39;zcf&gt; {</span>
+<span class="doccomment">///     fn zero_copy_from(cart: &amp;&#39;zcf MyStruct&lt;&#39;_&gt;) -&gt; Self {</span>
 <span class="doccomment">///         MyStruct {</span>
 <span class="doccomment">///             message: Cow::Borrowed(&amp;cart.message)</span>
 <span class="doccomment">///         }</span>
@@ -269,22 +233,33 @@
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Reference from a string slice directly</span>
-<span class="doccomment">/// impl ZeroCopyFrom&lt;str&gt; for MyStruct&lt;&#39;static&gt; {</span>
-<span class="doccomment">///     fn zero_copy_from&lt;&#39;b&gt;(cart: &amp;&#39;b str) -&gt; MyStruct&lt;&#39;b&gt; {</span>
+<span class="doccomment">/// impl&lt;&#39;zcf&gt; ZeroCopyFrom&lt;&#39;zcf, str&gt; for MyStruct&lt;&#39;zcf&gt; {</span>
+<span class="doccomment">///     fn zero_copy_from(cart: &amp;&#39;zcf str) -&gt; Self {</span>
 <span class="doccomment">///         MyStruct {</span>
 <span class="doccomment">///             message: Cow::Borrowed(cart)</span>
 <span class="doccomment">///         }</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Clone the cart `C` into a [`Yokeable`] struct, which may retain references into `C`.</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>: <span class="lifetime">&#39;zcf</span> {
+    <span class="doccomment">/// Clone the cart `C` into a struct that may retain references into `C`.</span>
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span><span class="ident">::Target</span><span class="op">&gt;</span>,
+    <span class="ident">T</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C</span><span class="op">&gt;</span>,
+{
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">YokeTraitHack</span>(<span class="ident">T::zero_copy_from</span>(<span class="ident">cart</span>))
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span><span class="ident">::Target</span><span class="op">&gt;</span>,
     <span class="ident">C</span>: <span class="ident">StableDeref</span> <span class="op">+</span> <span class="ident">Deref</span>,
 {
     <span class="doccomment">/// Construct a [`Yoke`]`&lt;Y, C&gt;` from a cart implementing `StableDeref` by zero-copy cloning</span>
@@ -309,9 +284,10 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;demo&quot;, yoke.get());</span>
     <span class="doccomment">/// ```</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_zero_copy_cart</span>(<span class="ident">cart</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="ident">::attach_to_cart_badly</span>(<span class="ident">cart</span>, <span class="ident">Y::zero_copy_from</span>)
+        <span class="ident">Yoke</span>::<span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="ident">::attach_to_cart</span>(<span class="ident">cart</span>, <span class="op">|</span><span class="ident">c</span><span class="op">|</span> {
+            <span class="ident">YokeTraitHack</span>::<span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span><span class="ident">::zero_copy_from</span>(<span class="ident">c</span>).<span class="number">0</span>
+        })
     }
 }
 
@@ -321,47 +297,47 @@
 <span class="comment">// specialization.</span>
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">str</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Cow::Borrowed</span>(<span class="ident">cart</span>)
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">str</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Cow::Borrowed</span>(<span class="ident">cart</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">str</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">cart</span>
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">str</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">cart</span>
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C</span>, <span class="ident">T</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">cart</span>.<span class="ident">as_ref</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::zero_copy_from</span>(<span class="ident">c</span>))
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C1</span>, <span class="ident">T1</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C1</span><span class="op">&gt;</span>, <span class="ident">C2</span>, <span class="ident">T2</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C2</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span>(<span class="ident">C1</span>, <span class="ident">C2</span>)<span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T1</span>, <span class="ident">T2</span>) {
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
-        <span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> (<span class="ident">C1</span>, <span class="ident">C2</span>),
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="op">&lt;</span><span class="ident">T1</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="op">&lt;</span><span class="ident">T2</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>) {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C1</span>, <span class="ident">T1</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C1</span><span class="op">&gt;</span>, <span class="ident">C2</span>, <span class="ident">T2</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">C2</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, (<span class="ident">C1</span>, <span class="ident">C2</span>)<span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">T1</span>, <span class="ident">T2</span>)
+{
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> (<span class="ident">C1</span>, <span class="ident">C2</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         (
             <span class="op">&lt;</span><span class="ident">T1</span> <span class="kw">as</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C1</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::zero_copy_from</span>(<span class="kw-2">&amp;</span><span class="ident">cart</span>.<span class="number">0</span>),
             <span class="op">&lt;</span><span class="ident">T2</span> <span class="kw">as</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">C2</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::zero_copy_from</span>(<span class="kw-2">&amp;</span><span class="ident">cart</span>.<span class="number">1</span>),
@@ -376,23 +352,23 @@
 <span class="comment">// or inference are involved, and the proc macro does not necessarily have</span>
 <span class="comment">// enough type information to figure this out on its own.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">ToOwned</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">B</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">B</span>: <span class="ident">ToOwned</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">B</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">B</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">B</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">B</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Cow::Borrowed</span>(<span class="ident">cart</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">str</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> <span class="ident">str</span> {
         <span class="ident">cart</span>
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">T</span>] {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;zcf</span>, [<span class="ident">T</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> [<span class="ident">T</span>] {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero_copy_from</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">T</span>] {
+    <span class="kw">fn</span> <span class="ident">zero_copy_from</span>(<span class="ident">cart</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> [<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;zcf</span> [<span class="ident">T</span>] {
         <span class="ident">cart</span>
     }
 }

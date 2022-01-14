@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ErasedDataStructBox",""],["ErasedDataStructMarker","Marker type for [`ErasedDataStruct`]."]],"trait":[["ErasedDataProvider","A type-erased data provider that loads a payload of types implementing [`Any`]."],["ErasedDataStruct","Auto-implemented trait allowing for type erasure of data provider structs."]]});

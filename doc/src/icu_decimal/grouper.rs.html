@@ -130,6 +130,13 @@
 <span id="130">130</span>
 <span id="131">131</span>
 <span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -179,7 +186,7 @@
     <span class="kw">use</span> <span class="ident">fixed_decimal::FixedDecimal</span>;
     <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
     <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">icu_provider::struct_provider::StructProvider</span>;
+    <span class="kw">use</span> <span class="ident">icu_provider::struct_provider::AnyPayloadProvider</span>;
     <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
     <span class="kw">let</span> <span class="ident">western_sizes</span> <span class="op">=</span> <span class="ident">GroupingSizesV1</span> {
@@ -247,16 +254,23 @@
                 <span class="ident">grouping_sizes</span>: <span class="ident">cas</span>.<span class="ident">sizes</span>,
                 ..<span class="ident">Default::default</span>()
             };
-            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">StructProvider</span> {
+            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">AnyPayloadProvider</span> {
                 <span class="ident">key</span>: <span class="ident"><span class="kw">crate</span>::provider::key::SYMBOLS_V1</span>,
-                <span class="ident">data</span>: <span class="ident">DataPayload::from_owned</span>(<span class="ident">data_struct</span>),
+                <span class="ident">data</span>: <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::provider::DecimalSymbolsV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(
+                    <span class="ident">data_struct</span>,
+                )
+                .<span class="ident">wrap_into_any_payload</span>(),
             };
             <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">options::FixedDecimalFormatOptions</span> {
                 <span class="ident">grouping_strategy</span>: <span class="ident">cas</span>.<span class="ident">strategy</span>,
                 ..<span class="ident">Default::default</span>()
             };
-            <span class="kw">let</span> <span class="ident">fdf</span> <span class="op">=</span>
-                <span class="ident">FixedDecimalFormat::try_new</span>(<span class="ident">LanguageIdentifier::und</span>(), <span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="ident">options</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">fdf</span> <span class="op">=</span> <span class="ident">FixedDecimalFormat::try_new</span>(
+                <span class="ident">LanguageIdentifier::und</span>(),
+                <span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="ident">as_downcasting</span>(),
+                <span class="ident">options</span>,
+            )
+            .<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">actual</span> <span class="op">=</span> <span class="ident">fdf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">dec</span>);
             <span class="macro">assert_eq!</span>(<span class="ident">cas</span>.<span class="ident">expected</span>[<span class="ident">i</span>], <span class="ident">actual</span>.<span class="ident">writeable_to_string</span>(), <span class="string">&quot;{:?}&quot;</span>, <span class="ident">cas</span>);
         }

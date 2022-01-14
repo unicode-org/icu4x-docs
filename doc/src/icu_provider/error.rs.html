@@ -300,12 +300,34 @@
 <span id="300">300</span>
 <span id="301">301</span>
 <span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">core::any::TypeId</span>;
 <span class="kw">use</span> <span class="ident">displaydoc::Display</span>;
 
 <span class="doccomment">/// A list specifying general categories of data provider error.</span>
@@ -347,10 +369,10 @@
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Resource blocked by filter&quot;</span>)]</span>
     <span class="ident">FilteredResource</span>,
 
-    <span class="doccomment">/// The generic type parameter does not match the TypeId. The actual TypeId is stored</span>
+    <span class="doccomment">/// The generic type parameter does not match the TypeId. The expected type name is stored</span>
     <span class="doccomment">/// as context when this error is returned.</span>
-    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Mismatched type information (expected {0:?})&quot;</span>)]</span>
-    <span class="ident">MismatchedType</span>(<span class="ident">TypeId</span>),
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Mismatched types: tried to downcast with {0}, but actual type is different&quot;</span>)]</span>
+    <span class="ident">MismatchedType</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>),
 
     <span class="doccomment">/// The payload is missing. This is usually caused by a previous error.</span>
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Missing payload&quot;</span>)]</span>
@@ -362,16 +384,20 @@
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Mutex error&quot;</span>)]</span>
     <span class="ident">Mutex</span>,
 
-    <span class="doccomment">/// An error occurred while accessing a system resource.</span>
-    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;I/O error: {0:?}&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-    <span class="ident">Io</span>(<span class="ident">std::io::ErrorKind</span>),
+    <span class="doccomment">/// A data provider object was given to an operation in an invalid state.</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Invalid state&quot;</span>)]</span>
+    <span class="ident">InvalidState</span>,
 
     <span class="doccomment">/// An unspecified error occurred, such as a Serde error.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Check debug logs for potentially more information.</span>
     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;Custom&quot;</span>)]</span>
     <span class="ident">Custom</span>,
+
+    <span class="doccomment">/// An error occurred while accessing a system resource.</span>
+    <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;I/O error: {0:?}&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+    <span class="ident">Io</span>(<span class="ident">std::io::ErrorKind</span>),
 }
 
 <span class="doccomment">/// The error type for ICU4X data provider operations.</span>
@@ -558,6 +584,26 @@
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;log_error_context&quot;</span>)]</span>
         <span class="macro">log::warn!</span>(<span class="string">&quot;{}: {:?}&quot;</span>, <span class="self">self</span>, <span class="ident">context</span>);
         <span class="self">self</span>
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_type</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DataError</span> {
+        <span class="ident">DataError</span> {
+            <span class="ident">kind</span>: <span class="ident">DataErrorKind::MismatchedType</span>(<span class="ident">core::any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()),
+            <span class="ident">key</span>: <span class="prelude-val">None</span>,
+            <span class="ident">str_context</span>: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">result_is_err_missing_resource_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">result</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DataError</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="macro">matches!</span>(
+            <span class="ident">result</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">DataError</span> {
+                <span class="ident">kind</span>: <span class="ident">DataErrorKind::MissingResourceKey</span>,
+                ..
+            })
+        )
     }
 }
 

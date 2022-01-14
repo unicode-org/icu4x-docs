@@ -167,6 +167,11 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -234,6 +239,15 @@
 <span class="doccomment">//! are typically deserialized later via Serde. This allows for a Serde-enabled provider</span>
 <span class="doccomment">//! to be saved as a trait object without being specific to a data struct type.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! ### `AnyProvider`</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The trait [`AnyProvider`] removes the type argument from [`DataProvider`] and requires</span>
+<span class="doccomment">//! that all data structs be convertible to the [`Any`](core::any::Any) type. This enables the</span>
+<span class="doccomment">//! processing of data without the caller knowing the underlying data struct.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Since [`AnyProvider`] is not specific to a single type, it can be useful for caches or</span>
+<span class="doccomment">//! other bulk data operations.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! ### `DataProvider&lt;SerializeMarker&gt;`</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! *Enabled with the &quot;serialize&quot; feature*</span>
@@ -242,15 +256,6 @@
 <span class="doccomment">//! input to a data exporter, such as when writing data to the filesystem.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This trait is normally implemented using the [`impl_dyn_provider!`] macro.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ### `DataProvider&lt;ErasedDataStructMarker&gt;`</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The trait [`ErasedDataProvider`] removes the type argument from [`DataProvider`] and requires</span>
-<span class="doccomment">//! that all data structs be convertible to the [`Any`](core::any::Any) type. This enables the processing of data</span>
-<span class="doccomment">//! without the caller knowing the underlying data struct.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Since [`ErasedDataProvider`] is not specific to a single type, it can be useful for caches or</span>
-<span class="doccomment">//! other bulk data operations.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This trait is normally implemented using the [`impl_dyn_provider!`] macro.</span>
 <span class="doccomment">//!</span>
@@ -265,7 +270,7 @@
 <span class="doccomment">//! [`InvariantDataProvider`]: inv::InvariantDataProvider</span>
 <span class="doccomment">//! [`StructProvider`]: struct_provider::StructProvider</span>
 <span class="doccomment">//! [`HelloWorldProvider`]: hello_world::HelloWorldProvider</span>
-<span class="doccomment">//! [`ErasedDataProvider`]: erased::ErasedDataProvider</span>
+<span class="doccomment">//! [`AnyProvider`]: any::AnyProvider</span>
 <span class="doccomment">//! [`Yokeable`]: yoke::Yokeable</span>
 <span class="doccomment">//! [`impl_dyn_provider!`]: impl_dyn_provider</span>
 
@@ -276,12 +281,11 @@
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">dynutil</span>;
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">buffer_provider</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">any</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">buf</span>;
 <span class="kw">mod</span> <span class="ident">data_provider</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">either</span>;
 <span class="kw">mod</span> <span class="ident">error</span>;
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">erased</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">export</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">filter</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fork</span>;
@@ -302,8 +306,12 @@
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
     <span class="doccomment">//! Core selection of APIs and structures for [`DataProvider`].</span>
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buffer_provider::BufferMarker</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buffer_provider::BufferProvider</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AnyMarker</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AnyPayload</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AnyProvider</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AnyResponse</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buf::BufferMarker</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buf::BufferProvider</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DataPayload</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DataProvider</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DataRequest</span>;
@@ -317,6 +325,8 @@
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::resource::ResourceOptions</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::resource::ResourcePath</span>;
 
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AsDataProviderAnyMarkerWrap</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AsDowncastingAnyProvider</span>;
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serde::AsDeserializingBufferProvider</span>;
 }

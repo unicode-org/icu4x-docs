@@ -171,18 +171,15 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="doccomment">//! Utilities for using trait objects with `DataPayload`.</span>
 
-<span class="doccomment">/// Trait to allow conversion from `DataPayload&lt;T&gt;` to `DataPayload&lt;S&gt;` where `T` implements `S`.</span>
+<span class="doccomment">/// Trait to allow conversion from `DataPayload&lt;T&gt;` to `DataPayload&lt;S&gt;`.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This is used internally by [`impl_dyn_provider!`] and is not intended to be called from userland</span>
-<span class="doccomment">/// code. You may be looking for [`DataPayload::downcast`], which converts in the other direction.</span>
+<span class="doccomment">/// This trait can be manually implemented in order to enable [`impl_dyn_provider`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`DataPayload::downcast`]: crate::DataPayload::downcast</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">UpcastDataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>
@@ -195,18 +192,17 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Upcast and then downcast a data struct of type `Cow&lt;str&gt;` (cart type `String`) via</span>
-    <span class="doccomment">/// [`ErasedDataStruct`](crate::erased::ErasedDataStruct):</span>
+    <span class="doccomment">/// [`AnyPayload`](crate::any::AnyPayload):</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider::prelude::*;</span>
-    <span class="doccomment">/// use icu_provider::erased::*;</span>
     <span class="doccomment">/// use icu_provider::dynutil::UpcastDataPayload;</span>
     <span class="doccomment">/// use icu_provider::marker::CowStrMarker;</span>
     <span class="doccomment">/// use std::borrow::Cow;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let data = &quot;foo&quot;.to_string();</span>
     <span class="doccomment">/// let original = DataPayload::&lt;CowStrMarker&gt;::from_owned(Cow::Owned(data));</span>
-    <span class="doccomment">/// let upcasted = ErasedDataStructMarker::upcast(original);</span>
+    <span class="doccomment">/// let upcasted = AnyMarker::upcast(original);</span>
     <span class="doccomment">/// let downcasted = upcasted</span>
     <span class="doccomment">///     .downcast::&lt;CowStrMarker&gt;()</span>
     <span class="doccomment">///     .expect(&quot;Type conversion&quot;);</span>
@@ -215,19 +211,20 @@
     <span class="kw">fn</span> <span class="ident">upcast</span>(<span class="ident">other</span>: <span class="ident"><span class="kw">crate</span>::prelude::DataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::prelude::DataPayload</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 }
 
-<span class="doccomment">/// Implement [`DataProvider`] for a trait object `S` on a type that already implements [`DataProvider`]</span>
-<span class="doccomment">/// for one or more `M`, where `M` is a concrete type that implements the trait `S`.</span>
+<span class="doccomment">/// Implements [`DataProvider`] for a marker type `S` on a type that already implements</span>
+<span class="doccomment">/// [`DataProvider`] for one or more `M`, where `M` is a concrete type that is convertible to `S`</span>
+<span class="doccomment">/// via [`UpcastDataPayload`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Use this macro to add support to your data provider for:</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// - [`ErasedDataStruct`] if your provider can return typed objects as [`Any`](core::any::Any)</span>
+<span class="doccomment">/// - [`AnyPayload`] if your provider can return typed objects as [`Any`](core::any::Any)</span>
 <span class="doccomment">/// - [`SerializeMarker`] if your provider returns objects implementing [`serde::Serialize`]</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The second argument is a match-like construction mapping from resource keys to structs. To map</span>
 <span class="doccomment">/// multiple keys to a single data struct, use `_` as the data key.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The third argument can be either the trait object marker, like [`SerializeMarker`], or the</span>
-<span class="doccomment">/// shorthands `ERASED` or `SERDE_SE`.</span>
+<span class="doccomment">/// shorthands `ANY` or `SERDE_SE`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Lifetimes:</span>
 <span class="doccomment">///</span>
@@ -239,7 +236,6 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">/// use icu_provider::erased::ErasedDataStructMarker;</span>
 <span class="doccomment">/// use icu_provider::marker::CowStrMarker;</span>
 <span class="doccomment">/// use std::borrow::Cow;</span>
 <span class="doccomment">/// const DEMO_KEY: ResourceKey = icu_provider::resource_key!(x, &quot;foo&quot;, &quot;bar&quot;, 1);</span>
@@ -257,14 +253,14 @@
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // Implement DataProvider&lt;ErasedDataStructMarker&gt;</span>
+<span class="doccomment">/// // Implement DataProvider&lt;AnyMarker&gt;</span>
 <span class="doccomment">/// icu_provider::impl_dyn_provider!(MyProvider, {</span>
 <span class="doccomment">///     DEMO_KEY =&gt; CowStrMarker,</span>
-<span class="doccomment">/// }, ERASED);</span>
+<span class="doccomment">/// }, ANY);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Usage example</span>
 <span class="doccomment">/// let provider = MyProvider(&quot;demo&quot;.to_string());</span>
-<span class="doccomment">/// let resp: DataResponse&lt;ErasedDataStructMarker&gt; = provider</span>
+<span class="doccomment">/// let resp: DataResponse&lt;AnyMarker&gt; = provider</span>
 <span class="doccomment">///     .load_payload(&amp;DEMO_KEY.into())</span>
 <span class="doccomment">///     .expect(&quot;Loading should succeed&quot;);</span>
 <span class="doccomment">/// let payload: DataPayload&lt;CowStrMarker&gt; = resp</span>
@@ -294,19 +290,19 @@
 <span class="doccomment">/// // Send all keys to the `CowStrMarker` provider.</span>
 <span class="doccomment">/// icu_provider::impl_dyn_provider!(MyProvider, {</span>
 <span class="doccomment">///     _ =&gt; CowStrMarker,</span>
-<span class="doccomment">/// }, ERASED);</span>
+<span class="doccomment">/// }, ANY);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`DataProvider`]: crate::DataProvider</span>
-<span class="doccomment">/// [`ErasedDataStruct`]: (crate::erased::ErasedDataStruct)</span>
+<span class="doccomment">/// [`AnyPayload`]: (crate::any::AnyPayload)</span>
 <span class="doccomment">/// [`SerializeMarker`]: (crate::serde::SerializeMarker)</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">impl_dyn_provider</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">ERASED</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">ANY</span>) <span class="op">=</span><span class="op">&gt;</span> {
         <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
             { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, },
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::erased::ErasedDataStructMarker</span>
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::any::AnyMarker</span>
         );
     };
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">SERDE_SE</span>) <span class="op">=</span><span class="op">&gt;</span> {

@@ -955,6 +955,7 @@
 <span id="955">955</span>
 <span id="956">956</span>
 <span id="957">957</span>
+<span id="958">958</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -963,7 +964,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buffer_provider::BufferMarker</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buf::BufferMarker</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::{<span class="ident">DataError</span>, <span class="ident">DataErrorKind</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::marker::DataMarker</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::resource::ResourceKey</span>;
@@ -1059,7 +1060,7 @@
     <span class="doccomment">/// The language of the returned data, or None if the resource key isn&#39;t localized.</span>
     <span class="kw">pub</span> <span class="ident">data_langid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The format of the buffer for buffer-backed data, if known (for example, JSON).</span>
-    <span class="kw">pub</span> <span class="ident">buffer_format</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::buffer_provider::BufferFormat</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">buffer_format</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::buf::BufferFormat</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// A container for data payloads returned from a [`DataProvider`].</span>
@@ -1089,11 +1090,6 @@
 <span class="doccomment">/// To transform a [`DataPayload`] to a different type backed by the same data store (cart), use</span>
 <span class="doccomment">/// [`DataPayload::map_project()`] or one of its sister methods.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ## Downcasting from a trait object</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// If you have a [`DataPayload`]`&lt;`[`ErasedDataStructMarker`]`&gt;`, use [`DataPayload::downcast()`]</span>
-<span class="doccomment">/// to transform it into a payload of a concrete type.</span>
-<span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Basic usage, using the `CowStrMarker` marker:</span>
@@ -1107,8 +1103,6 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(&quot;Demo&quot;, payload.get());</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`ErasedDataStructMarker`]: crate::erased::ErasedDataStructMarker</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
@@ -1305,6 +1299,14 @@
         <span class="self">Self</span> {
             <span class="ident">yoke</span>: <span class="ident">Yoke::new_owned</span>(<span class="ident">data</span>),
         }
+    }
+
+    <span class="doccomment">/// Convert a DataPayload that was created via [`DataPayload::from_owned()`] back into the</span>
+    <span class="doccomment">/// concrete type used to construct it.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_unwrap_owned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">yoke</span>
+            .<span class="ident">try_into_yokeable</span>()
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">DataErrorKind::InvalidState</span>.<span class="ident">with_str_context</span>(<span class="string">&quot;try_unwrap_owned&quot;</span>))
     }
 
     <span class="doccomment">/// Mutate the data contained in this DataPayload.</span>

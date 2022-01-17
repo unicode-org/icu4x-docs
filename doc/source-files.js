@@ -1,5 +1,7 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["crabbake"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["crabbake_derive"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["deduplicating_array"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","signum.rs","uint_iterator.rs"]};
 sourcesIndex["formatted_string"] = {"name":"","files":["error.rs","formatted_string.rs","lib.rs"]};

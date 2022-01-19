@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FormattedStringError",""]],"trait":[["FormattedStringLike","A string with L levels of annotations of type F. For N = 0, this is implemented for `&str`, for higher N see LayeredFormattedString."]],"type":[["FormattedString",""]]});

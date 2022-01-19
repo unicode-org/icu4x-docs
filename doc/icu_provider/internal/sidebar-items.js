@@ -1,1 +1,0 @@
-initSidebarItems({"macro":[["tinystr16","Re-export tinystr16 for macro resource_key!()"],["tinystr4","Re-export tinystr4 for macro resource_key!()"]]});

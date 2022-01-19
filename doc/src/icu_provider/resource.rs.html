@@ -534,6 +534,46 @@
 <span id="533">533</span>
 <span id="534">534</span>
 <span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -541,128 +581,209 @@
 <span class="doccomment">//! Resource paths and related types.</span>
 
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
-<span class="kw">use</span> <span class="ident">alloc::format</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::{<span class="ident">DataError</span>, <span class="ident">DataErrorKind</span>};
-<span class="kw">use</span> <span class="ident">core::borrow::Borrow</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers</span>;
 <span class="kw">use</span> <span class="ident">core::default::Default</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::fmt::Write</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
-<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">TinyStr16</span>, <span class="ident">TinyStr4</span>};
 <span class="kw">use</span> <span class="ident">writeable</span>::{<span class="ident">LengthHint</span>, <span class="ident">Writeable</span>};
 
-<span class="doccomment">/// A top-level collection of related resource keys.</span>
-<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ResourceCategory</span> {
-    <span class="ident">Core</span>,
-    <span class="ident">Calendar</span>,
-    <span class="ident">DateTime</span>,
-    <span class="ident">Decimal</span>,
-    <span class="ident">LocaleCanonicalizer</span>,
-    <span class="ident">Plurals</span>,
-    <span class="ident">TimeZone</span>,
-    <span class="ident">Properties</span>,
-    <span class="ident">ListFormatter</span>,
-    <span class="ident">Segmenter</span>,
-    <span class="ident">PrivateUse</span>(<span class="ident">TinyStr4</span>),
+<span class="doccomment">/// A compact hash of a [`ResourceKey`]. Useful for keys in maps.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKeyHash</span>([<span class="ident">u8</span>; <span class="number">4</span>]);
+
+<span class="kw">impl</span> <span class="ident">ResourceKeyHash</span> {
+    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">compute_from_str</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">helpers::fxhash_32</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>()).<span class="ident">to_le_bytes</span>())
+    }
 }
 
-<span class="kw">impl</span> <span class="ident">ResourceCategory</span> {
-    <span class="doccomment">/// Gets or builds a string form of this [`ResourceCategory`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::Core</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;core&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::Calendar</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;calendar&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::DateTime</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;datetime&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::Decimal</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;decimal&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::LocaleCanonicalizer</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;locale_canonicalizer&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::Plurals</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;plurals&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::TimeZone</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;time_zone&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::Properties</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;props&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::ListFormatter</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;list_formatter&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::Segmenter</span> =&gt; <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;segmenter&quot;</span>),
-            <span class="ident"><span class="self">Self</span>::PrivateUse</span>(<span class="ident">id</span>) =&gt; {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;x-&quot;</span>);
-                <span class="ident">result</span>.<span class="ident">push_str</span>(<span class="ident">id</span>.<span class="ident">as_str</span>());
-                <span class="ident">Cow::Owned</span>(<span class="ident">result</span>)
-            }
+<span class="doccomment">/// The resource key used for loading data from an ICU4X data provider.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// A resource key is tightly coupled with the code that uses it to load data at runtime.</span>
+<span class="doccomment">/// Executables can be searched for ResourceKey instances to produce optimized data files.</span>
+<span class="doccomment">/// Therefore, users should not generally create ResourceKey instances; they should instead use</span>
+<span class="doccomment">/// the ones exported by a component.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKey</span> {
+    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    <span class="ident">hash</span>: <span class="ident">ResourceKeyHash</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">ResourceKey</span> {
+    <span class="doccomment">/// Gets a human-readable representation of a [`ResourceKey`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The human-readable path string always contains at least one &#39;/&#39;, and it ends with &#39;@&#39;</span>
+    <span class="doccomment">/// followed by one or more digits. Paths do not contain characters other than ASCII,</span>
+    <span class="doccomment">/// &#39;_&#39;, &#39;/&#39;, &#39;=&#39;, and &#39;@&#39;.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Useful for reading and writing data to a file system.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
+        <span class="self">self</span>.<span class="ident">path</span>
+    }
+
+    <span class="doccomment">/// Gets a machine-readable representation of a [`ResourceKey`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The machine-readable hash is 4 bytes and can be used as the key in a map.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The hash is a 32-bit FxHash of the path, computed as if on a little-endian platform.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ResourceKeyHash</span> {
+        <span class="self">self</span>.<span class="ident">hash</span>
+    }
+
+    <span class="doccomment">/// Creates a new ResourceKey from a path, returning an error if the path is invalid.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// It is intended that `ResourceKey` objects are const-constructed. To force construction</span>
+    <span class="doccomment">/// into a const context, use [`resource_key!()`]. Doing so ensures that compile-time key</span>
+    <span class="doccomment">/// extraction functions as expected.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Const constructed (preferred):</span>
+    <span class="doccomment">/// const k1: ResourceKey = icu_provider::resource_key!(&quot;foo/bar@1&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Runtime constructed:</span>
+    <span class="doccomment">/// let k2: ResourceKey = ResourceKey::try_new(&quot;foo/bar@1&quot;).unwrap();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(k1, k2);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="ident"><span class="self">Self</span>::check_path_syntax</span>(<span class="ident">path</span>) {
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+                <span class="ident">path</span>,
+                <span class="ident">hash</span>: <span class="ident">ResourceKeyHash::compute_from_str</span>(<span class="ident">path</span>),
+            }),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">DataError::custom</span>(<span class="string">&quot;resource key syntax error&quot;</span>)),
         }
     }
-}
 
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">ResourceCategory</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">as_str</span>())
+    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">check_path_syntax</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+        <span class="comment">// Approximate regex: \w+(/\w+)*@\d+</span>
+        <span class="comment">// State 0 = start of string</span>
+        <span class="comment">// State 1 = after first character</span>
+        <span class="comment">// State 2 = after a slash</span>
+        <span class="comment">// State 3 = after a character after a slash</span>
+        <span class="comment">// State 4 = after @</span>
+        <span class="comment">// State 5 = after a digit after @</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="ident">path_bytes</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">as_bytes</span>();
+        <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">path_bytes</span>.<span class="ident">len</span>() {
+            <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">path_bytes</span>[<span class="ident">i</span>];
+            <span class="ident">state</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">state</span>, <span class="ident">c</span>) {
+                (<span class="number">0</span> <span class="op">|</span> <span class="number">1</span>, <span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>) =&gt; <span class="number">1</span>,
+                (<span class="number">1</span>, <span class="string">b&#39;/&#39;</span>) =&gt; <span class="number">2</span>,
+                (<span class="number">2</span> <span class="op">|</span> <span class="number">3</span>, <span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>) =&gt; <span class="number">3</span>,
+                (<span class="number">3</span>, <span class="string">b&#39;/&#39;</span>) =&gt; <span class="number">2</span>,
+                (<span class="number">3</span>, <span class="string">b&#39;@&#39;</span>) =&gt; <span class="number">4</span>,
+                (<span class="number">4</span> <span class="op">|</span> <span class="number">5</span>, <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span>) =&gt; <span class="number">5</span>,
+                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(()),
+            };
+            <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+        <span class="kw">if</span> <span class="ident">state</span> <span class="op">!</span><span class="op">=</span> <span class="number">5</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">writeable::Writeable</span> <span class="kw">for</span> <span class="ident">ResourceCategory</span> {
-    <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
-        <span class="ident">sink</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">as_str</span>())
-    }
+<span class="attribute">#[<span class="ident">test</span>]</span>
+<span class="kw">fn</span> <span class="ident">test_path_syntax</span>() {
+    <span class="comment">// Valid keys:</span>
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello/world@1&quot;</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)));
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello/world/foo@1&quot;</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)));
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello/world@999&quot;</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)));
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello_world/foo@1&quot;</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)));
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello_458/world@1&quot;</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)));
 
-    <span class="kw">fn</span> <span class="ident">write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">writeable::LengthHint</span> {
-        <span class="ident">writeable::LengthHint::exact</span>(<span class="self">self</span>.<span class="ident">as_str</span>().<span class="ident">len</span>())
-    }
-}
+    <span class="comment">// No slash:</span>
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello_world@1&quot;</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
 
-<span class="doccomment">/// A category, subcategory, and version, used for requesting data from a</span>
-<span class="doccomment">/// [`DataProvider`](crate::DataProvider).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The fields in a [`ResourceKey`] should generally be known at compile time.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Use [`resource_key!`] as a shortcut to create resource keys in code.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKey</span> {
-    <span class="kw">pub</span> <span class="ident">category</span>: <span class="ident">ResourceCategory</span>,
-    <span class="kw">pub</span> <span class="ident">sub_category</span>: <span class="ident">TinyStr16</span>,
-    <span class="kw">pub</span> <span class="ident">version</span>: <span class="ident">u16</span>,
+    <span class="comment">// No version:</span>
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello/world&quot;</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello/world@&quot;</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;hello/world@foo&quot;</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
+
+    <span class="comment">// Invalid characters:</span>
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">ResourceKey::try_new</span>(<span class="string">&quot;你好/世界@1&quot;</span>), <span class="prelude-val">Err</span>(<span class="kw">_</span>)));
 }
 
 <span class="doccomment">/// Shortcut to construct a const resource identifier.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// # Examples</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Create a private-use ResourceKey:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// const MY_PRIVATE_USE_KEY: ResourceKey = icu_provider::resource_key!(x, &quot;foo&quot;, &quot;bar&quot;, 1);</span>
-<span class="doccomment">/// assert_eq!(&quot;x-foo/bar@1&quot;, format!(&quot;{}&quot;, MY_PRIVATE_USE_KEY));</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Create a ResourceKey for a specific [`ResourceCategory`] (for ICU4X library code only):</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// const MY_PRIVATE_USE_KEY: ResourceKey = icu_provider::resource_key!(Plurals, &quot;ordinal&quot;, 1);</span>
-<span class="doccomment">/// assert_eq!(&quot;plurals/ordinal@1&quot;, format!(&quot;{}&quot;, MY_PRIVATE_USE_KEY));</span>
-<span class="doccomment">/// ```</span>
+<span class="doccomment">/// For example, see [`ResourceKey::try_new()`].</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">resource_key</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceCategory</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>:<span class="ident">literal</span>) =&gt; {{
+        <span class="comment">// Force the ResourceKey into a const context</span>
+        <span class="kw">const</span> <span class="ident">RESOURCE_KEY_MACRO_CONST</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span> <span class="op">=</span> {
+            <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey::try_new</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="macro">concat!</span>(<span class="string">&quot;Invalid resource key: &quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>)),
+            }
+        };
+        <span class="ident">RESOURCE_KEY_MACRO_CONST</span>
+    }};
+    <span class="comment">// TODO(#570): Migrate call sites to the all-in-one string version of the macro above,</span>
+    <span class="comment">// and then delete all of the macro branches that follow.</span>
+    (<span class="ident">Core</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;core&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
     };
-    (<span class="ident">x</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pu</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceCategory::PrivateUse</span>(<span class="macro-nonterminal">$</span><span class="macro">crate::internal::tinystr4!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pu</span>)),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>,
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>
-        )
+    (<span class="ident">Calendar</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;calendar&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span> {
-            <span class="ident">category</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>,
-            <span class="ident">sub_category</span>: <span class="macro-nonterminal">$</span><span class="macro">crate::internal::tinystr16!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>),
-            <span class="ident">version</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>,
-        }
+    (<span class="ident">DateTime</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;datetime&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
     };
+    (<span class="ident">Decimal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;decimal&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="ident">LocaleCanonicalizer</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;locale_canonicalizer&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="ident">Plurals</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;plurals&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="ident">TimeZone</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;time_zone&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="ident">Properties</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;props&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="ident">ListFormatter</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;list_formatter&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="ident">Segmenter</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::resource_key!</span>(<span class="string">&quot;segmenter&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>)
+    };
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>:<span class="ident">tt</span>) =&gt; {{
+        <span class="comment">// Force the ResourceKey into a const context</span>
+        <span class="kw">const</span> <span class="ident">RESOURCE_KEY_MACRO_CONST</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span> <span class="op">=</span> {
+            <span class="comment">// Note: concat!() does not seem to work as a literal argument to another macro call.</span>
+            <span class="comment">// This branch will be deleted anyway in #570.</span>
+            <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey::try_new</span>(<span class="macro">concat!</span>(
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">category</span>,
+                <span class="string">&quot;/&quot;</span>,
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sub_category</span>,
+                <span class="string">&quot;@&quot;</span>,
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">version</span>
+            )) {
+                <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="macro">concat!</span>(<span class="string">&quot;Invalid resource key&quot;</span>)),
+            }
+        };
+        <span class="ident">RESOURCE_KEY_MACRO_CONST</span>
+    }};
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">ResourceKey</span> {
@@ -682,19 +803,11 @@
 
 <span class="kw">impl</span> <span class="ident">Writeable</span> <span class="kw">for</span> <span class="ident">ResourceKey</span> {
     <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
-        <span class="ident">sink</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">category</span>.<span class="ident">as_str</span>())<span class="question-mark">?</span>;
-        <span class="ident">sink</span>.<span class="ident">write_char</span>(<span class="string">&#39;/&#39;</span>)<span class="question-mark">?</span>;
-        <span class="ident">sink</span>.<span class="ident">write_str</span>(<span class="self">self</span>.<span class="ident">sub_category</span>.<span class="ident">as_str</span>())<span class="question-mark">?</span>;
-        <span class="ident">sink</span>.<span class="ident">write_char</span>(<span class="string">&#39;@&#39;</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">version</span>.<span class="ident">write_to</span>(<span class="ident">sink</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
+        <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">write_to</span>(<span class="ident">sink</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">LengthHint</span> {
-        <span class="ident">LengthHint::exact</span>(<span class="number">2</span>)
-            <span class="op">+</span> <span class="self">self</span>.<span class="ident">category</span>.<span class="ident">as_str</span>().<span class="ident">len</span>()
-            <span class="op">+</span> <span class="self">self</span>.<span class="ident">sub_category</span>.<span class="ident">len</span>()
-            <span class="op">+</span> <span class="self">self</span>.<span class="ident">version</span>.<span class="ident">write_len</span>()
+        <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">write_len</span>()
     }
 }
 
@@ -708,15 +821,39 @@
     <span class="doccomment">/// use icu_provider::prelude::*;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let resc_key = icu_provider::hello_world::key::HELLO_WORLD_V1;</span>
-    <span class="doccomment">/// let components = resc_key.get_components();</span>
+    <span class="doccomment">/// let components: Vec&lt;&amp;str&gt; = resc_key</span>
+    <span class="doccomment">///     .iter_components()</span>
+    <span class="doccomment">///     .collect();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(</span>
     <span class="doccomment">///     [&quot;core&quot;, &quot;helloworld@1&quot;],</span>
-    <span class="doccomment">///     components.iter().collect::&lt;Vec&lt;&amp;str&gt;&gt;()[..]</span>
+    <span class="doccomment">///     components[..]</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_components</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ResourceKeyComponents</span> {
-        <span class="self">self</span>.<span class="ident">into</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_components</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
+        <span class="comment">// TODO(#1516): Consider alternatives to this method.</span>
+        <span class="self">self</span>.<span class="ident">get_path</span>().<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>)
+    }
+
+    <span class="doccomment">/// Gets the last path component of a [`ResourceKey`] without the version suffix.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let resc_key = icu_provider::hello_world::key::HELLO_WORLD_V1;</span>
+    <span class="doccomment">/// assert_eq!(&quot;helloworld&quot;, resc_key.get_last_component_no_version());</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_last_component_no_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
+        <span class="comment">// This cannot fail because of the preconditions on path (at least one &#39;/&#39; and &#39;@&#39;)</span>
+        <span class="comment">// TODO(#1515): Consider deleting this method.</span>
+        <span class="self">self</span>.<span class="ident">iter_components</span>()
+            .<span class="ident">last</span>()
+            .<span class="ident">unwrap</span>()
+            .<span class="ident">split</span>(<span class="string">&#39;@&#39;</span>)
+            .<span class="ident">next</span>()
+            .<span class="ident">unwrap</span>()
     }
 
     <span class="doccomment">/// Returns [`Ok`] if this data key matches the argument, or the appropriate error.</span>
@@ -728,9 +865,9 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider::prelude::*;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// const FOO_BAR: ResourceKey = icu_provider::resource_key!(x, &quot;foo&quot;, &quot;bar&quot;, 1);</span>
-    <span class="doccomment">/// const FOO_BAZ: ResourceKey = icu_provider::resource_key!(x, &quot;foo&quot;, &quot;baz&quot;, 1);</span>
-    <span class="doccomment">/// const BAR_BAZ: ResourceKey = icu_provider::resource_key!(x, &quot;bar&quot;, &quot;baz&quot;, 1);</span>
+    <span class="doccomment">/// const FOO_BAR: ResourceKey = icu_provider::resource_key!(&quot;foo/bar@1&quot;);</span>
+    <span class="doccomment">/// const FOO_BAZ: ResourceKey = icu_provider::resource_key!(&quot;foo/baz@1&quot;);</span>
+    <span class="doccomment">/// const BAR_BAZ: ResourceKey = icu_provider::resource_key!(&quot;bar/baz@1&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert!(matches!(</span>
     <span class="doccomment">///     FOO_BAR.match_key(FOO_BAR),</span>
@@ -756,33 +893,6 @@
             <span class="prelude-val">Ok</span>(())
         } <span class="kw">else</span> {
             <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
-        }
-    }
-}
-
-<span class="doccomment">/// The standard components of a [`ResourceKey`] path.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKeyComponents</span> {
-    <span class="ident">components</span>: [<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>; <span class="number">2</span>],
-}
-
-<span class="kw">impl</span> <span class="ident">ResourceKeyComponents</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">components</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">cow</span><span class="op">|</span> <span class="ident">cow</span>.<span class="ident">borrow</span>())
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ResourceKeyComponents</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">components</span>: [
-                <span class="ident">resc_key</span>.<span class="ident">category</span>.<span class="ident">as_str</span>(),
-                <span class="comment">// TODO: Evalute the size penalty of this format!</span>
-                <span class="ident">Cow::Owned</span>(<span class="macro">format!</span>(
-                    <span class="string">&quot;{}@{}&quot;</span>,
-                    <span class="ident">resc_key</span>.<span class="ident">sub_category</span>.<span class="ident">as_str</span>(),
-                    <span class="ident">resc_key</span>.<span class="ident">version</span>
-                )),
-            ],
         }
     }
 }
@@ -868,47 +978,28 @@
     <span class="doccomment">///     variant: Some(Cow::Borrowed(&quot;GBP&quot;)),</span>
     <span class="doccomment">///     langid: Some(langid!(&quot;pt_BR&quot;)),</span>
     <span class="doccomment">/// };</span>
-    <span class="doccomment">/// let components = resc_options.get_components();</span>
+    <span class="doccomment">/// let components: Vec&lt;String&gt; = resc_options</span>
+    <span class="doccomment">///     .iter_components()</span>
+    <span class="doccomment">///     .map(|s| s.into_owned())</span>
+    <span class="doccomment">///     .collect();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(</span>
     <span class="doccomment">///     [&quot;GBP&quot;, &quot;pt-BR&quot;],</span>
-    <span class="doccomment">///     components.iter().collect::&lt;Vec&lt;&amp;str&gt;&gt;()[..]</span>
+    <span class="doccomment">///     components[..]</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_components</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ResourceOptionsComponents</span> {
-        <span class="self">self</span>.<span class="ident">into</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_components</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="comment">// TODO(#1516): Consider alternatives to this method.</span>
+        <span class="kw">let</span> <span class="ident">components_array</span>: [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>; <span class="number">2</span>] <span class="op">=</span> [
+            <span class="self">self</span>.<span class="ident">variant</span>.<span class="ident">clone</span>(),
+            <span class="self">self</span>.<span class="ident">langid</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Cow::Owned</span>(<span class="ident">s</span>.<span class="ident">to_string</span>())),
+        ];
+        <span class="ident">IntoIterator::into_iter</span>(<span class="ident">components_array</span>).<span class="ident">flatten</span>()
     }
 
     <span class="doccomment">/// Returns whether this [`ResourceOptions`] has all empty fields (no components).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::default</span>()
-    }
-}
-
-<span class="doccomment">/// The standard components of a [`ResourceOptions`] path.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceOptionsComponents</span> {
-    <span class="ident">components</span>: [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>; <span class="number">2</span>],
-}
-
-<span class="kw">impl</span> <span class="ident">ResourceOptionsComponents</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">components</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">option</span><span class="op">|</span> <span class="ident">option</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">cow</span><span class="op">|</span> <span class="ident">cow</span>.<span class="ident">borrow</span>()))
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ResourceOptionsComponents</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">resc_options</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">components</span>: [
-                <span class="ident">resc_options</span>.<span class="ident">variant</span>.<span class="ident">as_ref</span>().<span class="ident">cloned</span>(),
-                <span class="ident">resc_options</span>
-                    .<span class="ident">langid</span>
-                    .<span class="ident">as_ref</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Cow::Owned</span>(<span class="ident">s</span>.<span class="ident">to_string</span>())),
-            ],
-        }
     }
 }
 
@@ -952,33 +1043,24 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">tinystr::tinystr4</span>;
 
     <span class="kw">struct</span> <span class="ident">KeyTestCase</span> {
         <span class="kw">pub</span> <span class="ident">resc_key</span>: <span class="ident">ResourceKey</span>,
         <span class="kw">pub</span> <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
     }
 
-    <span class="kw">fn</span> <span class="ident">get_key_test_cases</span>() -&gt; [<span class="ident">KeyTestCase</span>; <span class="number">4</span>] {
+    <span class="kw">fn</span> <span class="ident">get_key_test_cases</span>() -&gt; [<span class="ident">KeyTestCase</span>; <span class="number">3</span>] {
         [
             <span class="ident">KeyTestCase</span> {
-                <span class="ident">resc_key</span>: <span class="macro">resource_key!</span>(<span class="ident">Core</span>, <span class="string">&quot;cardinal&quot;</span>, <span class="number">1</span>),
+                <span class="ident">resc_key</span>: <span class="macro">resource_key!</span>(<span class="string">&quot;core/cardinal@1&quot;</span>),
                 <span class="ident">expected</span>: <span class="string">&quot;core/cardinal@1&quot;</span>,
             },
             <span class="ident">KeyTestCase</span> {
-                <span class="ident">resc_key</span>: <span class="ident">ResourceKey</span> {
-                    <span class="ident">category</span>: <span class="ident">ResourceCategory::PrivateUse</span>(<span class="macro">tinystr4!</span>(<span class="string">&quot;priv&quot;</span>)),
-                    <span class="ident">sub_category</span>: <span class="macro">tinystr::tinystr16!</span>(<span class="string">&quot;cardinal&quot;</span>),
-                    <span class="ident">version</span>: <span class="number">1</span>,
-                },
-                <span class="ident">expected</span>: <span class="string">&quot;x-priv/cardinal@1&quot;</span>,
-            },
-            <span class="ident">KeyTestCase</span> {
-                <span class="ident">resc_key</span>: <span class="macro">resource_key!</span>(<span class="ident">Core</span>, <span class="string">&quot;maxlengthsubcatg&quot;</span>, <span class="number">1</span>),
+                <span class="ident">resc_key</span>: <span class="macro">resource_key!</span>(<span class="string">&quot;core/maxlengthsubcatg@1&quot;</span>),
                 <span class="ident">expected</span>: <span class="string">&quot;core/maxlengthsubcatg@1&quot;</span>,
             },
             <span class="ident">KeyTestCase</span> {
-                <span class="ident">resc_key</span>: <span class="macro">resource_key!</span>(<span class="ident">Core</span>, <span class="string">&quot;cardinal&quot;</span>, <span class="number">65535</span>),
+                <span class="ident">resc_key</span>: <span class="macro">resource_key!</span>(<span class="string">&quot;core/cardinal@65535&quot;</span>),
                 <span class="ident">expected</span>: <span class="string">&quot;core/cardinal@65535&quot;</span>,
             },
         ]
@@ -992,8 +1074,7 @@
             <span class="macro">assert_eq!</span>(
                 <span class="ident">cas</span>.<span class="ident">expected</span>,
                 <span class="ident">cas</span>.<span class="ident">resc_key</span>
-                    .<span class="ident">get_components</span>()
-                    .<span class="ident">iter</span>()
+                    .<span class="ident">iter_components</span>()
                     .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                     .<span class="ident">join</span>(<span class="string">&quot;/&quot;</span>)
             );
@@ -1040,9 +1121,8 @@
             <span class="macro">assert_eq!</span>(
                 <span class="ident">cas</span>.<span class="ident">expected</span>,
                 <span class="ident">cas</span>.<span class="ident">resc_options</span>
-                    .<span class="ident">get_components</span>()
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                    .<span class="ident">iter_components</span>()
+                    .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                     .<span class="ident">join</span>(<span class="string">&quot;/&quot;</span>)
             );
         }

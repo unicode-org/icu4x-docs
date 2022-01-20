@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1642614844185,
+  "lastUpdate": 1642640039008,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -24569,6 +24569,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 14187,
             "range": "± 731",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f46172f403b4456bc8abaed8e000a7b44d6e5234",
+          "message": "Simplifying `assert_writeable_parts_eq` (#1522)",
+          "timestamp": "2022-01-19T23:56:38+01:00",
+          "tree_id": "14072e932c76438785b022379f8422b17e4100cc",
+          "url": "https://github.com/unicode-org/icu4x/commit/f46172f403b4456bc8abaed8e000a7b44d6e5234"
+        },
+        "date": 1642633633185,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 864,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5348,
+            "range": "± 11",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 14143,
+            "range": "± 54",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "41129501+gnrunge@users.noreply.github.com",
+            "name": "Norbert Runge",
+            "username": "gnrunge"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "642f910b5b26138fc0ed4f6e927306ee9a544eec",
+          "message": "Consolidates wasm-opt and wabt package installation. devDependencies for both (#1525)\n\npackages are put into ffi/diplomat/wasm/package.json. Installation of the npm\r\npackages is now performed with 'npm -i', wasm-opt and wabt packages are\r\ninstalled under ffi/diplomat/wasm/node_modules, PATH is set accordingly.\r\nPR includes regenerated package-lock.json and updated binsize CI task.\r\n\r\nPR part of issue #1076.",
+          "timestamp": "2022-01-19T16:43:38-08:00",
+          "tree_id": "078e585cab56ce63b399c1eeec14bb5aa0f3d033",
+          "url": "https://github.com/unicode-org/icu4x/commit/642f910b5b26138fc0ed4f6e927306ee9a544eec"
+        },
+        "date": 1642640028121,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 984,
+            "range": "± 18",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6608,
+            "range": "± 123",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 18009,
+            "range": "± 1341",
             "unit": "ns/iter"
           }
         ]

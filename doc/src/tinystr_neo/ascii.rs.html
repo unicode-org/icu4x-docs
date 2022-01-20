@@ -79,6 +79,23 @@
 <span id="78">78</span>
 <span id="79">79</span>
 <span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -95,6 +112,14 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">bytes</span>, <span class="bool-val">false</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes_inner</span>(
+        <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+        <span class="ident">allow_trailing_null</span>: <span class="ident">bool</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">N</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::TooLarge</span> {
                 <span class="ident">max</span>: <span class="ident">N</span>,
@@ -104,15 +129,24 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">N</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_null</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">bytes</span>.<span class="ident">len</span>() {
             <span class="kw">if</span> <span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">==</span> <span class="number">0</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::ContainsNull</span>);
+                <span class="ident">found_null</span> <span class="op">=</span> <span class="bool-val">true</span>;
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x80</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::NonAscii</span>);
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">found_null</span> {
+                <span class="comment">// Error if there are contentful bytes after null</span>
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::ContainsNull</span>);
             }
             <span class="ident">out</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">i</span>];
 
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">allow_trailing_null</span> <span class="op">&amp;&amp;</span> <span class="ident">found_null</span> {
+            <span class="comment">// We found some trailing nulls, error</span>
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::ContainsNull</span>);
         }
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">bytes</span>: <span class="ident">out</span> })

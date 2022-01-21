@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Type","Represents the type of a list. See https://unicode.org/reports/tr35/tr35-general.html#ListPatterns"],["Width","Represents the type of a list. See https://unicode.org/reports/tr35/tr35-general.html#ListPatterns"]]});

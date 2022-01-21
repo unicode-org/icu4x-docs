@@ -264,37 +264,109 @@
 <span id="263">263</span>
 <span id="264">264</span>
 <span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::options</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>::{<span class="self">self</span>, <span class="ident">Write</span>};
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">writeable</span>::<span class="kw-2">*</span>;
 
+<span class="doccomment">/// Represents the type of a list. See the</span>
+<span class="doccomment">/// [CLDR spec](https://unicode.org/reports/tr35/tr35-general.html#ListPatterns)</span>
+<span class="doccomment">/// for an explanation of the different types.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ListType</span> {
+    <span class="doccomment">/// A conjunction</span>
+    <span class="ident">And</span>,
+    <span class="doccomment">/// A disjunction</span>
+    <span class="ident">Or</span>,
+    <span class="doccomment">/// A list of units</span>
+    <span class="ident">Unit</span>,
+}
+
+<span class="doccomment">/// Represents the style of a list. See the</span>
+<span class="doccomment">/// [CLDR spec](https://unicode.org/reports/tr35/tr35-general.html#ListPatterns)</span>
+<span class="doccomment">/// for an explanation of the different styles.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ListStyle</span> {
+    <span class="doccomment">/// A typical list</span>
+    <span class="ident">Wide</span>,
+    <span class="doccomment">/// A shorter list</span>
+    <span class="ident">Short</span>,
+    <span class="doccomment">/// The shortest type of list</span>
+    <span class="ident">Narrow</span>,
+}
+
+<span class="doccomment">/// A formatter that renders sequences of items in an i18n-friendly way. See the</span>
+<span class="doccomment">/// [crate-level documentation](crate) for more details.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ListFormatter</span> {
     <span class="ident">data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span>,
-    <span class="ident">width</span>: <span class="ident">Width</span>,
+    <span class="ident">style</span>: <span class="ident">ListStyle</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">ListFormatter</span> {
+    <span class="doccomment">/// Creates a new [`ListFormatter`] from the given provider. The provider has to support the</span>
+    <span class="doccomment">/// correct key for the given type:</span>
+    <span class="doccomment">/// [`LIST_FORMAT_AND_V1`](crate::provider::key::LIST_FORMAT_AND_V1),</span>
+    <span class="doccomment">/// [`LIST_FORMAT_OR_V1`](crate::provider::key::LIST_FORMAT_OR_V1), or</span>
+    <span class="doccomment">/// [`LIST_FORMAT_UNIT_V1`](crate::provider::key::LIST_FORMAT_UNIT_V1).</span>
+    <span class="doccomment">/// An error is returned if the key or language are not available, or if there were any</span>
+    <span class="doccomment">/// deserialization errors.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
         <span class="ident">locale</span>: <span class="ident">T</span>,
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
-        <span class="ident">type_</span>: <span class="ident">Type</span>,
-        <span class="ident">width</span>: <span class="ident">Width</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="ident">type_</span>: <span class="ident">ListType</span>,
+        <span class="ident">style</span>: <span class="ident">ListStyle</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
                 <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
                     <span class="ident">key</span>: <span class="kw">match</span> <span class="ident">type_</span> {
-                        <span class="ident">Type::And</span> =&gt; <span class="ident">key::LIST_FORMAT_AND_V1</span>,
-                        <span class="ident">Type::Or</span> =&gt; <span class="ident">key::LIST_FORMAT_OR_V1</span>,
-                        <span class="ident">Type::Unit</span> =&gt; <span class="ident">key::LIST_FORMAT_UNIT_V1</span>,
+                        <span class="ident">ListType::And</span> =&gt; <span class="ident">key::LIST_FORMAT_AND_V1</span>,
+                        <span class="ident">ListType::Or</span> =&gt; <span class="ident">key::LIST_FORMAT_OR_V1</span>,
+                        <span class="ident">ListType::Unit</span> =&gt; <span class="ident">key::LIST_FORMAT_UNIT_V1</span>,
                     },
                     <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
                         <span class="ident">variant</span>: <span class="prelude-val">None</span>,
@@ -303,12 +375,12 @@
                 },
             })<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">data</span>, <span class="ident">width</span> })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">data</span>, <span class="ident">style</span> })
     }
 
-    <span class="doccomment">/// Returns a `Writeable` composed of the input `Writeable`s and the language-dependent</span>
-    <span class="doccomment">/// formatting. The first layer of fields contains `ListFormatter::element()` for input</span>
-    <span class="doccomment">/// elements, and `ListFormatter::literal()` for list literals.</span>
+    <span class="doccomment">/// Returns a [`Writeable`] composed of the input [`Writeable`]s and the language-dependent</span>
+    <span class="doccomment">/// formatting. The first layer of parts contains [`parts::ELEMENT`] for input</span>
+    <span class="doccomment">/// elements, and [`parts::LITERAL`] for list literals.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">values</span>: <span class="ident">I</span>,
@@ -318,22 +390,28 @@
             <span class="ident">values</span>,
         }
     }
-
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">element</span>() -&gt; <span class="ident">Part</span> {
-        <span class="ident">Part</span> {
-            <span class="ident">category</span>: <span class="string">&quot;list&quot;</span>,
-            <span class="ident">value</span>: <span class="string">&quot;element&quot;</span>,
-        }
-    }
-
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">literal</span>() -&gt; <span class="ident">Part</span> {
-        <span class="ident">Part</span> {
-            <span class="ident">category</span>: <span class="string">&quot;list&quot;</span>,
-            <span class="ident">value</span>: <span class="string">&quot;literal&quot;</span>,
-        }
-    }
 }
 
+<span class="doccomment">/// The [`Part`]s used by [`ListFormatter`].</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">parts</span> {
+    <span class="kw">use</span> <span class="ident">writeable::Part</span>;
+
+    <span class="doccomment">/// The [`Part`] used by [`List`](super::List) to mark the part of the string that is an element.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ELEMENT</span>: <span class="ident">Part</span> <span class="op">=</span> <span class="ident">Part</span> {
+        <span class="ident">category</span>: <span class="string">&quot;list&quot;</span>,
+        <span class="ident">value</span>: <span class="string">&quot;element&quot;</span>,
+    };
+
+    <span class="doccomment">/// The [`Part`] used by [`List`](super::List) to mark the part of the string that is a list literal,</span>
+    <span class="doccomment">/// such as &quot;, &quot; or &quot; and &quot;.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">LITERAL</span>: <span class="ident">Part</span> <span class="op">=</span> <span class="ident">Part</span> {
+        <span class="ident">category</span>: <span class="string">&quot;list&quot;</span>,
+        <span class="ident">value</span>: <span class="string">&quot;literal&quot;</span>,
+    };
+}
+
+<span class="doccomment">/// The [`Writeable`] implementation that is returned by [`ListFormatter::format`]. See</span>
+<span class="doccomment">/// the [`writeable`] crate for how to consume this.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">List</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ListFormatter</span>,
     <span class="ident">values</span>: <span class="ident">I</span>,
@@ -343,12 +421,12 @@
     <span class="kw">fn</span> <span class="ident">write_to_parts</span><span class="op">&lt;</span><span class="ident">V</span>: <span class="ident">PartsWrite</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">V</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">macro_rules!</span> <span class="ident">literal</span> {
             (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">lit</span>:<span class="ident">ident</span>) =&gt; {
-                <span class="ident">sink</span>.<span class="ident">with_part</span>(<span class="ident">ListFormatter::literal</span>(), <span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">write_str</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">lit</span>))
+                <span class="ident">sink</span>.<span class="ident">with_part</span>(<span class="ident">parts::LITERAL</span>, <span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">write_str</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">lit</span>))
             };
         }
         <span class="macro">macro_rules!</span> <span class="ident">value</span> {
             (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) =&gt; {
-                <span class="ident">sink</span>.<span class="ident">with_part</span>(<span class="ident">ListFormatter::element</span>(), <span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>.<span class="ident">write_to_parts</span>(<span class="ident">e</span>))
+                <span class="ident">sink</span>.<span class="ident">with_part</span>(<span class="ident">parts::ELEMENT</span>, <span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>.<span class="ident">write_to_parts</span>(<span class="ident">e</span>))
             };
         }
 
@@ -365,7 +443,7 @@
                         .<span class="ident">formatter</span>
                         .<span class="ident">data</span>
                         .<span class="ident">get</span>()
-                        .<span class="ident">start</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">width</span>)
+                        .<span class="ident">start</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">style</span>)
                         .<span class="ident">parts</span>(<span class="kw-2">&amp;</span><span class="ident">second</span>);
 
                     <span class="macro">literal!</span>(<span class="ident">start_before</span>)<span class="question-mark">?</span>;
@@ -380,7 +458,7 @@
                             .<span class="ident">formatter</span>
                             .<span class="ident">data</span>
                             .<span class="ident">get</span>()
-                            .<span class="ident">middle</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">width</span>)
+                            .<span class="ident">middle</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">style</span>)
                             .<span class="ident">parts</span>(<span class="kw-2">&amp;</span><span class="ident">next</span>);
                         <span class="macro">literal!</span>(<span class="ident">between</span>)<span class="question-mark">?</span>;
                         <span class="macro">value!</span>(<span class="ident">next</span>)<span class="question-mark">?</span>;
@@ -391,7 +469,7 @@
                         .<span class="ident">formatter</span>
                         .<span class="ident">data</span>
                         .<span class="ident">get</span>()
-                        .<span class="ident">end</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">width</span>)
+                        .<span class="ident">end</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">style</span>)
                         .<span class="ident">parts</span>(<span class="kw-2">&amp;</span><span class="ident">next</span>);
                     <span class="macro">literal!</span>(<span class="ident">end_between</span>)<span class="question-mark">?</span>;
                     <span class="macro">value!</span>(<span class="ident">next</span>)<span class="question-mark">?</span>;
@@ -402,7 +480,7 @@
                         .<span class="ident">formatter</span>
                         .<span class="ident">data</span>
                         .<span class="ident">get</span>()
-                        .<span class="ident">pair</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">width</span>)
+                        .<span class="ident">pair</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">style</span>)
                         .<span class="ident">parts</span>(<span class="kw-2">&amp;</span><span class="ident">second</span>);
                     <span class="macro">literal!</span>(<span class="ident">before</span>)<span class="question-mark">?</span>;
                     <span class="macro">value!</span>(<span class="ident">first</span>)<span class="question-mark">?</span>;
@@ -433,7 +511,7 @@
                 .<span class="ident">formatter</span>
                 .<span class="ident">data</span>
                 .<span class="ident">get</span>()
-                .<span class="ident">size_hint</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">width</span>, <span class="ident">count</span>)
+                .<span class="ident">size_hint</span>(<span class="self">self</span>.<span class="ident">formatter</span>.<span class="ident">style</span>, <span class="ident">count</span>)
     }
 }
 
@@ -442,18 +520,18 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">writeable</span>::{<span class="ident">assert_writeable_eq</span>, <span class="ident">assert_writeable_parts_eq</span>};
 
-    <span class="kw">fn</span> <span class="ident">formatter</span>(<span class="ident">width</span>: <span class="ident">Width</span>) -&gt; <span class="ident">ListFormatter</span> {
+    <span class="kw">fn</span> <span class="ident">formatter</span>(<span class="ident">style</span>: <span class="ident">ListStyle</span>) -&gt; <span class="ident">ListFormatter</span> {
         <span class="ident">ListFormatter</span> {
             <span class="ident">data</span>: <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(
                 <span class="ident"><span class="kw">crate</span>::provider::test::test_patterns</span>(),
             ),
-            <span class="ident">width</span>,
+            <span class="ident">style</span>,
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_slices</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Wide</span>);
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">ListStyle::Wide</span>);
         <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> [<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>, <span class="string">&quot;three&quot;</span>, <span class="string">&quot;four&quot;</span>, <span class="string">&quot;five&quot;</span>];
 
         <span class="macro">assert_writeable_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>(<span class="ident">values</span>[<span class="number">0</span>..<span class="number">0</span>].<span class="ident">iter</span>()), <span class="string">&quot;&quot;</span>);
@@ -469,24 +547,24 @@
             <span class="ident">formatter</span>.<span class="ident">format</span>(<span class="ident">values</span>.<span class="ident">iter</span>()),
             <span class="string">&quot;@one:two,three,four.five!&quot;</span>,
             [
-                (<span class="number">0</span>, <span class="number">1</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">1</span>, <span class="number">4</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">4</span>, <span class="number">5</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">5</span>, <span class="number">8</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">8</span>, <span class="number">9</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">9</span>, <span class="number">14</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">14</span>, <span class="number">15</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">15</span>, <span class="number">19</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">19</span>, <span class="number">20</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">20</span>, <span class="number">24</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">24</span>, <span class="number">25</span>, <span class="ident">ListFormatter::literal</span>())
+                (<span class="number">0</span>, <span class="number">1</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">1</span>, <span class="number">4</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">4</span>, <span class="number">5</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">5</span>, <span class="number">8</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">8</span>, <span class="number">9</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">9</span>, <span class="number">14</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">14</span>, <span class="number">15</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">15</span>, <span class="number">19</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">19</span>, <span class="number">20</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">20</span>, <span class="number">24</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">24</span>, <span class="number">25</span>, <span class="ident">parts::LITERAL</span>)
             ]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_into_iterator</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Wide</span>);
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">ListStyle::Wide</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vecdeque</span> <span class="op">=</span> <span class="ident">std::collections::vec_deque::VecDeque</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::new</span>();
         <span class="ident">vecdeque</span>.<span class="ident">push_back</span>(<span class="number">10</span>);
@@ -496,35 +574,35 @@
             <span class="ident">formatter</span>.<span class="ident">format</span>(<span class="ident">vecdeque</span>.<span class="ident">iter</span>()),
             <span class="string">&quot;$48;10+&quot;</span>,
             [
-                (<span class="number">0</span>, <span class="number">1</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">1</span>, <span class="number">3</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">3</span>, <span class="number">4</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">4</span>, <span class="number">6</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">6</span>, <span class="number">7</span>, <span class="ident">ListFormatter::literal</span>()),
+                (<span class="number">0</span>, <span class="number">1</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">1</span>, <span class="number">3</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">3</span>, <span class="number">4</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">4</span>, <span class="number">6</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">6</span>, <span class="number">7</span>, <span class="ident">parts::LITERAL</span>),
             ]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_iterator</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Wide</span>);
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">ListStyle::Wide</span>);
 
         <span class="macro">assert_writeable_parts_eq!</span>(
             <span class="ident">formatter</span>.<span class="ident">format</span>(<span class="ident">core::iter::repeat</span>(<span class="number">5</span>).<span class="ident">take</span>(<span class="number">2</span>)),
             <span class="string">&quot;$5;5+&quot;</span>,
             [
-                (<span class="number">0</span>, <span class="number">1</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">1</span>, <span class="number">2</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">2</span>, <span class="number">3</span>, <span class="ident">ListFormatter::literal</span>()),
-                (<span class="number">3</span>, <span class="number">4</span>, <span class="ident">ListFormatter::element</span>()),
-                (<span class="number">4</span>, <span class="number">5</span>, <span class="ident">ListFormatter::literal</span>()),
+                (<span class="number">0</span>, <span class="number">1</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">1</span>, <span class="number">2</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">2</span>, <span class="number">3</span>, <span class="ident">parts::LITERAL</span>),
+                (<span class="number">3</span>, <span class="number">4</span>, <span class="ident">parts::ELEMENT</span>),
+                (<span class="number">4</span>, <span class="number">5</span>, <span class="ident">parts::LITERAL</span>),
             ]
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_conditional</span>() {
-        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">Width::Narrow</span>);
+        <span class="kw">let</span> <span class="ident">formatter</span> <span class="op">=</span> <span class="ident">formatter</span>(<span class="ident">ListStyle::Narrow</span>);
 
         <span class="macro">assert_writeable_eq!</span>(<span class="ident">formatter</span>.<span class="ident">format</span>([<span class="string">&quot;Beta&quot;</span>, <span class="string">&quot;Alpha&quot;</span>].<span class="ident">iter</span>()), <span class="string">&quot;Beta :o Alpha&quot;</span>);
     }

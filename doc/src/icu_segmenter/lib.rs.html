@@ -158,6 +158,26 @@
 <span id="157">157</span>
 <span id="158">158</span>
 <span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -168,7 +188,8 @@
 <span class="doccomment">//! A segmenter implementation for the following rules.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! - Line breaker that is compatible with [Unicode Standard Annex #14][UAX14] and CSS properties.</span>
-<span class="doccomment">//! - Word breaker that is compatible with [Unicode Standard Annex #29][UAX29].</span>
+<span class="doccomment">//! - Grapheme cluster breaker, word breaker, and sentence breaker that are compatible with</span>
+<span class="doccomment">//!   [Unicode Standard Annex #29][UAX29].</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [UAX14]: https://www.unicode.org/reports/tr14/</span>
 <span class="doccomment">//! [UAX29]: https://www.unicode.org/reports/tr29/</span>
@@ -220,16 +241,35 @@
 <span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[6, 11]);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! ## Grapheme Cluster Break</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Segment a string:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!```rust</span>
+<span class="doccomment">//! use icu_segmenter::GraphemeClusterBreakIterator;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let breakpoints: Vec&lt;usize&gt; = GraphemeClusterBreakIterator::new(&quot;Hello 🗺&quot;).collect();</span>
+<span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[0, 1, 2, 3, 4, 5, 6, 10]); // World Map (U+1F5FA) is encoded in four bytes in UTF-8.</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Segment a Latin1 byte string:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! use icu_segmenter::GraphemeClusterBreakIteratorLatin1;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let breakpoints: Vec&lt;usize&gt; = GraphemeClusterBreakIteratorLatin1::new(b&quot;Hello World&quot;).collect();</span>
+<span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! ## Word Break</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Segment a string with default options:</span>
+<span class="doccomment">//! Segment a string:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!```rust</span>
 <span class="doccomment">//! use icu_segmenter::WordBreakIterator;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let mut iter = WordBreakIterator::new(&quot;Hello World&quot;);</span>
-<span class="doccomment">//! let result: Vec&lt;usize&gt; = iter.collect();</span>
-<span class="doccomment">//! println!(&quot;{:?}&quot;, result);</span>
+<span class="doccomment">//! let breakpoints: Vec&lt;usize&gt; = WordBreakIterator::new(&quot;Hello World&quot;).collect();</span>
+<span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[0, 5, 6, 11]);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Segment a Latin1 byte string:</span>
@@ -237,29 +277,28 @@
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! use icu_segmenter::WordBreakIteratorLatin1;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let s = &quot;Hello World&quot;;</span>
-<span class="doccomment">//! let iter = WordBreakIteratorLatin1::new(s.as_bytes());</span>
-<span class="doccomment">//! let result: Vec&lt;usize&gt; = iter.collect();</span>
-<span class="doccomment">//! println!(&quot;{:?}&quot;, result);</span>
+<span class="doccomment">//! let breakpoints: Vec&lt;usize&gt; = WordBreakIteratorLatin1::new(b&quot;Hello World&quot;).collect();</span>
+<span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[0, 5, 6, 11]);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Sentence Break</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! Segment a string:</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//!```rust</span>
 <span class="doccomment">//! use icu_segmenter::SentenceBreakIterator;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let mut iter = SentenceBreakIterator::new(&quot;Hello World&quot;);</span>
-<span class="doccomment">//! let result: Vec&lt;usize&gt; = iter.collect();</span>
-<span class="doccomment">//! println!(&quot;{:?}&quot;, result);</span>
+<span class="doccomment">//! let breakpoints: Vec&lt;usize&gt; = SentenceBreakIterator::new(&quot;Hello World&quot;).collect();</span>
+<span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[0, 11]);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Segment a Latin1 byte string:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! use icu_segmenter::SentenceBreakIteratorLatin1;</span>
-<span class="doccomment">//! let iter = SentenceBreakIteratorLatin1::new(b&quot;Hello World&quot;);</span>
-<span class="doccomment">//! let result: Vec&lt;usize&gt; = iter.collect();</span>
-<span class="doccomment">//! assert_eq!(&amp;result, &amp;[0, 11]);</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let breakpoints: Vec&lt;usize&gt; = SentenceBreakIteratorLatin1::new(b&quot;Hello World&quot;).collect();</span>
+<span class="doccomment">//! assert_eq!(&amp;breakpoints, &amp;[0, 11]);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Generating property table</span>
@@ -310,7 +349,8 @@
 }
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme</span>::{
-    <span class="ident">GraphemeBreakIterator</span>, <span class="ident">GraphemeBreakIteratorLatin1</span>, <span class="ident">GraphemeBreakIteratorUtf16</span>,
+    <span class="ident">GraphemeClusterBreakIterator</span>, <span class="ident">GraphemeClusterBreakIteratorLatin1</span>,
+    <span class="ident">GraphemeClusterBreakIteratorUtf16</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::line_breaker</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sentence</span>::{

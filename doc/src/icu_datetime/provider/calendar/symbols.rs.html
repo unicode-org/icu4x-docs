@@ -137,6 +137,19 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -144,9 +157,8 @@
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
 
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::yoke</span>::{<span class="self">self</span>, <span class="kw-2">*</span>};
-<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
+<span class="kw">use</span> <span class="ident">zerovec::map::ZeroMap</span>;
 
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
@@ -154,27 +166,31 @@
     <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>,
     <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>)
 )]</span>
-<span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">cloning_zcf</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DateSymbolsV1</span> {
-    <span class="kw">pub</span> <span class="ident">months</span>: <span class="ident">months::ContextsV1</span>,
-
-    <span class="kw">pub</span> <span class="ident">weekdays</span>: <span class="ident">weekdays::ContextsV1</span>,
-
-    <span class="kw">pub</span> <span class="ident">day_periods</span>: <span class="ident">day_periods::ContextsV1</span>,
-
-    <span class="kw">pub</span> <span class="ident">eras</span>: <span class="ident">Eras</span>,
+<span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">prove_covariance_manually</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DateSymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">months</span>: <span class="ident">months::ContextsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">weekdays</span>: <span class="ident">weekdays::ContextsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">day_periods</span>: <span class="ident">day_periods::ContextsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">eras</span>: <span class="ident">Eras</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Yokeable</span>, <span class="ident">ZeroCopyFrom</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(
     <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>,
     <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>)
 )]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Eras</span> {
-    <span class="comment">// TODO use ZeroMap instead: https://github.com/unicode-org/icu4x/issues/876</span>
-    <span class="kw">pub</span> <span class="ident">names</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">abbr</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">narrow</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
+<span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">prove_covariance_manually</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Eras</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">names</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">abbr</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">narrow</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">symbols</span> {
@@ -182,9 +198,9 @@
             <span class="kw">pub</span> <span class="kw">mod</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
                 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
-                <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+                <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">ZeroCopyFrom</span>, <span class="ident">Yokeable</span>)]</span>
                 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;provider_serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
-                <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SymbolsV1</span>(<span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expr</span>);
+                <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span> <span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expr</span>);
 
                 <span class="macro">symbols!</span>();
             }
@@ -195,24 +211,28 @@
         (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ty</span><span class="op">&gt;</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens</span>: <span class="ident">tt</span>)<span class="op">+</span> } -&gt; ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>)) =&gt; {
             <span class="macro">symbols!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens</span>)<span class="op">*</span> } -&gt; (
                 $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>)<span class="op">*</span>
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
                 <span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>,
             ));
         };
         (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ty</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens</span>: <span class="ident">tt</span>)<span class="op">+</span> } -&gt; ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>)) =&gt; {
             <span class="macro">symbols!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens</span>)<span class="op">*</span> } -&gt; (
                 $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>)<span class="op">*</span>
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
                 <span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>,
             ));
         };
         (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ty</span><span class="op">&gt;</span> $(,)<span class="question-mark">?</span> } -&gt; ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>)) =&gt; {
             <span class="macro">symbols!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> { } -&gt; (
                 $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>)<span class="op">*</span>
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
                 <span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&gt;</span>,
             ));
         };
         (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span> { <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>: <span class="ident">ty</span> $(,)<span class="question-mark">?</span> } -&gt; ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>)) =&gt; {
             <span class="macro">symbols!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> { } -&gt; (
                 $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>)<span class="op">*</span>
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
                 <span class="kw">pub</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">element</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>,
             ));
         };
@@ -221,9 +241,8 @@
                 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
                 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Yokeable</span>, <span class="ident">ZeroCopyFrom</span>)]</span>
-                <span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">cloning_zcf</span>)]</span>
                 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;provider_serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
-                <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SymbolsV1</span> {
+                <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
                     $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">members</span>)<span class="op">*</span>
                 }
                 <span class="macro">symbols!</span>();
@@ -233,46 +252,53 @@
             <span class="comment">// UTS 35 specifies that `format` widths are mandatory</span>
             <span class="comment">// except of `short`.</span>
             <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Yokeable</span>, <span class="ident">ZeroCopyFrom</span>)]</span>
-            <span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">cloning_zcf</span>)]</span>
             <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;provider_serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
-            <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FormatWidthsV1</span> {
-                <span class="kw">pub</span> <span class="ident">abbreviated</span>: <span class="ident">SymbolsV1</span>,
-                <span class="kw">pub</span> <span class="ident">narrow</span>: <span class="ident">SymbolsV1</span>,
-                <span class="kw">pub</span> <span class="ident">short</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&gt;</span>,
-                <span class="kw">pub</span> <span class="ident">wide</span>: <span class="ident">SymbolsV1</span>,
+            <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FormatWidthsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">abbreviated</span>: <span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">narrow</span>: <span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">short</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">wide</span>: <span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
             }
 
             <span class="comment">// UTS 35 specifies that `stand_alone` widths are optional</span>
             <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Yokeable</span>, <span class="ident">ZeroCopyFrom</span>)]</span>
-            <span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">cloning_zcf</span>)]</span>
             <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;provider_serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
-            <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StandAloneWidthsV1</span> {
-                <span class="kw">pub</span> <span class="ident">abbreviated</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&gt;</span>,
-                <span class="kw">pub</span> <span class="ident">narrow</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&gt;</span>,
-                <span class="kw">pub</span> <span class="ident">short</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&gt;</span>,
-                <span class="kw">pub</span> <span class="ident">wide</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&gt;</span>,
+            <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StandAloneWidthsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">abbreviated</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">narrow</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">short</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">wide</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
             }
 
             <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Yokeable</span>, <span class="ident">ZeroCopyFrom</span>)]</span>
-            <span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">cloning_zcf</span>)]</span>
             <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;provider_serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
-            <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ContextsV1</span> {
-                <span class="kw">pub</span> <span class="ident">format</span>: <span class="ident">FormatWidthsV1</span>,
-                <span class="kw">pub</span> <span class="ident">stand_alone</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StandAloneWidthsV1</span><span class="op">&gt;</span>,
+            <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ContextsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">format</span>: <span class="ident">FormatWidthsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+                <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;provider_serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+                <span class="kw">pub</span> <span class="ident">stand_alone</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StandAloneWidthsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>,
             }
         };
     }
 
-<span class="macro">symbols!</span>(<span class="ident">months</span>, [<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>; <span class="number">12</span>]);
+<span class="macro">symbols!</span>(<span class="ident">months</span>, [<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>; <span class="number">12</span>]);
 
-<span class="macro">symbols!</span>(<span class="ident">weekdays</span>, [<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>; <span class="number">7</span>]);
+<span class="macro">symbols!</span>(<span class="ident">weekdays</span>, [<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>; <span class="number">7</span>]);
 
 <span class="macro">symbols!</span>(
     <span class="ident">day_periods</span> {
-        <span class="ident">am</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
-        <span class="ident">pm</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
-        <span class="ident">noon</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">midnight</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">am</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">pm</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+        <span class="ident">noon</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">midnight</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     }
 );
 </code></pre></div>

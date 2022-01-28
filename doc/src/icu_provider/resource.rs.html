@@ -524,55 +524,6 @@
 <span id="523">523</span>
 <span id="524">524</span>
 <span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
-<span id="571">571</span>
-<span id="572">572</span>
-<span id="573">573</span>
-<span id="574">574</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -614,13 +565,14 @@
 <span class="doccomment">/// const K: ResourceKey = icu_provider::resource_key!(&quot;foo/bar@1&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The path string has to contain at least one `/`, and end with `@` followed by one or more ASCII</span>
-<span class="doccomment">/// digits. Paths do not contain characters other than ASCII letters and digits, `_`, `/`, `=`, and</span>
-<span class="doccomment">/// `@`. Invalid paths are compile-time errors (as [`resource_key!`] uses `const`).</span>
+<span class="doccomment">/// The human-readable path string ends with `@` followed by one or more digits (the version</span>
+<span class="doccomment">/// number). Paths do not contain characters other than ASCII letters and digits, `_`, `/`, `=`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Invalid paths are compile-time errors (as [`resource_key!`] uses `const`).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```compile_fail,E0080</span>
 <span class="doccomment">/// # use icu_provider::prelude::ResourceKey;</span>
-<span class="doccomment">/// const K: ResourceKey = icu_provider::resource_key!(&quot;foobar@1&quot;);</span>
+<span class="doccomment">/// const K: ResourceKey = icu_provider::resource_key!(&quot;foo/../bar@1&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKey</span> {
@@ -661,9 +613,8 @@
 <span class="kw">impl</span> <span class="macro-nonterminal">ResourceKey</span> {
     <span class="doccomment">/// Gets a human-readable representation of a [`ResourceKey`].</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// The human-readable path string always contains at least one `/`, and it ends with `@`</span>
-    <span class="doccomment">/// followed by one or more digits. Paths do not contain characters other than ASCII letters</span>
-    <span class="doccomment">/// and digits, `_`, `/`, `=`, and `@`.</span>
+    <span class="doccomment">/// The human-readable path string ends with `@` followed by one or more digits (the version</span>
+    <span class="doccomment">/// number). Paths do not contain characters other than ASCII letters and digits, `_`, `/`, `=`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Useful for reading and writing data to a file system.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -714,85 +665,41 @@
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
 
-        <span class="comment">// Regex: [a-zA-Z0-9=_]+(/[a-zA-Z0-9=_]+)*@[0-9]+</span>
+        <span class="comment">// Regex: [a-zA-Z0-9=_][a-zA-Z0-9=_/]*@[0-9]+</span>
         <span class="kw">enum</span> <span class="ident">State</span> {
-            <span class="ident">Start</span>,
-            <span class="ident">AfterChar</span>,
-            <span class="ident">AfterSlash</span>,
-            <span class="ident">AfterCharAfterSlash</span>,
-            <span class="ident">AfterAt</span>,
-            <span class="ident">AfterDigit</span>,
+            <span class="ident">Empty</span>,
+            <span class="ident">Body</span>,
+            <span class="ident">At</span>,
+            <span class="ident">Version</span>,
         }
         <span class="kw">use</span> <span class="ident">State</span>::<span class="kw-2">*</span>;
         <span class="ident">i</span> <span class="op">=</span> <span class="ident">start</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">Start</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">Empty</span>;
         <span class="kw">loop</span> {
-            <span class="ident">state</span> <span class="op">=</span> <span class="kw">match</span> (
-                <span class="ident">state</span>,
-                <span class="kw">if</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">end</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>()[<span class="ident">i</span>])
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">None</span>
-                },
-            ) {
-                (<span class="ident">Start</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>)) =&gt; <span class="ident">AfterChar</span>,
-                (<span class="ident">Start</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-Z0-9=_]&quot;</span>, <span class="ident">i</span>)),
-
-                (<span class="ident">AfterChar</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>)) =&gt; {
-                    <span class="ident">AfterChar</span>
-                }
-                (<span class="ident">AfterChar</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;/&#39;</span>)) =&gt; <span class="ident">AfterSlash</span>,
-                (<span class="ident">AfterChar</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-z0-9=_/]&quot;</span>, <span class="ident">i</span>)),
-
-                (<span class="ident">AfterSlash</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>)) =&gt; {
-                    <span class="ident">AfterCharAfterSlash</span>
-                }
-                (<span class="ident">AfterSlash</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-Z0-9=_]&quot;</span>, <span class="ident">i</span>)),
-
-                (
-                    <span class="ident">AfterCharAfterSlash</span>,
-                    <span class="prelude-val">Some</span>(<span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>),
-                ) =&gt; <span class="ident">AfterCharAfterSlash</span>,
-                (<span class="ident">AfterCharAfterSlash</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;/&#39;</span>)) =&gt; <span class="ident">AfterSlash</span>,
-                (<span class="ident">AfterCharAfterSlash</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;@&#39;</span>)) =&gt; <span class="ident">AfterAt</span>,
-                (<span class="ident">AfterCharAfterSlash</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-z0-9=_/@]&quot;</span>, <span class="ident">i</span>)),
-
-                (<span class="ident">AfterAt</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span>)) =&gt; <span class="ident">AfterDigit</span>,
-                (<span class="ident">AfterAt</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="ident">i</span>)),
-
-                (<span class="ident">AfterDigit</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span>)) =&gt; <span class="ident">AfterDigit</span>,
-                (<span class="ident">AfterDigit</span>, <span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">AfterDigit</span>, <span class="prelude-val">None</span>) =&gt; {
+            <span class="kw">let</span> <span class="ident">byte</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">end</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>()[<span class="ident">i</span>])
+            } <span class="kw">else</span> {
+                <span class="prelude-val">None</span>
+            };
+            <span class="ident">state</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">state</span>, <span class="ident">byte</span>) {
+                (<span class="ident">Empty</span> <span class="op">|</span> <span class="ident">Body</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> <span class="op">|</span> <span class="string">b&#39;A&#39;</span>..<span class="op">=</span><span class="string">b&#39;Z&#39;</span> <span class="op">|</span> <span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span> <span class="op">|</span> <span class="string">b&#39;_&#39;</span> <span class="op">|</span> <span class="string">b&#39;=&#39;</span>)) =&gt; <span class="ident">Body</span>,
+                (<span class="ident">Body</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;/&#39;</span>)) =&gt; <span class="ident">Body</span>,
+                (<span class="ident">Body</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;@&#39;</span>)) =&gt; <span class="ident">At</span>,
+                (<span class="ident">At</span> <span class="op">|</span> <span class="ident">Version</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span>)) =&gt; <span class="ident">Version</span>,
+                <span class="comment">// One of these cases will be hit at the latest when i == end, so the loop converges.</span>
+                (<span class="ident">Version</span>, <span class="prelude-val">None</span>) =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
                         <span class="ident">path</span>,
                         <span class="ident">hash</span>: <span class="ident">ResourceKeyHash::compute_from_str</span>(<span class="ident">path</span>),
                     })
                 }
+
+                (<span class="ident">Empty</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-Z0-9=_]&quot;</span>, <span class="ident">i</span>)),
+                (<span class="ident">Body</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-z0-9=_/@]&quot;</span>, <span class="ident">i</span>)),
+                (<span class="ident">At</span> <span class="op">|</span> <span class="ident">Version</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="ident">i</span>)),
             };
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
-    }
-
-    <span class="doccomment">/// Gets the last path component of a [`ResourceKey`] without the version suffix.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_provider::prelude::*;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let resc_key = icu_provider::hello_world::key::HELLO_WORLD_V1;</span>
-    <span class="doccomment">/// assert_eq!(&quot;helloworld&quot;, resc_key.get_last_component_no_version());</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_last_component_no_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
-        <span class="comment">// This cannot fail because of the preconditions on path (at least one &#39;/&#39; and &#39;@&#39;)</span>
-        <span class="comment">// TODO(#1515): Consider deleting this method.</span>
-        <span class="self">self</span>.<span class="ident">get_path</span>()
-            .<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>)
-            .<span class="ident">last</span>()
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">split</span>(<span class="string">&#39;@&#39;</span>)
-            .<span class="ident">next</span>()
-            .<span class="ident">unwrap</span>()
     }
 
     <span class="doccomment">/// Returns [`Ok`] if this data key matches the argument, or the appropriate error.</span>
@@ -844,12 +751,7 @@
     <span class="macro">assert!</span>(<span class="ident">ResourceKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@999&quot;</span>)).<span class="ident">is_ok</span>());
     <span class="macro">assert!</span>(<span class="ident">ResourceKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world/foo@1&quot;</span>)).<span class="ident">is_ok</span>());
     <span class="macro">assert!</span>(<span class="ident">ResourceKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_458/world@1&quot;</span>)).<span class="ident">is_ok</span>());
-
-    <span class="comment">// No slash:</span>
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">ResourceKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world@1&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-z0-9=_/]&quot;</span>, <span class="number">25</span>))
-    );
+    <span class="macro">assert!</span>(<span class="ident">ResourceKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world@1&quot;</span>)).<span class="ident">is_ok</span>());
 
     <span class="comment">// No version:</span>
     <span class="macro">assert_eq!</span>(

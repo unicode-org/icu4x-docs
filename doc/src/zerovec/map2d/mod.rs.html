@@ -770,6 +770,20 @@
 <span id="769">769</span>
 <span id="770">770</span>
 <span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -818,7 +832,7 @@
 <span class="doccomment">/// // Deserializing to ZeroMap requires no heap allocations.</span>
 <span class="doccomment">/// let zero_map: ZeroMap2d&lt;u16, u16, str&gt; = bincode::deserialize(BINCODE_BYTES)</span>
 <span class="doccomment">///     .expect(&quot;Should deserialize successfully&quot;);</span>
-<span class="doccomment">/// assert_eq!(zero_map.get(&amp;1, &amp;2), Some(&quot;three&quot;));</span>
+<span class="doccomment">/// assert_eq!(zero_map.get(&amp;1, &amp;2), Ok(&quot;three&quot;));</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`VarZeroVec`]: crate::VarZeroVec</span>
@@ -861,6 +875,13 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">joiner</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">keys1</span>: <span class="ident">K1::Container</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">values</span>: <span class="ident">V::Container</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="doccomment">/// Used in error types to communicate for which key the error occured.</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">KeyError</span> {
+    <span class="ident">K0</span>,
+    <span class="ident">K1</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span>
@@ -958,19 +979,20 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use zerovec::ZeroMap2d;</span>
+    <span class="doccomment">/// use zerovec::map2d::KeyError;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut map = ZeroMap2d::new();</span>
     <span class="doccomment">/// map.insert(&amp;1, &quot;one&quot;, &quot;foo&quot;);</span>
     <span class="doccomment">/// map.insert(&amp;2, &quot;one&quot;, &quot;bar&quot;);</span>
     <span class="doccomment">/// map.insert(&amp;2, &quot;two&quot;, &quot;baz&quot;);</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;one&quot;), Some(&quot;foo&quot;));</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;two&quot;), None);</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;2, &quot;one&quot;), Some(&quot;bar&quot;));</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;2, &quot;two&quot;), Some(&quot;baz&quot;));</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;3, &quot;three&quot;), None);</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;one&quot;), Ok(&quot;foo&quot;));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;two&quot;), Err(KeyError::K1));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;2, &quot;one&quot;), Ok(&quot;bar&quot;));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;2, &quot;two&quot;), Ok(&quot;baz&quot;));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;3, &quot;three&quot;), Err(KeyError::K0));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">V::GetType</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>)<span class="question-mark">?</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">V::GetType</span>, <span class="ident">KeyError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>).<span class="ident">ok_or</span>(<span class="ident">KeyError::K0</span>)<span class="question-mark">?</span>;
         <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span> <span class="ident">range</span>.<span class="ident">end</span>); <span class="comment">// &#39;&lt;&#39; because every key0 should have a key1</span>
         <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_len</span>());
         <span class="comment">// The above debug_assert! protects the unwrap() below</span>
@@ -979,8 +1001,10 @@
                 .<span class="ident">keys1</span>
                 .<span class="ident">zvl_binary_search_in_range</span>(<span class="ident">key1</span>, <span class="ident">range</span>)
                 .<span class="ident">unwrap</span>()
-                .<span class="ident">ok</span>()<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_get</span>(<span class="ident">index</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">KeyError::K1</span>)<span class="question-mark">?</span>;
+        <span class="comment">// This unwrap is protected by the invariant keys1.len() == values.len(),</span>
+        <span class="comment">// the above debug_assert!, and the contract of zvl_binary_search_in_range.</span>
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_get</span>(<span class="ident">index</span>).<span class="ident">unwrap</span>())
     }
 
     <span class="doccomment">/// Returns whether `key0` is contained in this map</span>
@@ -1023,24 +1047,27 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use zerovec::ZeroMap2d;</span>
+    <span class="doccomment">/// use zerovec::map2d::KeyError;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut map = ZeroMap2d::new();</span>
     <span class="doccomment">/// map.insert(&amp;1, &quot;one&quot;, &quot;foo&quot;);</span>
     <span class="doccomment">/// map.insert(&amp;2, &quot;two&quot;, &quot;bar&quot;);</span>
-    <span class="doccomment">/// assert_eq!(map.remove(&amp;1, &quot;one&quot;), Some(&quot;foo&quot;.to_owned().into_boxed_str()));</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;one&quot;), None);</span>
+    <span class="doccomment">/// assert_eq!(map.remove(&amp;1, &quot;one&quot;), Ok(&quot;foo&quot;.to_owned().into_boxed_str()));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;one&quot;), Err(KeyError::K0));</span>
+    <span class="doccomment">/// assert_eq!(map.remove(&amp;1, &quot;one&quot;), Err(KeyError::K0));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V::OwnedType</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">key0_index</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>)<span class="question-mark">?</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">V::OwnedType</span>, <span class="ident">KeyError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> (<span class="ident">key0_index</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>).<span class="ident">ok_or</span>(<span class="ident">KeyError::K0</span>)<span class="question-mark">?</span>;
         <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span> <span class="ident">range</span>.<span class="ident">end</span>); <span class="comment">// &#39;&lt;&#39; because every key0 should have a key1</span>
         <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_len</span>());
         <span class="comment">// The above debug_assert! protects the unwrap() below</span>
         <span class="kw">let</span> <span class="ident">is_singleton_range</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">start</span> <span class="op">+</span> <span class="number">1</span> <span class="op">==</span> <span class="ident">range</span>.<span class="ident">end</span>;
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">start</span>
-            <span class="op">+</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_binary_search_in_range</span>(<span class="ident">key1</span>, <span class="ident">range</span>).<span class="ident">unwrap</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; <span class="ident">index</span>,
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
-            };
+            <span class="op">+</span> <span class="self">self</span>
+                .<span class="ident">keys1</span>
+                .<span class="ident">zvl_binary_search_in_range</span>(<span class="ident">key1</span>, <span class="ident">range</span>)
+                .<span class="ident">unwrap</span>()
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">KeyError::K1</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_remove</span>(<span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">removed</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_remove</span>(<span class="ident">index</span>);
         <span class="self">self</span>.<span class="ident">joiner_shrink</span>(<span class="ident">key0_index</span>);
@@ -1049,7 +1076,7 @@
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
-        <span class="prelude-val">Some</span>(<span class="ident">removed</span>)
+        <span class="prelude-val">Ok</span>(<span class="ident">removed</span>)
     }
 
     <span class="doccomment">/// Appends `value` with `key` to the end of the underlying vector, returning</span>
@@ -1057,6 +1084,7 @@
     <span class="doccomment">/// sorted list.</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use zerovec::ZeroMap2d;</span>
+    <span class="doccomment">/// use zerovec::map2d::KeyError;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut map = ZeroMap2d::new();</span>
     <span class="doccomment">/// assert!(map.try_append(&amp;1, &quot;one&quot;, &quot;uno&quot;).is_none());</span>
@@ -1068,13 +1096,13 @@
     <span class="doccomment">/// let unsuccessful = map.try_append(&amp;2, &quot;two&quot;, &quot;dos&quot;);</span>
     <span class="doccomment">/// assert!(unsuccessful.is_some(), &quot;append out of order&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;one&quot;), Some(&quot;uno&quot;));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;1, &quot;one&quot;), Ok(&quot;uno&quot;));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // contains the original value for the key: 3</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;3, &quot;three&quot;), Some(&quot;tres&quot;));</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;3, &quot;three&quot;), Ok(&quot;tres&quot;));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // not appended since it wasn&#39;t in order</span>
-    <span class="doccomment">/// assert_eq!(map.get(&amp;2, &quot;two&quot;), None);</span>
+    <span class="doccomment">/// assert_eq!(map.get(&amp;2, &quot;two&quot;), Err(KeyError::K0));</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_append</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
@@ -1429,27 +1457,27 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zm2d</span> <span class="op">=</span> <span class="ident">ZeroMap2d</span>::<span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="ident">::new</span>();
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Borrowed([]), joiner: ZeroVec::Borrowed([]), keys1: [], values: [] }&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
 
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">try_append</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>, <span class="string">&quot;CCC&quot;</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">None</span>));
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3]), joiner: ZeroVec::Owned([1]), keys1: [\&quot;ccc\&quot;], values: [\&quot;CCC\&quot;] }&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;CCC&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
 
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">try_append</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>, <span class="string">&quot;EEE&quot;</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">None</span>));
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3]), joiner: ZeroVec::Owned([2]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;] }&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;EEE&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;five&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;CCC&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;EEE&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;five&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
 
         <span class="comment">// Out of order</span>
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">try_append</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ddd&quot;</span>, <span class="string">&quot;DD0&quot;</span>);
@@ -1468,29 +1496,29 @@
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">None</span>));
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3, 5, 7, 9]), joiner: ZeroVec::Owned([2, 3, 6, 7]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;, \&quot;ddd\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;, \&quot;yyy\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;, \&quot;DD1\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;, \&quot;YYY\&quot;] }&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;EEE&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">4</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;DD1&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;DD2&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;EEE&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;WWW&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">8</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;YYY&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">10</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;CCC&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;EEE&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">4</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;DD1&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;DD2&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;EEE&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;WWW&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">8</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;YYY&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">10</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
 
         <span class="comment">// Insert some elements</span>
         <span class="ident">zm2d</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;mmm&quot;</span>, <span class="string">&quot;MM0&quot;</span>);
@@ -1499,44 +1527,44 @@
         <span class="ident">zm2d</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;nnn&quot;</span>, <span class="string">&quot;NNN&quot;</span>);
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3, 5, 6, 7, 9]), joiner: ZeroVec::Owned([3, 4, 7, 10, 11]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;, \&quot;mmm\&quot;, \&quot;ddd\&quot;, \&quot;ddd\&quot;, \&quot;mmm\&quot;, \&quot;nnn\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;, \&quot;yyy\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;, \&quot;MM0\&quot;, \&quot;DD1\&quot;, \&quot;DD3\&quot;, \&quot;MM1\&quot;, \&quot;NNN\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;, \&quot;YYY\&quot;] }&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;EEE&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;mmm&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;MM0&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">4</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;DD1&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;DD3&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;mmm&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;MM1&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;nnn&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;NNN&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;DD2&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;EEE&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;WWW&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">8</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;YYY&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">10</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">0</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;CCC&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;EEE&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;mmm&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;MM0&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">4</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;DD1&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;DD3&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;mmm&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;MM1&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;nnn&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;NNN&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;ddd&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;DD2&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;eee&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;EEE&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;WWW&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">7</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">8</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;aaa&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;www&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>), <span class="prelude-val">Ok</span>(<span class="string">&quot;YYY&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;zzz&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K1</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">10</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="number">99</span>, <span class="string">&quot;&quot;</span>), <span class="prelude-val">Err</span>(<span class="ident">KeyError::K0</span>));
 
         <span class="comment">// Remove some elements</span>
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>); <span class="comment">// first element</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;CCC&quot;</span>).<span class="ident">into_boxed_str</span>()));
+        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;CCC&quot;</span>).<span class="ident">into_boxed_str</span>()));
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;mmm&quot;</span>); <span class="comment">// middle element</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;MM0&quot;</span>).<span class="ident">into_boxed_str</span>()));
+        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;MM0&quot;</span>).<span class="ident">into_boxed_str</span>()));
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="number">5</span>, <span class="string">&quot;ddd&quot;</span>); <span class="comment">// singleton K0</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;DD1&quot;</span>).<span class="ident">into_boxed_str</span>()));
+        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;DD1&quot;</span>).<span class="ident">into_boxed_str</span>()));
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>); <span class="comment">// last element</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;YYY&quot;</span>).<span class="ident">into_boxed_str</span>()));
+        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;YYY&quot;</span>).<span class="ident">into_boxed_str</span>()));
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3, 6, 7]), joiner: ZeroVec::Owned([1, 4, 7]), keys1: [\&quot;eee\&quot;, \&quot;ddd\&quot;, \&quot;mmm\&quot;, \&quot;nnn\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;], values: [\&quot;EEE\&quot;, \&quot;DD3\&quot;, \&quot;MM1\&quot;, \&quot;NNN\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;] }&quot;</span>);
     }

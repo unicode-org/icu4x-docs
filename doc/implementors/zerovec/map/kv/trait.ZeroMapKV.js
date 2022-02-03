@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["icu_provider"] = [{"text":"impl&lt;'a&gt; <a class=\"trait\" href=\"zerovec/map/kv/trait.ZeroMapKV.html\" title=\"trait zerovec::map::kv::ZeroMapKV\">ZeroMapKV</a>&lt;'a&gt; for <a class=\"struct\" href=\"icu_provider/prelude/struct.ResourceKeyHash.html\" title=\"struct icu_provider::prelude::ResourceKeyHash\">ResourceKeyHash</a>","synthetic":false,"types":["icu_provider::resource::ResourceKeyHash"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

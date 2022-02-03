@@ -1,4 +1,5 @@
 (function() {var implementors = {};
+implementors["icu_provider"] = [{"text":"impl <a class=\"trait\" href=\"zerovec/ule/trait.ULE.html\" title=\"trait zerovec::ule::ULE\">ULE</a> for <a class=\"struct\" href=\"icu_provider/prelude/struct.ResourceKeyHash.html\" title=\"struct icu_provider::prelude::ResourceKeyHash\">ResourceKeyHash</a>","synthetic":false,"types":["icu_provider::resource::ResourceKeyHash"]}];
 implementors["tinystr_neo"] = [{"text":"impl&lt;const N:&nbsp;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.58.1/std/primitive.usize.html\">usize</a>&gt; <a class=\"trait\" href=\"zerovec/ule/trait.ULE.html\" title=\"trait zerovec::ule::ULE\">ULE</a> for <a class=\"struct\" href=\"tinystr_neo/struct.TinyAsciiStr.html\" title=\"struct tinystr_neo::TinyAsciiStr\">TinyAsciiStr</a>&lt;N&gt;","synthetic":false,"types":["tinystr_neo::ascii::TinyAsciiStr"]}];
 implementors["zerovec"] = [];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

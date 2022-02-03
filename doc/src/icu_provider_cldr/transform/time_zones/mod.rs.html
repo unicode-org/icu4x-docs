@@ -236,28 +236,6 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -328,14 +306,17 @@
 <span class="kw">impl</span> <span class="ident">KeyedDataProvider</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
     <span class="kw">fn</span> <span class="ident">supports_key</span>(<span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="comment">// TODO(#442): Clean up KeyedDataProvider</span>
-        <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">resc_key</span> {
-            <span class="ident">key::TIMEZONE_FORMATS_V1</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="ident">key::TIMEZONE_EXEMPLAR_CITIES_V1</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="ident">key::TIMEZONE_GENERIC_NAMES_LONG_V1</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="ident">key::TIMEZONE_GENERIC_NAMES_SHORT_V1</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_LONG_V1</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_SHORT_V1</span> =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="kw-2">*</span><span class="ident">resc_key</span>)),
+        <span class="comment">// Note: This is a big if{} instead of match{} due to Rust bug #93470</span>
+        <span class="kw">if</span> <span class="op">!</span>(<span class="op">!</span>(<span class="kw-2">*</span><span class="ident">resc_key</span> <span class="op">==</span> <span class="ident">key::TIMEZONE_FORMATS_V1</span>)
+            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="kw-2">*</span><span class="ident">resc_key</span> <span class="op">==</span> <span class="ident">key::TIMEZONE_EXEMPLAR_CITIES_V1</span>)
+            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="kw-2">*</span><span class="ident">resc_key</span> <span class="op">==</span> <span class="ident">key::TIMEZONE_GENERIC_NAMES_LONG_V1</span>)
+            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="kw-2">*</span><span class="ident">resc_key</span> <span class="op">==</span> <span class="ident">key::TIMEZONE_GENERIC_NAMES_SHORT_V1</span>)
+            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="kw-2">*</span><span class="ident">resc_key</span> <span class="op">==</span> <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_LONG_V1</span>)
+            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="kw-2">*</span><span class="ident">resc_key</span> <span class="op">==</span> <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_SHORT_V1</span>))
+        {
+            <span class="prelude-val">Ok</span>(())
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="kw-2">*</span><span class="ident">resc_key</span>))
         }
     }
 }
@@ -360,13 +341,14 @@
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_data_provider</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span>:<span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
-            <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                <span class="ident">TimeZonesProvider::supports_key</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">try_langid</span>()<span class="question-mark">?</span>;
+        <span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
+            <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>
+                    .<span class="ident">get_langid</span>()
+                    .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">time_zones</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>) {
                     <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">dates</span>.<span class="ident">time_zone_names</span>,
-                    <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="ident">req</span>)),
+                    <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>)),
                 };
                 <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
                 <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
@@ -379,14 +361,18 @@
     };
 }
 
-<span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">TimeZonesProvider</span>, {
-    <span class="ident">key::TIMEZONE_FORMATS_V1</span> =&gt; <span class="ident">TimeZoneFormatsV1Marker</span>,
-    <span class="ident">key::TIMEZONE_EXEMPLAR_CITIES_V1</span> =&gt; <span class="ident">ExemplarCitiesV1Marker</span>,
-    <span class="ident">key::TIMEZONE_GENERIC_NAMES_LONG_V1</span> =&gt; <span class="ident">MetaZoneGenericNamesLongV1Marker</span>,
-    <span class="ident">key::TIMEZONE_GENERIC_NAMES_SHORT_V1</span> =&gt; <span class="ident">MetaZoneGenericNamesShortV1Marker</span>,
-    <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_LONG_V1</span> =&gt; <span class="ident">MetaZoneSpecificNamesLongV1Marker</span>,
-    <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_SHORT_V1</span> =&gt; <span class="ident">MetaZoneSpecificNamesShortV1Marker</span>,
-}, <span class="ident">SERDE_SE</span>);
+<span class="macro">icu_provider::impl_dyn_provider!</span>(
+    <span class="ident">TimeZonesProvider</span>,
+    [
+        <span class="ident">TimeZoneFormatsV1Marker</span>,
+        <span class="ident">ExemplarCitiesV1Marker</span>,
+        <span class="ident">MetaZoneGenericNamesLongV1Marker</span>,
+        <span class="ident">MetaZoneGenericNamesShortV1Marker</span>,
+        <span class="ident">MetaZoneSpecificNamesLongV1Marker</span>,
+        <span class="ident">MetaZoneSpecificNamesShortV1Marker</span>,
+    ],
+    <span class="ident">SERDE_SE</span>
+);
 
 <span class="macro">impl_data_provider!</span>(<span class="ident">TimeZoneFormatsV1</span>, <span class="ident">TimeZoneFormatsV1Marker</span>);
 <span class="macro">impl_data_provider!</span>(<span class="ident">ExemplarCitiesV1</span>, <span class="ident">ExemplarCitiesV1Marker</span>);
@@ -418,14 +404,9 @@
         <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">TimeZonesProvider::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span>).<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">time_zone_formats</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">TimeZoneFormatsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key::TIMEZONE_FORMATS_V1</span>,
-                    <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                        <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                        <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)),
-                    },
-                },
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
             })
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
@@ -433,14 +414,9 @@
         <span class="macro">assert_eq!</span>(<span class="string">&quot;GMT&quot;</span>, <span class="ident">time_zone_formats</span>.<span class="ident">get</span>().<span class="ident">gmt_zero_format</span>);
 
         <span class="kw">let</span> <span class="ident">exemplar_cities</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ExemplarCitiesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key::TIMEZONE_EXEMPLAR_CITIES_V1</span>,
-                    <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                        <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                        <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)),
-                    },
-                },
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
             })
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
@@ -448,14 +424,9 @@
         <span class="macro">assert_eq!</span>(<span class="string">&quot;Pohnpei&quot;</span>, <span class="ident">exemplar_cities</span>.<span class="ident">get</span>()[<span class="string">&quot;Pacific/Ponape&quot;</span>]);
 
         <span class="kw">let</span> <span class="ident">generic_names_long</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MetaZoneGenericNamesLongV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key::TIMEZONE_GENERIC_NAMES_LONG_V1</span>,
-                    <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                        <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                        <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)),
-                    },
-                },
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
             })
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
@@ -466,14 +437,9 @@
         );
 
         <span class="kw">let</span> <span class="ident">specific_names_long</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MetaZoneSpecificNamesLongV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_LONG_V1</span>,
-                    <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                        <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                        <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)),
-                    },
-                },
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
             })
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
@@ -484,14 +450,9 @@
         );
 
         <span class="kw">let</span> <span class="ident">generic_names_short</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MetaZoneGenericNamesShortV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key::TIMEZONE_GENERIC_NAMES_SHORT_V1</span>,
-                    <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                        <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                        <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)),
-                    },
-                },
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
             })
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
@@ -499,14 +460,9 @@
         <span class="macro">assert_eq!</span>(<span class="string">&quot;PT&quot;</span>, <span class="ident">generic_names_short</span>.<span class="ident">get</span>()[<span class="string">&quot;America_Pacific&quot;</span>]);
 
         <span class="kw">let</span> <span class="ident">specific_names_short</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MetaZoneSpecificNamesShortV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key::TIMEZONE_SPECIFIC_NAMES_SHORT_V1</span>,
-                    <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                        <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                        <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)),
-                    },
-                },
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
             })
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()

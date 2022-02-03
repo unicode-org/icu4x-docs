@@ -200,6 +200,7 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -239,13 +240,14 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">calendar::DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DateSkeletonPatternsProvider</span> {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
+<span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">calendar::DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DateSkeletonPatternsProvider</span> {
+    <span class="kw">fn</span> <span class="ident">load_resource</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">calendar::DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="ident">DateSkeletonPatternsProvider::supports_key</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">dates</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">dates_for</span>(<span class="ident">req</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">dates</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="number">0</span>
+            .<span class="ident">dates_for</span>::<span class="op">&lt;</span><span class="ident">calendar::DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>(<span class="ident">req</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
@@ -257,9 +259,11 @@
     }
 }
 
-<span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">DateSkeletonPatternsProvider</span>, {
-    <span class="kw">_</span> =&gt; <span class="ident">calendar::DateSkeletonPatternsV1Marker</span>,
-}, <span class="ident">SERDE_SE</span>);
+<span class="macro">icu_provider::impl_dyn_provider!</span>(
+    <span class="ident">DateSkeletonPatternsProvider</span>,
+    [<span class="ident">calendar::DateSkeletonPatternsV1Marker</span>,],
+    <span class="ident">SERDE_SE</span>
+);
 
 <span class="kw">impl</span> <span class="ident">IterableProvider</span> <span class="kw">for</span> <span class="ident">DateSkeletonPatternsProvider</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::needless_collect</span>)]</span> <span class="comment">// https://github.com/rust-lang/rust-clippy/issues/7526</span>
@@ -361,14 +365,12 @@
         .<span class="ident">expect</span>(<span class="string">&quot;Failed to retrieve provider&quot;</span>);
 
     <span class="kw">let</span> <span class="ident">skeletons</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">calendar::DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">resource_path</span>: <span class="ident">ResourcePath</span> {
-                <span class="ident">key</span>: <span class="ident">key::DATE_SKELETON_PATTERNS_V1</span>,
-                <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                    <span class="ident">variant</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;gregory&quot;</span>.<span class="ident">into</span>()),
-                    <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;fil&quot;</span>)),
-                },
+        .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+            <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
+                <span class="ident">variant</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;gregory&quot;</span>.<span class="ident">into</span>()),
+                <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;fil&quot;</span>)),
             },
+            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">expect</span>(<span class="string">&quot;Failed to load payload&quot;</span>)
         .<span class="ident">take_payload</span>()

@@ -130,6 +130,24 @@
 <span id="129">129</span>
 <span id="130">130</span>
 <span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -178,12 +196,10 @@
 <span class="doccomment">///     .expect(&quot;Deserialization should succeed&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Check that it works:</span>
-<span class="doccomment">/// let response: DataPayload&lt;HelloWorldV1Marker&gt; = provider.load_payload(</span>
-<span class="doccomment">///     &amp;DataRequest {</span>
-<span class="doccomment">///         resource_path: ResourcePath {</span>
-<span class="doccomment">///             key: key::HELLO_WORLD_V1,</span>
-<span class="doccomment">///             options: langid!(&quot;la&quot;).into(),</span>
-<span class="doccomment">///         }</span>
+<span class="doccomment">/// let response: DataPayload&lt;HelloWorldV1Marker&gt; = provider</span>
+<span class="doccomment">///     .load_resource(&amp;DataRequest {</span>
+<span class="doccomment">///         options: langid!(&quot;la&quot;).into(),</span>
+<span class="doccomment">///         metadata: Default::default(),</span>
 <span class="doccomment">///     })</span>
 <span class="doccomment">///     .expect(&quot;Data should be valid&quot;)</span>
 <span class="doccomment">///     .take_payload()</span>
@@ -214,28 +230,40 @@
 
     <span class="doccomment">/// Gets the buffer for the given DataRequest out of the BlobSchema and returns it yoked</span>
     <span class="doccomment">/// to the buffer backing the BlobSchema.</span>
-    <span class="kw">fn</span> <span class="ident">get_file</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Yoke</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>], <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_file</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Yoke</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>], <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">data</span>
-            .<span class="ident">try_project_cloned_with_capture</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>], <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>, <span class="ident">DataError</span><span class="op">&gt;</span>(
-                <span class="ident">req</span>,
-                <span class="op">|</span><span class="ident">zm</span>, <span class="ident">req</span>, <span class="kw">_</span><span class="op">|</span> {
-                    <span class="ident">zm</span>.<span class="ident">get</span>(
-                        <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">key</span>.<span class="ident">get_hash</span>(),
-                        <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">resource_path</span>.<span class="ident">options</span>.<span class="ident">writeable_to_string</span>(),
-                    )
+            .<span class="ident">try_project_cloned_with_capture</span>((<span class="ident">key</span>, <span class="ident">req</span>), <span class="op">|</span><span class="ident">zm</span>, (<span class="ident">key</span>, <span class="ident">req</span>), <span class="kw">_</span><span class="op">|</span> {
+                <span class="ident">zm</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">get_hash</span>(), <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">writeable_to_string</span>())
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
                         <span class="kw">match</span> <span class="ident">e</span> {
                             <span class="ident">KeyError::K0</span> =&gt; <span class="ident">DataErrorKind::MissingResourceKey</span>,
                             <span class="ident">KeyError::K1</span> =&gt; <span class="ident">DataErrorKind::MissingResourceOptions</span>,
                         }
-                        .<span class="ident">with_req</span>(<span class="ident">req</span>)
+                        .<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>)
                     })
-                },
-            )
+            })
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlobDataProvider</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlobDataProvider</span>
+<span class="kw">where</span>
+    <span class="ident">M</span>: <span class="ident">ResourceMarker</span>,
+    <span class="comment">// Actual bound:</span>
+    <span class="comment">//     for&lt;&#39;de&gt; &lt;M::Yokeable as Yokeable&lt;&#39;de&gt;&gt;::Output: serde::de::Deserialize&lt;&#39;de&gt;,</span>
+    <span class="comment">// Necessary workaround bound (see `yoke::trait_hack` docs):</span>
+    <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">yoke::Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>:
+        <span class="ident">serde::de::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">as_deserializing</span>().<span class="ident">load_resource</span>(<span class="ident">req</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlobDataProvider</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="comment">// Actual bound:</span>
@@ -244,14 +272,22 @@
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">yoke::Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>:
         <span class="ident">serde::de::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">as_deserializing</span>().<span class="ident">load_payload</span>(<span class="ident">req</span>)
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">as_deserializing</span>().<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">BufferProvider</span> <span class="kw">for</span> <span class="ident">BlobDataProvider</span> {
-    <span class="kw">fn</span> <span class="ident">load_buffer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">yoked_buffer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_file</span>(<span class="ident">req</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn</span> <span class="ident">load_buffer</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">yoked_buffer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_file</span>(<span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
         <span class="ident">metadata</span>.<span class="ident">buffer_format</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">BufferFormat::Postcard07</span>);

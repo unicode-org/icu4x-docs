@@ -240,6 +240,9 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -255,13 +258,13 @@
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
-<span class="kw">use</span> <span class="ident">icu_plurals::provider::PluralRulesV1Marker</span>;
+<span class="kw">use</span> <span class="ident">icu_plurals::provider::OrdinalV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">date::DateTimeInput</span>, <span class="ident">CldrCalendar</span>, <span class="ident">DateTimeFormatError</span>, <span class="ident">FormattedDateTime</span>};
 
 <span class="doccomment">/// [`DateTimeFormat`] is the main structure of the [`icu_datetime`] component.</span>
-<span class="doccomment">/// When constructed, it uses data from the [`DataProvider`], selected [`Locale`] and provided options to</span>
+<span class="doccomment">/// When constructed, it uses data from the [data provider], selected [`Locale`] and provided options to</span>
 <span class="doccomment">/// collect all data necessary to format any dates into that locale.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// For that reason, one should think of the process of formatting a date in two steps - first, a computational</span>
@@ -298,12 +301,13 @@
 <span class="doccomment">/// let value = dtf.format_to_string(&amp;datetime);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`. In the future this will become even more pronounced</span>
-<span class="doccomment">/// when we introduce asynchronous [`DataProvider`] and corresponding asynchronous constructor.</span>
+<span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [data provider]: icu_provider</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DateTimeFormat</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">raw::DateTimeFormat</span>, <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">CldrCalendar</span><span class="op">&gt;</span> <span class="ident">DateTimeFormat</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Constructor that takes a selected [`Locale`], reference to a [`DataProvider`] and</span>
+    <span class="doccomment">/// Constructor that takes a selected [`Locale`], reference to a [data provider] and</span>
     <span class="doccomment">/// a list of options, then collects all data necessary to format date and time values into the given locale.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
@@ -325,6 +329,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(dtf.is_ok(), true);</span>
     <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [data provider]: icu_provider</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>(
         <span class="ident">locale</span>: <span class="ident">T</span>,
@@ -332,10 +338,10 @@
         <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">DateTimeFormatOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">PluralRulesV1Marker</span><span class="op">&gt;</span>,
+        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>,
     {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
             <span class="ident">raw::DateTimeFormat::try_new</span>(<span class="ident">locale</span>, <span class="ident">data_provider</span>, <span class="ident">options</span>, <span class="ident">C::IDENTIFIER</span>)<span class="question-mark">?</span>,

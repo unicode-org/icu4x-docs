@@ -520,55 +520,6 @@
 <span id="519">519</span>
 <span id="520">520</span>
 <span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
-<span id="553">553</span>
-<span id="554">554</span>
-<span id="555">555</span>
-<span id="556">556</span>
-<span id="557">557</span>
-<span id="558">558</span>
-<span id="559">559</span>
-<span id="560">560</span>
-<span id="561">561</span>
-<span id="562">562</span>
-<span id="563">563</span>
-<span id="564">564</span>
-<span id="565">565</span>
-<span id="566">566</span>
-<span id="567">567</span>
-<span id="568">568</span>
-<span id="569">569</span>
-<span id="570">570</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -583,7 +534,7 @@
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::fmt::Write</span>;
 <span class="kw">use</span> <span class="ident">core::mem</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
+<span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">LanguageIdentifier</span>, <span class="ident">Locale</span>};
 <span class="kw">use</span> <span class="ident">writeable</span>::{<span class="ident">LengthHint</span>, <span class="ident">Writeable</span>};
 <span class="kw">use</span> <span class="ident">zerovec::ule</span>::<span class="kw-2">*</span>;
 
@@ -934,8 +885,7 @@
     }
 }
 
-<span class="doccomment">/// A variant and language identifier, used for requesting data from a</span>
-<span class="doccomment">/// [`DataProvider`](crate::DataProvider).</span>
+<span class="doccomment">/// A variant and language identifier, used for requesting data from a data provider.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The fields in a [`ResourceOptions`] are not generally known until runtime.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
@@ -1000,47 +950,20 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ResourceOptions</span> {
+    <span class="doccomment">/// Create a ResourceOptions with the given language identifier and an empty variant field.</span>
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">locale</span>: <span class="ident">Locale</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="ident">locale</span>.<span class="ident">id</span>),
+            <span class="ident">variant</span>: <span class="prelude-val">None</span>,
+        }
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">ResourceOptions</span> {
     <span class="doccomment">/// Returns whether this [`ResourceOptions`] has all empty fields (no components).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::default</span>()
-    }
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourcePath</span> {
-    <span class="kw">pub</span> <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-    <span class="kw">pub</span> <span class="ident">options</span>: <span class="ident">ResourceOptions</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">ResourcePath</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;ResourcePath{{{}}}&quot;</span>, <span class="self">self</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">ResourcePath</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
-        <span class="ident">writeable::Writeable::write_to</span>(<span class="self">self</span>, <span class="ident">f</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">writeable::Writeable</span> <span class="kw">for</span> <span class="ident">ResourcePath</span> {
-    <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
-        <span class="ident">writeable::Writeable::write_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>, <span class="ident">sink</span>)<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">options</span>.<span class="ident">is_empty</span>() {
-            <span class="ident">sink</span>.<span class="ident">write_char</span>(<span class="string">&#39;/&#39;</span>)<span class="question-mark">?</span>;
-            <span class="ident">writeable::Writeable::write_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>, <span class="ident">sink</span>)<span class="question-mark">?</span>;
-        }
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">fn</span> <span class="ident">write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">writeable::LengthHint</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">writeable::Writeable::write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>);
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">options</span>.<span class="ident">is_empty</span>() {
-            <span class="ident">result</span> <span class="op">+</span><span class="op">=</span> <span class="ident">writeable::Writeable::write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>) <span class="op">+</span> <span class="number">1</span>;
-        }
-        <span class="ident">result</span>
     }
 }
 
@@ -1115,27 +1038,6 @@
         <span class="kw">for</span> <span class="ident">cas</span> <span class="kw">in</span> <span class="ident">get_options_test_cases</span>().<span class="ident">iter</span>() {
             <span class="macro">assert_eq!</span>(<span class="ident">cas</span>.<span class="ident">expected</span>, <span class="ident">cas</span>.<span class="ident">resc_options</span>.<span class="ident">to_string</span>());
             <span class="macro">writeable::assert_writeable_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">cas</span>.<span class="ident">resc_options</span>, <span class="ident">cas</span>.<span class="ident">expected</span>);
-        }
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_resource_path_to_string</span>() {
-        <span class="kw">for</span> <span class="ident">key_cas</span> <span class="kw">in</span> <span class="ident">get_key_test_cases</span>().<span class="ident">iter</span>() {
-            <span class="kw">for</span> <span class="ident">options_cas</span> <span class="kw">in</span> <span class="ident">get_options_test_cases</span>().<span class="ident">iter</span>() {
-                <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">options_cas</span>.<span class="ident">resc_options</span>.<span class="ident">is_empty</span>() {
-                    <span class="ident">key_cas</span>.<span class="ident">expected</span>.<span class="ident">to_string</span>()
-                } <span class="kw">else</span> {
-                    <span class="macro">format!</span>(<span class="string">&quot;{}/{}&quot;</span>, <span class="ident">key_cas</span>.<span class="ident">expected</span>, <span class="ident">options_cas</span>.<span class="ident">expected</span>)
-                };
-                <span class="kw">let</span> <span class="ident">resource_path</span> <span class="op">=</span> <span class="ident">ResourcePath</span> {
-                    <span class="ident">key</span>: <span class="ident">key_cas</span>.<span class="ident">resc_key</span>,
-                    <span class="comment">// Note: once https://github.com/rust-lang/rust/pull/80470 is accepted,</span>
-                    <span class="comment">// we won&#39;t have to clone here.</span>
-                    <span class="ident">options</span>: <span class="ident">options_cas</span>.<span class="ident">resc_options</span>.<span class="ident">clone</span>(),
-                };
-                <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">resource_path</span>.<span class="ident">to_string</span>());
-                <span class="macro">writeable::assert_writeable_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">resource_path</span>, <span class="ident">expected</span>);
-            }
         }
     }
 }

@@ -401,15 +401,6 @@
 <span id="400">400</span>
 <span id="401">401</span>
 <span id="402">402</span>
-<span id="403">403</span>
-<span id="404">404</span>
-<span id="405">405</span>
-<span id="406">406</span>
-<span id="407">407</span>
-<span id="408">408</span>
-<span id="409">409</span>
-<span id="410">410</span>
-<span id="411">411</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -683,7 +674,8 @@
 <span class="doccomment">///     data: AnyPayload::from_static_ref(&amp;CONST_DATA),</span>
 <span class="doccomment">/// };</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let any_response = provider.load_any(&amp;DataRequest::from(key::HELLO_WORLD_V1))</span>
+<span class="doccomment">/// let any_response = provider</span>
+<span class="doccomment">///     .load_any(key::HELLO_WORLD_V1, &amp;DataRequest::default())</span>
 <span class="doccomment">///     .expect(&quot;Load should succeed&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Downcast to something useful</span>
@@ -698,52 +690,42 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`AnyPayloadProvider`]: crate::struct_provider::AnyPayloadProvider</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AnyProvider</span> {
-    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">AnyMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">P</span>
+<span class="doccomment">/// A wrapper over `DynProvider&lt;AnyMarker&gt;` that implements `AnyProvider`</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DynProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">P</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">P</span>);
+
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsDynProviderAnyMarkerWrap</span> {
+    <span class="doccomment">/// Returns an object implementing `AnyProvider` when called on `DynProvider&lt;AnyMarker&gt;`</span>
+    <span class="kw">fn</span> <span class="ident">as_any_provider</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DynProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AsDynProviderAnyMarkerWrap</span> <span class="kw">for</span> <span class="ident">P</span>
 <span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">AnyProvider</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">P</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">AnyMarker</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">AnyMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">load_any</span>(<span class="ident">req</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">into</span>())
+    <span class="kw">fn</span> <span class="ident">as_any_provider</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DynProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
+        <span class="ident">DynProviderAnyMarkerWrap</span>(<span class="self">self</span>)
     }
 }
 
-<span class="doccomment">/// A wrapper over `DataProvider&lt;AnyMarker&gt;` that implements `AnyProvider`</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">P</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">P</span>);
-
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsDataProviderAnyMarkerWrap</span> {
-    <span class="doccomment">/// Returns an object implementing `AnyProvider` when called on `DataProvider&lt;AnyMarker&gt;`</span>
-    <span class="kw">fn</span> <span class="ident">as_any_provider</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AsDataProviderAnyMarkerWrap</span> <span class="kw">for</span> <span class="ident">P</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AnyProvider</span> <span class="kw">for</span> <span class="ident">DynProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">AnyMarker</span><span class="op">&gt;</span>,
+    <span class="ident">P</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">AnyMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">as_any_provider</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
-        <span class="ident">DataProviderAnyMarkerWrap</span>(<span class="self">self</span>)
+    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">try_into</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> <span class="ident">AnyProvider</span> <span class="kw">for</span> <span class="ident">DataProviderAnyMarkerWrap</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">AnyMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-{
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_payload</span>(<span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">try_into</span>()
-    }
-}
-
-<span class="doccomment">/// A wrapper over `AnyProvider` that implements `DataProvider&lt;M&gt;` via downcasting</span>
+<span class="doccomment">/// A wrapper over `AnyProvider` that implements `DynProvider&lt;M&gt;` via downcasting</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DowncastingAnyProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">P</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">P</span>);
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsDowncastingAnyProvider</span> {
-    <span class="doccomment">/// Returns an object implementing `DataProvider&lt;M&gt;` when called on `AnyProvider`</span>
+    <span class="doccomment">/// Returns an object implementing `DynProvider&lt;M&gt;` when called on `AnyProvider`</span>
     <span class="kw">fn</span> <span class="ident">as_downcasting</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DowncastingAnyProvider</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 }
 
@@ -757,16 +739,16 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DowncastingAnyProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DowncastingAnyProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">P</span>: <span class="ident">AnyProvider</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">M</span>: <span class="ident">DataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">M</span>: <span class="ident">ResourceMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
     <span class="ident">M::Yokeable</span>: <span class="ident">ZeroCopyFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M::Yokeable</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_any</span>(<span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">downcast</span>()
+    <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_any</span>(<span class="ident">M::KEY</span>, <span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">downcast</span>()
     }
 }
 

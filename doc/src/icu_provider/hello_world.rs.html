@@ -206,11 +206,6 @@
 <span id="205">205</span>
 <span id="206">206</span>
 <span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -227,7 +222,6 @@
 <span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::fmt::Debug</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
@@ -385,21 +379,17 @@
 }
 
 <span class="kw">impl</span> <span class="ident">IterableProvider</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span> {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::needless_collect</span>)]</span> <span class="comment">// https://github.com/rust-lang/rust-clippy/issues/7526</span>
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">resc_key</span>.<span class="ident">match_key</span>(<span class="ident">HelloWorldV1Marker::KEY</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">map</span>
-            .<span class="ident">iter_keys</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">langid</span><span class="op">|</span> <span class="ident">ResourceOptions</span> {
-                <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="ident">langid</span>.<span class="ident">clone</span>()),
-            })
-            .<span class="ident">collect</span>();
-        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">list</span>.<span class="ident">into_iter</span>()))
+        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(
+            <span class="self">self</span>.<span class="ident">map</span>
+                .<span class="ident">iter_keys</span>()
+                .<span class="ident">cloned</span>()
+                .<span class="ident">map</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="ident">::into</span>),
+        ))
     }
 }
 

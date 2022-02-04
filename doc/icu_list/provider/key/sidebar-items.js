@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["LIST_FORMAT_AND_V1","Resource key for `ListFormatterPatternsV1` for `ListFormatter`s of `ListType::And`"],["LIST_FORMAT_OR_V1","Resource key for `ListFormatterPatternsV1` for `ListFormatter`s of `ListType::Or`"],["LIST_FORMAT_UNIT_V1","Resource key for `ListFormatterPatternsV1` for `ListFormatter`s of `ListType::Unit`"]]});

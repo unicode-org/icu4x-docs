@@ -275,104 +275,43 @@
 <span id="274">274</span>
 <span id="275">275</span>
 <span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">provider::ListFormatterPatternsV1</span>, <span class="ident">ListStyle</span>};
 <span class="kw">use</span> <span class="ident">core::fmt</span>::{<span class="self">self</span>, <span class="ident">Write</span>};
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">writeable</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Represents the type of a list. See the</span>
-<span class="doccomment">/// [CLDR spec](https://unicode.org/reports/tr35/tr35-general.html#ListPatterns)</span>
-<span class="doccomment">/// for an explanation of the different types.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ListType</span> {
-    <span class="doccomment">/// A conjunction</span>
-    <span class="ident">And</span>,
-    <span class="doccomment">/// A disjunction</span>
-    <span class="ident">Or</span>,
-    <span class="doccomment">/// A list of units</span>
-    <span class="ident">Unit</span>,
-}
-
-<span class="doccomment">/// Represents the style of a list. See the</span>
-<span class="doccomment">/// [CLDR spec](https://unicode.org/reports/tr35/tr35-general.html#ListPatterns)</span>
-<span class="doccomment">/// for an explanation of the different styles.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ListStyle</span> {
-    <span class="doccomment">/// A typical list</span>
-    <span class="ident">Wide</span>,
-    <span class="doccomment">/// A shorter list</span>
-    <span class="ident">Short</span>,
-    <span class="doccomment">/// The shortest type of list</span>
-    <span class="ident">Narrow</span>,
-}
-
 <span class="doccomment">/// A formatter that renders sequences of items in an i18n-friendly way. See the</span>
 <span class="doccomment">/// [crate-level documentation](crate) for more details.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ListFormatter</span> {
-    <span class="ident">data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ListFormatter</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="ident">data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
     <span class="ident">style</span>: <span class="ident">ListStyle</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">ListFormatter</span> {
-    <span class="doccomment">/// Creates a new [`ListFormatter`] from the given provider. The provider has to support the</span>
-    <span class="doccomment">/// correct key for the given type:</span>
-    <span class="doccomment">/// [`LIST_FORMAT_AND_V1`](crate::provider::key::LIST_FORMAT_AND_V1),</span>
-    <span class="doccomment">/// [`LIST_FORMAT_OR_V1`](crate::provider::key::LIST_FORMAT_OR_V1), or</span>
-    <span class="doccomment">/// [`LIST_FORMAT_UNIT_V1`](crate::provider::key::LIST_FORMAT_UNIT_V1).</span>
-    <span class="doccomment">/// An error is returned if the key or language are not available, or if there were any</span>
-    <span class="doccomment">/// deserialization errors.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">D</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ListFormatter</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Creates a new [`ListFormatter`] that produces a list for the given [`ResourceMarker`]. See</span>
+    <span class="doccomment">/// [`crate::markers`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
         <span class="ident">locale</span>: <span class="ident">T</span>,
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
-        <span class="ident">type_</span>: <span class="ident">ListType</span>,
         <span class="ident">style</span>: <span class="ident">ListStyle</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load_payload</span>(
-                <span class="kw">match</span> <span class="ident">type_</span> {
-                    <span class="ident">ListType::And</span> =&gt; <span class="ident">key::LIST_FORMAT_AND_V1</span>,
-                    <span class="ident">ListType::Or</span> =&gt; <span class="ident">key::LIST_FORMAT_OR_V1</span>,
-                    <span class="ident">ListType::Unit</span> =&gt; <span class="ident">key::LIST_FORMAT_UNIT_V1</span>,
-                },
-                <span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                    <span class="ident">options</span>: <span class="ident">locale</span>.<span class="ident">into</span>().<span class="ident">into</span>(),
-                    <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                },
-            )<span class="question-mark">?</span>
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="ident">locale</span>.<span class="ident">into</span>().<span class="ident">into</span>(),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+            })<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">data</span>, <span class="ident">style</span> })
     }
+
+    <span class="comment">// constructor!(&quot;and lists&quot;, try_new_and, AndListV1Marker);</span>
+    <span class="comment">// constructor!(&quot;or lists&quot;, try_new_or, OrListV1Marker);</span>
+    <span class="comment">// constructor!(&quot;unit lists&quot;, try_new_unit, UnitListV1Marker);</span>
 
     <span class="doccomment">/// Returns a [`Writeable`] composed of the input [`Writeable`]s and the language-dependent</span>
     <span class="doccomment">/// formatting. The first layer of parts contains [`parts::ELEMENT`] for input</span>
@@ -380,7 +319,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">values</span>: <span class="ident">I</span>,
-    ) -&gt; <span class="ident">List</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>, <span class="ident">I</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">List</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">M</span>, <span class="ident">W</span>, <span class="ident">I</span><span class="op">&gt;</span> {
         <span class="ident">List</span> {
             <span class="ident">formatter</span>: <span class="self">self</span>,
             <span class="ident">values</span>,
@@ -408,12 +347,23 @@
 
 <span class="doccomment">/// The [`Writeable`] implementation that is returned by [`ListFormatter::format`]. See</span>
 <span class="doccomment">/// the [`writeable`] crate for how to consume this.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">List</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ListFormatter</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">List</span><span class="op">&lt;</span>
+    <span class="lifetime">&#39;a</span>,
+    <span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+    <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+<span class="op">&gt;</span> {
+    <span class="ident">formatter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ListFormatter</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
     <span class="ident">values</span>: <span class="ident">I</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Writeable</span> <span class="kw">for</span> <span class="ident">List</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">W</span>, <span class="ident">I</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span>
+        <span class="lifetime">&#39;a</span>,
+        <span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">W</span>: <span class="ident">Writeable</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+        <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">W</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+    <span class="op">&gt;</span> <span class="ident">Writeable</span> <span class="kw">for</span> <span class="ident">List</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">M</span>, <span class="ident">W</span>, <span class="ident">I</span><span class="op">&gt;</span>
+{
     <span class="kw">fn</span> <span class="ident">write_to_parts</span><span class="op">&lt;</span><span class="ident">V</span>: <span class="ident">PartsWrite</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">V</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">macro_rules!</span> <span class="ident">literal</span> {
             (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">lit</span>:<span class="ident">ident</span>) =&gt; {
@@ -516,11 +466,9 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">writeable</span>::{<span class="ident">assert_writeable_eq</span>, <span class="ident">assert_writeable_parts_eq</span>};
 
-    <span class="kw">fn</span> <span class="ident">formatter</span>(<span class="ident">style</span>: <span class="ident">ListStyle</span>) -&gt; <span class="ident">ListFormatter</span> {
+    <span class="kw">fn</span> <span class="ident">formatter</span>(<span class="ident">style</span>: <span class="ident">ListStyle</span>) -&gt; <span class="ident">ListFormatter</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::markers::And</span><span class="op">&gt;</span> {
         <span class="ident">ListFormatter</span> {
-            <span class="ident">data</span>: <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">ListFormatterPatternsV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(
-                <span class="ident"><span class="kw">crate</span>::provider::test::test_patterns</span>(),
-            ),
+            <span class="ident">data</span>: <span class="ident">DataPayload::from_owned</span>(<span class="ident"><span class="kw">crate</span>::provider::test::test_patterns</span>()),
             <span class="ident">style</span>,
         }
     }

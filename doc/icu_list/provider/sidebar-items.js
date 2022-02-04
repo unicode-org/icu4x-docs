@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["key","Resource keys for `icu_list`."]],"struct":[["ListFormatterPatternsV1","Symbols and metadata required for `ListFormatter`"],["ListFormatterPatternsV1Marker","Marker type for [`ListFormatterPatternsV1`]"]]});

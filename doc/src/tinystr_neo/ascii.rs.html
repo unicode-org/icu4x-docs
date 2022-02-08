@@ -459,6 +459,17 @@
 <span id="458">458</span>
 <span id="459">459</span>
 <span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -484,26 +495,26 @@
         <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">allow_trailing_null</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">N</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::TooLarge</span> {
-                <span class="ident">max</span>: <span class="ident">N</span>,
-                <span class="ident">found</span>: <span class="ident">bytes</span>.<span class="ident">len</span>(),
-            });
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>();
+        <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="ident">N</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::TooLarge</span> { <span class="ident">max</span>: <span class="ident">N</span>, <span class="ident">len</span> });
         }
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">N</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_null</span> <span class="op">=</span> <span class="bool-val">false</span>;
-        <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">bytes</span>.<span class="ident">len</span>() {
-            <span class="kw">if</span> <span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">==</span> <span class="number">0</span> {
+        <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">len</span> {
+            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">i</span>];
+
+            <span class="kw">if</span> <span class="ident">b</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="ident">found_null</span> <span class="op">=</span> <span class="bool-val">true</span>;
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x80</span> {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">b</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x80</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::NonAscii</span>);
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">found_null</span> {
                 <span class="comment">// Error if there are contentful bytes after null</span>
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::ContainsNull</span>);
             }
-            <span class="ident">out</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">i</span>];
+            <span class="ident">out</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">b</span>;
 
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
@@ -518,10 +529,11 @@
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::from_bytes</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>())
+        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="bool-val">false</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">len</span>()
@@ -533,17 +545,20 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">==</span> <span class="number">0</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>..<span class="self">self</span>.<span class="ident">len</span>()]
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="ident">N</span>] {
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">all_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="ident">N</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>
     }
 
@@ -566,6 +581,7 @@
     <span class="doccomment">/// assert!(!s2.is_ascii_alphabetic());</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ascii_alphabetic</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_alphabetic</span>()
@@ -596,6 +612,7 @@
     <span class="doccomment">/// assert!(!s2.is_ascii_alphanumeric());</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ascii_alphanumeric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_alphanumeric</span>()
@@ -624,6 +641,7 @@
     <span class="doccomment">/// assert!(!s2.is_ascii_numeric());</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ascii_numeric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_numeric</span>()
@@ -649,6 +667,7 @@
     <span class="doccomment">/// assert_eq!(&amp;*s1.to_ascii_lowercase(), &quot;tes3&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ascii_lowercase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_lowercase</span>();
@@ -678,6 +697,7 @@
     <span class="doccomment">/// assert_eq!(&amp;*s1.to_ascii_titlecase(), &quot;Test&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ascii_titlecase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_titlecase</span>();
@@ -707,6 +727,7 @@
     <span class="doccomment">/// assert_eq!(&amp;*s1.to_ascii_uppercase(), &quot;TES3&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ascii_uppercase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
             <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_uppercase</span>();
@@ -731,6 +752,7 @@
     <span class="doccomment">/// # Safety</span>
     <span class="doccomment">/// Must be called with a bytes array made of valid ASCII bytes, with no null bytes</span>
     <span class="doccomment">/// between ASCII characters</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_bytes_unchecked</span>(<span class="ident">bytes</span>: [<span class="ident">u8</span>; <span class="ident">N</span>]) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">bytes</span> }
     }

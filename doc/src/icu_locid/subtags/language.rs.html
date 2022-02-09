@@ -261,7 +261,7 @@
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::ops::RangeInclusive</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
-<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr4</span>, <span class="ident">TinyStr4</span>};
+<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr</span>, <span class="ident">TinyStr4</span>};
 
 <span class="doccomment">/// A language subtag (examples: `&quot;en&quot;`, `&quot;csb&quot;`, `&quot;zh&quot;`, `&quot;und&quot;`, etc.)</span>
 <span class="doccomment">///</span>
@@ -297,7 +297,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Language</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TinyStr4</span><span class="op">&gt;</span>);
 
 <span class="kw">const</span> <span class="ident">LANGUAGE_LENGTH</span>: <span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="number">2</span>..<span class="op">=</span><span class="number">3</span>;
-<span class="kw">const</span> <span class="ident">UND_VALUE</span>: <span class="ident">TinyStr4</span> <span class="op">=</span> <span class="macro">tinystr4!</span>(<span class="string">&quot;und&quot;</span>);
+<span class="kw">const</span> <span class="ident">UND_VALUE</span>: <span class="ident">TinyStr4</span> <span class="op">=</span> <span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;und&quot;</span>);
 
 <span class="kw">impl</span> <span class="ident">Language</span> {
     <span class="doccomment">/// A constructor which takes a utf8 slice, parses it and</span>
@@ -350,8 +350,8 @@
     <span class="doccomment">/// let lang = unsafe { Language::from_raw_unchecked(raw) };</span>
     <span class="doccomment">/// assert_eq!(lang, &quot;en&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">map</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::into</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">4</span>]<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="ident">TinyStr4::all_bytes</span>).<span class="ident">copied</span>()
     }
 
     <span class="doccomment">/// Constructor which takes a raw value returned by</span>
@@ -374,9 +374,9 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function accepts a [`u32`] that is expected to be a valid [`TinyStr4`]</span>
     <span class="doccomment">/// representing a [`Language`] subtag in canonical syntax.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw_unchecked</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw_unchecked</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">4</span>]<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="kw">match</span> <span class="ident">v</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">TinyStr4::new_unchecked</span>(<span class="ident">v</span>)),
+            <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">TinyStr4::from_bytes_unchecked</span>(<span class="ident">v</span>)),
             <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         })
     }

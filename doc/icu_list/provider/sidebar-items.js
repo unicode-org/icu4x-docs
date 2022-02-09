@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AndListV1Marker","Marker type for [`ListFormatterPatternsV1`]: “list/and@1”"],["ListFormatterPatternsV1","Symbols and metadata required for `ListFormatter`."],["OrListV1Marker","Marker type for [`ListFormatterPatternsV1`]: “list/or@1”"],["UnitListV1Marker","Marker type for [`ListFormatterPatternsV1`]: “list/unit@1”"]]});

@@ -194,30 +194,6 @@
 <span id="193">193</span>
 <span id="194">194</span>
 <span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -229,7 +205,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CldrPaths</span>;
 <span class="kw">use</span> <span class="ident">icu_datetime::provider::time_zones</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::iter::IterableProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::iter::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 
@@ -275,82 +251,58 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">KeyedDataProvider</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
-    <span class="kw">fn</span> <span class="ident">supported_keys</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> {
-        <span class="macro">vec!</span>[
-            <span class="ident">TimeZoneFormatsV1Marker::KEY</span>,
-            <span class="ident">ExemplarCitiesV1Marker::KEY</span>,
-            <span class="ident">MetaZoneGenericNamesLongV1Marker::KEY</span>,
-            <span class="ident">MetaZoneGenericNamesShortV1Marker::KEY</span>,
-            <span class="ident">MetaZoneSpecificNamesLongV1Marker::KEY</span>,
-            <span class="ident">MetaZoneSpecificNamesShortV1Marker::KEY</span>,
-        ]
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">IterableProvider</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
-    <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">_resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(
-            <span class="self">self</span>.<span class="ident">data</span>
-                .<span class="ident">iter_keys</span>()
-                <span class="comment">// TODO(#568): Avoid the clone</span>
-                .<span class="ident">cloned</span>()
-                .<span class="ident">map</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="ident">::into</span>),
-        ))
-    }
-}
-
 <span class="macro">macro_rules!</span> <span class="ident">impl_data_provider</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span>:<span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
-            <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>
-                    .<span class="ident">get_langid</span>()
-                    .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="ident">time_zones</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">dates</span>.<span class="ident">time_zone_names</span>,
-                    <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>)),
-                };
-                <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
-                <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
-                <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
-                    <span class="ident">metadata</span>,
-                    <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id::from</span>(<span class="ident">time_zones</span>.<span class="ident">clone</span>()))),
-                })
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span>:<span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
+        $(
+            <span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
+                <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+                    <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>
+                        .<span class="ident">get_langid</span>()
+                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
+                    <span class="kw">let</span> <span class="ident">time_zones</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>) {
+                        <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">dates</span>.<span class="ident">time_zone_names</span>,
+                        <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>)),
+                    };
+                    <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
+                    <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
+                    <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
+                        <span class="ident">metadata</span>,
+                        <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span> <span class="kw">as</span> <span class="ident">DataMarker</span><span class="op">&gt;</span><span class="ident">::Yokeable::from</span>(<span class="ident">time_zones</span>.<span class="ident">clone</span>()))),
+                    })
+                }
+            }
+
+            <span class="kw">impl</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
+                <span class="kw">fn</span> <span class="ident">supported_options</span>(
+                    <span class="kw-2">&amp;</span><span class="self">self</span>,
+                ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(
+                        <span class="self">self</span>.<span class="ident">data</span>
+                            .<span class="ident">iter_keys</span>()
+                            <span class="comment">// TODO(#568): Avoid the clone</span>
+                            .<span class="ident">cloned</span>()
+                            .<span class="ident">map</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="ident">::into</span>),
+                    ))
+                }
+            }
+        )<span class="op">+</span>
+
+        <span class="kw">impl</span> <span class="ident">KeyedDataProvider</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
+            <span class="kw">fn</span> <span class="ident">supported_keys</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> {
+                <span class="macro">vec!</span>[$(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>),<span class="op">+</span>]
             }
         }
+
+        <span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">TimeZonesProvider</span>, [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span>),<span class="op">+</span>,], <span class="ident">SERDE_SE</span>);
     };
 }
 
-<span class="macro">icu_provider::impl_dyn_provider!</span>(
-    <span class="ident">TimeZonesProvider</span>,
-    [
-        <span class="ident">TimeZoneFormatsV1Marker</span>,
-        <span class="ident">ExemplarCitiesV1Marker</span>,
-        <span class="ident">MetaZoneGenericNamesLongV1Marker</span>,
-        <span class="ident">MetaZoneGenericNamesShortV1Marker</span>,
-        <span class="ident">MetaZoneSpecificNamesLongV1Marker</span>,
-        <span class="ident">MetaZoneSpecificNamesShortV1Marker</span>,
-    ],
-    <span class="ident">SERDE_SE</span>
-);
-
-<span class="macro">impl_data_provider!</span>(<span class="ident">TimeZoneFormatsV1</span>, <span class="ident">TimeZoneFormatsV1Marker</span>);
-<span class="macro">impl_data_provider!</span>(<span class="ident">ExemplarCitiesV1</span>, <span class="ident">ExemplarCitiesV1Marker</span>);
-<span class="macro">impl_data_provider!</span>(<span class="ident">MetaZoneGenericNamesLongV1</span>, <span class="ident">MetaZoneGenericNamesLongV1Marker</span>);
 <span class="macro">impl_data_provider!</span>(
-    <span class="ident">MetaZoneGenericNamesShortV1</span>,
-    <span class="ident">MetaZoneGenericNamesShortV1Marker</span>
-);
-<span class="macro">impl_data_provider!</span>(
-    <span class="ident">MetaZoneSpecificNamesLongV1</span>,
-    <span class="ident">MetaZoneSpecificNamesLongV1Marker</span>
-);
-<span class="macro">impl_data_provider!</span>(
-    <span class="ident">MetaZoneSpecificNamesShortV1</span>,
+    <span class="ident">TimeZoneFormatsV1Marker</span>,
+    <span class="ident">ExemplarCitiesV1Marker</span>,
+    <span class="ident">MetaZoneGenericNamesLongV1Marker</span>,
+    <span class="ident">MetaZoneGenericNamesShortV1Marker</span>,
+    <span class="ident">MetaZoneSpecificNamesLongV1Marker</span>,
     <span class="ident">MetaZoneSpecificNamesShortV1Marker</span>
 );
 

@@ -162,10 +162,6 @@
 <span id="161">161</span>
 <span id="162">162</span>
 <span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -177,7 +173,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CldrPaths</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::rules::runtime::ast::Rule</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::iter::IterableProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::iter::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 
@@ -236,20 +232,16 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">PluralRulesV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PluralsProvider</span> {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">PluralRulesV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">cldr_rules</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_rules_for</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)<span class="question-mark">?</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">PluralRulesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PluralsProvider</span> {
+    <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">cldr_rules</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_rules_for</span>(<span class="kw-2">&amp;</span><span class="ident">M::KEY</span>)<span class="question-mark">?</span>;
         <span class="comment">// TODO: Implement language fallback?</span>
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>
             .<span class="ident">get_langid</span>()
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="ident">M::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">cldr_rules</span>.<span class="number">0</span>.<span class="ident">get</span>(<span class="ident">langid</span>) {
             <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
-            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>)),
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="ident">M::KEY</span>, <span class="ident">req</span>)),
         };
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
@@ -260,17 +252,20 @@
     }
 }
 
-<span class="macro">icu_provider::impl_dyn_provider!</span>(<span class="ident">PluralsProvider</span>, {
-    <span class="kw">_</span> =&gt; <span class="ident">PluralRulesV1Marker</span>,
-}, <span class="ident">SERDE_SE</span>);
+<span class="macro">icu_provider::impl_dyn_provider!</span>(
+    <span class="ident">PluralsProvider</span>,
+    [<span class="ident">OrdinalV1Marker</span>, <span class="ident">CardinalV1Marker</span>,],
+    <span class="ident">SERDE_SE</span>
+);
 
-<span class="kw">impl</span> <span class="ident">IterableProvider</span> <span class="kw">for</span> <span class="ident">PluralsProvider</span> {
-    <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">PluralRulesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>
+    <span class="kw">for</span> <span class="ident">PluralsProvider</span>
+{
+    <span class="kw">fn</span> <span class="ident">supported_options</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(
-            <span class="self">self</span>.<span class="ident">get_rules_for</span>(<span class="ident">resc_key</span>)<span class="question-mark">?</span>
+            <span class="self">self</span>.<span class="ident">get_rules_for</span>(<span class="kw-2">&amp;</span><span class="ident">M::KEY</span>)<span class="question-mark">?</span>
                 .<span class="number">0</span>
                 .<span class="ident">iter_keys</span>()
                 <span class="comment">// TODO(#568): Avoid the clone</span>
@@ -306,14 +301,11 @@
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">PluralsProvider::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span>).<span class="ident">unwrap</span>();
 
     <span class="comment">// Spot-check locale &#39;cs&#39; since it has some interesting entries</span>
-    <span class="kw">let</span> <span class="ident">cs_rules</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">PluralRulesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-        .<span class="ident">load_payload</span>(
-            <span class="ident">CardinalV1Marker::KEY</span>,
-            <span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;cs&quot;</span>).<span class="ident">into</span>(),
-                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-            },
-        )
+    <span class="kw">let</span> <span class="ident">cs_rules</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CardinalV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
+        .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+            <span class="ident">options</span>: <span class="macro">langid!</span>(<span class="string">&quot;cs&quot;</span>).<span class="ident">into</span>(),
+            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+        })
         .<span class="ident">unwrap</span>()
         .<span class="ident">take_payload</span>()
         .<span class="ident">unwrap</span>();

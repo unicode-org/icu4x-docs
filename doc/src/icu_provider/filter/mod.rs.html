@@ -197,6 +197,36 @@
 <span id="196">196</span>
 <span id="197">197</span>
 <span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -204,7 +234,7 @@
 <span class="doccomment">//! Providers that filter resource requests.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Requests that fail a filter test will return [`DataError`] of kind [`FilteredResource`](</span>
-<span class="doccomment">//! DataErrorKind::FilteredResource) and will not appear in [`IterableProvider`] iterators.</span>
+<span class="doccomment">//! DataErrorKind::FilteredResource) and will not appear in [`IterableDynProvider`] iterators.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The main struct is [`RequestFilterDataProvider`]. Although that struct can be created</span>
 <span class="doccomment">//! directly, the traits in this module provide helper functions for common filtering patterns.</span>
@@ -231,13 +261,13 @@
 <span class="doccomment">//!     .filter_by_langid(|langid| langid.language == language!(&quot;de&quot;));</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! [`IterableProvider`]: crate::iter::IterableProvider</span>
+<span class="doccomment">//! [`IterableDynProvider`]: crate::iter::IterableDynProvider</span>
 
 <span class="kw">mod</span> <span class="ident">impls</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">impls</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iter::IterableProvider</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iter</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 
@@ -245,7 +275,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Data requests that are rejected by the filter will return a [`DataError`] with kind</span>
 <span class="doccomment">/// [`FilteredResource`](DataErrorKind::FilteredResource), and they will not be returned</span>
-<span class="doccomment">/// by [`IterableProvider::supported_options_for_key`].</span>
+<span class="doccomment">/// by [`IterableDynProvider::supported_options_for_key`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Although this struct can be created directly, the traits in this module provide helper</span>
 <span class="doccomment">/// functions for common filtering patterns.</span>
@@ -338,16 +368,46 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">IterableProvider</span> <span class="kw">for</span> <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">F</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">D</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">F</span><span class="op">&gt;</span>
 <span class="kw">where</span>
+    <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="ident">bool</span>,
-    <span class="ident">D</span>: <span class="ident">IterableProvider</span>,
+    <span class="ident">D</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">resc_key</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceKey</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">resc_key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">iter</span><span class="op">|</span> {
+            <span class="comment">// Use filter_map instead of filter to avoid cloning the options</span>
+            <span class="kw">let</span> <span class="ident">filtered_iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">filter_map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">DataRequest</span> {
+                    <span class="ident">options</span>,
+                    <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                };
+                <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">predicate</span>)(<span class="kw-2">&amp;</span><span class="ident">request</span>) {
+                    <span class="prelude-val">Some</span>(<span class="ident">request</span>.<span class="ident">options</span>)
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">None</span>
+                }
+            });
+            <span class="kw">let</span> <span class="ident">boxed_filtered_iter</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
+                <span class="ident">Box::new</span>(<span class="ident">filtered_iter</span>);
+            <span class="ident">boxed_filtered_iter</span>
+        })
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">D</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">F</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">M</span>: <span class="ident">ResourceMarker</span>,
+    <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="ident">bool</span>,
+    <span class="ident">D</span>: <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+{
+    <span class="kw">fn</span> <span class="ident">supported_options</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">supported_options</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">iter</span><span class="op">|</span> {
             <span class="comment">// Use filter_map instead of filter to avoid cloning the options</span>
             <span class="kw">let</span> <span class="ident">filtered_iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">filter_map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">DataRequest</span> {

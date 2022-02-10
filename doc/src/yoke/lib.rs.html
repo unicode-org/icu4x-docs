@@ -38,18 +38,48 @@
 <span id="37">37</span>
 <span id="38">38</span>
 <span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="doccomment">//! This crate provides [`Yoke`], a data structure that allows one</span>
-<span class="doccomment">//! to &quot;yoke&quot; Cow-like borrowed data types to their backing storage,</span>
-<span class="doccomment">//! enabling one to use Cow (etc) in zero-copy deserialization</span>
-<span class="doccomment">//! with dynamic lifetimes for the borrowed data, for example caching it.</span>
+<span class="doccomment">//! This crate provides [`Yoke&lt;Y, C&gt;`][Yoke], which allows one to &quot;yoke&quot; a zero-copy deserialized</span>
+<span class="doccomment">//! object(say, a [`Cow&lt;&#39;a, str&gt;`](alloc::borrow::Cow)) to the source it was deserialized from, (say, an [`Rc&lt;[u8]&gt;`](alloc::rc::Rc)),</span>
+<span class="doccomment">//! known as a &quot;cart&quot;, producing a type that looks like `Yoke&lt;Cow&lt;&#39;static, str&gt;, Rc&lt;[u8]&gt;&gt;`</span>
+<span class="doccomment">//! and can be moved around with impunity.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Succinctly, this allows one to &quot;erase&quot; static lifetimes and turn them into dynamic ones, similarly</span>
+<span class="doccomment">//! to how `dyn` allows one to &quot;erase&quot; static types and turn them into dynamic ones.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Most of the time the yokeable `Y` type will be some kind of zero-copy deserializable</span>
+<span class="doccomment">//! abstraction, potentially with an owned variant (like [`Cow`](alloc::borrow::Cow),</span>
+<span class="doccomment">//! [`ZeroVec`](https://docs.rs/zerovec), or an aggregate containing such types), and the cart `C` will be some smart pointer like</span>
+<span class="doccomment">//!   [`Box&lt;T&gt;`](alloc::boxed::Box), [`Rc&lt;T&gt;`](alloc::rc::Rc), or [`Arc&lt;T&gt;`](std::sync::Arc), potentially wrapped in an [`Option&lt;T&gt;`](Option).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The key behind this crate is [`Yoke::get()`], where calling [`.get()`][Yoke::get] on a type like</span>
+<span class="doccomment">//! `Yoke&lt;Cow&lt;&#39;static, str&gt;, _&gt;` will get you a short-lived `&amp;&#39;a Cow&lt;&#39;a, str&gt;`, restricted to the</span>
+<span class="doccomment">//! lifetime of the borrow used during [`.get()`](Yoke::get). This is entirely safe since the `Cow` borrows from</span>
+<span class="doccomment">//! the cart type, which cannot be interfered with as long as the `Yoke` is borrowed by [`.get()`](Yoke::get).</span>
+<span class="doccomment">//! [`.get()`](Yoke::get) protects access by essentially reifying the erased lifetime to a safe local one</span>
+<span class="doccomment">//! when necessary.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! See the documentation of [`Yoke`] for more details.</span>
 
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">test</span>), <span class="ident">no_std</span>)]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">test</span>), <span class="ident">not</span>(<span class="ident">doc</span>)), <span class="ident">no_std</span>)]</span>
 <span class="comment">// The lifetimes here are important for safety and explicitly writing</span>
 <span class="comment">// them out is good even when redundant</span>
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::needless_lifetimes</span>)]</span>

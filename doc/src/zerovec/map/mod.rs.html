@@ -381,6 +381,28 @@
 <span id="380">380</span>
 <span id="381">381</span>
 <span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -389,8 +411,10 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule::AsULE</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ZeroSlice</span>, <span class="ident">ZeroVec</span>};
+<span class="kw">use</span> <span class="ident">alloc::borrow::Borrow</span>;
 <span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
+<span class="kw">use</span> <span class="ident">core::iter::FromIterator</span>;
 
 <span class="kw">mod</span> <span class="ident">borrowed</span>;
 <span class="kw">mod</span> <span class="ident">kv</span>;
@@ -433,10 +457,8 @@
 <span class="doccomment">/// [`VarZeroVec`]: crate::VarZeroVec</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">keys</span>: <span class="ident">K::Container</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">values</span>: <span class="ident">V::Container</span>,
@@ -444,10 +466,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::new</span>()
@@ -456,10 +476,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
     <span class="doccomment">/// Creates a new, empty `ZeroMap&lt;K, V&gt;`.</span>
     <span class="doccomment">///</span>
@@ -761,6 +779,32 @@
             <span class="ident">keys</span>: <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">clone</span>(),
             <span class="ident">values</span>: <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">clone</span>(),
         }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">FromIterator</span><span class="op">&lt;</span>(<span class="ident">A</span>, <span class="ident">B</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">A</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>,
+    <span class="ident">B</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+{
+    <span class="kw">fn</span> <span class="ident">from_iter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">A</span>, <span class="ident">B</span>)<span class="op">&gt;</span>,
+    {
+        <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">into_iter</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">iter</span>.<span class="ident">size_hint</span>() {
+            (<span class="kw">_</span>, <span class="prelude-val">Some</span>(<span class="ident">upper</span>)) =&gt; <span class="ident"><span class="self">Self</span>::with_capacity</span>(<span class="ident">upper</span>),
+            (<span class="ident">lower</span>, <span class="prelude-val">None</span>) =&gt; <span class="ident"><span class="self">Self</span>::with_capacity</span>(<span class="ident">lower</span>),
+        };
+
+        <span class="kw">for</span> (<span class="ident">key</span>, <span class="ident">value</span>) <span class="kw">in</span> <span class="ident">iter</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>)) <span class="op">=</span> <span class="ident">map</span>.<span class="ident">try_append</span>(<span class="ident">key</span>.<span class="ident">borrow</span>(), <span class="ident">value</span>.<span class="ident">borrow</span>()) {
+                <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">value</span>);
+            }
+        }
+        <span class="ident">map</span>
     }
 }
 </code></pre></div>

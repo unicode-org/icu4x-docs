@@ -507,6 +507,29 @@
 <span id="506">506</span>
 <span id="507">507</span>
 <span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -550,6 +573,11 @@
         <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
         <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Search for a key in a sorted vector by a predicate, returns `Ok(index)` if found,</span>
+    <span class="doccomment">/// returns `Err(insert_index)` if not found, where `insert_index` is the</span>
+    <span class="doccomment">/// index where it should be inserted to maintain sort order.</span>
+    <span class="kw">fn</span> <span class="ident">zvl_binary_search_by</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span>;
     <span class="doccomment">/// Get element at `index`</span>
     <span class="kw">fn</span> <span class="ident">zvl_get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::GetType</span><span class="op">&gt;</span>;
     <span class="doccomment">/// The length of this vector</span>
@@ -663,6 +691,12 @@
         <span class="kw">let</span> <span class="ident">zs</span>: <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>;
         <span class="ident">zs</span>.<span class="ident">zvl_binary_search_in_range</span>(<span class="ident">k</span>, <span class="ident">range</span>)
     }
+    <span class="kw">fn</span> <span class="ident">zvl_binary_search_by</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">mut</span> <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="ident">ZeroSlice::binary_search_by</span>(<span class="self">self</span>, <span class="op">|</span><span class="ident">probe</span><span class="op">|</span> <span class="ident">predicate</span>(<span class="kw-2">&amp;</span><span class="ident">probe</span>))
+    }
     <span class="kw">fn</span> <span class="ident">zvl_get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_ule_ref</span>(<span class="ident">index</span>)
     }
@@ -722,6 +756,12 @@
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">subslice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_subslice</span>(<span class="ident">range</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="ident">ZeroSlice::binary_search</span>(<span class="ident">subslice</span>, <span class="ident">k</span>))
+    }
+    <span class="kw">fn</span> <span class="ident">zvl_binary_search_by</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="kw-2">mut</span> <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="ident">ZeroSlice::binary_search_by</span>(<span class="self">self</span>, <span class="op">|</span><span class="ident">probe</span><span class="op">|</span> <span class="ident">predicate</span>(<span class="kw-2">&amp;</span><span class="ident">probe</span>))
     }
     <span class="kw">fn</span> <span class="ident">zvl_get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_ule_ref</span>(<span class="ident">index</span>)
@@ -822,6 +862,9 @@
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">binary_search_in_range</span>(<span class="ident">k</span>, <span class="ident">range</span>)
     }
+    <span class="kw">fn</span> <span class="ident">zvl_binary_search_by</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">binary_search_by</span>(<span class="ident">predicate</span>)
+    }
     <span class="kw">fn</span> <span class="ident">zvl_get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">index</span>)
     }
@@ -890,6 +933,9 @@
         <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">binary_search_in_range</span>(<span class="ident">k</span>, <span class="ident">range</span>)
+    }
+    <span class="kw">fn</span> <span class="ident">zvl_binary_search_by</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">binary_search_by</span>(<span class="ident">predicate</span>)
     }
     <span class="kw">fn</span> <span class="ident">zvl_get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">index</span>)

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Options","Options bag for initializing a [`postcard::Serializer`]."],["Serializer","A serializer for Postcard."]]});

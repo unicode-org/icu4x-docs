@@ -135,28 +135,92 @@
 <span id="134">134</span>
 <span id="135">135</span>
 <span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::{<span class="ident">Latin1Indices</span>, <span class="ident">Utf16Indices</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rule_segmenter</span>::<span class="kw-2">*</span>;
 
 <span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/generated_sentence_table.rs&quot;</span>));
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SentenceBreakType</span>;
+<span class="doccomment">/// Sentence break iterator for an `str` (a UTF-8 string).</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SentenceBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">SentenceBreakType</span><span class="op">&gt;</span>;
 
-<span class="comment">// UTF-8 version of sentence break iterator using rule based segmenter.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SentenceBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">SentenceBreakType</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Sentence break iterator for a Latin-1 (8-bit) string.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SentenceBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">SentenceBreakTypeLatin1</span><span class="op">&gt;</span>;
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SentenceBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create sentence break iterator</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
+<span class="doccomment">/// Sentence break iterator for a UTF-16 string.</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SentenceBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">SentenceBreakTypeUtf16</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Supports loading sentence break data, and creating sentence break iterators for different string</span>
+<span class="doccomment">/// encodings. Please see the [module-level documentation] for its usages.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [module-level documentation]: index.html</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SentenceBreakSegmenter</span>;
+
+<span class="kw">impl</span> <span class="ident">SentenceBreakSegmenter</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="comment">// Note: This will be able to return an Error once DataProvider is added</span>
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>)
+    }
+
+    <span class="doccomment">/// Create a sentence break iterator for an `str` (a UTF-8 string).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_str</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">str</span>) -&gt; <span class="ident">SentenceBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
+        <span class="ident">SentenceBreakIterator</span> {
             <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>(),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">break_state_table</span>: <span class="kw-2">&amp;</span><span class="ident">BREAK_STATE_MACHINE_TABLE</span>,
+            <span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">PROPERTY_TABLE</span>,
+            <span class="ident">rule_property_count</span>: <span class="ident">PROPERTY_COUNT</span>,
+            <span class="ident">last_codepoint_property</span>: <span class="ident">LAST_CODEPOINT_PROPERTY</span>,
+            <span class="ident">sot_property</span>: <span class="ident">PROP_SOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
+            <span class="ident">eot_property</span>: <span class="ident">PROP_EOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
+            <span class="ident">complex_property</span>: <span class="ident">PROP_COMPLEX</span> <span class="kw">as</span> <span class="ident">u8</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create a sentence break iterator for a Latin-1 (8-bit) string.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_latin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u8</span>],
+    ) -&gt; <span class="ident">SentenceBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
+        <span class="ident">SentenceBreakIteratorLatin1</span> {
+            <span class="ident">iter</span>: <span class="ident">Latin1Indices::new</span>(<span class="ident">input</span>),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">break_state_table</span>: <span class="kw-2">&amp;</span><span class="ident">BREAK_STATE_MACHINE_TABLE</span>,
+            <span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">PROPERTY_TABLE</span>,
+            <span class="ident">rule_property_count</span>: <span class="ident">PROPERTY_COUNT</span>,
+            <span class="ident">last_codepoint_property</span>: <span class="ident">LAST_CODEPOINT_PROPERTY</span>,
+            <span class="ident">sot_property</span>: <span class="ident">PROP_SOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
+            <span class="ident">eot_property</span>: <span class="ident">PROP_EOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
+            <span class="ident">complex_property</span>: <span class="ident">PROP_COMPLEX</span> <span class="kw">as</span> <span class="ident">u8</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create a sentence break iterator for a UTF-16 string.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf16</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u16</span>]) -&gt; <span class="ident">SentenceBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
+        <span class="ident">SentenceBreakIteratorUtf16</span> {
+            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
             <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
@@ -171,8 +235,10 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SentenceBreakType</span> {
-    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SentenceBreakType</span>;
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SentenceBreakType</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">char</span>;
 
     <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="ident">iter</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
@@ -189,30 +255,8 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SentenceBreakTypeLatin1</span>;
 
-<span class="comment">// Latin-1 version of sentence break iterator using rule based segmenter.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SentenceBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">SentenceBreakTypeLatin1</span><span class="op">&gt;</span>;
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SentenceBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create sentence break iterator using Latin-1/8-bit string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">iter</span>: <span class="ident">Latin1Indices::new</span>(<span class="ident">input</span>),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">break_state_table</span>: <span class="kw-2">&amp;</span><span class="ident">BREAK_STATE_MACHINE_TABLE</span>,
-            <span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">PROPERTY_TABLE</span>,
-            <span class="ident">rule_property_count</span>: <span class="ident">PROPERTY_COUNT</span>,
-            <span class="ident">last_codepoint_property</span>: <span class="ident">LAST_CODEPOINT_PROPERTY</span>,
-            <span class="ident">sot_property</span>: <span class="ident">PROP_SOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
-            <span class="ident">eot_property</span>: <span class="ident">PROP_EOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
-            <span class="ident">complex_property</span>: <span class="ident">PROP_COMPLEX</span> <span class="kw">as</span> <span class="ident">u8</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SentenceBreakTypeLatin1</span> {
-    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Latin1Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SentenceBreakTypeLatin1</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Latin1Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">u8</span>; <span class="comment">// TODO: Latin1Char</span>
 
     <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
@@ -229,30 +273,8 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SentenceBreakTypeUtf16</span>;
 
-<span class="comment">// UTF-16 version of sentence break iterator using rule based segmenter.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SentenceBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">SentenceBreakTypeUtf16</span><span class="op">&gt;</span>;
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SentenceBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Create sentence break iterator using UTF-16 string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u16</span>]) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
-            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
-            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
-            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">break_state_table</span>: <span class="kw-2">&amp;</span><span class="ident">BREAK_STATE_MACHINE_TABLE</span>,
-            <span class="ident">property_table</span>: <span class="kw-2">&amp;</span><span class="ident">PROPERTY_TABLE</span>,
-            <span class="ident">rule_property_count</span>: <span class="ident">PROPERTY_COUNT</span>,
-            <span class="ident">last_codepoint_property</span>: <span class="ident">LAST_CODEPOINT_PROPERTY</span>,
-            <span class="ident">sot_property</span>: <span class="ident">PROP_SOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
-            <span class="ident">eot_property</span>: <span class="ident">PROP_EOT</span> <span class="kw">as</span> <span class="ident">u8</span>,
-            <span class="ident">complex_property</span>: <span class="ident">PROP_COMPLEX</span> <span class="kw">as</span> <span class="ident">u8</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SentenceBreakTypeUtf16</span> {
-    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf16Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SentenceBreakTypeUtf16</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf16Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">u32</span>;
 
     <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="ident">iter</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {

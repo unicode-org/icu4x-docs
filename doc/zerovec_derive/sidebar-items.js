@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["ULE","Custom derive for `zerovec::ULE`,"],["VarULE","Custom derive for `zerovec::VarULE`,"]]});
+initSidebarItems({"attr":[["make_ule","Generate a corresponding ULE type and the relevant AsULE implementations for this type"]],"derive":[["ULE","Custom derive for `zerovec::ULE`,"],["VarULE","Custom derive for `zerovec::VarULE`,"]]});

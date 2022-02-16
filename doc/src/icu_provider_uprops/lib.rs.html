@@ -30,6 +30,31 @@
 <span id="29">29</span>
 <span id="30">30</span>
 <span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -37,8 +62,8 @@
 <span class="doccomment">//! `icu_provider_uprops` contains implementations of the [`ICU4X`]</span>
 <span class="doccomment">//! [data provider] interface backed by TOML files exported by the</span>
 <span class="doccomment">//! ICU4C icuwriteuprops tool. Create a directory containing TOML files for</span>
-<span class="doccomment">//! the necessary Unicode properties and then pass the path into the</span>
-<span class="doccomment">//! [`PropertiesDataProvider`].</span>
+<span class="doccomment">//! the necessary Unicode properties and then pass the path to the desired</span>
+<span class="doccomment">//! provider.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! **Important:** This data provider implementation is not optimized</span>
 <span class="doccomment">//! for production use.  It is much more efficient if you use</span>
@@ -52,15 +77,40 @@
 <span class="kw">mod</span> <span class="ident">bin_uniset</span>;
 <span class="kw">mod</span> <span class="ident">enum_codepointtrie</span>;
 <span class="kw">mod</span> <span class="ident">enum_uniset</span>;
-<span class="kw">mod</span> <span class="ident">provider</span>;
 <span class="kw">mod</span> <span class="ident">reader</span>;
 <span class="kw">mod</span> <span class="ident">script</span>;
 <span class="kw">mod</span> <span class="ident">uprops_helpers</span>;
 <span class="kw">mod</span> <span class="ident">uprops_serde</span>;
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">bin_uniset::BinaryPropertyUnicodeSetDataProvider</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">enum_codepointtrie::EnumeratedPropertyCodePointTrieProvider</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">provider::PropertiesDataProvider</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">enum_uniset::EnumeratedPropertyUnicodeSetDataProvider</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">script::ScriptWithExtensionsPropertyProvider</span>;
+
+<span class="kw">use</span> <span class="ident">icu_provider::fork::by_key::MultiForkByKeyProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::iter::IterableDynProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::DataMarker</span>;
+<span class="kw">use</span> <span class="ident">std::path::Path</span>;
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_exportable_provider</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DataMarker</span><span class="op">&gt;</span>(
+    <span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
+) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="ident">MultiForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">EnumeratedPropertyCodePointTrieProvider</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">ScriptWithExtensionsPropertyProvider</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">EnumeratedPropertyUnicodeSetDataProvider</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">BinaryPropertyUnicodeSetDataProvider</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+{
+    <span class="prelude-val">Ok</span>(<span class="ident">MultiForkByKeyProvider</span> {
+        <span class="ident">providers</span>: <span class="macro">vec!</span>[
+            <span class="ident">Box::new</span>(<span class="ident">EnumeratedPropertyCodePointTrieProvider::try_new</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span>),
+            <span class="ident">Box::new</span>(<span class="ident">ScriptWithExtensionsPropertyProvider::try_new</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span>),
+            <span class="ident">Box::new</span>(<span class="ident">EnumeratedPropertyUnicodeSetDataProvider::try_new</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span>),
+            <span class="comment">// Has to go last as it matches all props/ keys.</span>
+            <span class="ident">Box::new</span>(<span class="ident">BinaryPropertyUnicodeSetDataProvider::try_new</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span>),
+        ],
+    })
+}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_provider_uprops" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
 </body></html>

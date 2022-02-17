@@ -180,7 +180,7 @@
 <span class="doccomment">/// use zerovec::ule::{ULE, AsULE, CharULE};</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let c1 = &#39;𑄃&#39;;</span>
-<span class="doccomment">/// let ule = c1.as_unaligned();</span>
+<span class="doccomment">/// let ule = c1.to_unaligned();</span>
 <span class="doccomment">/// assert_eq!(CharULE::as_byte_slice(&amp;[ule]), &amp;[0x03, 0x11, 0x01, 0x00]);</span>
 <span class="doccomment">/// let c2 = char::from_unaligned(ule);</span>
 <span class="doccomment">/// assert_eq!(c1, c2);</span>
@@ -227,7 +227,7 @@
     <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="ident">CharULE</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">as_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
+    <span class="kw">fn</span> <span class="ident">to_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
         <span class="kw">let</span> <span class="ident">u</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="self">self</span>);
         <span class="ident">CharULE</span>(<span class="ident">u</span>.<span class="ident">to_le_bytes</span>())
     }
@@ -253,7 +253,7 @@
     <span class="kw">fn</span> <span class="ident">test_parse</span>() {
         <span class="comment">// 1-byte, 2-byte, 3-byte, and 4-byte character in UTF-8 (not as relevant in UTF-32)</span>
         <span class="kw">let</span> <span class="ident">chars</span> <span class="op">=</span> [<span class="string">&#39;w&#39;</span>, <span class="string">&#39;ω&#39;</span>, <span class="string">&#39;文&#39;</span>, <span class="string">&#39;𑄃&#39;</span>];
-        <span class="kw">let</span> <span class="ident">char_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CharULE</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">iter</span>().<span class="ident">copied</span>().<span class="ident">map</span>(<span class="ident">char::as_unaligned</span>).<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">char_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CharULE</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">iter</span>().<span class="ident">copied</span>().<span class="ident">map</span>(<span class="ident">char::to_unaligned</span>).<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">char_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">CharULE::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">char_ules</span>);
 
         <span class="comment">// Check parsing</span>
@@ -267,7 +267,7 @@
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">chars</span>, <span class="ident">parsed_chars</span>.<span class="ident">as_slice</span>());
 
         <span class="comment">// Check EqULE</span>
-        <span class="kw">let</span> <span class="ident">char_ule_slice</span> <span class="op">=</span> <span class="ident">char::slice_as_unaligned</span>(<span class="kw-2">&amp;</span><span class="ident">chars</span>);
+        <span class="kw">let</span> <span class="ident">char_ule_slice</span> <span class="op">=</span> <span class="ident">char::slice_to_unaligned</span>(<span class="kw-2">&amp;</span><span class="ident">chars</span>);
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_endian</span> <span class="op">=</span> <span class="string">&quot;little&quot;</span>)]</span>
         <span class="macro">assert_eq!</span>(<span class="ident">char_ule_slice</span>, <span class="prelude-val">Some</span>(<span class="ident">char_ules</span>.<span class="ident">as_slice</span>()));
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_endian</span> <span class="op">=</span> <span class="string">&quot;little&quot;</span>))]</span>
@@ -278,7 +278,7 @@
         <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>
             .<span class="ident">iter</span>()
             .<span class="ident">copied</span>()
-            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>)
+            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::to_unaligned</span>)
             .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">u32_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">u32_ules</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">char_bytes</span>, <span class="ident">u32_bytes</span>);
@@ -297,7 +297,7 @@
         <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>
             .<span class="ident">iter</span>()
             .<span class="ident">copied</span>()
-            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>)
+            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::to_unaligned</span>)
             .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">u32_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">u32_ules</span>);
         <span class="kw">let</span> <span class="ident">parsed_ules_result</span> <span class="op">=</span> <span class="ident">CharULE::parse_byte_slice</span>(<span class="ident">u32_bytes</span>);
@@ -308,7 +308,7 @@
         <span class="kw">let</span> <span class="ident">u32_ules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">u32s</span>
             .<span class="ident">iter</span>()
             .<span class="ident">copied</span>()
-            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::as_unaligned</span>)
+            .<span class="ident">map</span>(<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::to_unaligned</span>)
             .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">u32_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::as_byte_slice</span>(<span class="kw-2">&amp;</span><span class="ident">u32_ules</span>);
         <span class="kw">let</span> <span class="ident">parsed_ules_result</span> <span class="op">=</span> <span class="ident">CharULE::parse_byte_slice</span>(<span class="ident">u32_bytes</span>);

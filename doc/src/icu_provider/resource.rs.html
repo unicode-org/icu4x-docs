@@ -520,6 +520,9 @@
 <span id="519">519</span>
 <span id="520">520</span>
 <span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -538,15 +541,46 @@
 <span class="kw">use</span> <span class="ident">writeable</span>::{<span class="ident">LengthHint</span>, <span class="ident">Writeable</span>};
 <span class="kw">use</span> <span class="ident">zerovec::ule</span>::<span class="kw-2">*</span>;
 
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules!</span> <span class="ident">leading_tag</span> {
+    () =&gt; {
+        <span class="string">&quot;\nicu4x_key_tag&quot;</span>
+    };
+}
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules!</span> <span class="ident">trailing_tag</span> {
+    () =&gt; {
+        <span class="string">&quot;\n&quot;</span>
+    };
+}
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules!</span> <span class="ident">tagged</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">without_tags</span>:<span class="ident">expr</span>) =&gt; {
+        <span class="macro">concat!</span>(
+            <span class="macro-nonterminal">$</span><span class="macro">crate::leading_tag!</span>(),
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">without_tags</span>,
+            <span class="macro-nonterminal">$</span><span class="macro">crate::trailing_tag!</span>()
+        )
+    };
+}
+
 <span class="doccomment">/// A compact hash of a [`ResourceKey`]. Useful for keys in maps.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>)]</span>
+<span class="attribute">#[<span class="macro-nonterminal">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKeyHash</span>([<span class="ident">u8</span>; <span class="number">4</span>]);
 
 <span class="kw">impl</span> <span class="ident">ResourceKeyHash</span> {
     <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">compute_from_str</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">helpers::fxhash_32</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>()).<span class="ident">to_le_bytes</span>())
+        <span class="self">Self</span>(
+            <span class="ident">helpers::fxhash_32</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>(), <span class="macro">leading_tag!</span>().<span class="ident">len</span>(), <span class="macro">trailing_tag!</span>().<span class="ident">len</span>())
+                .<span class="ident">to_le_bytes</span>(),
+        )
     }
 }
 
@@ -623,35 +657,7 @@
     <span class="ident">hash</span>: <span class="ident">ResourceKeyHash</span>,
 }
 
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">leading_tag</span> {
-    () =&gt; {
-        <span class="string">&quot;\nicu4x_key_tag&quot;</span>
-    };
-}
-
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">trailing_tag</span> {
-    () =&gt; {
-        <span class="string">&quot;\n&quot;</span>
-    };
-}
-
-<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">tagged</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">without_tags</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="macro">concat!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro">crate::leading_tag!</span>(),
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">without_tags</span>,
-            <span class="macro-nonterminal">$</span><span class="macro">crate::trailing_tag!</span>()
-        )
-    };
-}
-
-<span class="kw">impl</span> <span class="macro-nonterminal">ResourceKey</span> {
+<span class="kw">impl</span> <span class="ident">ResourceKey</span> {
     <span class="doccomment">/// Gets a human-readable representation of a [`ResourceKey`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The human-readable path string ends with `@` followed by one or more digits (the version</span>

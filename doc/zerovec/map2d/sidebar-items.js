@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["KeyError","Used in error types to communicate for which key the error occured."]],"struct":[["ZeroMap2d","A zero-copy, two-dimensional map datastructure ."],["ZeroMap2dBorrowed","A borrowed-only version of `ZeroMap2d`"]]});
+initSidebarItems({"enum":[["KeyError","Used in error types to communicate for which key the error occured."]],"struct":[["ZeroMap2dBorrowed","A borrowed-only version of `ZeroMap2d`"]]});

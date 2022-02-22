@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["export_from_iterable","Convenience function to drive a [`DataExporter`] from an [`IterableDynProvider`]."]],"trait":[["DataExporter","An object capable of serializing data payloads to be read by a data provider."]]});
+initSidebarItems({"trait":[["DataExporter","An object capable of exporting data payloads in some form."]]});

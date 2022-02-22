@@ -51,6 +51,15 @@
 <span id="50">50</span>
 <span id="51">51</span>
 <span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -68,36 +77,45 @@
 <span class="doccomment">//! use icu_provider::prelude::*;</span>
 <span class="doccomment">//! use icu_provider::export::DataExporter;</span>
 <span class="doccomment">//! use icu_provider::hello_world::*;</span>
-<span class="doccomment">//! use icu_provider_blob::StaticDataProvider;</span>
+<span class="doccomment">//! use icu_provider_blob::BlobDataProvider;</span>
 <span class="doccomment">//! use icu_provider_blob::export::BlobExporter;</span>
-<span class="doccomment">//! use icu_locid_macros::langid;</span>
+<span class="doccomment">//! use std::borrow::Cow;</span>
 <span class="doccomment">//! use std::io::Read;</span>
+<span class="doccomment">//! use std::rc::Rc;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let mut buffer: Vec&lt;u8&gt; = Vec::new();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! // Set up the exporter and export a key</span>
+<span class="doccomment">//! let payload = DataPayload::&lt;HelloWorldV1Marker&gt;::from_owned(</span>
+<span class="doccomment">//!     HelloWorldV1 { message: Cow::Borrowed(&quot;Hi&quot;) }</span>
+<span class="doccomment">//! );</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Export something</span>
 <span class="doccomment">//! {</span>
 <span class="doccomment">//!     let mut exporter = BlobExporter::new_with_sink(Box::new(&amp;mut buffer));</span>
-<span class="doccomment">//!     let source_provider = HelloWorldProvider::new_with_placeholder_data();</span>
-<span class="doccomment">//!     let result = icu_provider::export::export_from_iterable(</span>
+<span class="doccomment">//!     exporter.put_payload(</span>
 <span class="doccomment">//!         HelloWorldV1Marker::KEY,</span>
-<span class="doccomment">//!         &amp;source_provider,</span>
-<span class="doccomment">//!         &amp;mut exporter)</span>
-<span class="doccomment">//!     .expect(&quot;Should successfully export&quot;);</span>
+<span class="doccomment">//!         Default::default(),</span>
+<span class="doccomment">//!         payload.clone().into_serializable(),</span>
+<span class="doccomment">//!     ).expect(&quot;Should successfully export&quot;);</span>
 <span class="doccomment">//!     exporter.close().expect(&quot;Should successfully dump to buffer&quot;);</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! // Assert that the exported data equals the pre-computed hello_world.postcard</span>
-<span class="doccomment">//! let mut expected_buffer: Vec&lt;u8&gt; = Vec::new();</span>
-<span class="doccomment">//! std::fs::File::open(concat!(</span>
-<span class="doccomment">//!     env!(&quot;CARGO_MANIFEST_DIR&quot;),</span>
-<span class="doccomment">//!     &quot;/tests/data/hello_world.postcard&quot;</span>
-<span class="doccomment">//! ))</span>
-<span class="doccomment">//! .expect(&quot;File should exist&quot;)</span>
-<span class="doccomment">//! .read_to_end(&amp;mut expected_buffer)</span>
-<span class="doccomment">//! .expect(&quot;Reading pre-computed postcard buffer&quot;);</span>
+<span class="doccomment">//! // Create a blob provider reading from the buffer</span>
+<span class="doccomment">//! let provider = BlobDataProvider::new_from_rc_blob(buffer.into())</span>
+<span class="doccomment">//!     .expect(&quot;Should successfully read from buffer&quot;);</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(buffer, expected_buffer);</span>
+<span class="doccomment">//! // Read the key from the filesystem and ensure it is as expected</span>
+<span class="doccomment">//! let req = DataRequest {</span>
+<span class="doccomment">//!     options: Default::default(),</span>
+<span class="doccomment">//!     metadata: Default::default(),</span>
+<span class="doccomment">//! };</span>
+<span class="doccomment">//! let response: DataPayload&lt;HelloWorldV1Marker&gt; =</span>
+<span class="doccomment">//!     provider.load_resource(&amp;req).unwrap().take_payload().unwrap();</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! assert_eq!(</span>
+<span class="doccomment">//!     response.get(),</span>
+<span class="doccomment">//!     payload.get(),</span>
+<span class="doccomment">//! );</span>
 <span class="doccomment">//! ```</span>
 
 <span class="kw">mod</span> <span class="ident">blob_exporter</span>;

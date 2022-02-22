@@ -70,14 +70,6 @@
 <span id="69">69</span>
 <span id="70">70</span>
 <span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
-<span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
-<span id="79">79</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -86,74 +78,66 @@
 <span class="kw">use</span> <span class="ident">icu_provider::export::DataExporter</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::serde::SerializeMarker</span>;
-<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
+<span class="kw">use</span> <span class="ident">std::sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 <span class="kw">use</span> <span class="ident">zerovec::map2d::ZeroMap2d</span>;
 
 <span class="doccomment">/// A data exporter that writes data to a single-file blob.</span>
 <span class="doccomment">/// See the module-level docs for an example.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;w</span><span class="op">&gt;</span> {
-    <span class="ident">resources</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span>(<span class="ident">ResourceKeyHash</span>, <span class="ident">String</span>), <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="lifetime">&#39;w</span><span class="op">&gt;</span>,
+    <span class="ident">resources</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ResourceKeyHash</span>, <span class="ident">String</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;w</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;w</span><span class="op">&gt;</span> <span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;w</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a [`BlobExporter`] that writes to the given I/O stream.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_sink</span>(<span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="lifetime">&#39;w</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_sink</span>(<span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;w</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">resources</span>: <span class="ident">LiteMap::new</span>(),
+            <span class="ident">resources</span>: <span class="ident">Mutex::new</span>(<span class="ident">Vec::new</span>()),
             <span class="ident">sink</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">is_empty</span>() {
-            <span class="macro">panic!</span>(<span class="string">&quot;Please call close before dropping FilesystemExporter&quot;</span>);
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlobExporter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="ident">DataRequest</span>,
+        <span class="ident">options</span>: <span class="ident">ResourceOptions</span>,
         <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="macro">log::trace!</span>(<span class="string">&quot;Adding: {} {}&quot;</span>, <span class="ident">key</span>, <span class="ident">req</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;Adding: {}/{}&quot;</span>, <span class="ident">key</span>, <span class="ident">options</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serializer</span> <span class="op">=</span> <span class="ident">postcard::Serializer</span> {
             <span class="ident">output</span>: <span class="ident">postcard::flavors::AllocVec</span>(<span class="ident">Vec::new</span>()),
         };
         <span class="ident">payload</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serializer</span><span class="op">&gt;</span><span class="ident">::erase</span>(<span class="kw-2">&amp;mut</span> <span class="ident">serializer</span>))<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">insert</span>(
-            (
-                <span class="ident">key</span>.<span class="ident">get_hash</span>(),
-                <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">writeable_to_string</span>().<span class="ident">into_owned</span>(),
-            ),
+        <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">push</span>((
+            <span class="ident">key</span>.<span class="ident">get_hash</span>(),
+            <span class="ident">options</span>.<span class="ident">writeable_to_string</span>().<span class="ident">into_owned</span>(),
             <span class="ident">serializer</span>.<span class="ident">output</span>.<span class="number">0</span>,
-        );
+        ));
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="comment">// Convert from LiteMap&lt;(String, String), Vec&lt;u8&gt;&gt; to ZeroMap2d&lt;str, str, [u8]&gt;</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zm</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="ident">ResourceKeyHash</span>, <span class="ident">str</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">ZeroMap2d::with_capacity</span>(<span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">len</span>());
-        <span class="kw">for</span> ((<span class="ident">key</span>, <span class="ident">option</span>), <span class="ident">bytes</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">iter</span>() {
-            <span class="ident">zm</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">option</span>, <span class="ident">bytes</span>);
+        <span class="kw">let</span> <span class="ident">zm</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">resources</span>
+            .<span class="ident">get_mut</span>()
+            .<span class="ident">unwrap</span>()
+            .<span class="ident">drain</span>(..)
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">zm</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">BlobSchemaV1</span> {
+                <span class="ident">resources</span>: <span class="ident">zm</span>.<span class="ident">as_borrowed</span>(),
+            });
+            <span class="macro">log::info!</span>(<span class="string">&quot;Serializing blob to output stream...&quot;</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serializer</span> <span class="op">=</span> <span class="ident">postcard::Serializer</span> {
+                <span class="ident">output</span>: <span class="ident">postcard::flavors::AllocVec</span>(<span class="ident">Vec::new</span>()),
+            };
+            <span class="ident">serde::Serialize::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>, <span class="kw-2">&amp;mut</span> <span class="ident">serializer</span>)<span class="question-mark">?</span>;
+            <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">serializer</span>.<span class="ident">output</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">BlobSchemaV1</span> {
-            <span class="ident">resources</span>: <span class="ident">zm</span>.<span class="ident">as_borrowed</span>(),
-        });
-        <span class="macro">log::info!</span>(<span class="string">&quot;Serializing blob to output stream...&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">serializer</span> <span class="op">=</span> <span class="ident">postcard::Serializer</span> {
-            <span class="ident">output</span>: <span class="ident">postcard::flavors::AllocVec</span>(<span class="ident">Vec::new</span>()),
-        };
-        <span class="ident">serde::Serialize::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>, <span class="kw-2">&amp;mut</span> <span class="ident">serializer</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">serializer</span>.<span class="ident">output</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">resources</span>.<span class="ident">clear</span>();
         <span class="prelude-val">Ok</span>(())
     }
 }

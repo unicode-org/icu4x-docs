@@ -205,6 +205,17 @@
 <span id="204">204</span>
 <span id="205">205</span>
 <span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -221,7 +232,6 @@
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">core::fmt::Debug</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
@@ -391,25 +401,37 @@
     }
 }
 
-<span class="doccomment">/// Adds entries to a [`HelloWorldProvider`] from [`AnyMarker`](crate::any::AnyMarker)</span>
-<span class="kw">impl</span> <span class="ident"><span class="kw">crate</span>::export::DataExporter</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::any::AnyMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span> {
-    <span class="kw">fn</span> <span class="ident">put_payload</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="ident">DataRequest</span>,
-        <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::any::AnyMarker</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="ident">key</span>.<span class="ident">match_key</span>(<span class="ident">HelloWorldV1Marker::KEY</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>
-            .<span class="ident">get_langid</span>()
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">downcast_payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">HelloWorldV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">downcast</span>()<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">insert</span>(
-            <span class="ident">langid</span>.<span class="ident">clone</span>(),
-            <span class="ident">Cow::Owned</span>(<span class="ident">downcast_payload</span>.<span class="ident">get</span>().<span class="ident">message</span>.<span class="ident">to_string</span>()),
-        );
-        <span class="prelude-val">Ok</span>(())
-    }
+<span class="attribute">#[<span class="ident">test</span>]</span>
+<span class="kw">fn</span> <span class="ident">test_iter</span>() {
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">HelloWorldProvider::new_with_placeholder_data</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">supported_langids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
+        .<span class="ident">supported_options</span>()
+        .<span class="ident">unwrap</span>()
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">resc_options</span><span class="op">|</span> <span class="ident">resc_options</span>.<span class="ident">langid</span>.<span class="ident">unwrap</span>())
+        .<span class="ident">collect</span>();
+    <span class="ident">supported_langids</span>.<span class="ident">sort</span>();
+
+    <span class="macro">assert_eq!</span>(
+        <span class="ident">supported_langids</span>,
+        <span class="macro">vec!</span>[
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;bn&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;cs&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;de&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;el&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;en&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;eo&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;fa&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;fi&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;is&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;ja&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;la&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;pt&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;ro&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;ru&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;vi&quot;</span>),
+            <span class="macro">icu_locid_macros::langid!</span>(<span class="string">&quot;zh&quot;</span>)
+        ]
+    );
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_provider" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

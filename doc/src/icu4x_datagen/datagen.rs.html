@@ -484,6 +484,10 @@
 <span id="483">483</span>
 <span id="484">484</span>
 <span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -504,7 +508,6 @@
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::fs_exporter</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::serializers</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::FilesystemExporter</span>;
-<span class="kw">use</span> <span class="ident">icu_provider_fs::manifest</span>;
 <span class="kw">use</span> <span class="ident">simple_logger::SimpleLogger</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
@@ -539,14 +542,6 @@
                 .<span class="ident">possible_value</span>(<span class="string">&quot;blob&quot;</span>)
                 .<span class="ident">help</span>(<span class="string">&quot;Output to a directory on the filesystem or a single blob.&quot;</span>)
                 .<span class="ident">default_value</span>(<span class="string">&quot;dir&quot;</span>),
-        )
-        .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;ALIASING&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;aliasing&quot;</span>)
-                .<span class="ident">takes_value</span>(<span class="bool-val">true</span>)
-                .<span class="ident">possible_value</span>(<span class="string">&quot;none&quot;</span>)
-                .<span class="ident">possible_value</span>(<span class="string">&quot;symlink&quot;</span>)
-                .<span class="ident">help</span>(<span class="string">&quot;Sets the aliasing mode of the output on the filesystem.&quot;</span>),
         )
         .<span class="ident">arg</span>(
             <span class="ident">Arg::with_name</span>(<span class="string">&quot;OVERWRITE&quot;</span>)
@@ -843,18 +838,37 @@
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     };
 
-    <span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="ident">selected_keys</span> {
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span>
-            <span class="ident">icu_provider::export::export_from_iterable</span>(<span class="ident">key</span>, <span class="ident">provider</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">exporter</span>);
+    <span class="comment">// TODO: Parallelize this.</span>
+    <span class="ident">selected_keys</span>.<span class="ident">into_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>)<span class="question-mark">?</span>
+            <span class="comment">// TODO: Parallelize this.</span>
+            .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
+                    .<span class="ident">load_payload</span>(
+                        <span class="ident">key</span>,
+                        <span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                            <span class="ident">options</span>: <span class="ident">options</span>.<span class="ident">clone</span>(),
+                            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                        },
+                    )<span class="question-mark">?</span>
+                    .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+                <span class="ident">exporter</span>.<span class="ident">put_payload</span>(<span class="ident">key</span>, <span class="ident">options</span>, <span class="ident">payload</span>)
+            });
+
+        <span class="ident">exporter</span>.<span class="ident">flush</span>(<span class="ident">key</span>)<span class="question-mark">?</span>;
+
         <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;TEST_KEYS&quot;</span>)
             <span class="op">&amp;&amp;</span> <span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">DataErrorKind::MissingResourceKey</span>)
         {
             <span class="macro">log::trace!</span>(<span class="string">&quot;Skipping key: {}&quot;</span>, <span class="ident">key</span>);
+            <span class="prelude-val">Ok</span>(())
         } <span class="kw">else</span> {
             <span class="macro">log::info!</span>(<span class="string">&quot;Writing key: {}&quot;</span>, <span class="ident">key</span>);
-            <span class="ident">result</span><span class="question-mark">?</span>
+            <span class="ident">result</span>
         }
-    }
+    })<span class="question-mark">?</span>;
+
     <span class="ident">exporter</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
@@ -873,34 +887,28 @@
 
     <span class="macro">log::info!</span>(<span class="string">&quot;Writing to filesystem tree at: {}&quot;</span>, <span class="ident">output_path</span>.<span class="ident">display</span>());
 
-    <span class="kw">let</span> <span class="ident">serializer</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">serializers::AbstractSerializer</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;SYNTAX&quot;</span>) {
-        <span class="prelude-val">Some</span>(<span class="string">&quot;json&quot;</span>) <span class="op">|</span> <span class="prelude-val">None</span> =&gt; {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">serializers::json::Options::default</span>();
-            <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;PRETTY&quot;</span>) {
-                <span class="ident">options</span>.<span class="ident">style</span> <span class="op">=</span> <span class="ident">serializers::json::StyleOption::Pretty</span>;
+    <span class="kw">let</span> <span class="ident">serializer</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">serializers::AbstractSerializer</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="kw">match</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;SYNTAX&quot;</span>) {
+            <span class="prelude-val">Some</span>(<span class="string">&quot;json&quot;</span>) <span class="op">|</span> <span class="prelude-val">None</span> =&gt; {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">serializers::json::Options::default</span>();
+                <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;PRETTY&quot;</span>) {
+                    <span class="ident">options</span>.<span class="ident">style</span> <span class="op">=</span> <span class="ident">serializers::json::StyleOption::Pretty</span>;
+                }
+                <span class="ident">Box::new</span>(<span class="ident">serializers::json::Serializer::new</span>(<span class="ident">options</span>))
             }
-            <span class="ident">Box::new</span>(<span class="ident">serializers::json::Serializer::new</span>(<span class="ident">options</span>))
-        }
-        <span class="prelude-val">Some</span>(<span class="string">&quot;bincode&quot;</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">serializers::bincode::Options::default</span>();
-            <span class="ident">Box::new</span>(<span class="ident">serializers::bincode::Serializer::new</span>(<span class="ident">options</span>))
-        }
-        <span class="prelude-val">Some</span>(<span class="string">&quot;postcard&quot;</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">serializers::postcard::Options::default</span>();
-            <span class="ident">Box::new</span>(<span class="ident">serializers::postcard::Serializer::new</span>(<span class="ident">options</span>))
-        }
-        <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-    };
+            <span class="prelude-val">Some</span>(<span class="string">&quot;bincode&quot;</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">serializers::bincode::Options::default</span>();
+                <span class="ident">Box::new</span>(<span class="ident">serializers::bincode::Serializer::new</span>(<span class="ident">options</span>))
+            }
+            <span class="prelude-val">Some</span>(<span class="string">&quot;postcard&quot;</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">serializers::postcard::Options::default</span>();
+                <span class="ident">Box::new</span>(<span class="ident">serializers::postcard::Serializer::new</span>(<span class="ident">options</span>))
+            }
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
+        };
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">fs_exporter::ExporterOptions::default</span>();
     <span class="ident">options</span>.<span class="ident">root</span> <span class="op">=</span> <span class="ident">output_path</span>;
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ALIASING&quot;</span>) {
-        <span class="ident">options</span>.<span class="ident">aliasing</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">value</span> {
-            <span class="string">&quot;none&quot;</span> =&gt; <span class="ident">manifest::AliasOption::NoAliases</span>,
-            <span class="string">&quot;symlink&quot;</span> =&gt; <span class="ident">manifest::AliasOption::Symlink</span>,
-            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-        };
-    }
     <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;OVERWRITE&quot;</span>) {
         <span class="ident">options</span>.<span class="ident">overwrite</span> <span class="op">=</span> <span class="ident">fs_exporter::OverwriteOption::RemoveAndReplace</span>
     }
@@ -925,7 +933,7 @@
         <span class="prelude-val">None</span> =&gt; <span class="macro">log::info!</span>(<span class="string">&quot;Writing blob to standard out&quot;</span>),
     };
 
-    <span class="kw">let</span> <span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path_buf</span>) <span class="op">=</span> <span class="ident">output_path</span> {
+    <span class="kw">let</span> <span class="ident">sink</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path_buf</span>) <span class="op">=</span> <span class="ident">output_path</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;OVERWRITE&quot;</span>) <span class="op">&amp;&amp;</span> <span class="ident">path_buf</span>.<span class="ident">exists</span>() {
             <span class="macro">eyre::bail!</span>(<span class="string">&quot;Output path is present: {:?}&quot;</span>, <span class="ident">path_buf</span>);
         }

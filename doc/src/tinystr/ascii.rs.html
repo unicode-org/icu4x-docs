@@ -487,6 +487,16 @@
 <span id="486">486</span>
 <span id="487">487</span>
 <span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -504,15 +514,25 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">bytes</span>, <span class="bool-val">false</span>)
+        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">bytes</span>, <span class="number">0</span>, <span class="ident">bytes</span>.<span class="ident">len</span>(), <span class="bool-val">false</span>)
+    }
+
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes_manual_slice</span>(
+        <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+        <span class="ident">start</span>: <span class="ident">usize</span>,
+        <span class="ident">end</span>: <span class="ident">usize</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>, <span class="bool-val">false</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes_inner</span>(
         <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+        <span class="ident">start</span>: <span class="ident">usize</span>,
+        <span class="ident">end</span>: <span class="ident">usize</span>,
         <span class="ident">allow_trailing_null</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>();
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">end</span> <span class="op">-</span> <span class="ident">start</span>;
         <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="ident">N</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::TooLarge</span> { <span class="ident">max</span>: <span class="ident">N</span>, <span class="ident">len</span> });
         }
@@ -521,7 +541,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found_null</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">len</span> {
-            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">i</span>];
+            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">bytes</span>[<span class="ident">start</span> <span class="op">+</span> <span class="ident">i</span>];
 
             <span class="kw">if</span> <span class="ident">b</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="ident">found_null</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -546,7 +566,7 @@
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="bool-val">false</span>)
+        <span class="ident"><span class="self">Self</span>::from_bytes_inner</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>(), <span class="number">0</span>, <span class="ident">s</span>.<span class="ident">len</span>(), <span class="bool-val">false</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -584,6 +604,35 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>
     }
 
+    <span class="doccomment">/// # Safety</span>
+    <span class="doccomment">/// Must be called with a bytes array made of valid ASCII bytes, with no null bytes</span>
+    <span class="doccomment">/// between ASCII characters</span>
+    <span class="attribute">#[<span class="ident">must_use</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_bytes_unchecked</span>(<span class="ident">bytes</span>: [<span class="ident">u8</span>; <span class="ident">N</span>]) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> { <span class="ident">bytes</span> }
+    }
+}
+
+<span class="macro">macro_rules!</span> <span class="ident">check_is</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8</span>:<span class="ident">ident</span>) =&gt; {
+        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
+            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check</span>()
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
+            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check</span>()
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="op">!</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8</span>() {
+                    <span class="kw">return</span> <span class="bool-val">false</span>;
+                }
+                <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            }
+            <span class="bool-val">true</span>
+        }
+    };
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Checks if the value is composed of ASCII alphabetic characters:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">///  * U+0041 &#39;A&#39; ..= U+005A &#39;Z&#39;, or</span>
@@ -604,14 +653,8 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ascii_alphabetic</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_alphabetic</span>()
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_alphabetic</span>()
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">as_bytes</span>().<span class="ident">iter</span>().<span class="ident">all</span>(<span class="ident">u8::is_ascii_alphabetic</span>)
-        }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_ascii_alphabetic</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">check_is!</span>(<span class="self">self</span>, <span class="ident">is_ascii_alphabetic</span>, <span class="ident">is_ascii_alphabetic</span>)
     }
 
     <span class="doccomment">/// Checks if the value is composed of ASCII alphanumeric characters:</span>
@@ -635,14 +678,8 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ascii_alphanumeric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_alphanumeric</span>()
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_alphanumeric</span>()
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">as_bytes</span>().<span class="ident">iter</span>().<span class="ident">all</span>(<span class="ident">u8::is_ascii_alphanumeric</span>)
-        }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_ascii_alphanumeric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">check_is!</span>(<span class="self">self</span>, <span class="ident">is_ascii_alphanumeric</span>, <span class="ident">is_ascii_alphanumeric</span>)
     }
 
     <span class="doccomment">/// Checks if the value is composed of ASCII decimal digits:</span>
@@ -664,16 +701,38 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_ascii_numeric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_numeric</span>()
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">is_ascii_numeric</span>()
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">as_bytes</span>().<span class="ident">iter</span>().<span class="ident">all</span>(<span class="ident">u8::is_ascii_digit</span>)
-        }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_ascii_numeric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="macro">check_is!</span>(<span class="self">self</span>, <span class="ident">is_ascii_numeric</span>, <span class="ident">is_ascii_digit</span>)
     }
+}
 
+<span class="macro">macro_rules!</span> <span class="ident">to</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">later_char_to</span>:<span class="ident">ident</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">first_char_to</span>:<span class="ident">ident</span>)<span class="question-mark">?</span>) =&gt; {{
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
+            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>().<span class="ident">to_bytes</span>();
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> {
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">aligned</span>[<span class="ident">i</span>];
+                <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            }
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
+            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>().<span class="ident">to_bytes</span>();
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> {
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">aligned</span>[<span class="ident">i</span>];
+                <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            }
+        } <span class="kw">else</span> {
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">later_char_to</span>();
+                <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            }
+            $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">first_char_to</span>())<span class="question-mark">?</span>
+        }
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>
+    }};
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Converts this type to its ASCII lower case equivalent in-place.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ASCII letters &#39;A&#39; to &#39;Z&#39; are mapped to &#39;a&#39; to &#39;z&#39;, other characters are unchanged.</span>
@@ -690,17 +749,8 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ascii_lowercase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_lowercase</span>();
-            <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">aligned</span>.<span class="ident">to_bytes</span>()[<span class="number">0</span>..<span class="ident">N</span>])
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_lowercase</span>();
-            <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">aligned</span>.<span class="ident">to_bytes</span>()[<span class="number">0</span>..<span class="ident">N</span>])
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="ident">u8::make_ascii_lowercase</span>);
-            <span class="self">self</span>
-        }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">to_ascii_lowercase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="macro">to!</span>(<span class="self">self</span>, <span class="ident">to_ascii_lowercase</span>, <span class="ident">to_ascii_lowercase</span>)
     }
 
     <span class="doccomment">/// Converts this type to its ASCII title case equivalent in-place.</span>
@@ -720,18 +770,13 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ascii_titlecase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_titlecase</span>();
-            <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">aligned</span>.<span class="ident">to_bytes</span>()[<span class="number">0</span>..<span class="ident">N</span>])
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_titlecase</span>();
-            <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">aligned</span>.<span class="ident">to_bytes</span>()[<span class="number">0</span>..<span class="ident">N</span>])
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="ident">u8::make_ascii_lowercase</span>);
-            <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>].<span class="ident">make_ascii_uppercase</span>();
-            <span class="self">self</span>
-        }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">to_ascii_titlecase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="macro">to!</span>(
+            <span class="self">self</span>,
+            <span class="ident">to_ascii_titlecase</span>,
+            <span class="ident">to_ascii_lowercase</span>,
+            <span class="ident">to_ascii_uppercase</span>
+        )
     }
 
     <span class="doccomment">/// Converts this type to its ASCII upper case equivalent in-place.</span>
@@ -750,33 +795,8 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ascii_uppercase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_uppercase</span>();
-            <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">aligned</span>.<span class="ident">to_bytes</span>()[<span class="number">0</span>..<span class="ident">N</span>])
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">to_ascii_uppercase</span>();
-            <span class="ident"><span class="self">Self</span>::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">aligned</span>.<span class="ident">to_bytes</span>()[<span class="number">0</span>..<span class="ident">N</span>])
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="ident">u8::make_ascii_uppercase</span>);
-            <span class="self">self</span>
-        }
-    }
-
-    <span class="doccomment">/// # Panics</span>
-    <span class="doccomment">/// Panics if src is not exactly N bytes long</span>
-    <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">N</span>];
-        <span class="ident">bytes</span>[<span class="number">0</span>..<span class="ident">N</span>].<span class="ident">copy_from_slice</span>(<span class="ident">src</span>);
-        <span class="self">Self</span> { <span class="ident">bytes</span> }
-    }
-
-    <span class="doccomment">/// # Safety</span>
-    <span class="doccomment">/// Must be called with a bytes array made of valid ASCII bytes, with no null bytes</span>
-    <span class="doccomment">/// between ASCII characters</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_bytes_unchecked</span>(<span class="ident">bytes</span>: [<span class="ident">u8</span>; <span class="ident">N</span>]) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">bytes</span> }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">to_ascii_uppercase</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
+        <span class="macro">to!</span>(<span class="self">self</span>, <span class="ident">to_ascii_uppercase</span>, <span class="ident">to_ascii_uppercase</span>)
     }
 }
 

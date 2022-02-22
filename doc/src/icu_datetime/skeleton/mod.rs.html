@@ -394,6 +394,17 @@
 <span id="393">393</span>
 <span id="394">394</span>
 <span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -419,9 +430,14 @@
     <span class="kw">use</span> <span class="kw">crate</span>::{
         <span class="ident">fields</span>::{<span class="ident">Day</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">Month</span>, <span class="ident">Weekday</span>},
         <span class="ident">options::components</span>,
-        <span class="ident">provider</span>::{<span class="ident">calendar::DatePatternsV1Marker</span>, <span class="ident">calendar::DateSkeletonPatternsV1Marker</span>},
+        <span class="ident">pattern::runtime::Pattern</span>,
+        <span class="ident">provider::calendar</span>::{
+            <span class="ident">DatePatternsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>, <span class="ident">SkeletonV1</span>,
+        },
     };
     <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
+    <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
+    <span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 
     <span class="kw">use</span> <span class="ident">::serde</span>::{
         <span class="ident">ser</span>::{<span class="self">self</span>, <span class="ident">SerializeSeq</span>},
@@ -484,7 +500,7 @@
                     <span class="ident">available_format_pattern</span>
                         .<span class="ident">expect_pattern</span>(<span class="string">&quot;pattern should not have plural variants&quot;</span>)
                         .<span class="ident">to_string</span>(),
-                    <span class="ident">String::from</span>(<span class="string">&quot;MMMM d, y&quot;</span>)
+                    <span class="ident">String::from</span>(<span class="string">&quot;H:m:s&quot;</span>)
                 )
             }
             <span class="ident">BestSkeleton::NoMatch</span> =&gt; {
@@ -496,7 +512,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_skeleton_matching_missing_fields</span>() {
         <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">components::Bag</span> {
-            <span class="ident">month</span>: <span class="prelude-val">Some</span>(<span class="ident">components::Month::Numeric</span>),
+            <span class="ident">week</span>: <span class="prelude-val">Some</span>(<span class="ident">components::Week::TwoDigitWeekOfYear</span>),
             <span class="ident">weekday</span>: <span class="prelude-val">Some</span>(<span class="ident">components::Text::Short</span>),
             ..<span class="ident">Default::default</span>()
         };
@@ -509,7 +525,9 @@
                     <span class="ident">available_format_pattern</span>
                         .<span class="ident">expect_pattern</span>(<span class="string">&quot;pattern should not have plural variants&quot;</span>)
                         .<span class="ident">to_string</span>(),
-                    <span class="ident">String::from</span>(<span class="string">&quot;L&quot;</span>)
+                    <span class="comment">// CLDR has (&quot;yw&quot;, &quot;MMMMW&quot;, &quot;ccc&quot;). The first two result in 1 missing &amp; 1 extra symbol vs just</span>
+                    <span class="comment">// 1 missing symbol for &quot;ccc&quot;.</span>
+                    <span class="ident">String::from</span>(<span class="string">&quot;ccc&quot;</span>)
                 )
             }
             <span class="ident">best</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected {:?}&quot;</span>, <span class="ident">best</span>),
@@ -564,8 +582,6 @@
         );
     }
 
-    <span class="doccomment">/// There are no skeletons that match just the time zone. They all rely on the appendItems</span>
-    <span class="doccomment">/// data from the CLDR.</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_skeleton_no_match</span>() {
         <span class="kw">let</span> <span class="ident">components</span> <span class="op">=</span> <span class="ident">components::Bag</span> {
@@ -573,10 +589,16 @@
             ..<span class="ident">Default::default</span>()
         };
         <span class="kw">let</span> <span class="ident">requested_fields</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">to_vec_fields</span>();
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">skeletons</span>) <span class="op">=</span> <span class="ident">get_data_payload</span>();
+        <span class="comment">// Construct a set of skeletons that do not use the time zone symbol.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">skeletons</span> <span class="op">=</span> <span class="ident">LiteMap::new</span>();
+        <span class="ident">skeletons</span>.<span class="ident">insert</span>(
+            <span class="ident">SkeletonV1::try_from</span>(<span class="string">&quot;EEEE&quot;</span>).<span class="ident">unwrap</span>(),
+            <span class="ident">Pattern::from_str</span>(<span class="string">&quot;weekday EEEE&quot;</span>).<span class="ident">unwrap</span>().<span class="ident">into</span>(),
+        );
+        <span class="kw">let</span> <span class="ident">skeletons</span> <span class="op">=</span> <span class="ident">DateSkeletonPatternsV1</span>(<span class="ident">skeletons</span>);
 
         <span class="macro">assert_eq!</span>(
-            <span class="ident">get_best_available_format_pattern</span>(<span class="ident">skeletons</span>.<span class="ident">get</span>(), <span class="kw-2">&amp;</span><span class="ident">requested_fields</span>, <span class="bool-val">false</span>),
+            <span class="ident">get_best_available_format_pattern</span>(<span class="kw-2">&amp;</span><span class="ident">skeletons</span>, <span class="kw-2">&amp;</span><span class="ident">requested_fields</span>, <span class="bool-val">false</span>),
             <span class="ident">BestSkeleton::NoMatch</span>,
             <span class="string">&quot;No match was found&quot;</span>
         );

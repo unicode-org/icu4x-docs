@@ -156,6 +156,35 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -169,8 +198,9 @@
     <span class="ident">options::DateTimeFormatOptions</span>,
     <span class="ident">provider::calendar::patterns::PatternPluralsFromPatternsV1Marker</span>,
     <span class="ident">provider::calendar</span>::{<span class="ident">DatePatternsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>, <span class="ident">DateSymbolsV1Marker</span>},
+    <span class="ident">provider::week_data::WeekDataV1Marker</span>,
 };
-<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
+<span class="kw">use</span> <span class="ident">alloc::string</span>::{<span class="ident">String</span>, <span class="ident">ToString</span>};
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals</span>::{<span class="ident">provider::OrdinalV1Marker</span>, <span class="ident">PluralRules</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
@@ -186,6 +216,7 @@
     <span class="kw">pub</span> <span class="ident">locale</span>: <span class="ident">Locale</span>,
     <span class="kw">pub</span> <span class="ident">patterns</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">PatternPluralsFromPatternsV1Marker</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PluralRules</span><span class="op">&gt;</span>,
 }
 
@@ -205,7 +236,8 @@
         <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>,
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
 
@@ -216,10 +248,26 @@
             <span class="ident">calendar</span>,
         )<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">requires_data</span> <span class="op">=</span> <span class="ident">datetime::analyze_patterns</span>(<span class="kw-2">&amp;</span><span class="ident">patterns</span>.<span class="ident">get</span>().<span class="number">0</span>, <span class="bool-val">false</span>)
+        <span class="kw">let</span> <span class="ident">required</span> <span class="op">=</span> <span class="ident">datetime::analyze_patterns</span>(<span class="kw-2">&amp;</span><span class="ident">patterns</span>.<span class="ident">get</span>().<span class="number">0</span>, <span class="bool-val">false</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">field</span><span class="op">|</span> <span class="ident">DateTimeFormatError::UnsupportedField</span>(<span class="ident">field</span>.<span class="ident">symbol</span>))<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">langid</span>: <span class="ident">icu_locid::LanguageIdentifier</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>().<span class="ident">into</span>();
+
+        <span class="kw">let</span> <span class="ident">week_data</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">required</span>.<span class="ident">week_data</span> {
+            <span class="prelude-val">Some</span>(
+                <span class="ident">data_provider</span>
+                    .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                        <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
+                            <span class="ident">variant</span>: <span class="ident">langid</span>.<span class="ident">region</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">as_str</span>().<span class="ident">to_string</span>().<span class="ident">into</span>()),
+                            <span class="ident">langid</span>: <span class="prelude-val">None</span>,
+                        },
+                        <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                    })<span class="question-mark">?</span>
+                    .<span class="ident">take_payload</span>()<span class="question-mark">?</span>,
+            )
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        };
 
         <span class="kw">let</span> <span class="ident">ordinal_rules</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PatternPlurals::MultipleVariants</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">patterns</span>.<span class="ident">get</span>().<span class="number">0</span> {
             <span class="prelude-val">Some</span>(<span class="ident">PluralRules::try_new_ordinal</span>(<span class="ident">locale</span>.<span class="ident">clone</span>(), <span class="ident">data_provider</span>)<span class="question-mark">?</span>)
@@ -227,7 +275,7 @@
             <span class="prelude-val">None</span>
         };
 
-        <span class="kw">let</span> <span class="ident">symbols_data</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">requires_data</span> {
+        <span class="kw">let</span> <span class="ident">symbols_data</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">required</span>.<span class="ident">symbols_data</span> {
             <span class="prelude-val">Some</span>(
                 <span class="ident">data_provider</span>
                     .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
@@ -243,7 +291,13 @@
             <span class="prelude-val">None</span>
         };
 
-        <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">locale</span>, <span class="ident">patterns</span>, <span class="ident">symbols_data</span>, <span class="ident">ordinal_rules</span>))
+        <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::new</span>(
+            <span class="ident">locale</span>,
+            <span class="ident">patterns</span>,
+            <span class="ident">symbols_data</span>,
+            <span class="ident">week_data</span>,
+            <span class="ident">ordinal_rules</span>,
+        ))
     }
 
     <span class="doccomment">/// Creates a new [`DateTimeFormat`] regardless of whether there are time-zone symbols in the pattern.</span>
@@ -251,6 +305,7 @@
         <span class="ident">locale</span>: <span class="ident">T</span>,
         <span class="ident">patterns</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">PatternPluralsFromPatternsV1Marker</span><span class="op">&gt;</span>,
         <span class="ident">symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PluralRules</span><span class="op">&gt;</span>,
     ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
@@ -259,6 +314,7 @@
             <span class="ident">locale</span>,
             <span class="ident">patterns</span>,
             <span class="ident">symbols</span>,
+            <span class="ident">week_data</span>,
             <span class="ident">ordinal_rules</span>,
         }
     }
@@ -274,6 +330,7 @@
             <span class="ident">patterns</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">patterns</span>,
             <span class="ident">symbols</span>: <span class="self">self</span>.<span class="ident">symbols</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="ident">datetime</span>: <span class="ident">value</span>,
+            <span class="ident">week_data</span>: <span class="self">self</span>.<span class="ident">week_data</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">locale</span>,
             <span class="ident">ordinal_rules</span>: <span class="self">self</span>.<span class="ident">ordinal_rules</span>.<span class="ident">as_ref</span>(),
         }
@@ -291,6 +348,7 @@
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">patterns</span>.<span class="ident">get</span>().<span class="number">0</span>,
             <span class="self">self</span>.<span class="ident">symbols</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="ident">value</span>,
+            <span class="self">self</span>.<span class="ident">week_data</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="self">self</span>.<span class="ident">ordinal_rules</span>.<span class="ident">as_ref</span>(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">locale</span>,
             <span class="ident">w</span>,

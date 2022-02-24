@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["LineBreakPropertyTable","Property table for line breaking."]],"struct":[["LineBreakDataV1","Pre-processed Unicode data in the form of tables to be used for line breaking."],["LineBreakDataV1Marker","Marker type for [`LineBreakDataV1`]: “segmenter/line@1”"],["LineBreakRuleTable","Rule table for line breaking."]]});

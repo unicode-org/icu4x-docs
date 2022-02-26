@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645691851389,
+  "lastUpdate": 1645916803771,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -27971,6 +27971,132 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 18147,
             "range": "± 69",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4c22ef7d6aa78aa8d1bc4f7193619ccd03f65976",
+          "message": "Add serde support to the zerovec proc macro; reexport from the zerovec crate (#1632)\n\n* Add serde reexport\r\n\r\n* Add zerovec::serde\r\n\r\n* Reexport derive, add docs\r\n\r\n* fixup vis\r\n\r\n* fixup feature\r\n\r\n* Update utils/zerovec/derive/src/lib.rs\r\n\r\nCo-authored-by: Shane F. Carr <shane@unicode.org>\r\n\r\n* readme\r\n\r\n* fixup test deps\r\n\r\nCo-authored-by: Shane F. Carr <shane@unicode.org>",
+          "timestamp": "2022-02-24T16:36:53-08:00",
+          "tree_id": "a579238d57bb74a14423b7d3043dcd164cd000fe",
+          "url": "https://github.com/unicode-org/icu4x/commit/4c22ef7d6aa78aa8d1bc4f7193619ccd03f65976"
+        },
+        "date": 1645750320470,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 923,
+            "range": "± 67",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5959,
+            "range": "± 382",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 15367,
+            "range": "± 836",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "gregtatum@users.noreply.github.com",
+            "name": "Greg Tatum",
+            "username": "gregtatum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "caacf5426577cf9e77523a2ca05a86ca0af04e3f",
+          "message": "Remove @gregtatum from the alerts list (#1639)\n\nThese alerts aren't really actionable by me, and end up being\r\nnotifications that I mostly ignore. It's probably best to just remove\r\nmyself from the list at this time.",
+          "timestamp": "2022-02-25T13:22:12-06:00",
+          "tree_id": "11a1eb314e7048e7504cbf3d02be3ef6b20f95d7",
+          "url": "https://github.com/unicode-org/icu4x/commit/caacf5426577cf9e77523a2ca05a86ca0af04e3f"
+        },
+        "date": 1645817582376,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1197,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6401,
+            "range": "± 9",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 18152,
+            "range": "± 1269",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b34c72b370fddc504e1ca207099c523cbaed072a",
+          "message": "Bump trim-off-newlines from 1.0.2 to 1.0.3 in /ffi/diplomat/wasm (#1640)\n\nBumps [trim-off-newlines](https://github.com/stevemao/trim-off-newlines) from 1.0.2 to 1.0.3.\r\n- [Release notes](https://github.com/stevemao/trim-off-newlines/releases)\r\n- [Commits](https://github.com/stevemao/trim-off-newlines/compare/v1.0.2...v1.0.3)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: trim-off-newlines\r\n  dependency-type: indirect\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\n\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2022-02-26T16:56:22-06:00",
+          "tree_id": "6bcf7b12dcc47e524ae96ae9735c13e3b5ceafe6",
+          "url": "https://github.com/unicode-org/icu4x/commit/b34c72b370fddc504e1ca207099c523cbaed072a"
+        },
+        "date": 1645916792523,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 996,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5393,
+            "range": "± 9",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 15190,
+            "range": "± 12",
             "unit": "ns/iter"
           }
         ]

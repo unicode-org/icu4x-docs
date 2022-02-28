@@ -488,6 +488,7 @@
 <span id="487">487</span>
 <span id="488">488</span>
 <span id="489">489</span>
+<span id="490">490</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -508,6 +509,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::fs_exporter</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::serializers</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::FilesystemExporter</span>;
+<span class="kw">use</span> <span class="ident">rayon::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">simple_logger::SimpleLogger</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
@@ -773,7 +775,7 @@
         <span class="ident">filtered</span>
     };
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;HELLO_WORLD&quot;</span>) {
             <span class="ident">Box::new</span>(<span class="ident">HelloWorldProvider::new_with_placeholder_data</span>())
         } <span class="kw">else</span> {
@@ -838,11 +840,11 @@
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     };
 
-    <span class="comment">// TODO: Parallelize this.</span>
-    <span class="ident">selected_keys</span>.<span class="ident">into_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> {
+    <span class="ident">selected_keys</span>.<span class="ident">into_par_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>
             .<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>)<span class="question-mark">?</span>
-            <span class="comment">// TODO: Parallelize this.</span>
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">into_par_iter</span>()
             .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
                     .<span class="ident">load_payload</span>(

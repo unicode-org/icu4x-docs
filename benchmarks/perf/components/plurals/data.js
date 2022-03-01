@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1645916803771,
+  "lastUpdate": 1646095201939,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -28097,6 +28097,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 15190,
             "range": "± 12",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "10595307+mildgravitas@users.noreply.github.com",
+            "name": "mildgravitas",
+            "username": "mildgravitas"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d501688aef534f55358f79ff6d2660880cffea88",
+          "message": "Use rayon to add parallelism to datagen (#1600)\n\nCo-authored-by: Robert Bastian <robertbastian@users.noreply.github.com>",
+          "timestamp": "2022-02-28T14:01:04-08:00",
+          "tree_id": "191e220f65c9c25657eb3df20bd0adaff29b0934",
+          "url": "https://github.com/unicode-org/icu4x/commit/d501688aef534f55358f79ff6d2660880cffea88"
+        },
+        "date": 1646086296767,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 993,
+            "range": "± 60",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6432,
+            "range": "± 372",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 17109,
+            "range": "± 945",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "aethanyc@gmail.com",
+            "name": "Ting-Yu Lin",
+            "username": "aethanyc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1a4e610165ff33eea11c25271915058ca1bbf5eb",
+          "message": "Bring LineBreakDataV1 data structure closer to RuleBreakDataV1 (#1634)\n\n* Align LineBreakDataV1 with RuleBreakDataV1\r\n\r\nMake LineBreakDataV1 data more similar to RuleBreakDataV1 via:\r\n\r\n- Include generated_line_table.rs in `line_data` mod in provider.rs.\r\n- Move `property_count` from LineBreakRuleTable into LineBreakDataV1.\r\n\r\n* Rename LineBreakRuleTable to LineBreakStateTable\r\n\r\nIt's because we have RuleBreakDataV1::RuleBreakStateTable.\r\n\r\n* Add more fields from line data to LineBreakDataV1\r\n\r\nCurrently, only `eot_property` is used in LineBreakIterator.\r\n\r\n* Use `crate` link to refer to module-level documentation\r\n\r\nhttps://doc.rust-lang.org/rustdoc/linking-to-items-by-name.html?highlight=super#valid-links\r\n\r\n* Expand the types to export in line mod",
+          "timestamp": "2022-02-28T16:28:36-08:00",
+          "tree_id": "6e627e63dae593b460d6b22d45e0525d7663c44f",
+          "url": "https://github.com/unicode-org/icu4x/commit/1a4e610165ff33eea11c25271915058ca1bbf5eb"
+        },
+        "date": 1646095187620,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 1246,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6737,
+            "range": "± 12",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 18942,
+            "range": "± 1748",
             "unit": "ns/iter"
           }
         ]

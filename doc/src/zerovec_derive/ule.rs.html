@@ -408,6 +408,20 @@
 <span id="407">407</span>
 <span id="408">408</span>
 <span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -421,6 +435,8 @@
     <span class="ident">parse_quote</span>, <span class="ident">AttributeArgs</span>, <span class="ident">Data</span>, <span class="ident">DataEnum</span>, <span class="ident">DataStruct</span>, <span class="ident">DeriveInput</span>, <span class="ident">Error</span>, <span class="ident">Expr</span>, <span class="ident">Field</span>,
     <span class="ident">Fields</span>, <span class="ident">Ident</span>, <span class="ident">Lit</span>,
 };
+
+<span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_impl</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>) -&gt; <span class="ident">TokenStream2</span> {
     <span class="kw">if</span> <span class="op">!</span><span class="ident">utils::has_valid_repr</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">attrs</span>, <span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span> <span class="op">==</span> <span class="string">&quot;packed&quot;</span> <span class="op">|</span><span class="op">|</span> <span class="ident">r</span> <span class="op">==</span> <span class="string">&quot;transparent&quot;</span>) {
@@ -472,6 +488,7 @@
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">validate_byte_slice</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">zerovec::ZeroVecError</span><span class="op">&gt;</span> {
                 <span class="kw">const</span> <span class="ident">SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">::core::mem::size_of</span>::<span class="op">&lt;</span>#<span class="ident">name</span><span class="op">&gt;</span>();
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::modulo_one</span>)]</span>
                 <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="ident">SIZE</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">zerovec::ZeroVecError::length</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>(<span class="ident">bytes</span>.<span class="ident">len</span>()));
                 }
@@ -570,6 +587,11 @@
         .<span class="ident">to_compile_error</span>();
     }
 
+    <span class="comment">// the next discriminant expected</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">next</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="comment">// Discriminants that have not been found in series (we might find them later)</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">not_found</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
+
     <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">variant</span>) <span class="kw">in</span> <span class="ident">enu</span>.<span class="ident">variants</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
         <span class="kw">if</span> <span class="ident">variant</span>.<span class="ident">fields</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Fields::Unit</span> {
             <span class="comment">// This can be supported in the future, see zerovec/design_doc.md</span>
@@ -582,16 +604,21 @@
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="kw-2">ref</span> <span class="ident">discr</span>)) <span class="op">=</span> <span class="ident">variant</span>.<span class="ident">discriminant</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">n</span>) <span class="op">=</span> <span class="ident">get_expr_int</span>(<span class="ident">discr</span>) {
+                <span class="kw">if</span> <span class="ident">n</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">next</span> {
+                    <span class="kw">for</span> <span class="ident">missing</span> <span class="kw">in</span> <span class="ident">next</span>..<span class="ident">n</span> {
+                        <span class="ident">not_found</span>.<span class="ident">insert</span>(<span class="ident">missing</span>);
+                    }
+                    <span class="ident">next</span> <span class="op">=</span> <span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>;
+                }
+
+                <span class="ident">not_found</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>);
+
                 <span class="comment">// We require explicit discriminants so that it is clear that reordering</span>
                 <span class="comment">// fields would be a breaking change. Furthermore, using explicit discriminants helps ensure that</span>
                 <span class="comment">// platform-specific C ABI choices do not matter.</span>
                 <span class="comment">// We could potentially add in explicit discriminants on the user&#39;s behalf in the future, or support</span>
                 <span class="comment">// more complicated sets of explicit discriminant values.</span>
-                <span class="kw">if</span> <span class="ident">n</span> <span class="op">!</span><span class="op">=</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">u64</span> {
-                    <span class="kw">return</span> <span class="ident">Error::new</span>(<span class="ident">discr</span>.<span class="ident">span</span>(), <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;#[make_ule] must be applied to enums with discriminants \
-                                                              increasing in order from 0, expected {i}, found {n}&quot;</span>))
-                        .<span class="ident">to_compile_error</span>();
-                }
+                <span class="kw">if</span> <span class="ident">n</span> <span class="op">!</span><span class="op">=</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">u64</span> {}
             } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="ident">Error::new</span>(
                     <span class="ident">discr</span>.<span class="ident">span</span>(),
@@ -608,7 +635,15 @@
         }
     }
 
-    <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">enu</span>.<span class="ident">variants</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u8</span>;
+    <span class="kw">let</span> <span class="ident">not_found</span> <span class="op">=</span> <span class="ident">not_found</span>.<span class="ident">iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">not_found</span>.<span class="ident">is_empty</span>() {
+        <span class="kw">return</span> <span class="ident">Error::new</span>(<span class="ident">input</span>.<span class="ident">span</span>(), <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;#[make_ule] must be applied to enums with discriminants \
+                                                  filling the range from 0 to a maximum; could not find {:?}&quot;</span>, <span class="ident">not_found</span>))
+            .<span class="ident">to_compile_error</span>();
+    }
+
+    <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">next</span> <span class="kw">as</span> <span class="ident">u8</span>;
 
     <span class="kw">let</span> <span class="ident">maybe_ord_derives</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">skip_ord</span> {
         <span class="macro">quote!</span>()
@@ -640,7 +675,7 @@
             <span class="kw">fn</span> <span class="ident">validate_byte_slice</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">zerovec::ZeroVecError</span><span class="op">&gt;</span> {
                 <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="ident">bytes</span> {
                     <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">&gt;</span><span class="op">=</span> #<span class="ident">max</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ZeroVecError::parse</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>())
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">zerovec::ZeroVecError::parse</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>())
                     }
                 }
                 <span class="prelude-val">Ok</span>(())
@@ -666,32 +701,25 @@
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">::core::convert::TryFrom</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="kw">for</span> #<span class="ident">name</span> {
-            <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
-            <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">value</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span> #<span class="ident">name</span> {
+            <span class="doccomment">/// Attempt to construct the value from its corresponding integer,</span>
+            <span class="doccomment">/// returning None if not possible</span>
+            <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_from_u8</span>(<span class="ident">value</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
                 <span class="kw">if</span> <span class="ident">value</span> <span class="op">&lt;</span><span class="op">=</span> #<span class="ident">max</span> {
                     <span class="kw">unsafe</span> {
-                        <span class="prelude-val">Ok</span>(<span class="ident">::core::mem::transmute</span>(<span class="ident">value</span>))
+                        <span class="prelude-val">Some</span>(<span class="ident">::core::mem::transmute</span>(<span class="ident">value</span>))
                     }
                 } <span class="kw">else</span> {
-                    <span class="prelude-val">Err</span>(())
+                    <span class="prelude-val">None</span>
                 }
-            }
-        }
-
-        <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>#<span class="ident">name</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u8</span> {
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: #<span class="ident">name</span>) -&gt; <span class="self">Self</span> {
-                <span class="ident">other</span> <span class="kw">as</span> <span class="ident">u8</span>
             }
         }
     )
 }
 
 <span class="kw">fn</span> <span class="ident">get_expr_int</span>(<span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Expr::Lit</span>(<span class="kw-2">ref</span> <span class="ident">l</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">e</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Lit::Int</span>(<span class="kw-2">ref</span> <span class="ident">i</span>) <span class="op">=</span> <span class="ident">l</span>.<span class="ident">lit</span> {
-            <span class="kw">return</span> <span class="ident">i</span>.<span class="ident">base10_parse</span>().<span class="ident">ok</span>();
-        }
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">Lit::Int</span>(<span class="kw-2">ref</span> <span class="ident">i</span>)) <span class="op">=</span> <span class="ident">syn::parse2</span>(<span class="macro">quote!</span>(#<span class="ident">e</span>)) {
+        <span class="kw">return</span> <span class="ident">i</span>.<span class="ident">base10_parse</span>().<span class="ident">ok</span>();
     }
 
     <span class="prelude-val">None</span>

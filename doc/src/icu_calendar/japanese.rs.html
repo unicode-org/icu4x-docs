@@ -203,16 +203,6 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -283,7 +273,6 @@
         <span class="ident">Iso</span>.<span class="ident">offset_date</span>(<span class="kw-2">&amp;mut</span> <span class="ident">date</span>.<span class="ident">inner</span>, <span class="ident">offset</span>.<span class="ident">cast_unit</span>())
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::field_reassign_with_default</span>)]</span> <span class="comment">// it&#39;s more clear this way</span>
     <span class="kw">fn</span> <span class="ident">until</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">date1</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::DateInner</span>,
@@ -380,7 +369,6 @@
     <span class="kw">fn</span> <span class="ident">era_for</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="ident">IsoDateInner</span>) -&gt; (<span class="ident">EraStartDate</span>, <span class="ident">TinyStr16</span>) {
         <span class="kw">let</span> <span class="ident">date</span>: <span class="ident">EraStartDate</span> <span class="op">=</span> <span class="ident">date</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">era_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">eras</span>.<span class="ident">get</span>();
-        <span class="kw">let</span> <span class="ident">deref_tuple</span> <span class="op">=</span> <span class="op">|</span><span class="ident">x</span>: (<span class="kw-2">&amp;</span><span class="ident">EraStartDate</span>, <span class="kw-2">&amp;</span><span class="ident">TinyStr16</span>)<span class="op">|</span> (<span class="kw-2">*</span><span class="ident">x</span>.<span class="number">0</span>, <span class="kw-2">*</span><span class="ident">x</span>.<span class="number">1</span>);
         <span class="comment">// We optimize for the five &quot;modern&quot; post-Meiji eras, which are stored in a smaller</span>
         <span class="comment">// array and also hardcoded. The hardcoded version is not used if data indicates the</span>
         <span class="comment">// presence of newer eras.</span>
@@ -403,27 +391,19 @@
                     .<span class="ident">dates_to_eras</span>
                     .<span class="ident">iter</span>()
                     .<span class="ident">rev</span>()
-                    .<span class="ident">find</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">k</span> <span class="op">&lt;</span> <span class="ident">date</span>)
-                    .<span class="ident">map</span>(<span class="ident">deref_tuple</span>)
+                    .<span class="ident">find</span>(<span class="op">|</span><span class="kw-2">&amp;</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span> <span class="op">&lt;</span> <span class="ident">date</span>)
                     .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>)
             }
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">historical</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">era_data</span>.<span class="ident">dates_to_historical_eras</span>;
-            <span class="kw">match</span> <span class="ident">historical</span>.<span class="ident">find_index</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; <span class="ident">historical</span>
-                    .<span class="ident">get_indexed</span>(<span class="ident">index</span>)
-                    .<span class="ident">map</span>(<span class="ident">deref_tuple</span>)
-                    .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>),
-                <span class="prelude-val">Err</span>(<span class="ident">index</span>) <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="number">0</span> =&gt; <span class="ident">historical</span>
-                    .<span class="ident">get_indexed</span>(<span class="ident">index</span>)
-                    .<span class="ident">map</span>(<span class="ident">deref_tuple</span>)
-                    .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>),
+            <span class="kw">match</span> <span class="ident">historical</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span>(<span class="ident">d</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">d</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>)) {
+                <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; <span class="ident">historical</span>.<span class="ident">get</span>(<span class="ident">index</span>),
+                <span class="prelude-val">Err</span>(<span class="ident">index</span>) <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="number">0</span> =&gt; <span class="ident">historical</span>.<span class="ident">get</span>(<span class="ident">index</span>),
                 <span class="prelude-val">Err</span>(<span class="ident">index</span>) =&gt; <span class="ident">historical</span>
-                    .<span class="ident">get_indexed</span>(<span class="ident">index</span> <span class="op">-</span> <span class="number">1</span>)
-                    .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">historical</span>.<span class="ident">get_indexed</span>(<span class="ident">historical</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>))
-                    .<span class="ident">map</span>(<span class="ident">deref_tuple</span>)
-                    .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>),
+                    .<span class="ident">get</span>(<span class="ident">index</span> <span class="op">-</span> <span class="number">1</span>)
+                    .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">historical</span>.<span class="ident">iter</span>().<span class="ident">next_back</span>()),
             }
+            .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>)
         }
     }
 }

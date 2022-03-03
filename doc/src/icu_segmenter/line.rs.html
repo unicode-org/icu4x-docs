@@ -965,10 +965,38 @@
 <span id="964">964</span>
 <span id="965">965</span>
 <span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dictionary::DictionarySegmenter</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::language</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::line_data</span>::<span class="kw-2">*</span>;
@@ -1073,12 +1101,15 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakSegmenter</span> {
     <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
     <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>,
+    <span class="ident">dictionary_payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">LineBreakSegmenter</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="ident"><span class="self">Self</span>::try_new_with_options</span>(<span class="ident">provider</span>, <span class="ident">Default::default</span>())
     }
@@ -1088,12 +1119,21 @@
         <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">options</span>, <span class="ident">payload</span> })
+        <span class="kw">let</span> <span class="ident">dictionary_payload</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
+            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">options</span>,
+            <span class="ident">payload</span>,
+            <span class="ident">dictionary_payload</span>,
+        })
     }
 
     <span class="doccomment">/// Create a line break iterator for an `str` (a UTF-8 string).</span>
@@ -1105,6 +1145,7 @@
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
+            <span class="ident">dictionary_payload</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary_payload</span>,
         }
     }
 
@@ -1120,6 +1161,7 @@
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
+            <span class="ident">dictionary_payload</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary_payload</span>,
         }
     }
 
@@ -1135,6 +1177,7 @@
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
+            <span class="ident">dictionary_payload</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary_payload</span>,
         }
     }
 }
@@ -1361,7 +1404,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="ident">c</span>: <span class="ident"><span class="self">Self</span>::CharType</span>,
     ) -&gt; <span class="ident">u8</span>;
 
-    <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
+    <span class="kw">fn</span> <span class="ident">compute_line_break_for_complex_language</span>(
         <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
@@ -1383,6 +1426,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="ident">result_cache</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>,
     <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakOptions</span>,
+    <span class="ident">dictionary_payload</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
@@ -1583,7 +1627,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="comment">// Restore iterator to move to head of complex string</span>
         <span class="self">self</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
         <span class="self">self</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">Y::get_line_break_by_platform_fallback</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
+        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">Y::compute_line_break_for_complex_language</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="self">self</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
         <span class="comment">// result_cache vector is utf-16 index that is in BMP.</span>
@@ -1621,13 +1665,18 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="ident">use_complex_breaking_utf32</span>(<span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>, <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
-        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+    <span class="kw">fn</span> <span class="ident">compute_line_break_for_complex_language</span>(
+        <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">ret</span>) <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="ident">input</span>) {
             <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">input</span>.<span class="ident">len</span>());
             <span class="kw">return</span> <span class="ident">ret</span>;
+        }
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new</span>(<span class="ident">iterator</span>.<span class="ident">dictionary_payload</span>) {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="ident">input</span>).<span class="ident">collect</span>();
+            <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">input</span>.<span class="ident">len</span>());
+            <span class="kw">return</span> <span class="ident">result</span>;
         }
         [<span class="ident">input</span>.<span class="ident">len</span>()].<span class="ident">to_vec</span>()
     }
@@ -1670,7 +1719,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="bool-val">false</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
+    <span class="kw">fn</span> <span class="ident">compute_line_break_for_complex_language</span>(
         <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">_input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
@@ -1699,13 +1748,18 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="ident">use_complex_breaking_utf32</span>(<span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>, <span class="ident">c</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_line_break_by_platform_fallback</span>(
-        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+    <span class="kw">fn</span> <span class="ident">compute_line_break_for_complex_language</span>(
+        <span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
     ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">ret</span>) <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="ident">input</span>) {
             <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">input</span>.<span class="ident">len</span>());
             <span class="kw">return</span> <span class="ident">ret</span>;
+        }
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new</span>(<span class="ident">iterator</span>.<span class="ident">dictionary_payload</span>) {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="ident">input</span>).<span class="ident">collect</span>();
+            <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">input</span>.<span class="ident">len</span>());
+            <span class="kw">return</span> <span class="ident">result</span>;
         }
         [<span class="ident">input</span>.<span class="ident">len</span>()].<span class="ident">to_vec</span>()
     }

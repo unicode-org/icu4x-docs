@@ -799,6 +799,17 @@
 <span id="798">798</span>
 <span id="799">799</span>
 <span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -824,11 +835,48 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// `T` must implement [`AsULE`], which is auto-implemented for a number of built-in types,</span>
 <span class="doccomment">/// including all fixed-width multibyte integers. For variable-width types like [`str`],</span>
-<span class="doccomment">/// see [`VarZeroVec`](crate::VarZeroVec).</span>
+<span class="doccomment">/// see [`VarZeroVec`](crate::VarZeroVec). [`zerovec::make_ule`](crate::make_ule) may</span>
+<span class="doccomment">/// be used to automatically implement [`AsULE`] for a type and generate the underlying [`ULE`] type.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Typically, the zero-copy equivalent of a `Vec&lt;T&gt;` will simply be `ZeroVec&lt;&#39;a, T&gt;`.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Most of the methods on `ZeroVec&lt;&#39;a, T&gt;` come from its [`Deref`] implementation to [`ZeroSlice&lt;T&gt;`](ZeroSlice)</span>
+<span class="doccomment">/// Most of the methods on `ZeroVec&lt;&#39;a, T&gt;` come from its [`Deref`] implementation to [`ZeroSlice&lt;T&gt;`](ZeroSlice).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// For creating zero-copy vectors of fixed-size types, see [`VarZeroVec`](crate::VarZeroVec).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `ZeroVec&lt;T&gt;` behaves much like [`Cow`](alloc::borrow::Cow), where it can be constructed from</span>
+<span class="doccomment">/// owned data (and then mutated!) but can also borrow from some buffer.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Example</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use zerovec::ZeroVec;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // The little-endian bytes correspond to the numbers on the following line.</span>
+<span class="doccomment">/// let nums: &amp;[u16] = &amp;[211, 281, 421, 461];</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// struct Data&lt;&#39;a&gt; {</span>
+<span class="doccomment">///     #[serde(borrow)]</span>
+<span class="doccomment">///     nums: ZeroVec&lt;&#39;a, u16&gt;,</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // The owned version will allocate</span>
+<span class="doccomment">/// let data = Data { nums: ZeroVec::alloc_from_slice(nums) };</span>
+<span class="doccomment">/// let bincode_bytes = bincode::serialize(&amp;data)</span>
+<span class="doccomment">///     .expect(&quot;Serialization should be successful&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Will deserialize without allocations</span>
+<span class="doccomment">/// let deserialized: Data = bincode::deserialize(&amp;bincode_bytes)</span>
+<span class="doccomment">///     .expect(&quot;Deserialization should be successful&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // This deserializes without allocation!</span>
+<span class="doccomment">/// assert!(matches!(deserialized.nums, ZeroVec::Borrowed(_)));</span>
+<span class="doccomment">/// assert_eq!(deserialized.nums.get(2), Some(421));</span>
+<span class="doccomment">/// assert_eq!(deserialized.nums, nums);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`ule`]: crate::ule</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # How it Works</span>
 <span class="doccomment">///</span>
@@ -837,35 +885,9 @@
 <span class="doccomment">/// items from `ZeroVec&lt;T&gt;`, we fetch the `T::ULE`, convert it on the fly to `T`, and return `T` by</span>
 <span class="doccomment">/// value.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Benchmarks can be found in the project repository. We found that for common operations on small</span>
-<span class="doccomment">/// and large vectors, `ZeroVec&lt;T&gt;` performs from slightly faster to 15% slower than `Vec&lt;T&gt;`.</span>
-<span class="doccomment">/// However, the main performance improvement on `ZeroVec&lt;T&gt;` is when deserializing from a byte</span>
-<span class="doccomment">/// array; `ZeroVec&lt;T&gt;` deserializes 80% faster than `Vec&lt;T&gt;` in Serde Bincode, and it does not</span>
-<span class="doccomment">/// require any heap allocations.</span>
+<span class="doccomment">/// Benchmarks can be found in the project repository, with some results found in the [crate-level documentation](crate).</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `ZeroVec&lt;T&gt;` contains no unsafe code. However, the conversion from `&amp;[u8]` to `&amp;[T::ULE]` may</span>
-<span class="doccomment">/// be unsafe. For more information, see the [`ule`] module.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Example</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use zerovec::ZeroVec;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // The little-endian bytes correspond to the numbers on the following line.</span>
-<span class="doccomment">/// let bytes: &amp;[u8] = &amp;[0xD3, 0x00, 0x19, 0x01, 0xA5, 0x01, 0xCD, 0x01];</span>
-<span class="doccomment">/// let nums: &amp;[u16] = &amp;[211, 281, 421, 461];</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec: ZeroVec&lt;u16&gt; = ZeroVec::parse_byte_slice(bytes).unwrap();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert!(matches!(zerovec, ZeroVec::Borrowed(_)));</span>
-<span class="doccomment">/// assert_eq!(zerovec.get(2), Some(421));</span>
-<span class="doccomment">/// assert_eq!(zerovec, nums);</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`ule`]: crate::ule</span>
-<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="doccomment">/// See [the design doc](https://github.com/unicode-org/icu4x/blob/main/utils/zerovec/design_doc.md) for more details.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>

@@ -449,6 +449,21 @@
 <span id="448">448</span>
 <span id="449">449</span>
 <span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -470,7 +485,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// `T` must implement [`VarULE`], which is already implemented for [`str`] and `[u8]`. For storing more</span>
 <span class="doccomment">/// complicated series of elements, it is implemented on `ZeroSlice&lt;T&gt;` as well as `VarZeroSlice&lt;T&gt;`</span>
-<span class="doccomment">/// for nesting.</span>
+<span class="doccomment">/// for nesting. [`zerovec::make_varule`](crate::make_varule) may be used to generate</span>
+<span class="doccomment">/// a dynamically-sized [`VarULE`] type and conversions to and from a custom type.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// For example, here are some owned types and their zero-copy equivalents:</span>
 <span class="doccomment">///</span>
@@ -479,28 +495,12 @@
 <span class="doccomment">/// - `Vec&lt;Vec&lt;u32&gt;&gt;`: `VarZeroVec&lt;&#39;a, ZeroSlice&lt;u32&gt;&gt;`</span>
 <span class="doccomment">/// - `Vec&lt;Vec&lt;String&gt;&gt;`: `VarZeroVec&lt;&#39;a, VarZeroSlice&lt;str&gt;&gt;`</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// Most of the methods on `VarZeroVec&lt;&#39;a, T&gt;` come from its [`Deref`] implementation to [`VarZeroSlice&lt;T&gt;`](VarZeroSlice).</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// For creating zero-copy vectors of fixed-size types, see [`ZeroVec`](crate::ZeroVec).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// `VarZeroVec&lt;T&gt;` behaves much like [`Cow`](alloc::borrow::Cow), where it can be constructed from</span>
 <span class="doccomment">/// owned data (and then mutated!) but can also borrow from some buffer.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # How it Works</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `VarZeroVec&lt;T&gt;`, when used with non-human-readable serializers (like `bincode`), will</span>
-<span class="doccomment">/// serialize to a specially formatted list of bytes. The format is:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// - 4 bytes for `length` (interpreted as a little-endian u32)</span>
-<span class="doccomment">/// - `4 * length` bytes of `indices` (interpreted as little-endian u32)</span>
-<span class="doccomment">/// - Remaining bytes for actual `data`</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Each element in the `indices` array points to the starting index of its corresponding</span>
-<span class="doccomment">/// data part in the `data` list. The ending index can be calculated from the starting index</span>
-<span class="doccomment">/// of the next element (or the length of the slice if dealing with the last element).</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Safety</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// `VarZeroVec&lt;T&gt;` is implemented with a fair amount of unsafe code, but is externally</span>
-<span class="doccomment">/// safe to use.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
@@ -511,15 +511,24 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// // The little-endian bytes correspond to the list of strings.</span>
 <span class="doccomment">/// let strings = vec![&quot;w&quot;, &quot;ω&quot;, &quot;文&quot;, &quot;𑄃&quot;];</span>
-<span class="doccomment">/// let bytes = &amp;[</span>
-<span class="doccomment">///     4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,  3, 0, 0, 0,</span>
-<span class="doccomment">///     6, 0, 0, 0, 119, 207, 137, 230, 150, 135, 240, 145, 132, 131,</span>
-<span class="doccomment">/// ];</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec: VarZeroVec&lt;str&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
+<span class="doccomment">/// #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// struct Data&lt;&#39;a&gt; {</span>
+<span class="doccomment">///     #[serde(borrow)]</span>
+<span class="doccomment">///     strings: VarZeroVec&lt;&#39;a, str&gt;</span>
+<span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(zerovec.get(2), Some(&quot;文&quot;));</span>
-<span class="doccomment">/// assert_eq!(zerovec, &amp;*strings);</span>
+<span class="doccomment">/// let data = Data { strings: VarZeroVec::from(&amp;strings) };</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let bincode_bytes = bincode::serialize(&amp;data)</span>
+<span class="doccomment">///     .expect(&quot;Serialization should be successful&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Will deserialize without allocations</span>
+<span class="doccomment">/// let deserialized: Data = bincode::deserialize(&amp;bincode_bytes)</span>
+<span class="doccomment">///     .expect(&quot;Deserialization should be successful&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(deserialized.strings.get(2), Some(&quot;文&quot;));</span>
+<span class="doccomment">/// assert_eq!(deserialized.strings, &amp;*strings);</span>
 <span class="doccomment">/// # Ok::&lt;(), ZeroVecError&gt;(())</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -534,29 +543,50 @@
 <span class="doccomment">/// use zerovec::ule::*;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // The structured list correspond to the list of integers.</span>
-<span class="doccomment">/// let numbers: Vec&lt;Vec&lt;u32&gt;&gt; = vec![</span>
-<span class="doccomment">///     vec![12, 25, 38],</span>
-<span class="doccomment">///     vec![39179, 100],</span>
-<span class="doccomment">///     vec![42, 55555],</span>
-<span class="doccomment">///     vec![12345, 54321, 9],</span>
+<span class="doccomment">/// let numbers: &amp;[&amp;[u32]] = &amp;[</span>
+<span class="doccomment">///     &amp;[12, 25, 38],</span>
+<span class="doccomment">///     &amp;[39179, 100],</span>
+<span class="doccomment">///     &amp;[42, 55555],</span>
+<span class="doccomment">///     &amp;[12345, 54321, 9],</span>
 <span class="doccomment">/// ];</span>
-<span class="doccomment">/// let bytes = &amp;[4, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 20, 0, 0, 0, 28, 0, 0, 0,</span>
-<span class="doccomment">///              12, 0, 0, 0, 25, 0, 0, 0, 38, 0, 0, 0, 11, 153, 0, 0, 100, 0,</span>
-<span class="doccomment">///              0, 0, 42, 0, 0, 0, 3, 217, 0, 0, 57, 48, 0, 0, 49, 212, 0, 0,</span>
-<span class="doccomment">///              9, 0, 0, 0];</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec1: VarZeroVec&lt;ZeroSlice&lt;u32&gt;&gt; = VarZeroVec::parse_byte_slice(bytes)?;</span>
-<span class="doccomment">/// assert_eq!(zerovec1.get(2).and_then(|v| v.get(1)), Some(55555));</span>
+<span class="doccomment">/// #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// struct Data&lt;&#39;a&gt; {</span>
+<span class="doccomment">///     #[serde(borrow)]</span>
+<span class="doccomment">///     vecs: VarZeroVec&lt;&#39;a, ZeroSlice&lt;u32&gt;&gt;</span>
+<span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let zerovec2: VarZeroVec&lt;ZeroSlice&lt;u32&gt;&gt; = (&amp;numbers).into();</span>
-<span class="doccomment">/// assert_eq!(zerovec1, zerovec2);</span>
+<span class="doccomment">/// let data = Data { vecs: VarZeroVec::from(numbers) };</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let bincode_bytes = bincode::serialize(&amp;data)</span>
+<span class="doccomment">///     .expect(&quot;Serialization should be successful&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let deserialized: Data = bincode::deserialize(&amp;bincode_bytes)</span>
+<span class="doccomment">///     .expect(&quot;Deserialization should be successful&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(deserialized.vecs[0].get(1).unwrap(), 25);</span>
+<span class="doccomment">/// assert_eq!(deserialized.vecs[1], *numbers[1]);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Ok::&lt;(), ZeroVecError&gt;(())</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`VarZeroVec`]s can be nested infinitely, see the docs of [`VarZeroSlice`]</span>
+<span class="doccomment">/// [`VarZeroVec`]s can be nested infinitely via a similar mechanism, see the docs of [`VarZeroSlice`]</span>
 <span class="doccomment">/// for more information.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # How it Works</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `VarZeroVec&lt;T&gt;`, when used with non-human-readable serializers (like `bincode`), will</span>
+<span class="doccomment">/// serialize to a specially formatted list of bytes. The format is:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// - 4 bytes for `length` (interpreted as a little-endian u32)</span>
+<span class="doccomment">/// - `4 * length` bytes of `indices` (interpreted as little-endian u32)</span>
+<span class="doccomment">/// - Remaining bytes for actual `data`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Each element in the `indices` array points to the starting index of its corresponding</span>
+<span class="doccomment">/// data part in the `data` list. The ending index can be calculated from the starting index</span>
+<span class="doccomment">/// of the next element (or the length of the slice if dealing with the last element).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// See [the design doc](https://github.com/unicode-org/icu4x/blob/main/utils/zerovec/design_doc.md) for more details.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`ule`]: crate::ule</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {

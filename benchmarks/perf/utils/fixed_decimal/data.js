@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1646791483627,
+  "lastUpdate": 1646851068299,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -20609,6 +20609,66 @@ window.BENCHMARK_DATA = {
             "name": "fixed_decimal/overview",
             "value": 108889,
             "range": "± 3253",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "aethanyc@gmail.com",
+            "name": "Ting-Yu Lin",
+            "username": "aethanyc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "54804ff5a6b252a8fb2fe4a805e62667d356fd7f",
+          "message": "Make line break tests run faster (#1681)\n\nCurrently, we load line break data *every time* we call `is_break` or\r\n`get_linebreak_property`. It is sufficient to load the data once per test.\r\n\r\nOn my machine, the running time of `cargo test break_rule` is reduce from 2.66s\r\nto 0.05s, and `cargo test linebreak_property` from 0.62s to 0.05s.",
+          "timestamp": "2022-03-09T10:23:48-08:00",
+          "tree_id": "90e9f635d80de15197f7096e1520c500e754881f",
+          "url": "https://github.com/unicode-org/icu4x/commit/54804ff5a6b252a8fb2fe4a805e62667d356fd7f"
+        },
+        "date": 1646850905423,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 102972,
+            "range": "± 600",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "135bf92d0f206f8558f6b703d2dff0e2e87cb88a",
+          "message": "Add more AsULE impls for primitives (#1672)\n\n* Add f32/f64 ule\n\n* Add bool ULE\n\n* add equle",
+          "timestamp": "2022-03-09T10:27:31-08:00",
+          "tree_id": "8c86919aa276778f92c17766e8b87f6f31760735",
+          "url": "https://github.com/unicode-org/icu4x/commit/135bf92d0f206f8558f6b703d2dff0e2e87cb88a"
+        },
+        "date": 1646851055714,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 103053,
+            "range": "± 360",
             "unit": "ns/iter"
           }
         ]

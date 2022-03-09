@@ -168,6 +168,36 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -178,12 +208,16 @@
 
 <span class="attribute">#[<span class="ident">diplomat::bridge</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ffi</span> {
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::ffi::ICU4XDataProvider</span>;
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
     <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
     <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
+    <span class="kw">use</span> <span class="ident">icu_provider::ResourceProvider</span>;
     <span class="kw">use</span> <span class="ident">icu_segmenter::Latin1Char</span>;
+    <span class="kw">use</span> <span class="ident">icu_segmenter::LineBreakDataV1Marker</span>;
     <span class="kw">use</span> <span class="ident">icu_segmenter::LineBreakIterator</span>;
     <span class="kw">use</span> <span class="ident">icu_segmenter::LineBreakSegmenter</span>;
+    <span class="kw">use</span> <span class="ident">icu_segmenter::UCharDictionaryBreakDataV1Marker</span>;
     <span class="kw">use</span> <span class="ident">icu_segmenter::Utf16Char</span>;
 
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
@@ -225,9 +259,21 @@
     <span class="kw">impl</span> <span class="ident">ICU4XLineBreakSegmenter</span> {
         <span class="doccomment">/// Construct a [`ICU4XLineBreakSegmenter`] with default options.</span>
         <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu_segmenter/struct.LineBreakSegmenter.html#method.try_new) for more information.</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>() -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLineBreakSegmenter</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_provider::inv::InvariantDataProvider</span>;
-            <span class="ident">LineBreakSegmenter::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>)
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(
+            <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLineBreakSegmenter</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+            <span class="kw">use</span> <span class="ident">icu_provider::serde::AsDeserializingBufferProvider</span>;
+            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="number">0</span>.<span class="ident">as_deserializing</span>();
+            <span class="ident"><span class="self">Self</span>::try_new_impl</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>)
+        }
+
+        <span class="kw">fn</span> <span class="ident">try_new_impl</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLineBreakSegmenter</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span>
+        <span class="kw">where</span>
+            <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
+                <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>
+                <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        {
+            <span class="ident">LineBreakSegmenter::try_new</span>(<span class="ident">provider</span>)
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="ident">Box::new</span>(<span class="ident">ICU4XLineBreakSegmenter</span>(<span class="ident">o</span>)))
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
                 .<span class="ident">into</span>()
@@ -236,10 +282,24 @@
         <span class="doccomment">/// Construct a [`ICU4XLineBreakSegmenter`] with custom options.</span>
         <span class="doccomment">/// See [the Rust docs](https://unicode-org.github.io/icu4x-docs/doc/icu_segmenter/struct.LineBreakSegmenter.html#method.try_new_with_options) for more information.</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_with_options</span>(
+            <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
             <span class="ident">options</span>: <span class="ident">ICU4XLineBreakOptions</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLineBreakSegmenter</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_provider::inv::InvariantDataProvider</span>;
-            <span class="ident">LineBreakSegmenter::try_new_with_options</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="ident">options</span>.<span class="ident">into</span>())
+            <span class="kw">use</span> <span class="ident">icu_provider::serde::AsDeserializingBufferProvider</span>;
+            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="number">0</span>.<span class="ident">as_deserializing</span>();
+            <span class="ident"><span class="self">Self</span>::try_new_with_options_impl</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="ident">options</span>)
+        }
+
+        <span class="kw">fn</span> <span class="ident">try_new_with_options_impl</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(
+            <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
+            <span class="ident">options</span>: <span class="ident">ICU4XLineBreakOptions</span>,
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLineBreakSegmenter</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span>
+        <span class="kw">where</span>
+            <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
+                <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>
+                <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        {
+            <span class="ident">LineBreakSegmenter::try_new_with_options</span>(<span class="ident">provider</span>, <span class="ident">options</span>.<span class="ident">into</span>())
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="ident">Box::new</span>(<span class="ident">ICU4XLineBreakSegmenter</span>(<span class="ident">o</span>)))
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
                 .<span class="ident">into</span>()

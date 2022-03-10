@@ -200,6 +200,81 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -401,6 +476,81 @@
 
 <span class="comment">// EqULE is true because i8 is its own ULE.</span>
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">EqULE</span> <span class="kw">for</span> <span class="ident">i8</span> {}
+
+<span class="comment">// These impls are actually safe and portable due to Rust always using IEEE 754, see the documentation</span>
+<span class="comment">// on f32::from_bits: https://doc.rust-lang.org/stable/std/primitive.f32.html#method.from_bits</span>
+<span class="comment">//</span>
+<span class="comment">// The only potential problem is that some older platforms treat signaling NaNs differently. This is</span>
+<span class="comment">// still quite portable, signalingness is not typically super important.</span>
+
+<span class="kw">impl</span> <span class="ident">AsULE</span> <span class="kw">for</span> <span class="ident">f32</span> {
+    <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">to_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
+        <span class="self">self</span>.<span class="ident">to_bits</span>().<span class="ident">to_unaligned</span>()
+    }
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="ident"><span class="self">Self</span>::ULE</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_bits</span>(<span class="ident">u32::from_unaligned</span>(<span class="ident">unaligned</span>))
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">AsULE</span> <span class="kw">for</span> <span class="ident">f64</span> {
+    <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">to_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
+        <span class="self">self</span>.<span class="ident">to_bits</span>().<span class="ident">to_unaligned</span>()
+    }
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="ident"><span class="self">Self</span>::ULE</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::from_bits</span>(<span class="ident">u64::from_unaligned</span>(<span class="ident">unaligned</span>))
+    }
+}
+
+<span class="comment">// The from_bits documentation mentions that they have identical byte representations to integers</span>
+<span class="comment">// and EqULE only cares about LE systems</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">EqULE</span> <span class="kw">for</span> <span class="ident">f32</span> {}
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">EqULE</span> <span class="kw">for</span> <span class="ident">f64</span> {}
+
+<span class="comment">// The bool impl is not as efficient as it could be</span>
+<span class="comment">// We can, in the future, have https://github.com/unicode-org/icu4x/blob/main/utils/zerovec/design_doc.md#bitpacking</span>
+<span class="comment">// for better bitpacking</span>
+
+<span class="comment">// Safety (based on the safety checklist on the ULE trait):</span>
+<span class="comment">//  1. bool does not include any uninitialized or padding bytes (the remaining 7 bytes in bool are by definition zero)</span>
+<span class="comment">//  2. bool is aligned to 1 byte.</span>
+<span class="comment">//  3. The impl of validate_byte_slice() returns an error if any byte is not valid (bytes that are not 0 or 1).</span>
+<span class="comment">//  4. The impl of validate_byte_slice() returns an error if there are leftover bytes (never).</span>
+<span class="comment">//  5. The other ULE methods use the default impl.</span>
+<span class="comment">//  6. bool byte equality is semantic equality</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">ULE</span> <span class="kw">for</span> <span class="ident">bool</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">validate_byte_slice</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">ZeroVecError</span><span class="op">&gt;</span> {
+        <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="ident">bytes</span> {
+            <span class="comment">// https://doc.rust-lang.org/reference/types/boolean.html</span>
+            <span class="comment">// Rust booleans are always size 1, align 1 values with valid bit patterns 0x0 or 0x1</span>
+            <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">&gt;</span> <span class="number">1</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ZeroVecError::parse</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>());
+            }
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">AsULE</span> <span class="kw">for</span> <span class="ident">bool</span> {
+    <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="self">Self</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">to_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
+        <span class="self">self</span>
+    }
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="ident"><span class="self">Self</span>::ULE</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">unaligned</span>
+    }
+}
+
+<span class="comment">// EqULE is true because bool is its own ULE.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">EqULE</span> <span class="kw">for</span> <span class="ident">bool</span> {}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="zerovec" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
 </body></html>

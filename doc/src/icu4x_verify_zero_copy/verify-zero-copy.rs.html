@@ -261,6 +261,57 @@
 <span id="260">260</span>
 <span id="261">261</span>
 <span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -288,13 +339,31 @@
 <span class="attribute">#[<span class="ident">global_allocator</span>]</span>
 <span class="kw">static</span> <span class="ident">ALLOC</span>: <span class="ident">dhat::Alloc</span> <span class="op">=</span> <span class="ident">dhat::Alloc</span>;
 
-<span class="kw">static</span> <span class="ident">EXPECTED_VIOLATIONS</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
+<span class="comment">// Types in this list cannot be zero-copy deserialized (and are unlikely to work with CrabBake).</span>
+<span class="comment">//</span>
+<span class="comment">// Such types contain some data that was allocated during deserializations</span>
+<span class="comment">//</span>
+<span class="comment">// Every entry in this list is a bug that needs to be addressed before ICU4X 1.0.</span>
+<span class="kw">static</span> <span class="ident">EXPECTED_NET_VIOLATIONS</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
+    <span class="comment">// https://github.com/unicode-org/icu4x/issues/1678</span>
     <span class="string">&quot;datetime/skeletons@1&quot;</span>,
+    <span class="comment">// https://github.com/unicode-org/icu4x/issues/1034</span>
+    <span class="string">&quot;locale_canonicalizer/aliases@1&quot;</span>,
+    <span class="comment">// https://github.com/unicode-org/icu4x/issues/1034</span>
+    <span class="string">&quot;locale_canonicalizer/likelysubtags@1&quot;</span>,
+];
+
+<span class="comment">// Types in this list can be zero-copy deserialized (and do not contain allocated data),</span>
+<span class="comment">// however there is some allocation that occurs during deserialization for validation. This is unlikely to affect</span>
+<span class="comment">// CrabBake since CrabBake can bypass validation steps.</span>
+<span class="comment">//</span>
+<span class="comment">// Entries in this list represent a less-than-ideal state of things, however ICU4X is shippable with violations</span>
+<span class="comment">// in this list since it does not affect CrabBake.</span>
+<span class="kw">static</span> <span class="ident">EXPECTED_TOTAL_VIOLATIONS</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[
+    <span class="comment">// Regex DFAs need to be validated, which involved creating a BTreeMap</span>
     <span class="string">&quot;list/and@1&quot;</span>,
     <span class="string">&quot;list/or@1&quot;</span>,
     <span class="string">&quot;list/unit@1&quot;</span>,
-    <span class="string">&quot;locale_canonicalizer/aliases@1&quot;</span>,
-    <span class="string">&quot;locale_canonicalizer/likelysubtags@1&quot;</span>,
 ];
 
 <span class="kw">fn</span> <span class="ident">main</span>() -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -463,12 +532,17 @@
         <span class="ident">BlobDataProvider::new_from_rc_blob</span>(<span class="ident">Rc::from</span>(<span class="ident">blob</span>)).<span class="ident">expect</span>(<span class="string">&quot;Deserialization should succeed&quot;</span>);
 
     <span class="comment">// Litemap keeps it sorted, convenient</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">violations</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LiteMap::new</span>();
+
+    <span class="comment">// violations for net_bytes_allocated</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">net_violations</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LiteMap::new</span>();
+    <span class="comment">// violations for total_bytes_allocated (but not net_bytes_allocated)</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">total_violations</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LiteMap::new</span>();
 
     <span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="ident">selected_keys</span>.<span class="ident">into_iter</span>() {
         <span class="kw">let</span> <span class="ident">props_key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">get_path</span>().<span class="ident">starts_with</span>(<span class="string">&quot;props/&quot;</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_violation</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_total_violation</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">max_net_violation</span> <span class="op">=</span> <span class="number">0</span>;
 
         <span class="kw">for</span> <span class="ident">options</span> <span class="kw">in</span> <span class="ident">converter</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>)<span class="question-mark">?</span> {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load_buffer</span>(
@@ -493,32 +567,60 @@
 
             <span class="kw">let</span> <span class="ident">stats</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">HeapStatsMarker</span><span class="op">&gt;</span> <span class="op">=</span>
                 <span class="ident">converter</span>.<span class="ident">convert</span>(<span class="ident">key</span>, <span class="ident">payload</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="number">1</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">vio</span> <span class="op">=</span> <span class="ident">stats</span>.<span class="ident">get</span>().<span class="ident">total_bytes_allocated</span>;
-            <span class="macro">log::trace!</span>(<span class="string">&quot;Key {} with options [{}] takes {} bytes&quot;</span>, <span class="ident">key</span>, <span class="ident">options</span>, <span class="ident">vio</span>);
-            <span class="ident">max_violation</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="ident">vio</span>, <span class="ident">max_violation</span>);
+            <span class="kw">let</span> <span class="ident">vio_total</span> <span class="op">=</span> <span class="ident">stats</span>.<span class="ident">get</span>().<span class="ident">total_bytes_allocated</span>;
+            <span class="kw">let</span> <span class="ident">vio_net</span> <span class="op">=</span> <span class="ident">stats</span>.<span class="ident">get</span>().<span class="ident">net_bytes_allocated</span>;
+            <span class="macro">log::trace!</span>(
+                <span class="string">&quot;Key {} with options [{}] takes {} bytes ({} net)&quot;</span>,
+                <span class="ident">key</span>,
+                <span class="ident">options</span>,
+                <span class="ident">vio_total</span>,
+                <span class="ident">vio_net</span>
+            );
+            <span class="ident">max_total_violation</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="ident">vio_total</span>, <span class="ident">max_total_violation</span>);
+            <span class="ident">max_net_violation</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="ident">vio_net</span>, <span class="ident">max_net_violation</span>);
         }
-        <span class="macro">log::info!</span>(<span class="string">&quot;Key {} takes max {} bytes&quot;</span>, <span class="ident">key</span>, <span class="ident">max_violation</span>);
-        <span class="kw">if</span> <span class="ident">max_violation</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="ident">violations</span>.<span class="ident">insert</span>(<span class="ident">key</span>.<span class="ident">get_path</span>(), <span class="ident">max_violation</span>);
+        <span class="macro">log::info!</span>(
+            <span class="string">&quot;Key {} takes max {} bytes ({} net)&quot;</span>,
+            <span class="ident">key</span>,
+            <span class="ident">max_total_violation</span>,
+            <span class="ident">max_net_violation</span>
+        );
+        <span class="kw">if</span> <span class="ident">max_total_violation</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">max_net_violation</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="ident">net_violations</span>.<span class="ident">insert</span>(<span class="ident">key</span>.<span class="ident">get_path</span>(), <span class="ident">max_net_violation</span>);
+            } <span class="kw">else</span> {
+                <span class="ident">total_violations</span>.<span class="ident">insert</span>(<span class="ident">key</span>.<span class="ident">get_path</span>(), <span class="ident">max_total_violation</span>);
+            }
         }
     }
 
-    <span class="kw">let</span> <span class="ident">vio_vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">violations</span>.<span class="ident">iter_keys</span>().<span class="ident">copied</span>().<span class="ident">collect</span>();
+    <span class="kw">let</span> <span class="ident">total_vio_vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">total_violations</span>.<span class="ident">iter_keys</span>().<span class="ident">copied</span>().<span class="ident">collect</span>();
+    <span class="kw">let</span> <span class="ident">net_vio_vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">net_violations</span>.<span class="ident">iter_keys</span>().<span class="ident">copied</span>().<span class="ident">collect</span>();
 
-    <span class="kw">if</span> <span class="ident">vio_vec</span>.<span class="ident">is_empty</span>() {
+    <span class="kw">if</span> <span class="ident">total_vio_vec</span>.<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span> <span class="ident">net_vio_vec</span>.<span class="ident">is_empty</span>() {
         <span class="macro">log::info!</span>(<span class="string">&quot;Congratulations! All keys are zero-copy&quot;</span>);
     } <span class="kw">else</span> {
         <span class="macro">log::info!</span>(<span class="string">&quot;Found the following keys that are not yet zero-copy:&quot;</span>);
-        <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">vio</span>) <span class="kw">in</span> <span class="ident">violations</span>.<span class="ident">iter</span>() {
+        <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">vio</span>) <span class="kw">in</span> <span class="ident">net_violations</span>.<span class="ident">iter</span>() {
             <span class="macro">log::info!</span>(<span class="string">&quot;\t{}: max heap size {} bytes&quot;</span>, <span class="ident">name</span>, <span class="ident">vio</span>);
         }
+
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">total_vio_vec</span>.<span class="ident">is_empty</span>() {
+            <span class="macro">log::info!</span>(<span class="string">&quot;Also found the following keys that are zero-copy but temporarily allocate during deserialization:&quot;</span>);
+
+            <span class="kw">for</span> (<span class="ident">name</span>, <span class="ident">vio</span>) <span class="kw">in</span> <span class="ident">total_violations</span>.<span class="ident">iter</span>() {
+                <span class="macro">log::info!</span>(<span class="string">&quot;\t{}: allocates a maximum of {} bytes&quot;</span>, <span class="ident">name</span>, <span class="ident">vio</span>);
+            }
+        }
     }
-    <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;CHECK&quot;</span>) <span class="op">&amp;&amp;</span> <span class="ident">vio_vec</span> <span class="op">!</span><span class="op">=</span> <span class="ident">EXPECTED_VIOLATIONS</span> {
+    <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;CHECK&quot;</span>)
+        <span class="op">&amp;&amp;</span> (<span class="ident">total_vio_vec</span> <span class="op">!</span><span class="op">=</span> <span class="ident">EXPECTED_TOTAL_VIOLATIONS</span> <span class="op">|</span><span class="op">|</span> <span class="ident">net_vio_vec</span> <span class="op">!</span><span class="op">=</span> <span class="ident">EXPECTED_NET_VIOLATIONS</span>)
+    {
         <span class="macro">eyre::bail!</span>(<span class="string">&quot;Expected violations list does not match found violations!\n\
                     If the new list is smaller, please update EXPECTED_VIOLATIONS in verify-zero-copy.rs\n\
                     If it is bigger and that was unexpected, please make sure the key remains zero-copy, or ask ICU4X team members if it is okay\
                     to temporarily allow for this key to be allowlisted.\n\
-                    Expected:\n{:?}\nFound:\n{:?}&quot;</span>, <span class="ident">EXPECTED_VIOLATIONS</span>, <span class="ident">vio_vec</span>)
+                    Expected (net):\n{:?}\nFound (net):\n{:?}\nExpected (total):\n{:?}\nFound (total):\n{:?}&quot;</span>, <span class="ident">EXPECTED_NET_VIOLATIONS</span>, <span class="ident">net_vio_vec</span>, <span class="ident">EXPECTED_TOTAL_VIOLATIONS</span>, <span class="ident">total_vio_vec</span>)
     }
 
     <span class="prelude-val">Ok</span>(())

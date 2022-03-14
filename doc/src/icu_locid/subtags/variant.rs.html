@@ -167,7 +167,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser::errors::ParserError</span>;
 <span class="kw">use</span> <span class="ident">core::ops::RangeInclusive</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
-<span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
+<span class="kw">use</span> <span class="ident">tinystr::TinyAsciiStr</span>;
 
 <span class="doccomment">/// A variant subtag (examples: `&quot;macos&quot;`, `&quot;posix&quot;`, `&quot;1996&quot;` etc.)</span>
 <span class="doccomment">///</span>
@@ -185,7 +185,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`unicode_variant_id`]: https://unicode.org/reports/tr35/#unicode_variant_id</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Variant</span>(<span class="ident">TinyStr8</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Variant</span>(<span class="ident">TinyAsciiStr</span><span class="op">&lt;</span>{ <span class="kw-2">*</span><span class="ident">VARIANT_LENGTH</span>.<span class="ident">end</span>() }<span class="op">&gt;</span>);
 
 <span class="kw">const</span> <span class="ident">VARIANT_LENGTH</span>: <span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="number">4</span>..<span class="op">=</span><span class="number">8</span>;
 <span class="kw">const</span> <span class="ident">VARIANT_NUM_ALPHA_LENGTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
@@ -211,7 +211,7 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidSubtag</span>);
         }
 
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">TinyStr8::from_bytes</span>(<span class="ident">v</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ParserError::InvalidSubtag</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">TinyAsciiStr::from_bytes</span>(<span class="ident">v</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ParserError::InvalidSubtag</span>)<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="op">!</span><span class="ident">s</span>.<span class="ident">is_ascii_alphanumeric</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidSubtag</span>);
@@ -261,10 +261,10 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Safety</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This function accepts a [`u64`] that is expected to be a valid [`TinyStr8`]</span>
+    <span class="doccomment">/// This function accepts a [u8; 8] that is expected to be a valid [`TinyAsciiStr&lt;8&gt;`]</span>
     <span class="doccomment">/// representing a [`Variant`] subtag in canonical syntax.</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw_unchecked</span>(<span class="ident">v</span>: [<span class="ident">u8</span>; <span class="number">8</span>]) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">TinyStr8::from_bytes_unchecked</span>(<span class="ident">v</span>))
+        <span class="self">Self</span>(<span class="ident">TinyAsciiStr::from_bytes_unchecked</span>(<span class="ident">v</span>))
     }
 
     <span class="doccomment">/// A helper function for displaying</span>
@@ -316,7 +316,7 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Variant</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TinyStr8</span> {
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Variant</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">input</span>: <span class="ident">Variant</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">input</span>.<span class="number">0</span>
     }

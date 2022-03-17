@@ -272,10 +272,48 @@
 <span id="271">271</span>
 <span id="272">272</span>
 <span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser</span>::{<span class="ident">get_subtag_iterator</span>, <span class="ident">parse_language_identifier</span>, <span class="ident">ParserError</span>, <span class="ident">ParserMode</span>};
@@ -415,6 +453,42 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">canonicalize</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">lang_id</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::from_bytes</span>(<span class="ident">input</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">lang_id</span>.<span class="ident">to_string</span>())
+    }
+
+    <span class="doccomment">/// Compare this `LanguageIdentifier` with a BCP-47 string.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The return value is equivalent to what would happen if you first converted this</span>
+    <span class="doccomment">/// `LanguageIdentifier` to a BCP-47 string and then performed a byte comparison.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function is case-sensitive and results in a *total order*, so it is appropriate for</span>
+    <span class="doccomment">/// binary search. The only argument producing [`Ordering::Equal`] is `self.to_string()`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu::locid::LanguageIdentifier;</span>
+    <span class="doccomment">/// use std::cmp::Ordering;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let bcp47_strings: &amp;[&amp;[u8]] = &amp;[</span>
+    <span class="doccomment">///     b&quot;pl-Latn-PL&quot;,</span>
+    <span class="doccomment">///     b&quot;und&quot;,</span>
+    <span class="doccomment">///     b&quot;und-Adlm&quot;,</span>
+    <span class="doccomment">///     b&quot;und-GB&quot;,</span>
+    <span class="doccomment">///     b&quot;und-ZA&quot;,</span>
+    <span class="doccomment">///     b&quot;und-fonipa&quot;,</span>
+    <span class="doccomment">///     b&quot;zh&quot;,</span>
+    <span class="doccomment">/// ];</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// for ab in bcp47_strings.windows(2) {</span>
+    <span class="doccomment">///     let a = ab[0];</span>
+    <span class="doccomment">///     let b = ab[1];</span>
+    <span class="doccomment">///     assert!(a.cmp(b) == Ordering::Less);</span>
+    <span class="doccomment">///     let a_langid = LanguageIdentifier::from_bytes(a).unwrap();</span>
+    <span class="doccomment">///     assert!(a_langid.cmp_bytes(b) == Ordering::Less);</span>
+    <span class="doccomment">/// }</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Ordering</span> {
+        <span class="ident"><span class="kw">crate</span>::cmp::langid::cmp</span>(<span class="self">self</span>, <span class="ident">other</span>)
     }
 }
 

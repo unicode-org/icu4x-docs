@@ -337,6 +337,11 @@
 <span id="336">336</span>
 <span id="337">337</span>
 <span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -396,7 +401,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">/// use icu_provider::iter::*;</span>
+<span class="doccomment">/// use icu_provider::datagen::*;</span>
 <span class="doccomment">/// use icu_provider::hello_world::*;</span>
 <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
 <span class="doccomment">///</span>
@@ -445,7 +450,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">/// use icu_provider::iter::*;</span>
+<span class="doccomment">/// use icu_provider::datagen::*;</span>
 <span class="doccomment">/// use icu_provider::hello_world::*;</span>
 <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
 <span class="doccomment">///</span>
@@ -498,6 +503,22 @@
 <span class="doccomment">/// [`SerializeMarker`]: (crate::serde::SerializeMarker)</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">impl_dyn_provider</span> {
+    <span class="comment">// allow passing in multiple things to do and get dispatched</span>
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arms</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>:<span class="ident">tt</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>),<span class="op">+</span>) =&gt; {
+        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arms</span>,
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>
+        );
+
+        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arms</span>,
+            $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>),<span class="op">+</span>
+        );
+    };
+
+    <span class="comment">// Convenience shortcuts for dyn markers</span>
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">expr</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">ANY</span>) =&gt; {
         <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
@@ -520,21 +541,6 @@
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span>
         );
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">expr</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">SERDE_SE</span>, <span class="kw">impl</span> <span class="ident">DataConverter</span>) =&gt; {
-        <span class="comment">// If this fails to compile, enable the &quot;serialize&quot; feature on this crate.</span>
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
-            { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, },
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span>
-        );
-
-        <span class="comment">// If this fails to compile, enable the &quot;datagen&quot; feature on this crate.</span>
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
-            { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, },
-            <span class="kw">impl</span> <span class="ident">DataConverter</span>
-        );
-    };
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, ], <span class="ident">SERDE_SE</span>) =&gt; {
         <span class="comment">// If this fails to compile, enable the &quot;serialize&quot; feature on this crate.</span>
         <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
@@ -543,21 +549,18 @@
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span>
         );
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, ], <span class="ident">SERDE_SE</span>, <span class="kw">impl</span> <span class="ident">DataConverter</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
-            [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, ],
-            <span class="ident">SERDE_SE</span>
-        );
 
-        <span class="comment">// If this fails to compile, enable the &quot;datagen&quot; feature on this crate.</span>
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
-            { $(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, },
-            <span class="kw">impl</span> <span class="ident">DataConverter</span>
-        );
+    <span class="comment">// DataConverter stuff</span>
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, ], <span class="ident">DATA_CONVERTER</span>) =&gt; {
+
+         <span class="comment">// If this fails to compile, enable the &quot;datagen&quot; feature on this crate.</span>
+         <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
+             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
+             { $(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, },
+             <span class="ident">DATA_CONVERTER</span>
+         );
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">expr</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="kw">impl</span> <span class="ident">DataConverter</span>) =&gt; {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">expr</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">DATA_CONVERTER</span>) =&gt; {
         <span class="comment">// If this fails to compile, enable the &quot;datagen&quot; feature on this crate.</span>
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::DataConverter</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::any::AnyMarker</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
             <span class="kw">fn</span> <span class="ident">convert</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>, <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::any::AnyMarker</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataPayload</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::any::AnyMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
@@ -589,6 +592,39 @@
         }
     };
 
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, ], <span class="ident">ITERABLE_SERDE_SE</span>) =&gt; {
+
+         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
+         {
+             <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
+                 <span class="kw">match</span> <span class="ident">key</span> {
+                     $(
+                         <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span> =&gt; {
+                             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableResourceProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options</span>(<span class="self">self</span>)
+                         }
+                     )<span class="op">+</span>,
+                     <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+                 }
+             }
+         }
+    };
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">expr</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="ident">ITERABLE_SERDE_SE</span>) =&gt; {
+
+        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::serde::SerializeMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
+            <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
+                <span class="kw">match</span> <span class="ident">key</span> {
+                    $(
+                        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>)<span class="question-mark">?</span> =&gt; {
+                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDynProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options_for_key</span>(<span class="self">self</span>, <span class="ident">key</span>)
+                        }
+                    )<span class="op">+</span>,
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+                }
+            }
+        }
+    };
+
+    <span class="comment">// DynProvider stuff</span>
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span>:<span class="ident">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>:<span class="ident">expr</span>)<span class="question-mark">?</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, }, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span>:<span class="ident">path</span>) =&gt; {
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
         {
@@ -618,18 +654,6 @@
             }
         }
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::iter::IterableDynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
-            <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
-                <span class="kw">match</span> <span class="ident">key</span> {
-                    $(
-                        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pat</span> $(<span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">guard</span>)<span class="question-mark">?</span> =&gt; {
-                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::iter::IterableDynProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options_for_key</span>(<span class="self">self</span>, <span class="ident">key</span>)
-                        }
-                    )<span class="op">+</span>,
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
-                }
-            }
-        }
     };
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, ], <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span>:<span class="ident">path</span>) =&gt; {
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
@@ -656,20 +680,6 @@
                         }
                     )<span class="op">+</span>,
                     <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
-                }
-            }
-        }
-
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::iter::IterableDynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
-        {
-            <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
-                <span class="kw">match</span> <span class="ident">key</span> {
-                    $(
-                        <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span> =&gt; {
-                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::iter::IterableResourceProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options</span>(<span class="self">self</span>)
-                        }
-                    )<span class="op">+</span>,
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
                 }
             }
         }

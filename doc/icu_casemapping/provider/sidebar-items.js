@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CaseMappingV1","CaseMapping provides low-level access to the data necessary to convert characters and strings to upper, lower, or title case."],["CaseMappingV1Marker","Marker type for [`CaseMappingV1`]: “props/casemap@1”"]]});

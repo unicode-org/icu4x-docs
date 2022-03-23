@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1647617601146,
+  "lastUpdate": 1648070593266,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -11308,6 +11308,96 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 4504771,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "10595307+mildgravitas@users.noreply.github.com",
+            "name": "mildgravitas",
+            "username": "mildgravitas"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d3cbc2855e2623056e72cb209b3dc39e04e47afc",
+          "message": "Add support for week-of-month. (#1468)\n\nContrary to UTS 35 this always uses min_days = 1 as there's no month of\r\nweek-of-month field so there would be inconsistencies otherwise (e.g. in\r\nthe ISO calendar 2021-01-01 is the last week of December but 'MMMMW' would\r\nhave it formatted as 'week 5 of January').",
+          "timestamp": "2022-03-21T08:24:03-05:00",
+          "tree_id": "fff92bb6e7022879cfa45bc6031a7be0f218dcb6",
+          "url": "https://github.com/unicode-org/icu4x/commit/d3cbc2855e2623056e72cb209b3dc39e04e47afc"
+        },
+        "date": 1647869119129,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4505794,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "pandusonu@google.com",
+            "name": "Gollapudi Vamsi Krishna",
+            "username": "pandusonu2"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "82e2588fd5fe108f5e4ee3db8bd724a35fdba22a",
+          "message": "Add coptic calendar to cldr (#1710)",
+          "timestamp": "2022-03-21T14:10:59-07:00",
+          "tree_id": "1a84e869d27ad9f80e43297503b29e2864360dbb",
+          "url": "https://github.com/unicode-org/icu4x/commit/82e2588fd5fe108f5e4ee3db8bd724a35fdba22a"
+        },
+        "date": 1647897147678,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4545559,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1e53fd53c6c1cfb57d5bcefb900d696f6f2766ef",
+          "message": "Add Locale::cmp_bytes (#1713)",
+          "timestamp": "2022-03-23T16:21:35-05:00",
+          "tree_id": "c8ebe7b32c9513571da24d4340996ad1ef9f415b",
+          "url": "https://github.com/unicode-org/icu4x/commit/1e53fd53c6c1cfb57d5bcefb900d696f6f2766ef"
+        },
+        "date": 1648070576659,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4545559,
             "unit": "bytes",
             "biggerIsBetter": false
           }

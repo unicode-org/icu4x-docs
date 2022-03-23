@@ -295,6 +295,52 @@
 <span id="294">294</span>
 <span id="295">295</span>
 <span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -303,6 +349,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">extensions</span>, <span class="ident">subtags</span>, <span class="ident">LanguageIdentifier</span>};
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
+<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 
 <span class="doccomment">/// A core struct representing a [`Unicode Locale Identifier`].</span>
@@ -448,6 +495,68 @@
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">extensions::unicode::Value</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">keywords</span>.<span class="ident">get</span>(<span class="ident">key</span>)
     }
+
+    <span class="doccomment">/// Compare this `Locale` with a BCP-47 string.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The return value is equivalent to what would happen if you first converted this</span>
+    <span class="doccomment">/// `Locale` to a BCP-47 string and then performed a byte comparison.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function is case-sensitive and results in a *total order*, so it is appropriate for</span>
+    <span class="doccomment">/// binary search. The only argument producing [`Ordering::Equal`] is `self.to_string()`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu::locid::Locale;</span>
+    <span class="doccomment">/// use std::cmp::Ordering;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let bcp47_strings: &amp;[&amp;[u8]] = &amp;[</span>
+    <span class="doccomment">///     b&quot;pl-Latn-PL&quot;,</span>
+    <span class="doccomment">///     b&quot;und&quot;,</span>
+    <span class="doccomment">///     b&quot;und-fonipa&quot;,</span>
+    <span class="doccomment">///     b&quot;und-t-m0-true&quot;,</span>
+    <span class="doccomment">///     b&quot;und-u-ca-hebrew&quot;,</span>
+    <span class="doccomment">///     b&quot;und-u-ca-japanese&quot;,</span>
+    <span class="doccomment">///     b&quot;zh&quot;,</span>
+    <span class="doccomment">/// ];</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// for ab in bcp47_strings.windows(2) {</span>
+    <span class="doccomment">///     let a = ab[0];</span>
+    <span class="doccomment">///     let b = ab[1];</span>
+    <span class="doccomment">///     assert!(a.cmp(b) == Ordering::Less);</span>
+    <span class="doccomment">///     let a_langid = Locale::from_bytes(a).unwrap();</span>
+    <span class="doccomment">///     assert!(a_langid.cmp_bytes(b) == Ordering::Less);</span>
+    <span class="doccomment">/// }</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Ordering</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">other_iter</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">split</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">==</span> <span class="string">b&#39;-&#39;</span>);
+        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">for_each_subtag_str</span>(<span class="kw-2">&amp;mut</span> <span class="op">|</span><span class="ident">subtag</span><span class="op">|</span> {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">other</span>) <span class="op">=</span> <span class="ident">other_iter</span>.<span class="ident">next</span>() {
+                <span class="kw">match</span> <span class="ident">subtag</span>.<span class="ident">as_bytes</span>().<span class="ident">cmp</span>(<span class="ident">other</span>) {
+                    <span class="ident">Ordering::Equal</span> =&gt; <span class="prelude-val">Ok</span>(()),
+                    <span class="ident">not_equal</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">not_equal</span>),
+                }
+            } <span class="kw">else</span> {
+                <span class="prelude-val">Err</span>(<span class="ident">Ordering::Greater</span>)
+            }
+        });
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">o</span>) <span class="op">=</span> <span class="ident">r</span> {
+            <span class="kw">return</span> <span class="ident">o</span>;
+        }
+        <span class="kw">if</span> <span class="ident">other_iter</span>.<span class="ident">next</span>().<span class="ident">is_some</span>() {
+            <span class="kw">return</span> <span class="ident">Ordering::Less</span>;
+        }
+        <span class="ident">Ordering::Equal</span>
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_each_subtag_str</span><span class="op">&lt;</span><span class="ident">E</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">E</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">E</span><span class="op">&gt;</span>,
+    {
+        <span class="self">self</span>.<span class="ident">id</span>.<span class="ident">for_each_subtag_str</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">extensions</span>.<span class="ident">for_each_subtag_str</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">Locale</span> {
@@ -491,25 +600,7 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">core::fmt::Display</span> <span class="kw">for</span> <span class="ident">Locale</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">core::fmt::Formatter</span>) -&gt; <span class="ident">core::fmt::Result</span> {
-        <span class="ident">writeable::Writeable::write_to</span>(<span class="self">self</span>, <span class="ident">f</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">writeable::Writeable</span> <span class="kw">for</span> <span class="ident">Locale</span> {
-    <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
-        <span class="ident">writeable::Writeable::write_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">id</span>, <span class="ident">sink</span>)<span class="question-mark">?</span>;
-        <span class="ident">writeable::Writeable::write_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">extensions</span>, <span class="ident">sink</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">fn</span> <span class="ident">write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">writeable::LengthHint</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">writeable::Writeable::write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">id</span>);
-        <span class="ident">result</span> <span class="op">+</span><span class="op">=</span> <span class="ident">writeable::Writeable::write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">extensions</span>);
-        <span class="ident">result</span>
-    }
-}
+<span class="macro">impl_writeable_for_each_subtag_str_no_test!</span>(<span class="ident">Locale</span>);
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_writeable</span>() {
@@ -538,6 +629,7 @@
         <span class="ident">Locale::from_str</span>(<span class="string">&quot;en-001-x-foo-bar&quot;</span>).<span class="ident">unwrap</span>(),
         <span class="string">&quot;en-001-x-foo-bar&quot;</span>,
     );
+    <span class="macro">assert_writeable_eq!</span>(<span class="ident">Locale::from_str</span>(<span class="string">&quot;und-t-m0-true&quot;</span>).<span class="ident">unwrap</span>(), <span class="string">&quot;und-t-m0-true&quot;</span>,);
 }
 
 <span class="kw">impl</span> <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Locale</span> {

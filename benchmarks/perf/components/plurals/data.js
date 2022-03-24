@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1648155611318,
+  "lastUpdate": 1648156755038,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -30113,6 +30113,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 15973,
             "range": "± 27",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "96ec92d3991fe087bf412c72d18b81403bad8b55",
+          "message": "Rename ZeroVec::from_slice and add new method for const-constructed ZeroSlice (#1728)",
+          "timestamp": "2022-03-24T14:00:47-07:00",
+          "tree_id": "b2e557a5e2dcdbbe01c2f94d83c940ff14b63fbf",
+          "url": "https://github.com/unicode-org/icu4x/commit/96ec92d3991fe087bf412c72d18b81403bad8b55"
+        },
+        "date": 1648156158150,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 859,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5262,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 15695,
+            "range": "± 1122",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2180717961d049fb638b008ce5bb051e9a38fb72",
+          "message": "Split off non-core functionality from icu_provider into icu_provider_adapters (#1730)",
+          "timestamp": "2022-03-24T14:10:14-07:00",
+          "tree_id": "435be6aecf50b3a1a6e6c5e2e5890efe34b78781",
+          "url": "https://github.com/unicode-org/icu4x/commit/2180717961d049fb638b008ce5bb051e9a38fb72"
+        },
+        "date": 1648156739400,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 876,
+            "range": "± 45",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5841,
+            "range": "± 178",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 16603,
+            "range": "± 747",
             "unit": "ns/iter"
           }
         ]

@@ -898,7 +898,7 @@
     <span class="ident">Owned</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ULE</span><span class="op">&gt;</span>),
 
     <span class="doccomment">/// A borrowed `ZeroVec&lt;T&gt;`. This will typically be constructed by [`ZeroVec::parse_byte_slice()`],</span>
-    <span class="doccomment">/// [`ZeroVec::from_slice()`], or deserializers capable of doing zero-copy deserialization.</span>
+    <span class="doccomment">/// [`ZeroVec::from_slice_or_alloc()`], or deserializers capable of doing zero-copy deserialization.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If you already have a slice of `[T::ULE]`s, you can directly construct one of these.</span>
     <span class="doccomment">///</span>
@@ -1363,13 +1363,13 @@
     <span class="doccomment">/// let bytes: &amp;[u8] = &amp;[0xD3, 0x00, 0x19, 0x01, 0xA5, 0x01, 0xCD, 0x01];</span>
     <span class="doccomment">/// let nums: &amp;[u16] = &amp;[211, 281, 421, 461];</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let zerovec = ZeroVec::from_slice(nums);</span>
+    <span class="doccomment">/// let zerovec = ZeroVec::from_slice_or_alloc(nums);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Note: zerovec could be either borrowed or owned.</span>
     <span class="doccomment">/// assert_eq!(bytes, zerovec.as_bytes());</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T</span>]) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice_or_alloc</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T</span>]) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::try_from_slice</span>(<span class="ident">slice</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::alloc_from_slice</span>(<span class="ident">slice</span>))
     }
 }
@@ -1517,7 +1517,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_get</span>() {
         {
-            <span class="kw">let</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">ZeroVec::from_slice</span>(<span class="ident">TEST_SLICE</span>);
+            <span class="kw">let</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">ZeroVec::from_slice_or_alloc</span>(<span class="ident">TEST_SLICE</span>);
             <span class="macro">assert_eq!</span>(<span class="ident">zerovec</span>.<span class="ident">get</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="ident">TEST_SLICE</span>[<span class="number">0</span>]));
             <span class="macro">assert_eq!</span>(<span class="ident">zerovec</span>.<span class="ident">get</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="ident">TEST_SLICE</span>[<span class="number">1</span>]));
             <span class="macro">assert_eq!</span>(<span class="ident">zerovec</span>.<span class="ident">get</span>(<span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="ident">TEST_SLICE</span>[<span class="number">2</span>]));
@@ -1533,7 +1533,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_binary_search</span>() {
         {
-            <span class="kw">let</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">ZeroVec::from_slice</span>(<span class="ident">TEST_SLICE</span>);
+            <span class="kw">let</span> <span class="ident">zerovec</span> <span class="op">=</span> <span class="ident">ZeroVec::from_slice_or_alloc</span>(<span class="ident">TEST_SLICE</span>);
             <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="number">3</span>), <span class="ident">zerovec</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="number">0x0e0d0c</span>));
             <span class="macro">assert_eq!</span>(<span class="prelude-val">Err</span>(<span class="number">3</span>), <span class="ident">zerovec</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="number">0x0c0d0c</span>));
         }

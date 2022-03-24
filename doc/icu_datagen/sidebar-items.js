@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_all_keys",""]]});
+initSidebarItems({"fn":[["get_all_keys","List of all supported keys"],["get_registry","Get a registry that has the appropriate ConvertData and IterableDynProvider implementations"]]});

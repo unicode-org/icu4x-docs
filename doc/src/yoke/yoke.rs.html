@@ -1010,6 +1010,23 @@
 <span id="1009">1009</span>
 <span id="1010">1010</span>
 <span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1100,9 +1117,35 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// See also [`Yoke::try_attach_to_cart()`] to return a `Result` from the closure.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Due to [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937), call sites</span>
-    <span class="doccomment">/// for this function may not compile; if this happens, use</span>
+    <span class="doccomment">/// Call sites for this function may not compile; if this happens, use</span>
     <span class="doccomment">/// [`Yoke::attach_to_cart_badly()`] instead.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The following code does not currently compile.</span>
+    <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```compile_fail</span>
+    <span class="doccomment">/// # use yoke::{Yoke, Yokeable};</span>
+    <span class="doccomment">/// # use std::rc::Rc;</span>
+    <span class="doccomment">/// # use std::borrow::Cow;</span>
+    <span class="doccomment">/// # fn load_from_cache(_filename: &amp;str) -&gt; Rc&lt;[u8]&gt; {</span>
+    <span class="doccomment">/// #     // dummy implementation</span>
+    <span class="doccomment">/// #     Rc::new([0x5, 0, 0, 0, 0, 0, 0, 0, 0x68, 0x65, 0x6c, 0x6c, 0x6f])</span>
+    <span class="doccomment">/// # }</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// fn load_object(filename: &amp;str) -&gt; Yoke&lt;Cow&lt;&#39;static, str&gt;, Rc&lt;[u8]&gt;&gt; {</span>
+    <span class="doccomment">///     let rc: Rc&lt;[u8]&gt; = load_from_cache(filename);</span>
+    <span class="doccomment">///     Yoke::&lt;Cow&lt;&#39;static, str&gt;, Rc&lt;[u8]&gt;&gt;::attach_to_cart(rc, |data: &amp;[u8]| {</span>
+    <span class="doccomment">///         // essentially forcing a #[serde(borrow)]</span>
+    <span class="doccomment">///         Cow::Borrowed(bincode::deserialize(data).unwrap())</span>
+    <span class="doccomment">///     })</span>
+    <span class="doccomment">/// }</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let yoke: Yoke&lt;Cow&lt;str&gt;, _&gt; = load_object(&quot;filename.bincode&quot;);</span>
+    <span class="doccomment">/// assert_eq!(&amp;**yoke.get(), &quot;hello&quot;);</span>
+    <span class="doccomment">/// assert!(matches!(yoke.get(), &amp;Cow::Borrowed(_)));</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">attach_to_cart</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="ident">C</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span><span class="ident">::Target</span>) -&gt; <span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
@@ -1117,9 +1160,9 @@
     <span class="doccomment">/// Construct a [`Yoke`] by yokeing an object to a cart. If an error occurs in the</span>
     <span class="doccomment">/// deserializer function, the error is passed up to the caller.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Due to [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937), call sites</span>
-    <span class="doccomment">/// for this function may not compile; if this happens, use</span>
+    <span class="doccomment">/// Call sites for this function may not compile; if this happens, use</span>
     <span class="doccomment">/// [`Yoke::try_attach_to_cart_badly()`] instead.</span>
+    <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_attach_to_cart</span><span class="op">&lt;</span><span class="ident">E</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">cart</span>: <span class="ident">C</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;de</span> <span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">Deref</span><span class="op">&gt;</span><span class="ident">::Target</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>, <span class="ident">E</span><span class="op">&gt;</span>,
@@ -1596,18 +1639,12 @@
     <span class="doccomment">/// described in [#86702](https://github.com/rust-lang/rust/issues/86702). This parameter</span>
     <span class="doccomment">/// should just be ignored in the function.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Furthermore,</span>
-    <span class="doccomment">/// [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937) prevents</span>
-    <span class="doccomment">/// this from taking a capturing closure, however [`Yoke::project_with_capture()`]</span>
-    <span class="doccomment">/// can be used for the same use cases.</span>
-    <span class="doccomment">///</span>
+    <span class="doccomment">/// To capture data and pass it to the closure, use [`Yoke::project_with_capture()`].</span>
+    <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This can be used, for example, to transform data from one format to another:</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// ***[#1061](https://github.com/unicode-org/icu4x/issues/1061): The following example</span>
-    <span class="doccomment">/// requires Rust 1.56.***</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust,ignore</span>
+    <span class="doccomment">/// ```</span>
     <span class="doccomment">/// # use std::rc::Rc;</span>
     <span class="doccomment">/// # use yoke::Yoke;</span>
     <span class="doccomment">/// #</span>
@@ -1619,10 +1656,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This can also be used to create a yoke for a subfield</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// ***[#1061](https://github.com/unicode-org/icu4x/issues/1061): The following example</span>
-    <span class="doccomment">/// requires Rust 1.56.***</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust,ignore</span>
+    <span class="doccomment">/// ```</span>
     <span class="doccomment">/// # use std::borrow::Cow;</span>
     <span class="doccomment">/// # use yoke::{Yoke, Yokeable};</span>
     <span class="doccomment">/// # use std::mem;</span>
@@ -1706,9 +1740,9 @@
         }
     }
 
-    <span class="doccomment">/// This is similar to [`Yoke::project`], however it works around it not being able to</span>
-    <span class="doccomment">/// use `FnOnce` by using an explicit capture input, until [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937)</span>
-    <span class="doccomment">/// is fixed.</span>
+    <span class="doccomment">/// This is similar to [`Yoke::project`], but it works around it not being able to</span>
+    <span class="doccomment">/// use `FnOnce` by using an explicit capture input.</span>
+    <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// See the docs of [`Yoke::project`] for how this works.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">project_with_capture</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span>(
@@ -1731,8 +1765,8 @@
     }
 
     <span class="doccomment">/// This is similar to [`Yoke::project_cloned`], however it works around it not being able to</span>
-    <span class="doccomment">/// use `FnOnce` by using an explicit capture input, until [compiler bug #84937](https://github.com/rust-lang/rust/issues/84937)</span>
-    <span class="doccomment">/// is fixed.</span>
+    <span class="doccomment">/// use `FnOnce` by using an explicit capture input.</span>
+    <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// See the docs of [`Yoke::project_cloned`] for how this works.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">project_cloned_with_capture</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span>(

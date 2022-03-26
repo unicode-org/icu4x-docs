@@ -47,6 +47,6 @@ sourcesIndex["yoke"] = {"name":"","files":["either.rs","erased.rs","is_covariant
 sourcesIndex["yoke_derive"] = {"name":"","files":["lib.rs","visitor.rs"]};
 sourcesIndex["zerofrom"] = {"name":"","files":["lib.rs","macro_impls.rs","zero_from.rs"]};
 sourcesIndex["zerofrom_derive"] = {"name":"","files":["lib.rs","visitor.rs"]};
-sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["borrowed.rs","kv.rs","map.rs","mod.rs","serde.rs","vecs.rs"]},{"name":"map2d","files":["borrowed.rs","map.rs","mod.rs","serde.rs"]},{"name":"ule","files":["chars.rs","custom.rs","encode.rs","mod.rs","plain.rs","slices.rs","tuple.rs"]},{"name":"varzerovec","files":["components.rs","mod.rs","owned.rs","serde.rs","slice.rs","vec.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs","slice.rs"]}],"files":["error.rs","lib.rs","yoke_impls.rs","zerofrom_impls.rs"]};
+sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["borrowed.rs","kv.rs","map.rs","mod.rs","serde.rs","vecs.rs"]},{"name":"map2d","files":["borrowed.rs","map.rs","mod.rs","serde.rs"]},{"name":"ule","files":["chars.rs","custom.rs","encode.rs","mod.rs","option.rs","plain.rs","slices.rs","tuple.rs"]},{"name":"varzerovec","files":["components.rs","mod.rs","owned.rs","serde.rs","slice.rs","vec.rs"]},{"name":"zerovec","files":["mod.rs","serde.rs","slice.rs"]}],"files":["error.rs","lib.rs","yoke_impls.rs","zerofrom_impls.rs"]};
 sourcesIndex["zerovec_derive"] = {"name":"","files":["lib.rs","make_ule.rs","make_varule.rs","ule.rs","utils.rs","varule.rs"]};
 createSourceSidebar();

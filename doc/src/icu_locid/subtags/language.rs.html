@@ -351,6 +351,11 @@
 <span id="350">350</span>
 <span id="351">351</span>
 <span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -398,7 +403,7 @@
 <span class="kw">const</span> <span class="ident">LANGUAGE_LENGTH</span>: <span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="number">2</span>..<span class="op">=</span><span class="number">3</span>;
 <span class="comment">// TODO(#348): Change this to invoke a const function.</span>
 <span class="comment">// Safe because &quot;und&quot; is a valid language subtag</span>
-<span class="kw">const</span> <span class="ident">UND</span>: <span class="ident">Language</span> <span class="op">=</span> <span class="ident">Language</span>(<span class="kw">unsafe</span> { <span class="ident">TinyAsciiStr::from_bytes_unchecked</span>(<span class="kw-2">*</span><span class="string">b&quot;und&quot;</span>) });
+<span class="kw">const</span> <span class="ident">UND</span>: <span class="ident">Language</span> <span class="op">=</span> <span class="macro">crate::language!</span>(<span class="string">&quot;und&quot;</span>);
 
 <span class="kw">impl</span> <span class="ident">Language</span> {
     <span class="doccomment">/// A constructor which takes a utf8 slice, parses it and</span>
@@ -414,22 +419,27 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(lang, &quot;en&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">slen</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">len</span>();
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="self">Self</span>::from_bytes_manual_slice</span>(<span class="ident">v</span>, <span class="number">0</span>, <span class="ident">v</span>.<span class="ident">len</span>())
+    }
 
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">LANGUAGE_LENGTH</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">slen</span>) {
+    <span class="doccomment">/// Equivalent to [`from_bytes(bytes[start..end])`](Self::from_bytes),</span>
+    <span class="doccomment">/// but callable in a `const` context (which range indexing is not).</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes_manual_slice</span>(
+        <span class="ident">v</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+        <span class="ident">start</span>: <span class="ident">usize</span>,
+        <span class="ident">end</span>: <span class="ident">usize</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">slen</span> <span class="op">=</span> <span class="ident">end</span> <span class="op">-</span> <span class="ident">start</span>;
+
+        <span class="kw">if</span> <span class="ident">slen</span> <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">LANGUAGE_LENGTH</span>.<span class="ident">start</span>() <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">LANGUAGE_LENGTH</span>.<span class="ident">end</span>() <span class="op">&lt;</span> <span class="ident">slen</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidLanguage</span>);
         }
 
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">TinyAsciiStr::from_bytes</span>(<span class="ident">v</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ParserError::InvalidLanguage</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">s</span>.<span class="ident">is_ascii_alphabetic</span>() {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidLanguage</span>);
+        <span class="kw">match</span> <span class="ident">TinyAsciiStr::from_bytes_manual_slice</span>(<span class="ident">v</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">is_ascii_alphabetic</span>() =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="ident">s</span>.<span class="ident">to_ascii_lowercase</span>())),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidLanguage</span>),
         }
-
-        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">to_ascii_lowercase</span>();
-
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="ident">value</span>))
     }
 
     <span class="doccomment">/// Safely creates a [`Language`] from a reference to its raw format</span>
@@ -674,7 +684,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::locid::subtags::Language;</span>
-<span class="doccomment">/// use icu::locid::macros::language;</span>
+<span class="doccomment">/// use icu::locid::language;</span>
 <span class="doccomment">/// use zerovec::ZeroVec;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let zv = ZeroVec::&lt;Language&gt;::parse_byte_slice(b&quot;de\0fr\0arsar\0&quot;)</span>

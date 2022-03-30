@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1648570585925,
+  "lastUpdate": 1648605617346,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -30617,6 +30617,90 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 16781,
             "range": "± 882",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "younies.mahmoud@gmail.com",
+            "name": "Younies Mahmoud",
+            "username": "younies"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c0e95dfd78c0385325391ffb01150be25e41d440",
+          "message": "Add Bidi class data. (#1716)\n\n* Add Bidi class data.\r\n\r\n* Fix the comments.\r\n\r\n* fix the doc of the BidiClass.\r\n\r\n* Make copyright year 2021\r\n\r\n* build testdata.postcard",
+          "timestamp": "2022-03-29T22:21:28+02:00",
+          "tree_id": "986238f6b57f97a4446e803c68bd5bba3d53760e",
+          "url": "https://github.com/unicode-org/icu4x/commit/c0e95dfd78c0385325391ffb01150be25e41d440"
+        },
+        "date": 1648585810308,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 932,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5433,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 13912,
+            "range": "± 61",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6ebd111a7ecfb9606c1d9e303909efa38a701403",
+          "message": "Fix up intro doc (#1720)\n\n* Fix up intro doc\r\n\r\nCo-authored-by: Robert Bastian <robertbastian@users.noreply.github.com>",
+          "timestamp": "2022-03-29T18:52:24-07:00",
+          "tree_id": "bfde338c5e259c896d09ed56861d8c086aa95984",
+          "url": "https://github.com/unicode-org/icu4x/commit/6ebd111a7ecfb9606c1d9e303909efa38a701403"
+        },
+        "date": 1648605599615,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 825,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 4771,
+            "range": "± 23",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 12306,
+            "range": "± 703",
             "unit": "ns/iter"
           }
         ]

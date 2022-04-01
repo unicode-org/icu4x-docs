@@ -451,6 +451,19 @@
 <span id="450">450</span>
 <span id="451">451</span>
 <span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -487,8 +500,8 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Cargo features</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! This crate has four optional features:</span>
-<span class="doccomment">//!  -  `serde`: Allows serializing and deserializing `zerovec`&#39;s abstractions via [`serde`](https://docs.rs/serde)</span>
+<span class="doccomment">//! This crate has five optional features:</span>
+<span class="doccomment">//!  -  `serde` and `serde_serialize`: Allows serializing and deserializing `zerovec`&#39;s abstractions via [`serde`](https://docs.rs/serde)</span>
 <span class="doccomment">//!  -   `yoke`: Enables implementations of `Yokeable` from the [`yoke`](https://docs.rs/yoke/) crate, which is also useful</span>
 <span class="doccomment">//!              in situations involving a lot of zero-copy deserialization.</span>
 <span class="doccomment">//!  - `derive`: Makes it easier to use custom types in these collections by providing the [`#[make_ule]`](crate::make_ule) and</span>
@@ -507,11 +520,13 @@
 <span class="doccomment">//! Serialize and deserialize a struct with ZeroVec and VarZeroVec with Bincode:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//! # #[cfg(feature = &quot;serde&quot;)] {</span>
+<span class="doccomment">//! # #[cfg(feature = &quot;serde_serialize&quot;)] {</span>
 <span class="doccomment">//! use zerovec::{ZeroVec, VarZeroVec};</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // This example requires the &quot;serde&quot; feature</span>
+<span class="doccomment">//! # pub use dep_serde as serde;</span>
 <span class="doccomment">//! #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">//! # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">//! pub struct DataStruct&lt;&#39;data&gt; {</span>
 <span class="doccomment">//!     #[serde(borrow)]</span>
 <span class="doccomment">//!     nums: ZeroVec&lt;&#39;data, u32&gt;,</span>
@@ -537,20 +552,22 @@
 <span class="doccomment">//! assert_eq!(deserialized.strs.get(1), Some(&quot;world&quot;));</span>
 <span class="doccomment">//! // The deserialization will not have allocated anything</span>
 <span class="doccomment">//! assert!(matches!(deserialized.nums, ZeroVec::Borrowed(_)));</span>
-<span class="doccomment">//! # } // feature = &quot;serde&quot;</span>
+<span class="doccomment">//! # } // feature = &quot;serde_serialize&quot;</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Use custom types inside of ZeroVec:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # #[cfg(all(feature = &quot;serde&quot;, feature = &quot;derive&quot;))] {</span>
+<span class="doccomment">//! # #[cfg(all(feature = &quot;serde_serialize&quot;, feature = &quot;derive&quot;))] {</span>
 <span class="doccomment">//! use zerovec::{ZeroVec, VarZeroVec, ZeroMap};</span>
 <span class="doccomment">//! use std::borrow::Cow;</span>
 <span class="doccomment">//! use zerovec::ule::encode_varule_to_box;</span>
+<span class="doccomment">//! # use dep_serde as serde;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // custom fixed-size ULE type for ZeroVec</span>
 <span class="doccomment">//! #[zerovec::make_ule(DateULE)]</span>
 <span class="doccomment">//! #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">//! # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">//! struct Date {</span>
 <span class="doccomment">//!     y: u64,</span>
 <span class="doccomment">//!     m: u8,</span>
@@ -561,6 +578,7 @@
 <span class="doccomment">//! #[zerovec::make_varule(PersonULE)]</span>
 <span class="doccomment">//! #[zerovec::serde]</span>
 <span class="doccomment">//! #[derive(Clone, PartialEq, Eq, Ord, PartialOrd, serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">//! # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">//! struct Person&lt;&#39;a&gt; {</span>
 <span class="doccomment">//!     birthday: Date,</span>
 <span class="doccomment">//!     favorite_character: char,</span>
@@ -569,6 +587,7 @@
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">//! # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">//! struct Data&lt;&#39;a&gt; {</span>
 <span class="doccomment">//!     #[serde(borrow)]</span>
 <span class="doccomment">//!     important_dates: ZeroVec&lt;&#39;a, Date&gt;,</span>
@@ -692,7 +711,7 @@
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">alloc::boxed</span>;
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">serde</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dep_serde</span> <span class="kw">as</span> <span class="ident">serde</span>;
 }
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">maps</span> {
@@ -771,9 +790,11 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```rust</span>
 <span class="doccomment">/// use zerovec::ZeroVec;</span>
+<span class="doccomment">/// # use dep_serde as serde;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #[zerovec::make_ule(DateULE)]</span>
 <span class="doccomment">/// #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">/// struct Date {</span>
 <span class="doccomment">///     y: u64,</span>
 <span class="doccomment">///     m: u8,</span>
@@ -781,6 +802,7 @@
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">/// struct Dates&lt;&#39;a&gt; {</span>
 <span class="doccomment">///     #[serde(borrow)]</span>
 <span class="doccomment">///     dates: ZeroVec&lt;&#39;a, Date&gt;   </span>
@@ -815,10 +837,10 @@
 <span class="doccomment">/// to convert the [`VarULE`] type back to this type in a cheap, zero-copy way (see the example below</span>
 <span class="doccomment">/// for more details).</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Provided the type implements [`serde::Serialize`] and [`serde::Deserialize`], this attribute can also generate</span>
+<span class="doccomment">/// Provided the type implements [`serde::Serialize`](dep_serde::Serialize) and [`serde::Deserialize`](dep_serde::Deserialize), this attribute can also generate</span>
 <span class="doccomment">/// the relevant serialize/deserialize implementations for the [`VarULE`] type if you apply the `#[zerovec::serde]`</span>
 <span class="doccomment">/// attribute. Those impls are required to support human-readable serialization of the VarZeroVec.</span>
-<span class="doccomment">/// This needs the `serde` feature to be enabled on the `zerovec` crate to work.</span>
+<span class="doccomment">/// This needs the `serde`/`serde_serialize` features to be enabled on the `zerovec` crate to work.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// By default this attribute will also autogenerate a [`ZeroMapKV`] implementation, which requires</span>
 <span class="doccomment">/// [`Ord`] and [`PartialOrd`] on the [`VarULE`] type. You can opt out of this with `#[zerovec::skip_kv]`.</span>
@@ -842,10 +864,12 @@
 <span class="doccomment">/// use std::borrow::Cow;</span>
 <span class="doccomment">/// use zerovec::ule::encode_varule_to_box;</span>
 <span class="doccomment">/// use zerofrom::ZeroFrom;</span>
+<span class="doccomment">/// # use dep_serde as serde;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // custom fixed-size ULE type for ZeroVec</span>
 <span class="doccomment">/// #[zerovec::make_ule(DateULE)]</span>
 <span class="doccomment">/// #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd, serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">/// struct Date {</span>
 <span class="doccomment">///     y: u64,</span>
 <span class="doccomment">///     m: u8,</span>
@@ -856,6 +880,7 @@
 <span class="doccomment">/// #[zerovec::make_varule(PersonULE)]</span>
 <span class="doccomment">/// #[zerovec::serde]</span>
 <span class="doccomment">/// #[derive(Clone, PartialEq, Eq, Ord, PartialOrd, serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">/// struct Person&lt;&#39;a&gt; {</span>
 <span class="doccomment">///     birthday: Date,</span>
 <span class="doccomment">///     favorite_character: char,</span>
@@ -864,6 +889,7 @@
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #[derive(serde::Serialize, serde::Deserialize)]</span>
+<span class="doccomment">/// # #[serde(crate = &quot;dep_serde&quot;)]</span>
 <span class="doccomment">/// struct Data&lt;&#39;a&gt; {</span>
 <span class="doccomment">///     // note: VarZeroVec always must reference the ULE type directly</span>
 <span class="doccomment">///     #[serde(borrow)]</span>

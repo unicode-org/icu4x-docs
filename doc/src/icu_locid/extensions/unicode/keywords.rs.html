@@ -231,13 +231,14 @@
 <span id="230">230</span>
 <span id="231">231</span>
 <span id="232">232</span>
+<span id="233">233</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::borrow::Borrow</span>;
-<span class="kw">use</span> <span class="ident">core::ops::Deref</span>;
+<span class="kw">use</span> <span class="ident">core::iter::FromIterator</span>;
+<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Key</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Value</span>;
@@ -263,12 +264,12 @@
 <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
 <span class="doccomment">/// let value: Value = &quot;h23&quot;.parse()</span>
 <span class="doccomment">///     .expect(&quot;Failed to parse a Value.&quot;);</span>
-<span class="doccomment">/// let keywords = Keywords::from_vec_unchecked(vec![(key, value)]);</span>
+<span class="doccomment">/// let keywords: Keywords = vec![(key, value)].into_iter().collect();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(&amp;keywords.to_string(), &quot;hc-h23&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Hash</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Keywords</span>(<span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Key</span>, <span class="ident">Value</span>)<span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Keywords</span>(<span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">Key</span>, <span class="ident">Value</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">Keywords</span> {
     <span class="doccomment">/// Returns a new empty list of key-value pairs. Same as [`default()`](Default::default()), but is `const`.</span>
@@ -282,27 +283,25 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">Vec::new</span>())
+        <span class="self">Self</span>(<span class="ident">LiteMap::new</span>())
     }
 
-    <span class="doccomment">/// A constructor which takes a pre-sorted list of `(`[`Key`]`, `[`Value`]`)` tuples.</span>
-    <span class="doccomment">///</span>
+    <span class="doccomment">/// Returns `true` if there are no keywords.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::locid::extensions::unicode::{Keywords, Key, Value};</span>
+    <span class="doccomment">/// use icu::locid::Locale;</span>
+    <span class="doccomment">/// use icu::locid::extensions::unicode::Keywords;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let key: Key = &quot;ca&quot;.parse()</span>
-    <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
-    <span class="doccomment">/// let value: Value = &quot;buddhist&quot;.parse()</span>
-    <span class="doccomment">///     .expect(&quot;Failed to parse a Value.&quot;);</span>
-    <span class="doccomment">/// let keywords = Keywords::from_vec_unchecked(vec![(key, value)]);</span>
+    <span class="doccomment">/// let loc1 = Locale::from_bytes(b&quot;und-t-h0-hybrid&quot;).unwrap();</span>
+    <span class="doccomment">/// let loc2 = Locale::from_bytes(b&quot;und-u-ca-buddhist&quot;).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&amp;keywords.to_string(), &quot;ca-buddhist&quot;);</span>
+    <span class="doccomment">/// assert!(loc1.extensions.unicode.keywords.is_empty());</span>
+    <span class="doccomment">/// assert!(!loc2.extensions.unicode.keywords.is_empty());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec_unchecked</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Key</span>, <span class="ident">Value</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(<span class="ident">input</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">is_empty</span>()
     }
 
     <span class="doccomment">/// Returns `true` if the list contains a [`Value`] for the specified [`Key`].</span>
@@ -312,23 +311,24 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::locid::extensions::unicode::{Keywords, Key, Value};</span>
+    <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let key: Key = &quot;ca&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
     <span class="doccomment">/// let value: Value = &quot;gregory&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Value.&quot;);</span>
-    <span class="doccomment">/// let mut keywords = Keywords::from_vec_unchecked(vec![(key, value)]);</span>
+    <span class="doccomment">/// let keywords: Keywords = vec![(key, value)].into_iter().collect();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let key: Key = &quot;ca&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
     <span class="doccomment">/// assert!(&amp;keywords.contains_key(&amp;key));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains_key</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">Q</span>) -&gt; <span class="ident">bool</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains_key</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Q</span>) -&gt; <span class="ident">bool</span>
     <span class="kw">where</span>
-        <span class="ident">Q</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">Key</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>,
+        <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
-        <span class="self">self</span>.<span class="ident">binary_search_by_key</span>(<span class="ident">key</span>.<span class="ident">borrow</span>(), <span class="op">|</span>(<span class="ident">key</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">key</span>)
-            .<span class="ident">is_ok</span>()
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">contains_key</span>(<span class="ident">key</span>)
     }
 
     <span class="doccomment">/// Returns a reference to the [`Value`] corresponding to the [`Key`].</span>
@@ -343,7 +343,7 @@
     <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
     <span class="doccomment">/// let value: Value = &quot;buddhist&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Value.&quot;);</span>
-    <span class="doccomment">/// let mut keywords = Keywords::from_vec_unchecked(vec![(key, value)]);</span>
+    <span class="doccomment">/// let keywords: Keywords = vec![(key, value)].into_iter().collect();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let key: Key = &quot;ca&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
@@ -352,15 +352,12 @@
     <span class="doccomment">///     Some(&quot;buddhist&quot;.to_string())</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">Q</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Value</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Q</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Value</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">Q</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">Key</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>,
+        <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">binary_search_by_key</span>(<span class="ident">key</span>.<span class="ident">borrow</span>(), <span class="op">|</span>(<span class="ident">key</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">key</span>) {
-            <span class="self">self</span>.<span class="ident">deref</span>().<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">v</span>)<span class="op">|</span> <span class="ident">v</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">get</span>(<span class="ident">key</span>)
     }
 
     <span class="doccomment">/// Returns a mutable reference to the [`Value`] corresponding to the [`Key`].</span>
@@ -377,11 +374,11 @@
     <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
     <span class="doccomment">/// let value: Value = &quot;buddhist&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Value.&quot;);</span>
-    <span class="doccomment">/// let mut keywords = Keywords::from_vec_unchecked(vec![(key, value)]);</span>
+    <span class="doccomment">/// let mut keywords: Keywords = vec![(key, value)].into_iter().collect();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let key: Key = &quot;ca&quot;.parse()</span>
     <span class="doccomment">///     .expect(&quot;Failed to parse a Key.&quot;);</span>
-    <span class="doccomment">/// if let Some(value) = keywords.get_mut(key) {</span>
+    <span class="doccomment">/// if let Some(value) = keywords.get_mut(&amp;key) {</span>
     <span class="doccomment">///     *value = &quot;gregory&quot;.parse()</span>
     <span class="doccomment">///         .expect(&quot;Failed to parse a Value.&quot;);</span>
     <span class="doccomment">/// }</span>
@@ -390,17 +387,12 @@
     <span class="doccomment">///     Some(&quot;gregory&quot;.to_string())</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_mut</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">Q</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;mut</span> <span class="ident">Value</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_mut</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Q</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;mut</span> <span class="ident">Value</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">Q</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+        <span class="ident">Key</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>,
+        <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">binary_search_by_key</span>(<span class="ident">key</span>.<span class="ident">borrow</span>(), <span class="op">|</span>(<span class="ident">key</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">key</span>) {
-            <span class="comment">// Won&#39;t panic because the index was given to us by binary_search</span>
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="number">0</span>[<span class="ident">idx</span>].<span class="number">1</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">get_mut</span>(<span class="ident">key</span>)
     }
 
     <span class="doccomment">/// Clears all Unicode extension keywords, leaving Unicode attributes.</span>
@@ -446,23 +438,33 @@
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">E</span><span class="op">&gt;</span>,
     {
-        <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>() {
+        <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter</span>() {
             <span class="ident">f</span>(<span class="ident">k</span>.<span class="ident">as_str</span>())<span class="question-mark">?</span>;
             <span class="ident">v</span>.<span class="ident">for_each_subtag_str</span>(<span class="ident">f</span>)<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
-}
 
-<span class="macro">impl_writeable_for_key_value!</span>(<span class="ident">Keywords</span>, <span class="string">&quot;ca&quot;</span>, <span class="string">&quot;islamic-civil&quot;</span>, <span class="string">&quot;aa&quot;</span>, <span class="string">&quot;aa&quot;</span>);
-
-<span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Keywords</span> {
-    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> [(<span class="ident">Key</span>, <span class="ident">Value</span>)];
-
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">deref</span>()
+    <span class="doccomment">/// This needs to be its own method to help with type inference in helpers.rs</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_tuple_vec</span>(<span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Key</span>, <span class="ident">Value</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">v</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>()
     }
 }
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">Key</span>, <span class="ident">Value</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Keywords</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">map</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">Key</span>, <span class="ident">Value</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">map</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">FromIterator</span><span class="op">&lt;</span>(<span class="ident">Key</span>, <span class="ident">Value</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Keywords</span> {
+    <span class="kw">fn</span> <span class="ident">from_iter</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">Key</span>, <span class="ident">Value</span>)<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">LiteMap::from_iter</span>(<span class="ident">iter</span>).<span class="ident">into</span>()
+    }
+}
+
+<span class="macro">impl_writeable_for_key_value!</span>(<span class="ident">Keywords</span>, <span class="string">&quot;ca&quot;</span>, <span class="string">&quot;islamic-civil&quot;</span>, <span class="string">&quot;mm&quot;</span>, <span class="string">&quot;mm&quot;</span>);
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="icu_locid" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
 </body></html>

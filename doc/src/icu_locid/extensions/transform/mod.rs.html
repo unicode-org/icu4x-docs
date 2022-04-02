@@ -243,7 +243,6 @@
 <span id="242">242</span>
 <span id="243">243</span>
 <span id="244">244</span>
-<span id="245">245</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -273,8 +272,8 @@
 <span class="doccomment">//!     .expect(&quot;Parsing value failed.&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! assert_eq!(loc.extensions.transform.lang, Some(lang));</span>
-<span class="doccomment">//! assert!(loc.extensions.transform.fields.contains_key(key));</span>
-<span class="doccomment">//! assert_eq!(loc.extensions.transform.fields.get(key), Some(&amp;value));</span>
+<span class="doccomment">//! assert!(loc.extensions.transform.fields.contains_key(&amp;key));</span>
+<span class="doccomment">//! assert_eq!(loc.extensions.transform.fields.get(&amp;key), Some(&amp;value));</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! assert_eq!(&amp;loc.extensions.transform.to_string(), &quot;-t-es-AR-h0-hybrid&quot;);</span>
 <span class="doccomment">//! ```</span>
@@ -291,6 +290,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::subtags::Language</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec</span>;
+<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 
 <span class="doccomment">/// A list of [`Unicode BCP47 T Extensions`] as defined in [`Unicode Locale</span>
 <span class="doccomment">/// Identifier`] specification.</span>
@@ -381,7 +381,7 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">try_from_iter</span>(<span class="ident">iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SubtagIterator</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tlang</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tfields</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tfields</span> <span class="op">=</span> <span class="ident">LiteMap::new</span>();
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">subtag</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek</span>() {
             <span class="kw">if</span> <span class="ident">Language::from_bytes</span>(<span class="ident">subtag</span>).<span class="ident">is_ok</span>() {
@@ -403,10 +403,10 @@
                     <span class="kw">if</span> <span class="ident">current_tvalue</span>.<span class="ident">is_empty</span>() {
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidExtension</span>);
                     }
-                    <span class="ident">tfields</span>.<span class="ident">push</span>((
+                    <span class="ident">tfields</span>.<span class="ident">try_insert</span>(
                         <span class="ident">tkey</span>,
                         <span class="ident">Value::from_vec_unchecked</span>(<span class="ident">current_tvalue</span>.<span class="ident">drain</span>(..).<span class="ident">flatten</span>().<span class="ident">collect</span>()),
-                    ));
+                    );
                     <span class="ident">current_tkey</span> <span class="op">=</span> <span class="prelude-val">None</span>;
                     <span class="kw">continue</span>;
                 }
@@ -423,17 +423,15 @@
             <span class="kw">if</span> <span class="ident">current_tvalue</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidExtension</span>);
             }
-            <span class="ident">tfields</span>.<span class="ident">push</span>((
+            <span class="ident">tfields</span>.<span class="ident">try_insert</span>(
                 <span class="ident">tkey</span>,
                 <span class="ident">Value::from_vec_unchecked</span>(<span class="ident">current_tvalue</span>.<span class="ident">into_iter</span>().<span class="ident">flatten</span>().<span class="ident">collect</span>()),
-            ));
+            );
         }
-
-        <span class="ident">tfields</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="number">0</span>);
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">lang</span>: <span class="ident">tlang</span>,
-            <span class="ident">fields</span>: <span class="ident">Fields::from_vec_unchecked</span>(<span class="ident">tfields</span>),
+            <span class="ident">fields</span>: <span class="ident">tfields</span>.<span class="ident">into</span>(),
         })
     }
 

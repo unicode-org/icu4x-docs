@@ -435,6 +435,29 @@
 <span id="434">434</span>
 <span id="435">435</span>
 <span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -611,7 +634,18 @@
     <span class="doccomment">/// Safety:</span>
     <span class="doccomment">/// - `idx` must be in bounds (`idx &lt; self.len()`)</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked</span>(<span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span> {
+        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_things_range</span>(<span class="ident">idx</span>);
+        <span class="kw">let</span> <span class="ident">things_slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">get_unchecked</span>(<span class="ident">range</span>);
+        <span class="ident">T::from_byte_slice_unchecked</span>(<span class="ident">things_slice</span>)
+    }
+
+    <span class="doccomment">/// Get the range in `things` for the element at `idx`. Does not bounds check.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Safety:</span>
+    <span class="doccomment">/// - `idx` must be in bounds (`idx &lt; self.len()`)</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_things_range</span>(<span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">get_unchecked</span>(<span class="ident">idx</span>));
         <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">len</span>() {
             <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">len</span>()
@@ -619,8 +653,20 @@
             <span class="ident">usizeify</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">get_unchecked</span>(<span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span>))
         };
         <span class="macro">debug_assert!</span>(<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">end</span>);
-        <span class="kw">let</span> <span class="ident">things_slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">get_unchecked</span>(<span class="ident">start</span>..<span class="ident">end</span>);
-        <span class="ident">T::from_byte_slice_unchecked</span>(<span class="ident">things_slice</span>)
+        <span class="ident">start</span>..<span class="ident">end</span>
+    }
+
+    <span class="doccomment">/// Get the range in `entire_slice` for the element at `idx`. Does not bounds check.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Safety:</span>
+    <span class="doccomment">/// - `idx` must be in bounds (`idx &lt; self.len()`)</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_range</span>(<span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_things_range</span>(<span class="ident">idx</span>);
+        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">things</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">u8</span>] <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u8</span>)
+            .<span class="ident">offset_from</span>(<span class="self">self</span>.<span class="ident">entire_slice</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">u8</span>] <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u8</span>)
+            <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="ident">range</span>.<span class="ident">start</span> <span class="op">+</span> <span class="ident">offset</span>..<span class="ident">range</span>.<span class="ident">end</span> <span class="op">+</span> <span class="ident">offset</span>
     }
 
     <span class="doccomment">/// Create an iterator over the Ts contained in VarZeroVecComponents, checking internal invariants:</span>

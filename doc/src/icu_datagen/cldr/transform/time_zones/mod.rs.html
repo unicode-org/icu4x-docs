@@ -201,11 +201,45 @@
 <span id="200">200</span>
 <span id="201">201</span>
 <span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_serde</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_serde::time_zones::time_zone_names::TimeZoneNames</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_serde::time_zones::CldrTimeZonesData</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::reader</span>::{<span class="ident">get_langid_subdirectories</span>, <span class="ident">get_langid_subdirectory</span>, <span class="ident">open_reader</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::CldrPaths</span>;
@@ -214,8 +248,10 @@
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
+<span class="kw">use</span> <span class="ident">std::sync::RwLock</span>;
 
 <span class="kw">mod</span> <span class="ident">convert</span>;
 
@@ -223,7 +259,9 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeZonesProvider</span> {
     <span class="ident">path</span>: <span class="ident">PathBuf</span>,
-    <span class="ident">data</span>: <span class="ident">FrozenBTreeMap</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">cldr_serde::time_zone_names::TimeZoneNames</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">time_zone_names_data</span>: <span class="ident">FrozenBTreeMap</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">TimeZoneNames</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">bcp47_tzid_path</span>: <span class="ident">PathBuf</span>,
+    <span class="ident">bcp47_tzid_data</span>: <span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZonesProvider</span> {
@@ -231,7 +269,9 @@
     <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">cldr_paths</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">path</span>: <span class="ident">cldr_paths</span>.<span class="ident">cldr_dates_gregorian</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>),
-            <span class="ident">data</span>: <span class="ident">FrozenBTreeMap::new</span>(),
+            <span class="ident">time_zone_names_data</span>: <span class="ident">FrozenBTreeMap::new</span>(),
+            <span class="ident">bcp47_tzid_path</span>: <span class="ident">cldr_paths</span>.<span class="ident">cldr_bcp47</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;bcp47&quot;</span>),
+            <span class="ident">bcp47_tzid_data</span>: <span class="ident">RwLock::new</span>(<span class="ident">LiteMap::new</span>()),
         })
     }
 }
@@ -245,17 +285,16 @@
                         .<span class="ident">get_langid</span>()
                         .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
 
-                    <span class="kw">let</span> <span class="ident">time_zones</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time_zones</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">langid</span>) {
-                        <span class="ident">time_zones</span>
+                    <span class="kw">let</span> <span class="ident">time_zone_names</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">time_zone_names</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">time_zone_names_data</span>.<span class="ident">get</span>(<span class="ident">langid</span>) {
+                        <span class="ident">time_zone_names</span>
                     } <span class="kw">else</span> {
                         <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">get_langid_subdirectory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">path</span>, <span class="ident">langid</span>)<span class="question-mark">?</span>
                             .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>
                             .<span class="ident">join</span>(<span class="string">&quot;timeZoneNames.json&quot;</span>);
-
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::time_zone_names::Resource</span> <span class="op">=</span>
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::time_zones::time_zone_names::Resource</span> <span class="op">=</span>
                             <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
                                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::Json</span>(<span class="ident">e</span>, <span class="prelude-val">Some</span>(<span class="ident">path</span>)))<span class="question-mark">?</span>;
-                        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">insert</span>(<span class="ident">langid</span>.<span class="ident">clone</span>(), <span class="ident">Box::new</span>(<span class="ident">resource</span>
+                        <span class="self">self</span>.<span class="ident">time_zone_names_data</span>.<span class="ident">insert</span>(<span class="ident">langid</span>.<span class="ident">clone</span>(), <span class="ident">Box::new</span>(<span class="ident">resource</span>
                             .<span class="ident">main</span>
                             .<span class="number">0</span>
                             .<span class="ident">remove</span>(<span class="ident">langid</span>)
@@ -264,11 +303,39 @@
                             .<span class="ident">time_zone_names</span>))
                     };
 
+                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">bcp47_tzid_data</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>().<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
+                        <span class="kw">let</span> <span class="ident">bcp47_time_zone_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bcp47_tzid_path</span>.<span class="ident">join</span>(<span class="string">&quot;timezone.json&quot;</span>);
+
+                        <span class="kw">let</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::time_zones::bcp47_tzid::Resource</span> <span class="op">=</span>
+                            <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">bcp47_time_zone_path</span>)<span class="question-mark">?</span>)
+                                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::Json</span>(<span class="ident">e</span>, <span class="prelude-val">Some</span>(<span class="ident">bcp47_time_zone_path</span>)))<span class="question-mark">?</span>;
+                         <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">resource</span>
+                            .<span class="ident">keyword</span>
+                            .<span class="ident">u</span>
+                            .<span class="ident">time_zones</span>
+                            .<span class="ident">values</span>;
+
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_guard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bcp47_tzid_data</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>();
+                        <span class="kw">for</span> (<span class="ident">bcp47_tzid</span>, <span class="ident">bcp47_tzid_data</span>) <span class="kw">in</span> <span class="ident">r</span>.<span class="ident">iter</span>() {
+                            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">alias</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">bcp47_tzid_data</span>.<span class="ident">alias</span> {
+                                <span class="kw">for</span> <span class="ident">data_value</span> <span class="kw">in</span> <span class="ident">alias</span>.<span class="ident">split</span>(<span class="string">&quot; &quot;</span>) {
+                                    <span class="ident">data_guard</span>.<span class="ident">insert</span>(<span class="ident">data_value</span>.<span class="ident">to_string</span>(), <span class="ident">bcp47_tzid</span>.<span class="ident">to_string</span>());
+                                }
+                            }
+                        }
+                    }
+                    <span class="kw">let</span> <span class="ident">bcp47_tzids</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bcp47_tzid_data</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>();
+
+                    <span class="kw">let</span> <span class="ident">cldr_time_zones_data</span> <span class="op">=</span> <span class="ident">CldrTimeZonesData</span> {
+                        <span class="ident">time_zone_names</span>,
+                        <span class="ident">bcp47_tzids</span>: <span class="kw-2">&amp;</span><span class="ident">bcp47_tzids</span>,
+                    };
+
                     <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
                     <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
                     <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                         <span class="ident">metadata</span>,
-                        <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span> <span class="kw">as</span> <span class="ident">DataMarker</span><span class="op">&gt;</span><span class="ident">::Yokeable::from</span>(<span class="ident">time_zones</span>))),
+                        <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span> <span class="kw">as</span> <span class="ident">DataMarker</span><span class="op">&gt;</span><span class="ident">::Yokeable::from</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_time_zones_data</span>))),
                     })
                 }
             }
@@ -329,10 +396,7 @@
             .<span class="ident">unwrap</span>()
             .<span class="ident">take_payload</span>()
             .<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;Pohnpei&quot;</span>,
-            <span class="ident">exemplar_cities</span>.<span class="ident">get</span>().<span class="number">0</span>.<span class="ident">get</span>(<span class="string">&quot;Pacific/Ponape&quot;</span>).<span class="ident">unwrap</span>()
-        );
+        <span class="macro">assert_eq!</span>(<span class="string">&quot;Pohnpei&quot;</span>, <span class="ident">exemplar_cities</span>.<span class="ident">get</span>().<span class="number">0</span>.<span class="ident">get</span>(<span class="string">&quot;fmpni&quot;</span>).<span class="ident">unwrap</span>());
 
         <span class="kw">let</span> <span class="ident">generic_names_long</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MetaZoneGenericNamesLongV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {

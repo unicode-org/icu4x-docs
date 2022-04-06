@@ -331,6 +331,19 @@
 <span id="330">330</span>
 <span id="331">331</span>
 <span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -338,7 +351,7 @@
 <span class="kw">use</span> <span class="ident">proc_macro2::TokenStream</span> <span class="kw">as</span> <span class="ident">TokenStream2</span>;
 <span class="kw">use</span> <span class="ident">quote::quote</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="self">self</span>, <span class="ident">FieldInfo</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="self">self</span>, <span class="ident">FieldInfo</span>, <span class="ident">ZeroVecAttrs</span>};
 <span class="kw">use</span> <span class="ident">syn::spanned::Spanned</span>;
 <span class="kw">use</span> <span class="ident">syn</span>::{
     <span class="ident">parse_quote</span>, <span class="ident">AttributeArgs</span>, <span class="ident">Data</span>, <span class="ident">DataEnum</span>, <span class="ident">DataStruct</span>, <span class="ident">DeriveInput</span>, <span class="ident">Error</span>, <span class="ident">Expr</span>, <span class="ident">Fields</span>,
@@ -369,32 +382,24 @@
     <span class="kw">let</span> <span class="ident">arg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">attr</span>[<span class="number">0</span>];
     <span class="kw">let</span> <span class="ident">ule_name</span>: <span class="ident">Ident</span> <span class="op">=</span> <span class="macro">parse_quote!</span>(#<span class="ident">arg</span>);
 
-    <span class="kw">let</span> (<span class="ident">skip_kv</span>, <span class="ident">skip_ord</span>, <span class="ident">serde</span>) <span class="op">=</span>
-        <span class="kw">match</span> <span class="ident">utils::extract_attributes_common</span>(<span class="kw-2">&amp;mut</span> <span class="ident">input</span>.<span class="ident">attrs</span>, <span class="string">&quot;make_ule&quot;</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>(),
-        };
-
-    <span class="kw">if</span> <span class="ident">serde</span> {
-        <span class="kw">return</span> <span class="ident">Error::new</span>(
-            <span class="ident">input</span>.<span class="ident">span</span>(),
-            <span class="string">&quot;#[make_ule] does not support #[zerovec::serde]&quot;</span>,
-        )
-        .<span class="ident">to_compile_error</span>();
-    }
+    <span class="kw">let</span> <span class="ident">sp</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">span</span>();
+    <span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">utils::extract_attributes_common</span>(<span class="kw-2">&amp;mut</span> <span class="ident">input</span>.<span class="ident">attrs</span>, <span class="ident">sp</span>, <span class="bool-val">false</span>) {
+        <span class="prelude-val">Ok</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>(),
+    };
 
     <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">ident</span>;
 
     <span class="kw">let</span> <span class="ident">ule_stuff</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">input</span>.<span class="ident">data</span> {
-        <span class="ident">Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">s</span>) =&gt; <span class="ident">make_ule_struct_impl</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">ule_name</span>, <span class="kw-2">&amp;</span><span class="ident">input</span>, <span class="ident">s</span>, <span class="ident">skip_ord</span>),
-        <span class="ident">Data::Enum</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">make_ule_enum_impl</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">ule_name</span>, <span class="kw-2">&amp;</span><span class="ident">input</span>, <span class="ident">e</span>, <span class="ident">skip_ord</span>),
+        <span class="ident">Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">s</span>) =&gt; <span class="ident">make_ule_struct_impl</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">ule_name</span>, <span class="kw-2">&amp;</span><span class="ident">input</span>, <span class="ident">s</span>, <span class="ident">attrs</span>),
+        <span class="ident">Data::Enum</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">make_ule_enum_impl</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">ule_name</span>, <span class="kw-2">&amp;</span><span class="ident">input</span>, <span class="ident">e</span>, <span class="ident">attrs</span>),
         <span class="kw">_</span> =&gt; {
             <span class="kw">return</span> <span class="ident">Error::new</span>(<span class="ident">input</span>.<span class="ident">span</span>(), <span class="string">&quot;#[make_ule] must be applied to a struct&quot;</span>)
                 .<span class="ident">to_compile_error</span>();
         }
     };
 
-    <span class="kw">let</span> <span class="ident">zmkv</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">skip_kv</span> {
+    <span class="kw">let</span> <span class="ident">zmkv</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">attrs</span>.<span class="ident">skip_kv</span> {
         <span class="macro">quote!</span>()
     } <span class="kw">else</span> {
         <span class="macro">quote!</span>(
@@ -406,10 +411,25 @@
         )
     };
 
+    <span class="kw">let</span> <span class="ident">maybe_debug</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">attrs</span>.<span class="ident">debug</span> {
+        <span class="macro">quote!</span>(
+            <span class="kw">impl</span> <span class="ident">core::fmt::Debug</span> <span class="kw">for</span> #<span class="ident">ule_name</span> {
+                <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">core::fmt::Formatter</span>) -&gt; <span class="ident">core::fmt::Result</span> {
+                    <span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="op">&lt;</span>#<span class="ident">name</span> <span class="kw">as</span> <span class="ident">zerovec::ule::AsULE</span><span class="op">&gt;</span><span class="ident">::from_unaligned</span>(<span class="kw-2">*</span><span class="self">self</span>);
+                    <span class="op">&lt;</span>#<span class="ident">name</span> <span class="kw">as</span> <span class="ident">core::fmt::Debug</span><span class="op">&gt;</span><span class="ident">::fmt</span>(<span class="kw-2">&amp;</span><span class="ident">this</span>, <span class="ident">f</span>)
+                }
+            }
+        )
+    } <span class="kw">else</span> {
+        <span class="macro">quote!</span>()
+    };
+
     <span class="macro">quote!</span>(
         #<span class="ident">input</span>
 
         #<span class="ident">ule_stuff</span>
+
+        #<span class="ident">maybe_debug</span>
 
         #<span class="ident">zmkv</span>
     )
@@ -420,7 +440,7 @@
     <span class="ident">ule_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
     <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>,
     <span class="ident">enu</span>: <span class="kw-2">&amp;</span><span class="ident">DataEnum</span>,
-    <span class="ident">skip_ord</span>: <span class="ident">bool</span>,
+    <span class="ident">attrs</span>: <span class="ident">ZeroVecAttrs</span>,
 ) -&gt; <span class="ident">TokenStream2</span> {
     <span class="comment">// We could support more int reprs in the future if needed</span>
     <span class="kw">if</span> <span class="op">!</span><span class="ident">utils::has_valid_repr</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">attrs</span>, <span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span> <span class="op">==</span> <span class="string">&quot;u8&quot;</span>) {
@@ -489,13 +509,15 @@
 
     <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">next</span> <span class="kw">as</span> <span class="ident">u8</span>;
 
-    <span class="kw">let</span> <span class="ident">maybe_ord_derives</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">skip_ord</span> {
+    <span class="kw">let</span> <span class="ident">maybe_ord_derives</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">attrs</span>.<span class="ident">skip_ord</span> {
         <span class="macro">quote!</span>()
     } <span class="kw">else</span> {
         <span class="macro">quote!</span>(<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Ord</span>, <span class="ident">PartialOrd</span>)]</span>)
     };
 
     <span class="kw">let</span> <span class="ident">vis</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">vis</span>;
+
+    <span class="kw">let</span> <span class="ident">doc</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;[`ULE`](zerovec::ule::ULE) type for {name}&quot;</span>);
 
     <span class="comment">// Safety (based on the safety checklist on the ULE trait):</span>
     <span class="comment">//  1. ULE type does not include any uninitialized or padding bytes.</span>
@@ -512,6 +534,7 @@
         <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
         <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
         #<span class="ident">maybe_ord_derives</span>
+        <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> #<span class="ident">doc</span>]</span>
         #<span class="ident">vis</span> <span class="kw">struct</span> #<span class="ident">ule_name</span>(<span class="ident">u8</span>);
 
         <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">zerovec::ule::ULE</span> <span class="kw">for</span> #<span class="ident">ule_name</span> {
@@ -574,7 +597,7 @@
     <span class="ident">ule_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
     <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>,
     <span class="ident">struc</span>: <span class="kw-2">&amp;</span><span class="ident">DataStruct</span>,
-    <span class="ident">skip_ord</span>: <span class="ident">bool</span>,
+    <span class="ident">attrs</span>: <span class="ident">ZeroVecAttrs</span>,
 ) -&gt; <span class="ident">TokenStream2</span> {
     <span class="kw">if</span> <span class="ident">struc</span>.<span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">next</span>().<span class="ident">is_none</span>() {
         <span class="kw">return</span> <span class="ident">Error::new</span>(
@@ -591,9 +614,12 @@
     <span class="kw">let</span> <span class="ident">repr_attr</span> <span class="op">=</span> <span class="ident">utils::repr_for</span>(<span class="kw-2">&amp;</span><span class="ident">struc</span>.<span class="ident">fields</span>);
     <span class="kw">let</span> <span class="ident">vis</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">vis</span>;
 
+    <span class="kw">let</span> <span class="ident">doc</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;[`ULE`](zerovec::ule::ULE) type for {name}&quot;</span>);
+
     <span class="kw">let</span> <span class="ident">ule_struct</span>: <span class="ident">DeriveInput</span> <span class="op">=</span> <span class="macro">parse_quote!</span>(
         <span class="attribute">#[<span class="ident">repr</span>(#<span class="ident">repr_attr</span>)]</span>
         <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+        <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> #<span class="ident">doc</span>]</span>
         #<span class="ident">vis</span> <span class="kw">struct</span> #<span class="ident">ule_name</span> #<span class="ident">field_inits</span> #<span class="ident">semi</span>
     );
     <span class="kw">let</span> <span class="ident">derived</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::ule::derive_impl</span>(<span class="kw-2">&amp;</span><span class="ident">ule_struct</span>);
@@ -631,7 +657,7 @@
         }
     );
 
-    <span class="kw">let</span> <span class="ident">maybe_ord_impls</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">skip_ord</span> {
+    <span class="kw">let</span> <span class="ident">maybe_ord_impls</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">attrs</span>.<span class="ident">skip_ord</span> {
         <span class="macro">quote!</span>()
     } <span class="kw">else</span> {
         <span class="macro">quote!</span>(

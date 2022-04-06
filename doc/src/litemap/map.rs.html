@@ -565,16 +565,90 @@
 <span id="564">564</span>
 <span id="565">565</span>
 <span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">alloc::borrow::Borrow</span>;
-<span class="kw">use</span> <span class="ident">alloc::vec</span>;
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::iter::FromIterator</span>;
+<span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::mem</span>;
 <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Index</span>, <span class="ident">IndexMut</span>};
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::store::Store</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::store::StoreFromIterator</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::store::StoreIterable</span>;
 
 <span class="doccomment">/// A simple &quot;flat&quot; map based on a sorted vector</span>
 <span class="doccomment">///</span>
@@ -584,44 +658,59 @@
 <span class="doccomment">/// requires `Ord` instead of `Hash`.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;yoke&quot;</span>, <span class="ident">derive</span>(<span class="ident">yoke::Yokeable</span>))]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">values</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span> <span class="op">=</span> <span class="ident">alloc::vec::Vec</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">values</span>: <span class="ident">S</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">_key_type</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">_value_type</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Construct a new [`LiteMap`]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">values</span>: <span class="ident">Vec::new</span>() }
+        <span class="self">Self</span> {
+            <span class="ident">values</span>: <span class="ident">alloc::vec::Vec::new</span>(),
+            <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
+            <span class="ident">_value_type</span>: <span class="ident">PhantomData</span>,
+        }
     }
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Construct a new [`LiteMap`] with a given capacity</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">capacity</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">values</span>: <span class="ident">Vec::with_capacity</span>(<span class="ident">capacity</span>),
+            <span class="ident">values</span>: <span class="ident">S::lm_with_capacity</span>(<span class="ident">capacity</span>),
+            <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
+            <span class="ident">_value_type</span>: <span class="ident">PhantomData</span>,
         }
     }
 
     <span class="doccomment">/// The number of elements in the [`LiteMap`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">len</span>()
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_len</span>()
     }
 
     <span class="doccomment">/// Whether the [`LiteMap`] is empty</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">is_empty</span>()
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_is_empty</span>()
     }
 
     <span class="doccomment">/// Remove all elements from the [`LiteMap`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">clear</span>()
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_clear</span>()
     }
 
     <span class="doccomment">/// Reserve capacity for `additional` more elements to be inserted into</span>
     <span class="doccomment">/// the [`LiteMap`] to avoid frequent reallocations.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// See [`Vec::reserve()`] for more information.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [`Vec::reserve()`]: alloc::vec::Vec::reserve</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserve</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">additional</span>: <span class="ident">usize</span>) {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">reserve</span>(<span class="ident">additional</span>)
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_reserve</span>(<span class="ident">additional</span>)
     }
 
     <span class="doccomment">/// Convert a `Vec&lt;(K, V)&gt;` into a [`LiteMap`].</span>
@@ -630,13 +719,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The vec must be sorted and have no duplicate keys.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_tuple_vec_unchecked</span>(<span class="ident">values</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">values</span> }
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_tuple_vec_unchecked</span>(<span class="ident">values</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">values</span>,
+            <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
+            <span class="ident">_value_type</span>: <span class="ident">PhantomData</span>,
+        }
     }
 
     <span class="doccomment">/// Convert a [`LiteMap`] into a `Vec&lt;(K, V)&gt;`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_tuple_vec</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_tuple_vec</span>(<span class="self">self</span>) -&gt; <span class="ident">S</span> {
         <span class="self">self</span>.<span class="ident">values</span>
     }
 
@@ -645,11 +738,15 @@
     <span class="doccomment">/// In most cases, prefer [`LiteMap::get()`] over this method.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_indexed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="ident">V</span>)<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="ident">index</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="kw-2">ref</span> <span class="ident">k</span>, <span class="kw-2">ref</span> <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>, <span class="ident">v</span>))
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_get</span>(<span class="ident">index</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">Ord</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Get the value associated with `key`, if it exists.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
@@ -667,8 +764,8 @@
         <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">find_index</span>(<span class="ident">key</span>) {
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">values</span>[<span class="ident">found</span>].<span class="number">1</span>),
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// find_index returns a valid index</span>
+            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_get</span>(<span class="ident">found</span>).<span class="ident">unwrap</span>().<span class="number">1</span>),
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -711,8 +808,8 @@
         <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">find_index</span>(<span class="ident">key</span>) {
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">values</span>[<span class="ident">found</span>].<span class="number">1</span>),
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// find_index returns a valid index</span>
+            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_get_mut</span>(<span class="ident">found</span>).<span class="ident">unwrap</span>().<span class="number">1</span>),
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -732,7 +829,7 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">first</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="ident">V</span>)<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>, <span class="ident">v</span>))
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_get</span>(<span class="number">0</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>, <span class="ident">v</span>))
     }
 
     <span class="doccomment">/// Get the highest-rank key/value pair from the `LiteMap`, if it exists.</span>
@@ -750,7 +847,7 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">last</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="ident">V</span>)<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>, <span class="ident">v</span>))
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_get</span>(<span class="self">self</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>, <span class="ident">v</span>))
     }
 
     <span class="doccomment">/// Appends `value` with `key` to the end of the underlying vector, returning</span>
@@ -783,13 +880,13 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_append</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">last</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">last</span>() {
-            <span class="kw">if</span> <span class="ident">last</span>.<span class="number">0</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">key</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">last</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_last</span>() {
+            <span class="kw">if</span> <span class="ident">last</span>.<span class="number">0</span> <span class="op">&gt;</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">key</span> {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>));
             }
         }
 
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">push</span>((<span class="ident">key</span>, <span class="ident">value</span>));
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_push</span>(<span class="ident">key</span>, <span class="ident">value</span>);
         <span class="prelude-val">None</span>
     }
 
@@ -810,11 +907,14 @@
 
     <span class="doccomment">/// Version of [`Self::insert()`] that returns both the key and the old value.</span>
     <span class="kw">fn</span> <span class="ident">insert_save_key</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)) {
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// Index came from binary_search</span>
-            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">values</span>[<span class="ident">found</span>].<span class="number">1</span>, <span class="ident">value</span>))),
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)) {
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// Index came from binary_search</span>
+            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>((
+                <span class="ident">key</span>,
+                <span class="ident">mem::replace</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_get_mut</span>(<span class="ident">found</span>).<span class="ident">unwrap</span>().<span class="number">1</span>, <span class="ident">value</span>),
+            )),
             <span class="prelude-val">Err</span>(<span class="ident">ins</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">insert</span>(<span class="ident">ins</span>, (<span class="ident">key</span>, <span class="ident">value</span>));
+                <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_insert</span>(<span class="ident">ins</span>, <span class="ident">key</span>, <span class="ident">value</span>);
                 <span class="prelude-val">None</span>
             }
         }
@@ -844,11 +944,10 @@
     <span class="doccomment">/// assert_eq!(map.len(), 3);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_insert</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)) {
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// Index came from binary_search</span>
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)) {
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>)),
             <span class="prelude-val">Err</span>(<span class="ident">ins</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">insert</span>(<span class="ident">ins</span>, (<span class="ident">key</span>, <span class="ident">value</span>));
+                <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_insert</span>(<span class="ident">ins</span>, <span class="ident">key</span>, <span class="ident">value</span>);
                 <span class="prelude-val">None</span>
             }
         }
@@ -870,12 +969,18 @@
         <span class="ident">K</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>,
         <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">borrow</span>().<span class="ident">cmp</span>(<span class="ident">key</span>)) {
-            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">remove</span>(<span class="ident">found</span>).<span class="number">1</span>),
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">borrow</span>().<span class="ident">cmp</span>(<span class="ident">key</span>)) {
+            <span class="prelude-val">Ok</span>(<span class="ident">found</span>) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_remove</span>(<span class="ident">found</span>).<span class="number">1</span>),
             <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>: <span class="lifetime">&#39;a</span>, <span class="ident">V</span>: <span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
+    <span class="ident">S</span>: <span class="ident">StoreIterable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StoreFromIterator</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Insert all elements from `other` into this `LiteMap`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If `other` contains keys that already exist in `self`, the values in `other` replace the</span>
@@ -908,7 +1013,7 @@
     <span class="doccomment">/// assert_eq!(map3.len(), 1);</span>
     <span class="doccomment">/// assert_eq!(map3.get(&amp;2), Some(&quot;two&quot;).as_ref());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extend_from_litemap</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extend_from_litemap</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_empty</span>() {
             <span class="self">self</span>.<span class="ident">values</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">values</span>;
             <span class="kw">return</span> <span class="prelude-val">None</span>;
@@ -918,21 +1023,23 @@
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">last</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span>) <span class="op">&lt;</span> <span class="ident">other</span>.<span class="ident">first</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span>) {
             <span class="comment">// append other to self</span>
-            <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">extend</span>(<span class="ident">other</span>.<span class="ident">values</span>);
+            <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_extend_end</span>(<span class="ident">other</span>.<span class="ident">values</span>);
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">first</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span>) <span class="op">&gt;</span> <span class="ident">other</span>.<span class="ident">last</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span>) {
             <span class="comment">// prepend other to self</span>
-            <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">splice</span>(<span class="number">0</span>..<span class="number">0</span>, <span class="ident">other</span>.<span class="ident">values</span>);
+            <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_extend_start</span>(<span class="ident">other</span>.<span class="ident">values</span>);
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
             <span class="comment">// insert every element</span>
             <span class="kw">let</span> <span class="ident">leftover_tuples</span> <span class="op">=</span> <span class="ident">other</span>
                 .<span class="ident">values</span>
-                .<span class="ident">into_iter</span>()
+                .<span class="ident">lm_into_iter</span>()
                 .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> <span class="self">self</span>.<span class="ident">insert_save_key</span>(<span class="ident">k</span>, <span class="ident">v</span>))
                 .<span class="ident">collect</span>();
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">LiteMap</span> {
                 <span class="ident">values</span>: <span class="ident">leftover_tuples</span>,
+                <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
+                <span class="ident">_value_type</span>: <span class="ident">PhantomData</span>,
             };
             <span class="kw">if</span> <span class="ident">ret</span>.<span class="ident">is_empty</span>() {
                 <span class="prelude-val">None</span>
@@ -941,7 +1048,13 @@
             }
         }
     }
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Obtain the index for a given key, or if the key is not found, the index</span>
     <span class="doccomment">/// at which it would be inserted.</span>
     <span class="doccomment">///</span>
@@ -955,29 +1068,48 @@
         <span class="ident">K</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">Q</span><span class="op">&gt;</span>,
         <span class="ident">Q</span>: <span class="ident">Ord</span>,
     {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">borrow</span>().<span class="ident">cmp</span>(<span class="ident">key</span>))
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">borrow</span>().<span class="ident">cmp</span>(<span class="ident">key</span>))
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Default</span>,
+{
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">values</span>: <span class="macro">vec!</span>[] }
+        <span class="self">Self</span> {
+            <span class="ident">values</span>: <span class="ident">S::default</span>(),
+            <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
+            <span class="ident">_value_type</span>: <span class="ident">PhantomData</span>,
+        }
     }
 }
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">Ord</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">K</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">K</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">V</span>;
     <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">V</span> {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">key</span>).<span class="ident">expect</span>(<span class="string">&quot;LiteMap could not find key&quot;</span>)
     }
 }
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">Ord</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">K</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">K</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">V</span> {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="self">self</span>.<span class="ident">get_mut</span>(<span class="ident">key</span>).<span class="ident">expect</span>(<span class="string">&quot;LiteMap could not find key&quot;</span>)
     }
 }
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">Ord</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">FromIterator</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">FromIterator</span><span class="op">&lt;</span>(<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K</span>: <span class="ident">Ord</span>,
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="kw">fn</span> <span class="ident">from_iter</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">K</span>, <span class="ident">V</span>)<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">into_iter</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">iter</span>.<span class="ident">size_hint</span>() {
@@ -995,27 +1127,37 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>: <span class="lifetime">&#39;a</span>, <span class="ident">V</span>: <span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">StoreIterable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Produce an ordered iterator over key-value pairs</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="ident">V</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> (<span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="number">1</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">V</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_iter</span>()
     }
 
     <span class="doccomment">/// Produce an ordered iterator over keys</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">K</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="number">0</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_keys</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">K</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> <span class="ident">val</span>.<span class="number">0</span>)
     }
 
     <span class="doccomment">/// Produce an iterator over values, ordered by their keys</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_values</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">V</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="number">1</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_values</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">V</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> <span class="ident">val</span>.<span class="number">1</span>)
     }
 
     <span class="doccomment">/// Produce an ordered mutable iterator over key-value pairs</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;mut</span> <span class="ident">V</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">iter_mut</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> (<span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="number">0</span>, <span class="kw-2">&amp;mut</span> <span class="ident">val</span>.<span class="number">1</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_mut</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>,
+    ) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">V</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DoubleEndedIterator</span> {
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_iter_mut</span>()
     }
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
     <span class="doccomment">/// Retains only the elements specified by the predicate.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// In other words, remove all elements such that `f((&amp;k, &amp;v))` returns `false`.</span>
@@ -1031,23 +1173,23 @@
     <span class="doccomment">/// map.insert(3, &quot;three&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Retain elements with odd keys</span>
-    <span class="doccomment">/// map.retain(|(k, _)| k % 2 == 1);</span>
+    <span class="doccomment">/// map.retain(|k, _| k % 2 == 1);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(map.get(&amp;1), Some(&amp;&quot;one&quot;));</span>
     <span class="doccomment">/// assert_eq!(map.get(&amp;2), None);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">retain</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">predicate</span>: <span class="ident">F</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">retain</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">predicate</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>((<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="ident">V</span>)) -&gt; <span class="ident">bool</span>,
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">K</span>, <span class="kw-2">&amp;</span><span class="ident">V</span>) -&gt; <span class="ident">bool</span>,
     {
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">retain</span>(<span class="op">|</span>(<span class="kw-2">ref</span> <span class="ident">k</span>, <span class="kw-2">ref</span> <span class="ident">v</span>)<span class="op">|</span> <span class="ident">predicate</span>((<span class="ident">k</span>, <span class="ident">v</span>)))
+        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">lm_retain</span>(<span class="ident">predicate</span>)
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LiteMap</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">from_iterator</span>() {

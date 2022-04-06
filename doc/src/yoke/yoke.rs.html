@@ -1027,10 +1027,41 @@
 <span id="1026">1026</span>
 <span id="1027">1027</span>
 <span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
+<span id="1045">1045</span>
+<span id="1046">1046</span>
+<span id="1047">1047</span>
+<span id="1048">1048</span>
+<span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::either::EitherCart</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::erased</span>::{<span class="ident">ErasedBoxCart</span>, <span class="ident">ErasedRcCart</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::trait_hack::YokeTraitHack</span>;
@@ -1068,7 +1099,7 @@
 <span class="doccomment">/// The key behind this type is [`Yoke::get()`], where calling [`.get()`][Yoke::get] on a type like</span>
 <span class="doccomment">/// `Yoke&lt;Cow&lt;&#39;static, str&gt;, _&gt;` will get you a short-lived `&amp;&#39;a Cow&lt;&#39;a, str&gt;`, restricted to the</span>
 <span class="doccomment">/// lifetime of the borrow used during `.get()`. This is entirely safe since the `Cow` borrows from</span>
-<span class="doccomment">/// the cart type, which cannot be interfered with as long as the `Yoke` is borrowed by `.get</span>
+<span class="doccomment">/// the cart type `C`, which cannot be interfered with as long as the `Yoke` is borrowed by `.get</span>
 <span class="doccomment">/// ()`. `.get()` protects access by essentially reifying the erased lifetime to a safe local one</span>
 <span class="doccomment">/// when necessary.</span>
 <span class="doccomment">///</span>
@@ -1353,9 +1384,9 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// - `f()` must not panic</span>
     <span class="doccomment">/// - References from the yokeable `Y` should still be valid for the lifetime of the</span>
-    <span class="doccomment">///   returned cart type.</span>
+    <span class="doccomment">///   returned cart type `C`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Typically, this means implementing `f` as something which _wraps_ the inner cart type.</span>
+    <span class="doccomment">/// Typically, this means implementing `f` as something which _wraps_ the inner cart type `C`.</span>
     <span class="doccomment">/// `Yoke` only really cares about destructors for its carts so it&#39;s fine to erase other</span>
     <span class="doccomment">/// information about the cart, as long as the backing data will still be destroyed at the</span>
     <span class="doccomment">/// same time.</span>
@@ -1457,7 +1488,7 @@
         <span class="self">self</span>.<span class="ident">yokeable</span>.<span class="ident">transform_mut</span>(<span class="ident">f</span>)
     }
 
-    <span class="doccomment">/// Helper function allowing one to wrap the cart type in an `Option&lt;T&gt;`.</span>
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type `C` in an `Option&lt;T&gt;`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_cart_in_option</span>(<span class="self">self</span>) -&gt; <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
@@ -1571,7 +1602,7 @@
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">CloneableCart</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span> {}
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">CloneableCart</span> <span class="kw">for</span> () {}
 
-<span class="doccomment">/// Clone requires that the cart derefs to the same address after it is cloned. This works for</span>
+<span class="doccomment">/// Clone requires that the cart type `C` derefs to the same address after it is cloned. This works for</span>
 <span class="doccomment">/// Rc, Arc, and &amp;&#39;a T.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// For other cart types, clone `.backing_cart()` and re-use `.attach_to_cart()`; however, doing</span>
@@ -1839,14 +1870,14 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Allows type-erasing the cart in a `Yoke&lt;Y, Rc&lt;C&gt;&gt;`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// The yoke only carries around a cart type for its destructor,</span>
+    <span class="doccomment">/// The yoke only carries around a cart type `C` for its destructor,</span>
     <span class="doccomment">/// since it needs to be able to guarantee that its internal references</span>
     <span class="doccomment">/// are valid for the lifetime of the Yoke. As such, the actual type of the</span>
     <span class="doccomment">/// Cart is not very useful unless you wish to extract data out of it</span>
     <span class="doccomment">/// via [`Yoke::backing_cart()`]. Erasing the cart allows for one to mix</span>
     <span class="doccomment">/// [`Yoke`]s obtained from different sources.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// In case the cart type is not already `Rc&lt;T&gt;`, you can use</span>
+    <span class="doccomment">/// In case the cart type `C` is not already an `Rc&lt;T&gt;`, you can use</span>
     <span class="doccomment">/// [`Yoke::wrap_cart_in_rc()`] to wrap it.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
@@ -1884,14 +1915,14 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Allows type-erasing the cart in a `Yoke&lt;Y, Box&lt;C&gt;&gt;`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// The yoke only carries around a cart type for its destructor,</span>
+    <span class="doccomment">/// The yoke only carries around a cart type `C` for its destructor,</span>
     <span class="doccomment">/// since it needs to be able to guarantee that its internal references</span>
     <span class="doccomment">/// are valid for the lifetime of the Yoke. As such, the actual type of the</span>
     <span class="doccomment">/// Cart is not very useful unless you wish to extract data out of it</span>
     <span class="doccomment">/// via [`Yoke::backing_cart()`]. Erasing the cart allows for one to mix</span>
     <span class="doccomment">/// [`Yoke`]s obtained from different sources.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// In case the cart type is not already `Box&lt;T&gt;`, you can use</span>
+    <span class="doccomment">/// In case the cart type `C` is not already `Box&lt;T&gt;`, you can use</span>
     <span class="doccomment">/// [`Yoke::wrap_cart_in_box()`] to wrap it.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
@@ -1927,7 +1958,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Helper function allowing one to wrap the cart type in a `Box&lt;T&gt;`.</span>
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type `C` in a `Box&lt;T&gt;`.</span>
     <span class="doccomment">/// Can be paired with [`Yoke::erase_box_cart()`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Available with the `&quot;alloc&quot;` feature enabled.</span>
@@ -1938,7 +1969,7 @@
             <span class="self">self</span>.<span class="ident">replace_cart</span>(<span class="ident">Box::new</span>)
         }
     }
-    <span class="doccomment">/// Helper function allowing one to wrap the cart type in an `Rc&lt;T&gt;`.</span>
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type `C` in an `Rc&lt;T&gt;`.</span>
     <span class="doccomment">/// Can be paired with [`Yoke::erase_rc_cart()`], or generally used</span>
     <span class="doccomment">/// to make the [`Yoke`] cloneable.</span>
     <span class="doccomment">///</span>
@@ -1948,6 +1979,35 @@
         <span class="kw">unsafe</span> {
             <span class="comment">// safe because the cart is preserved, just wrapped</span>
             <span class="self">self</span>.<span class="ident">replace_cart</span>(<span class="ident">Rc::new</span>)
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type `C` in an [`EitherCart`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function wraps the cart into the `A` variant. To wrap it into the</span>
+    <span class="doccomment">/// `B` variant, use [`Self::wrap_cart_in_either_b()`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For an example, see [`EitherCart`].</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_cart_in_either_a</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">EitherCart</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> {
+            <span class="comment">// safe because the cart is preserved, just wrapped</span>
+            <span class="self">self</span>.<span class="ident">replace_cart</span>(<span class="ident">EitherCart::A</span>)
+        }
+    }
+    <span class="doccomment">/// Helper function allowing one to wrap the cart type `C` in an [`EitherCart`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function wraps the cart into the `B` variant. To wrap it into the</span>
+    <span class="doccomment">/// `A` variant, use [`Self::wrap_cart_in_either_a()`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For an example, see [`EitherCart`].</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wrap_cart_in_either_b</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>, <span class="ident">EitherCart</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">unsafe</span> {
+            <span class="comment">// safe because the cart is preserved, just wrapped</span>
+            <span class="self">self</span>.<span class="ident">replace_cart</span>(<span class="ident">EitherCart::B</span>)
         }
     }
 }

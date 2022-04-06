@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649194674110,
+  "lastUpdate": 1649206291015,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -12623,6 +12623,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/2cdcd0c777ef63accc95ca7b8881f61ea71ea600"
         },
         "date": 1649194655676,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4470980,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e8e77d12f21331ddf210beab1335ffa92df08382",
+          "message": "Minor fixes to yoke docs; publish new yoke/yoke-derive (#1773)\n\n* Move eithercart functions to yoke module\r\n\r\n* Mention more explicitly that the cart type is C\r\n\r\n* Bump yoke to 0.4.1, yoke-derive to 0.4.2",
+          "timestamp": "2022-04-06T00:36:53Z",
+          "tree_id": "5b273b613c7b91e536f252b97e938a92ea200e59",
+          "url": "https://github.com/unicode-org/icu4x/commit/e8e77d12f21331ddf210beab1335ffa92df08382"
+        },
+        "date": 1649205497580,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4470980,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1193250b38d5ad227abd7578a89dc6dca9cae6b4",
+          "message": "Add unicode_ext_value! macro, enabled by new helper ShortVec (#1767)",
+          "timestamp": "2022-04-05T17:49:53-07:00",
+          "tree_id": "23e15ce2ec1af33b8b344681cab7fecc44cf1131",
+          "url": "https://github.com/unicode-org/icu4x/commit/1193250b38d5ad227abd7578a89dc6dca9cae6b4"
+        },
+        "date": 1649206273291,
         "tool": "ndjson",
         "benches": [
           {

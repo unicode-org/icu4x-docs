@@ -110,6 +110,18 @@
 <span id="109">109</span>
 <span id="110">110</span>
 <span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -119,11 +131,24 @@
 <span class="doccomment">//! Read more about data providers: [`icu_provider`]</span>
 
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
+<span class="kw">use</span> <span class="ident">icu_locid</span>::{
+    <span class="ident">subtags</span>::{<span class="ident">Language</span>, <span class="ident">Region</span>, <span class="ident">Script</span>},
+    <span class="ident">LanguageIdentifier</span>,
+};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyAsciiStr</span>;
 <span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroMap</span>, <span class="ident">ZeroSlice</span>};
+
+<span class="comment">// We use raw TinyAsciiStrs for map keys, as we then don&#39;t have to</span>
+<span class="comment">// validate them as subtags on deserialization. Map lookup can be</span>
+<span class="comment">// done even if they are not valid tags (an invalid key will just</span>
+<span class="comment">// become inaccessible).</span>
+<span class="kw">type</span> <span class="ident">UnvalidatedLanguage</span> <span class="op">=</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">UnvalidatedScript</span> <span class="op">=</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">UnvalidatedRegion</span> <span class="op">=</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">UnvalidatedVariant</span> <span class="op">=</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">UnvalidatedValue</span> <span class="op">=</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">7</span><span class="op">&gt;</span>;
 
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">AliasesV1Marker</span> <span class="op">=</span> <span class="string">&quot;locale_canonicalizer/aliases@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
@@ -142,6 +167,7 @@
 <span class="doccomment">/// The algorithm in tr35 is not guaranteed to terminate on data other than what</span>
 <span class="doccomment">/// is currently in CLDR. For this reason, it is not a good idea to attempt to add</span>
 <span class="doccomment">/// or modify aliases for use in this structure.</span>
+<span class="comment">// TODO: Use validated types as value types</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AliasesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Language data not covered by other rules, normally this will be empty.</span>
     <span class="doccomment">/// This is not a map as it&#39;s searched linearly according to the canonicalization rules.</span>
@@ -153,35 +179,35 @@
     <span class="kw">pub</span> <span class="ident">language_variants</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">LanguageIdentifier</span>, <span class="ident">LanguageIdentifier</span>)<span class="op">&gt;</span>,
     <span class="doccomment">/// Sign language and region data.</span>
     <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">sgn_region</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">sgn_region</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">UnvalidatedLanguage</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Two character language codes.</span>
     <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
     <span class="kw">pub</span> <span class="ident">language_len2</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">2</span><span class="op">&gt;</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Three character language codes.</span>
     <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">language_len3</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">language_len3</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">UnvalidatedLanguage</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Scripts.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">script</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">script</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedScript</span>, <span class="ident">UnvalidatedScript</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Alphabetical region codes.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">region_alpha</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">2</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">region_alpha</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">2</span><span class="op">&gt;</span>, <span class="ident">UnvalidatedRegion</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Numeric region codes.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">region_num</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">region_num</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedRegion</span>, <span class="ident">UnvalidatedRegion</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Old regions which map to more than one new region.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">complex_region</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">complex_region</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedRegion</span>, <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">UnvalidatedRegion</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Variants.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">variant</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">variant</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedVariant</span>, <span class="ident">UnvalidatedVariant</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Subdivisions.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">subdivision</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">7</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">7</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">subdivision</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedValue</span>, <span class="ident">UnvalidatedValue</span><span class="op">&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">LikelySubtagsV1Marker</span> <span class="op">=</span> <span class="string">&quot;locale_canonicalizer/likelysubtags@1&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="doccomment">/// This likely subtags data is used for the minimize and maximize operations.</span>
@@ -189,37 +215,35 @@
 <span class="doccomment">/// based upon the rules in</span>
 <span class="doccomment">/// &lt;https://www.unicode.org/reports/tr35/#Likely_Subtags&gt;.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The data is stored in sorted order, allowing for binary search to identify</span>
-<span class="doccomment">/// rules to apply. It is broken down into smaller vectors based upon the rules</span>
+<span class="doccomment">/// The data is stored is broken down into smaller vectors based upon the rules</span>
 <span class="doccomment">/// defined for the likely subtags maximize algorithm.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// For efficiency, only the relevant part of the LanguageIdentifier is stored</span>
-<span class="doccomment">/// for searching. E.g., the `language_script` field is used to store rules for</span>
-<span class="doccomment">/// `LanguageIdentifier` that contain a language and a script, but not a region.</span>
-<span class="doccomment">/// This also allows for space savings by using a `TinyStr4` rather than a full</span>
-<span class="doccomment">/// `LanguageIdentifier`.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LikelySubtagsV1</span> {
+<span class="doccomment">/// for searching and replacing. E.g., the `language_script` field is used to store</span>
+<span class="doccomment">/// rules for `LanguageIdentifier`s that contain a language and a script, but not a</span>
+<span class="doccomment">/// region.</span>
+<span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">prove_covariance_manually</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LikelySubtagsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Language and script.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">language_script</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span>(<span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>), <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">language_script</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, (<span class="ident">UnvalidatedLanguage</span>, <span class="ident">UnvalidatedScript</span>), <span class="ident">Region</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Language and region.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">language_region</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span>(<span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>), <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">language_region</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, (<span class="ident">UnvalidatedLanguage</span>, <span class="ident">UnvalidatedRegion</span>), <span class="ident">Script</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Just language.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">language</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">language</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedLanguage</span>, (<span class="ident">Script</span>, <span class="ident">Region</span>)<span class="op">&gt;</span>,
     <span class="doccomment">/// Script and region.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">script_region</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span>(<span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>, <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>), <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">script_region</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, (<span class="ident">UnvalidatedScript</span>, <span class="ident">UnvalidatedRegion</span>), <span class="ident">Language</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Just script.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">script</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">script</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedScript</span>, (<span class="ident">Language</span>, <span class="ident">Region</span>)<span class="op">&gt;</span>,
     <span class="doccomment">/// Just region.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">region</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span>, <span class="ident">LanguageIdentifier</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serialize&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">region</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">UnvalidatedRegion</span>, (<span class="ident">Language</span>, <span class="ident">Script</span>)<span class="op">&gt;</span>,
     <span class="doccomment">/// Undefined.</span>
-    <span class="attribute">#[<span class="ident">zerofrom</span>(<span class="ident">clone</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">und</span>: <span class="ident">LanguageIdentifier</span>,
+    <span class="kw">pub</span> <span class="ident">und</span>: (<span class="ident">Language</span>, <span class="ident">Script</span>, <span class="ident">Region</span>),
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_locale_canonicalizer" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

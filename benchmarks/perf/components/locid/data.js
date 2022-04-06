@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649206683511,
+  "lastUpdate": 1649209004684,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -27677,6 +27677,78 @@ window.BENCHMARK_DATA = {
             "name": "locale/overview",
             "value": 4158,
             "range": "± 253",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "450e6bc6ae148e40d4938c81d7978a089b9c400a",
+          "message": "Add setters for Unicode Keywords and Transform Fields (#1768)",
+          "timestamp": "2022-04-05T18:16:44-07:00",
+          "tree_id": "d6bf6bd88c2ba346a71e3a319f34272dfc7eff5b",
+          "url": "https://github.com/unicode-org/icu4x/commit/450e6bc6ae148e40d4938c81d7978a089b9c400a"
+        },
+        "date": 1649208207734,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2272,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 3615,
+            "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a52b2f6c2fef2fbaf22aa3b3aec56ac97f3ac42d",
+          "message": "Bump yoke to 0.5.0 (#1776)",
+          "timestamp": "2022-04-06T01:29:35Z",
+          "tree_id": "249cf1a2e80a9e43d6bc9cc12e9e3bb82e8c3a24",
+          "url": "https://github.com/unicode-org/icu4x/commit/a52b2f6c2fef2fbaf22aa3b3aec56ac97f3ac42d"
+        },
+        "date": 1649208989636,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 2252,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 3615,
+            "range": "± 18",
             "unit": "ns/iter"
           }
         ]

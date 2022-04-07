@@ -111,8 +111,6 @@
 <span id="110">110</span>
 <span id="111">111</span>
 <span id="112">112</span>
-<span id="113">113</span>
-<span id="114">114</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -124,12 +122,11 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DateTimeFormatError</span> <span class="kw">as</span> <span class="ident">Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::fields</span>::{<span class="self">self</span>, <span class="ident">FieldSymbol</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pattern</span>::{<span class="ident">runtime::Pattern</span>, <span class="ident">PatternItem</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::raw</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">raw</span>, <span class="ident">FormattedTimeZone</span>};
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::datetime</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::time_zone</span>;
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FormattedZonedDateTime</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="ident">T</span><span class="op">&gt;</span>
@@ -217,12 +214,11 @@
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>());
 
     <span class="kw">match</span> <span class="ident">field</span>.<span class="ident">symbol</span> {
-        <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">_time_zone</span>) =&gt; <span class="ident">time_zone::write_field</span>(
-            <span class="ident">field</span>,
-            <span class="kw-2">&amp;</span><span class="ident">zoned_datetime_format</span>.<span class="ident">time_zone_format</span>,
-            <span class="ident">loc_datetime</span>.<span class="ident">datetime</span>(),
-            <span class="ident">w</span>,
-        )<span class="question-mark">?</span>,
+        <span class="ident">FieldSymbol::TimeZone</span>(<span class="ident">_time_zone</span>) =&gt; <span class="ident">FormattedTimeZone</span> {
+            <span class="ident">time_zone_format</span>: <span class="kw-2">&amp;</span><span class="ident">zoned_datetime_format</span>.<span class="ident">time_zone_format</span>,
+            <span class="ident">time_zone</span>: <span class="ident">loc_datetime</span>.<span class="ident">datetime</span>(),
+        }
+        .<span class="ident">write_to</span>(<span class="ident">w</span>)<span class="question-mark">?</span>,
         <span class="kw">_</span> =&gt; <span class="ident">datetime::write_field</span>(<span class="ident">pattern</span>, <span class="ident">field</span>, <span class="ident">symbols</span>, <span class="ident">loc_datetime</span>, <span class="ident">w</span>)<span class="question-mark">?</span>,
     }
     <span class="prelude-val">Ok</span>(())

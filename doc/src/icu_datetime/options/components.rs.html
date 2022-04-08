@@ -732,6 +732,22 @@
 <span id="727">727</span>
 <span id="728">728</span>
 <span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -781,7 +797,7 @@
 <span class="doccomment">//! let bag = components::Bag {</span>
 <span class="doccomment">//!     year: Some(components::Year::Numeric),</span>
 <span class="doccomment">//!     month: Some(components::Month::Long),</span>
-<span class="doccomment">//!     day: Some(components::Numeric::Numeric),</span>
+<span class="doccomment">//!     day: Some(components::Day::NumericDayOfMonth),</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     hour: Some(components::Numeric::TwoDigit),</span>
 <span class="doccomment">//!     minute: Some(components::Numeric::TwoDigit),</span>
@@ -829,8 +845,8 @@
     <span class="kw">pub</span> <span class="ident">month</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Month</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Include the week number, such as &quot;51st&quot; or &quot;51&quot; for week 51.</span>
     <span class="kw">pub</span> <span class="ident">week</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Week</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Include the day, such as &quot;07&quot; or &quot;7&quot;.</span>
-    <span class="kw">pub</span> <span class="ident">day</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Numeric</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Include the day of the month/year, such as &quot;07&quot; or &quot;7&quot;.</span>
+    <span class="kw">pub</span> <span class="ident">day</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Day</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Include the weekday, such as &quot;Wednesday&quot; or &quot;Wed&quot;.</span>
     <span class="kw">pub</span> <span class="ident">weekday</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Text</span><span class="op">&gt;</span>,
 
@@ -932,18 +948,20 @@
         }
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">day</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">day</span> {
-            <span class="comment">// TODO(#591,#592) Unimplemented day fields:</span>
+            <span class="comment">// TODO(#591) Unimplemented day fields:</span>
             <span class="comment">// D - Day of year</span>
-            <span class="comment">// F - Day of week in month</span>
             <span class="comment">// g - Modified Julian day.</span>
             <span class="ident">fields</span>.<span class="ident">push</span>(<span class="ident">Field</span> {
-                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::Day</span>(<span class="ident">fields::Day::DayOfMonth</span>),
+                <span class="ident">symbol</span>: <span class="ident">FieldSymbol::Day</span>(<span class="kw">match</span> <span class="ident">day</span> {
+                    <span class="ident">Day::NumericDayOfMonth</span> <span class="op">|</span> <span class="ident">Day::TwoDigitDayOfMonth</span> =&gt; <span class="ident">fields::Day::DayOfMonth</span>,
+                    <span class="ident">Day::DayOfWeekInMonth</span> =&gt; <span class="ident">fields::Day::DayOfWeekInMonth</span>,
+                }),
                 <span class="ident">length</span>: <span class="kw">match</span> <span class="ident">day</span> {
-                    <span class="comment">// Day of month (numeric).</span>
-                    <span class="comment">// d    1 	  Numeric: minimum digits</span>
-                    <span class="comment">// dd   01 	  Numeric: 2 digits, zero pad if needed</span>
-                    <span class="ident">Numeric::Numeric</span> =&gt; <span class="ident">FieldLength::One</span>,
-                    <span class="ident">Numeric::TwoDigit</span> =&gt; <span class="ident">FieldLength::TwoDigit</span>,
+                    <span class="comment">// d    1 	  Numeric day of month: minimum digits</span>
+                    <span class="comment">// dd   01 	  Numeric day of month: 2 digits, zero pad if needed</span>
+                    <span class="comment">// F    1  	  Numeric day of week in month: minimum digits</span>
+                    <span class="ident">Day::NumericDayOfMonth</span> <span class="op">|</span> <span class="ident">Day::DayOfWeekInMonth</span> =&gt; <span class="ident">FieldLength::One</span>,
+                    <span class="ident">Day::TwoDigitDayOfMonth</span> =&gt; <span class="ident">FieldLength::TwoDigit</span>,
                 },
             });
         }
@@ -1157,6 +1175,22 @@
     <span class="ident">TwoDigitWeekOfYear</span>,
 }
 
+<span class="doccomment">/// Options for displaying the current day of the month or year.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Copy</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>,
+    <span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>),
+    <span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)
+)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Day</span> {
+    <span class="doccomment">/// The numeric value of the day of month, such as the &quot;2&quot; in July 2 1984.</span>
+    <span class="ident">NumericDayOfMonth</span>,
+    <span class="doccomment">/// The two digit value of the day of month, such as the &quot;02&quot; in 1984-07-02.</span>
+    <span class="ident">TwoDigitDayOfMonth</span>,
+    <span class="doccomment">/// The day of week in this month, such as the &quot;2&quot; in 2nd Wednesday of July.</span>
+    <span class="ident">DayOfWeekInMonth</span>,
+}
+
 <span class="doccomment">/// Options for displaying a time zone for the `components::`[`Bag`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Note that the initial implementation is focusing on only supporting ECMA-402 compatible</span>
@@ -1293,13 +1327,11 @@
                 <span class="ident">FieldSymbol::Day</span>(<span class="ident">day</span>) =&gt; {
                     <span class="ident">bag</span>.<span class="ident">day</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">day</span> {
                         <span class="ident">fields::Day::DayOfMonth</span> =&gt; <span class="kw">match</span> <span class="ident">field</span>.<span class="ident">length</span> {
-                            <span class="ident">FieldLength::TwoDigit</span> =&gt; <span class="ident">Numeric::TwoDigit</span>,
-                            <span class="kw">_</span> =&gt; <span class="ident">Numeric::Numeric</span>,
+                            <span class="ident">FieldLength::TwoDigit</span> =&gt; <span class="ident">Day::TwoDigitDayOfMonth</span>,
+                            <span class="kw">_</span> =&gt; <span class="ident">Day::NumericDayOfMonth</span>,
                         },
                         <span class="ident">fields::Day::DayOfYear</span> =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;fields::Day::DayOfYear #591&quot;</span>),
-                        <span class="ident">fields::Day::DayOfWeekInMonth</span> =&gt; {
-                            <span class="macro">unimplemented!</span>(<span class="string">&quot;fields::Day::DayOfWeekInMonth #592&quot;</span>)
-                        }
+                        <span class="ident">fields::Day::DayOfWeekInMonth</span> =&gt; <span class="ident">Day::DayOfWeekInMonth</span>,
                         <span class="ident">fields::Day::ModifiedJulianDay</span> =&gt; {
                             <span class="macro">unimplemented!</span>(<span class="string">&quot;fields::Day::ModifiedJulianDay&quot;</span>)
                         }
@@ -1421,7 +1453,7 @@
             <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">Year::Numeric</span>),
             <span class="ident">month</span>: <span class="prelude-val">Some</span>(<span class="ident">Month::Long</span>),
             <span class="ident">week</span>: <span class="prelude-val">Some</span>(<span class="ident">Week::WeekOfMonth</span>),
-            <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
+            <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">Day::NumericDayOfMonth</span>),
 
             <span class="ident">hour</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
             <span class="ident">minute</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
@@ -1448,7 +1480,7 @@
         <span class="kw">let</span> <span class="ident">bag</span> <span class="op">=</span> <span class="ident">Bag</span> {
             <span class="ident">year</span>: <span class="prelude-val">Some</span>(<span class="ident">Year::Numeric</span>),
             <span class="ident">month</span>: <span class="prelude-val">Some</span>(<span class="ident">Month::TwoDigit</span>),
-            <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">Numeric::Numeric</span>),
+            <span class="ident">day</span>: <span class="prelude-val">Some</span>(<span class="ident">Day::NumericDayOfMonth</span>),
             ..<span class="ident">Default::default</span>()
         };
         <span class="macro">assert_eq!</span>(

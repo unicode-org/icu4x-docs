@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1649424395483,
+  "lastUpdate": 1649790982645,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -32087,6 +32087,132 @@ window.BENCHMARK_DATA = {
             "name": "plurals/pluralrules/overview",
             "value": 17226,
             "range": "± 475",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6590b5ddaabab6666592224037f3eb2cab2c4ccb",
+          "message": "ZeroCopy aliases (#1777)",
+          "timestamp": "2022-04-08T18:35:53+02:00",
+          "tree_id": "e1f9b3f329e408e693c7b91f6f13c2c468c08b44",
+          "url": "https://github.com/unicode-org/icu4x/commit/6590b5ddaabab6666592224037f3eb2cab2c4ccb"
+        },
+        "date": 1649436323118,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 827,
+            "range": "± 37",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 6202,
+            "range": "± 373",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 16434,
+            "range": "± 1200",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ebf0a95ec52e69d0fbbbcb3682396dbd8c597051",
+          "message": "Add note about Copy Error types to style guide (#1787)",
+          "timestamp": "2022-04-08T17:14:13-07:00",
+          "tree_id": "42000b85cd05045468dc930570c784e2113c6a08",
+          "url": "https://github.com/unicode-org/icu4x/commit/ebf0a95ec52e69d0fbbbcb3682396dbd8c597051"
+        },
+        "date": 1649463776870,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 778,
+            "range": "± 67",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5028,
+            "range": "± 354",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 14349,
+            "range": "± 1089",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "samchen61661@gmail.com",
+            "name": "samchen",
+            "username": "samchen61661"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d05b102ea5530c87da04178f942f002cfe10042d",
+          "message": "Replace metazones with a more compact identifier (#1782)\n\n* Replace metazones with a more compact identifier\r\n\r\n* fix tests",
+          "timestamp": "2022-04-12T12:07:25-07:00",
+          "tree_id": "6a43c1200ee7c98dd00fcba3c6a95d105e6a770d",
+          "url": "https://github.com/unicode-org/icu4x/commit/d05b102ea5530c87da04178f942f002cfe10042d"
+        },
+        "date": 1649790966689,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "plurals/operands/overview",
+            "value": 758,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/parser/overview",
+            "value": 5088,
+            "range": "± 14",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "plurals/pluralrules/overview",
+            "value": 13740,
+            "range": "± 63",
             "unit": "ns/iter"
           }
         ]

@@ -765,6 +765,20 @@
 <span id="760">760</span>
 <span id="761">761</span>
 <span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -781,6 +795,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter::symbols</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
@@ -1000,10 +1015,7 @@
 <span class="kw">impl</span> <span class="ident">SegmenterRuleProvider</span> {
     <span class="doccomment">/// Create a new [`Self`] given a filesystem directory. See [module-level documentation](crate)</span>
     <span class="doccomment">/// for its usage.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="ident">segmenter_data_root</span>: <span class="ident">P</span>,
-        <span class="ident">uprops_root</span>: <span class="ident">P</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">segmenter_data_root</span>: <span class="ident">P</span>, <span class="ident">uprops_root</span>: <span class="ident">P</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">segmenter_data_root</span> <span class="op">=</span> <span class="ident">segmenter_data_root</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">uprops_root</span> <span class="op">=</span> <span class="ident">uprops_root</span>.<span class="ident">into</span>();
 
@@ -1408,6 +1420,22 @@
             <span class="ident">eot_property</span>: (<span class="ident">property_length</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>,
             <span class="ident">complex_property</span>: <span class="ident">complex_property</span> <span class="kw">as</span> <span class="ident">u8</span>,
         })
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SegmenterRuleProvider</span> {
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">eyre::ErrReport</span>;
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+        <span class="ident">SegmenterRuleProvider::try_new</span>(
+            <span class="ident">options</span>
+                .<span class="ident">segmenter_data_root</span>
+                .<span class="ident">as_ref</span>()
+                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;SegmenterRuleProvider requires segmenter_data_root&quot;</span>))<span class="question-mark">?</span>,
+            <span class="ident">options</span>
+                .<span class="ident">uprops_root</span>
+                .<span class="ident">as_ref</span>()
+                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;SegmenterRuleProvider requires uprops_root&quot;</span>))<span class="question-mark">?</span>,
+        )
     }
 }
 

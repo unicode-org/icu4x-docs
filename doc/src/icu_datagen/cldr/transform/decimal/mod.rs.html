@@ -213,6 +213,18 @@
 <span id="208">208</span>
 <span id="209">209</span>
 <span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -242,9 +254,9 @@
         <span class="ident">RwLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyStr8</span>, <span class="ident">cldr_serde::numbering_systems::NumberingSystem</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NumbersProvider</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">cldr_paths</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">NumbersProvider</span> {
+    <span class="doccomment">/// Constructs an instance from paths to source data.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">cldr_paths</span>: <span class="kw-2">&amp;</span>(<span class="kw">impl</span> <span class="ident">CldrPaths</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>)) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">numbers_path</span>: <span class="ident">cldr_paths</span>.<span class="ident">cldr_numbers</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>),
             <span class="ident">numbering_systems_path</span>: <span class="ident">cldr_paths</span>
@@ -253,6 +265,18 @@
                 .<span class="ident">join</span>(<span class="string">&quot;numberingSystems.json&quot;</span>),
             <span class="ident">cldr_numbering_systems_data</span>: <span class="ident">RwLock::new</span>(<span class="prelude-val">None</span>),
         })
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NumbersProvider</span> {
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">eyre::ErrReport</span>;
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="ident">NumbersProvider::try_new</span>(
+            <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">options</span>
+                .<span class="ident">cldr_paths</span>
+                .<span class="ident">as_ref</span>()
+                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;NumbersProvider requires cldr_paths&quot;</span>))<span class="question-mark">?</span>,
+        )
     }
 }
 
@@ -409,7 +433,7 @@
     <span class="kw">use</span> <span class="ident">icu_locid::locale</span>;
 
     <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">NumbersProvider::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">CldrPaths</span>).<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">NumbersProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">unwrap</span>();
 
     <span class="kw">let</span> <span class="ident">ar_decimal</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {

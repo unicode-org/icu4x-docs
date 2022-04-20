@@ -135,8 +135,6 @@
 <span id="130">130</span>
 <span id="131">131</span>
 <span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -147,11 +145,11 @@
 <span class="doccomment">//! `&lt;https://github.com/unicode-org/cldr-json/blob/main/cldr-json/cldr-core/supplemental/weekData.json&gt;`</span>
 
 <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
+<span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">region</span>, <span class="ident">subtags::Region</span>};
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Deserializer</span>};
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::num::ParseIntError</span>;
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
-<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr</span>, <span class="ident">TinyStr4</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;camelCase&quot;</span>)]</span>
@@ -189,15 +187,15 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Territory</span> {
     <span class="comment">// A territory string, e.g. &quot;AD&quot; for Andorra.</span>
-    <span class="ident">Region</span>(<span class="ident">TinyStr4</span>),
+    <span class="ident">Region</span>(<span class="ident">Region</span>),
     <span class="comment">// An alternative variant for a given territory (e.g. the first day of the</span>
     <span class="comment">// week can be sunday rather than monday GB). The string is set to the region</span>
     <span class="comment">// with the &quot;-alt-variant&quot; suffix present in the json.</span>
-    <span class="ident">AltVariantRegion</span>(<span class="ident">TinyStr4</span>),
+    <span class="ident">AltVariantRegion</span>(<span class="ident">Region</span>),
 }
 
 <span class="doccomment">/// The string used to represent the default territory.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_TERRITORY</span>: <span class="ident">Territory</span> <span class="op">=</span> <span class="ident">Territory::Region</span>(<span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;001&quot;</span>));
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_TERRITORY</span>: <span class="ident">Territory</span> <span class="op">=</span> <span class="ident">Territory::Region</span>(<span class="macro">region!</span>(<span class="string">&quot;001&quot;</span>));
 
 <span class="doccomment">/// Suffix used to denote alternative week data variants for a given territory (e.g. English BC/AD v English BCE/CE).</span>
 <span class="kw">const</span> <span class="ident">ALT_VARIANT_SUFFIX</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;-alt-variant&quot;</span>;
@@ -225,14 +223,12 @@
             {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">prefix</span>) <span class="op">=</span> <span class="ident">s</span>.<span class="ident">strip_suffix</span>(<span class="ident">ALT_VARIANT_SUFFIX</span>) {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Territory::AltVariantRegion</span>(
-                        <span class="ident">prefix</span>
-                            .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TinyStr4</span><span class="op">&gt;</span>()
-                            .<span class="ident">map_err</span>(<span class="ident">serde::de::Error::custom</span>)<span class="question-mark">?</span>,
+                        <span class="ident">prefix</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Region</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">serde::de::Error::custom</span>)<span class="question-mark">?</span>,
                     ));
                 }
 
                 <span class="prelude-val">Ok</span>(<span class="ident">Territory::Region</span>(
-                    <span class="ident">s</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TinyStr4</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">serde::de::Error::custom</span>)<span class="question-mark">?</span>,
+                    <span class="ident">s</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Region</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">serde::de::Error::custom</span>)<span class="question-mark">?</span>,
                 ))
             }
         }

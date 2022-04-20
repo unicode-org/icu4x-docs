@@ -111,6 +111,7 @@
 <span id="106">106</span>
 <span id="107">107</span>
 <span id="108">108</span>
+<span id="109">109</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -165,7 +166,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`StaticDataProvider`]: crate::StaticDataProvider</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlobDataProvider</span> {
-    <span class="ident">data</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ResourceKeyHash</span>, <span class="ident">str</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span>
+    <span class="ident">data</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ResourceKeyHash</span>, [<span class="ident">u8</span>], [<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">BlobDataProvider</span> {
@@ -185,7 +187,7 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;export&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span> <span class="comment">// See #1771, we don&#39;t want this to be a publicly visible API</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="ident">ResourceKeyHash</span>, <span class="ident">str</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="ident">ResourceKeyHash</span>, [<span class="ident">u8</span>], [<span class="ident">u8</span>]<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>()
     }
 }
@@ -204,7 +206,7 @@
             <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_yoked_buffer</span>(
                 <span class="self">self</span>.<span class="ident">data</span>
                     .<span class="ident">try_project_cloned_with_capture</span>((<span class="ident">key</span>, <span class="ident">req</span>), <span class="op">|</span><span class="ident">zm</span>, (<span class="ident">key</span>, <span class="ident">req</span>), <span class="kw">_</span><span class="op">|</span> {
-                        <span class="ident">zm</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">get_hash</span>(), <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">write_to_string</span>())
+                        <span class="ident">zm</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">get_hash</span>(), <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">write_to_string</span>().<span class="ident">as_bytes</span>())
                             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
                                 <span class="kw">match</span> <span class="ident">e</span> {
                                     <span class="ident">KeyError::K0</span> =&gt; <span class="ident">DataErrorKind::MissingResourceKey</span>,

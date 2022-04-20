@@ -198,29 +198,6 @@
 <span id="193">193</span>
 <span id="194">194</span>
 <span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -237,10 +214,8 @@
 <span class="kw">use</span> <span class="ident">icu_datetime::provider::week_data</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">tinystr::TinyStr4</span>;
 
 <span class="doccomment">/// A data provider reading from CLDR JSON weekData files.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -300,7 +275,7 @@
 <span class="kw">impl</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WeekDataProvider</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::needless_collect</span>)]</span> <span class="comment">// https://github.com/rust-lang/rust-clippy/issues/7526</span>
     <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">regions</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TinyStr4</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>
+        <span class="kw">let</span> <span class="ident">regions</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">week_data</span>
             .<span class="ident">min_days</span>
             .<span class="ident">keys</span>()
@@ -310,11 +285,9 @@
                 <span class="ident">Territory::Region</span>(<span class="ident">r</span>) =&gt; <span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">r</span>)),
                 <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
             })
+            .<span class="ident">map</span>(<span class="ident">ResourceOptions::temp_for_region</span>)
             .<span class="ident">collect</span>();
-        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">regions</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">ResourceOptions</span> {
-            <span class="ident">variant</span>: <span class="ident">r</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">Cow::Owned</span>(<span class="ident">r</span>.<span class="ident">to_string</span>())),
-            <span class="ident">langid</span>: <span class="prelude-val">None</span>,
-        })))
+        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">regions</span>.<span class="ident">into_iter</span>()))
     }
 }
 
@@ -327,15 +300,8 @@
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
         <span class="kw">let</span> <span class="ident">territory</span> <span class="op">=</span> <span class="ident">req</span>
             .<span class="ident">options</span>
-            .<span class="ident">variant</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Territory</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                <span class="prelude-val">Ok</span>(<span class="ident">Territory::Region</span>(
-                    <span class="ident">TinyStr4::from_bytes</span>(<span class="ident">v</span>.<span class="ident">as_bytes</span>()).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-                        <span class="ident">DataErrorKind::MissingVariant</span>.<span class="ident">with_req</span>(<span class="ident">WeekDataV1Marker::KEY</span>, <span class="ident">req</span>)
-                    })<span class="question-mark">?</span>,
-                ))
-            })
+            .<span class="ident">region</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Territory</span>, <span class="ident">DataError</span><span class="op">&gt;</span> { <span class="prelude-val">Ok</span>(<span class="ident">Territory::Region</span>(<span class="ident">v</span>)) })
             .<span class="ident">transpose</span>()<span class="question-mark">?</span>
             .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DEFAULT_TERRITORY</span>.<span class="ident">clone</span>());
 
@@ -370,17 +336,14 @@
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">basic_cldr_week_data</span>() {
     <span class="kw">use</span> <span class="ident">icu_calendar::types::IsoWeekday</span>;
-    <span class="kw">use</span> <span class="ident">icu_locid::langid</span>;
+    <span class="kw">use</span> <span class="ident">icu_locid::region</span>;
 
     <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">WeekDataProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">unwrap</span>();
 
     <span class="kw">let</span> <span class="ident">default_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                <span class="ident">variant</span>: <span class="prelude-val">None</span>,
-                <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;en&quot;</span>)), <span class="comment">// We don&#39;t actually care about langid.</span>
-            },
+            <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()
@@ -391,10 +354,7 @@
 
     <span class="kw">let</span> <span class="ident">fr_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                <span class="ident">variant</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;FR&quot;</span>.<span class="ident">into</span>()),
-                <span class="ident">langid</span>: <span class="prelude-val">None</span>,
-            },
+            <span class="ident">options</span>: <span class="ident">ResourceOptions::temp_for_region</span>(<span class="prelude-val">Some</span>(<span class="macro">region!</span>(<span class="string">&quot;FR&quot;</span>))),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()
@@ -405,10 +365,7 @@
 
     <span class="kw">let</span> <span class="ident">iq_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                <span class="ident">variant</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;IQ&quot;</span>.<span class="ident">into</span>()),
-                <span class="ident">langid</span>: <span class="prelude-val">Some</span>(<span class="macro">langid!</span>(<span class="string">&quot;fr-FR&quot;</span>)),
-            },
+            <span class="ident">options</span>: <span class="ident">ResourceOptions::temp_for_region</span>(<span class="prelude-val">Some</span>(<span class="macro">region!</span>(<span class="string">&quot;IQ&quot;</span>))),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()
@@ -423,10 +380,7 @@
 
     <span class="kw">let</span> <span class="ident">gg_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions</span> {
-                <span class="ident">variant</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;GG&quot;</span>.<span class="ident">into</span>()),
-                <span class="ident">langid</span>: <span class="prelude-val">None</span>,
-            },
+            <span class="ident">options</span>: <span class="ident">ResourceOptions::temp_for_region</span>(<span class="prelude-val">Some</span>(<span class="macro">region!</span>(<span class="string">&quot;GG&quot;</span>))),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()

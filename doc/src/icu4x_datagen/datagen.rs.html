@@ -486,18 +486,6 @@
 <span id="481">481</span>
 <span id="482">482</span>
 <span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -507,11 +495,10 @@
 
 <span class="kw">use</span> <span class="ident">icu_datagen::cldr::CldrPathsAllInOne</span>;
 <span class="kw">use</span> <span class="ident">icu_datagen</span>::{<span class="ident">get_all_keys</span>, <span class="ident">DatagenOptions</span>};
-
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDynProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::export::DataExporter</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::hello_world</span>::{<span class="ident">HelloWorldProvider</span>, <span class="ident">HelloWorldV1Marker</span>};
+<span class="kw">use</span> <span class="ident">icu_provider::hello_world::HelloWorldV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::serde::SerializeMarker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_adapters::filter::Filterable</span>;
@@ -802,76 +789,65 @@
         <span class="ident">filtered</span>
     };
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">matches</span>
-        .<span class="ident">is_present</span>(<span class="string">&quot;HELLO_WORLD&quot;</span>)
-    {
-        <span class="ident">Box::new</span>(<span class="ident">HelloWorldProvider::new_with_placeholder_data</span>())
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
+        <span class="ident">DatagenOptions::for_test</span>()
     } <span class="kw">else</span> {
-        <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident">CldrPathsAllInOne</span> {
-            <span class="ident">cldr_json_root</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">_tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
+        <span class="ident">DatagenOptions</span> {
+            <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">CldrPathsAllInOne</span> {
+                <span class="ident">cldr_json_root</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">_tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;download&quot;</span>))]</span>
+                    <span class="macro">eyre::bail!</span>(<span class="string">&quot;--cldr-tag requires the download feature&quot;</span>);
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;download&quot;</span>)]</span>
+                    <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>()<span class="question-mark">?</span>
+                        .<span class="ident">cached_path_with_options</span>(
+                            <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                                <span class="string">&quot;https://github.com/unicode-org/cldr-json/releases/download/{}/cldr-{}-json-{}.zip&quot;</span>,
+                                <span class="ident">_tag</span>, <span class="ident">_tag</span>, <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>)),
+                            <span class="kw-2">&amp;</span><span class="ident">cached_path::Options::default</span>().<span class="ident">extract</span>(),
+                        )<span class="question-mark">?</span>
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>) {
+                    <span class="ident">PathBuf::from</span>(<span class="ident">path</span>)
+                } <span class="kw">else</span> {
+                    <span class="macro">eyre::bail!</span>(
+                        <span class="string">&quot;Either --cldr-tag or --cldr-root or --input-from-testdata must be specified&quot;</span>,
+                    )
+                },
+                <span class="ident">locale_subset</span>: <span class="ident">matches</span>
+                    .<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>)
+                    .<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>)
+                    .<span class="ident">to_string</span>(),
+            })),
+            <span class="ident">uprops_root</span>: <span class="prelude-val">Some</span>(<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">_tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_TAG&quot;</span>) {
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;download&quot;</span>))]</span>
-                <span class="macro">eyre::bail!</span>(<span class="string">&quot;--cldr-tag requires the download feature&quot;</span>);
+                <span class="macro">eyre::bail!</span>(<span class="string">&quot;--uprops-tag requires the download feature&quot;</span>);
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;download&quot;</span>)]</span>
                 <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>()<span class="question-mark">?</span>
                     .<span class="ident">cached_path_with_options</span>(
-                        <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                            <span class="string">&quot;https://github.com/unicode-org/cldr-json/releases/download/{}/cldr-{}-json-{}.zip&quot;</span>,
-                            <span class="ident">_tag</span>, <span class="ident">_tag</span>, <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>)),
-                        <span class="kw-2">&amp;</span><span class="ident">cached_path::Options::default</span>().<span class="ident">extract</span>(),
+                        <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;https://github.com/unicode-org/icu/releases/download/{}/icuexportdata_uprops_full.zip&quot;</span>, <span class="ident">_tag</span>),
+                        <span class="kw-2">&amp;</span><span class="ident">cached_path::Options::default</span>().<span class="ident">extract</span>()
                     )<span class="question-mark">?</span>
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>) {
+                    .<span class="ident">join</span>(<span class="string">&quot;icuexportdata_uprops_full&quot;</span>)
+                    .<span class="ident">join</span>(<span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_MODE&quot;</span>).<span class="ident">unwrap</span>())
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_ROOT&quot;</span>) {
                 <span class="ident">PathBuf::from</span>(<span class="ident">path</span>)
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
-                <span class="ident">icu_testdata::paths::cldr_json_root</span>()
             } <span class="kw">else</span> {
                 <span class="macro">eyre::bail!</span>(
-                    <span class="string">&quot;Either --cldr-tag or --cldr-root or --input-from-testdata must be specified&quot;</span>,
+                    <span class="string">&quot;Either --uprops-tag or --uprops-root or --input-from-testdata must be specified&quot;</span>,
                 )
-            },
-            <span class="ident">locale_subset</span>: <span class="ident">matches</span>
-                .<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>)
-                .<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>)
-                .<span class="ident">to_string</span>(),
-        };
-
-        <span class="kw">let</span> <span class="ident">uprops_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">_tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_TAG&quot;</span>) {
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;download&quot;</span>))]</span>
-            <span class="macro">eyre::bail!</span>(<span class="string">&quot;--uprops-tag requires the download feature&quot;</span>);
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;download&quot;</span>)]</span>
-            <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>()<span class="question-mark">?</span>
-                .<span class="ident">cached_path_with_options</span>(
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;https://github.com/unicode-org/icu/releases/download/{}/icuexportdata_uprops_full.zip&quot;</span>, <span class="ident">_tag</span>),
-                    <span class="kw-2">&amp;</span><span class="ident">cached_path::Options::default</span>().<span class="ident">extract</span>()
-                )<span class="question-mark">?</span>
-                .<span class="ident">join</span>(<span class="string">&quot;icuexportdata_uprops_full&quot;</span>)
-                .<span class="ident">join</span>(<span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_MODE&quot;</span>).<span class="ident">unwrap</span>())
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_ROOT&quot;</span>) {
-            <span class="ident">PathBuf::from</span>(<span class="ident">path</span>)
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
-            <span class="ident">icu_testdata::paths::uprops_toml_root</span>()
-        } <span class="kw">else</span> {
-            <span class="macro">eyre::bail!</span>(
-                <span class="string">&quot;Either --uprops-tag or --uprops-root or --input-from-testdata must be specified&quot;</span>,
-            )
-        };
-
-        <span class="kw">let</span> <span class="ident">segmenter_data_root</span> <span class="op">=</span> <span class="ident">icu_datagen::segmenter::segmenter_data_root</span>();
-
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">DatagenOptions</span> {
-            <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">cldr_paths</span>)),
-            <span class="ident">uprops_root</span>: <span class="prelude-val">Some</span>(<span class="ident">uprops_root</span>),
-            <span class="ident">segmenter_data_root</span>: <span class="prelude-val">Some</span>(<span class="ident">segmenter_data_root</span>),
-        };
-        <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="macro">icu_datagen::create_datagen_provider!</span>(<span class="ident">options</span>);
-
-        <span class="ident">Box::new</span>(<span class="ident">p</span>)
+            }),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
+            <span class="ident">segmenter_data_root</span>: <span class="prelude-val">Some</span>(<span class="ident">icu_datagen::segmenter::segmenter_data_root</span>()),
+        }
     };
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="ident">Box::new</span>(<span class="macro">icu_datagen::create_datagen_provider!</span>(<span class="ident">options</span>));
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">locales</span>) <span class="op">=</span> <span class="ident">selected_locales</span>.<span class="ident">as_ref</span>() {
         <span class="ident">provider</span> <span class="op">=</span> <span class="ident">Box::new</span>(
             <span class="ident">provider</span>
                 .<span class="ident">filterable</span>(<span class="string">&quot;icu4x-datagen locales&quot;</span>)
-                .<span class="ident">filter_by_langid_allowlist_strict</span>(<span class="ident">locales</span>),
+                .<span class="ident">filter_by_langid</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">lid</span><span class="op">|</span> <span class="ident">lid</span>.<span class="ident">language</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">locales</span>.<span class="ident">contains</span>(<span class="ident">lid</span>)),
         );
     }
 

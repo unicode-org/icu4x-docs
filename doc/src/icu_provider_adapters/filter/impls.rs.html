@@ -207,12 +207,6 @@
 <span id="202">202</span>
 <span id="203">203</span>
 <span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -271,15 +265,15 @@
     <span class="doccomment">/// // English should not appear in the iterator result:</span>
     <span class="doccomment">/// let supported_langids = provider.supported_options()</span>
     <span class="doccomment">///     .expect(&quot;Should successfully make an iterator of supported locales&quot;)</span>
-    <span class="doccomment">///     .filter_map(|options| options.langid)</span>
+    <span class="doccomment">///     .map(|options| options.get_langid())</span>
     <span class="doccomment">///     .collect::&lt;Vec&lt;LanguageIdentifier&gt;&gt;();</span>
     <span class="doccomment">/// assert!(supported_langids.contains(&amp;langid!(&quot;de&quot;)));</span>
     <span class="doccomment">/// assert!(!supported_langids.contains(&amp;langid!(&quot;en&quot;)));</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">filter_by_langid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
-        <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">LanguageIdentifier</span>) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
-    ) -&gt; <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>
+        <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">LanguageIdentifier</span>) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;a</span>,
+    ) -&gt; <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="lifetime">&#39;a</span>,
     {
@@ -290,10 +284,7 @@
                 <span class="kw">if</span> <span class="op">!</span>(<span class="ident">old_predicate</span>)(<span class="ident">request</span>) {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
-                <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">langid</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">langid</span>) =&gt; <span class="ident">predicate</span>(<span class="ident">langid</span>),
-                    <span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,
-                }
+                <span class="ident">predicate</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">get_langid</span>())
             }),
             <span class="ident">filter_name</span>: <span class="self">self</span>.<span class="ident">filter_name</span>,
         }
@@ -360,10 +351,7 @@
                 <span class="kw">if</span> <span class="op">!</span>(<span class="ident">old_predicate</span>)(<span class="ident">request</span>) {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
-                <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">langid</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">langid</span>) =&gt; <span class="ident">allowlist</span>.<span class="ident">contains</span>(<span class="ident">langid</span>),
-                    <span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,
-                }
+                <span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">is_langid_und</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">allowlist</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">get_langid</span>())
             }),
             <span class="ident">filter_name</span>: <span class="self">self</span>.<span class="ident">filter_name</span>,
         }
@@ -406,7 +394,7 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">require_langid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
-    ) -&gt; <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">RequestFilterDataProvider</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="lifetime">&#39;a</span>,
     {
@@ -417,7 +405,7 @@
                 <span class="kw">if</span> <span class="op">!</span>(<span class="ident">old_predicate</span>)(<span class="ident">request</span>) {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
-                <span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">langid</span>.<span class="ident">is_some</span>()
+                <span class="op">!</span><span class="ident">request</span>.<span class="ident">options</span>.<span class="ident">is_langid_und</span>()
             }),
             <span class="ident">filter_name</span>: <span class="self">self</span>.<span class="ident">filter_name</span>,
         }

@@ -272,11 +272,38 @@
 <span id="267">267</span>
 <span id="268">268</span>
 <span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uprops::uprops_serde</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::DatagenOptions</span>;
 <span class="kw">use</span> <span class="ident">icu_casemapping::provider</span>::{<span class="ident">CaseMappingV1</span>, <span class="ident">CaseMappingV1Marker</span>};
 <span class="kw">use</span> <span class="ident">icu_casemapping::CaseMappingInternals</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrieHeader</span>;
@@ -284,17 +311,24 @@
 
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std::fs</span>;
-<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CaseMappingDataProvider</span> {
     <span class="ident">case_mapping</span>: <span class="ident">CaseMappingInternals</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// A data provider reading from .toml files produced by the ICU4C icuwriteuprops tool.</span>
-<span class="kw">impl</span> <span class="ident">CaseMappingDataProvider</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">path</span>: <span class="ident">PathBuf</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">DatagenOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CaseMappingDataProvider</span> {
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">DataError</span>;
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">DatagenOptions</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(
+            <span class="ident">options</span>
+                .<span class="ident">uprops_root</span>
+                .<span class="ident">as_ref</span>()
+                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;CaseMappingDataProvider requires uprops root&quot;</span>))<span class="question-mark">?</span>
+                .<span class="ident">join</span>(<span class="string">&quot;ucase.toml&quot;</span>),
+        )
+        .<span class="ident">unwrap</span>();
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="kw">let</span> <span class="ident">toml</span>: <span class="ident">uprops_serde::case::Main</span> <span class="op">=</span> <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>).<span class="ident">unwrap</span>();
 
@@ -336,17 +370,35 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">CaseMappingV1Marker</span><span class="op">&gt;</span>
+    <span class="kw">for</span> <span class="ident">CaseMappingDataProvider</span>
+{
+    <span class="kw">fn</span> <span class="ident">supported_options</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">core::iter::once</span>(<span class="ident">Default::default</span>())))
+    }
+}
+
+<span class="macro">icu_provider::impl_dyn_provider!</span>(
+    <span class="ident">CaseMappingDataProvider</span>,
+    [<span class="ident">CaseMappingV1Marker</span>,],
+    <span class="ident">SERDE_SE</span>,
+    <span class="ident">ITERABLE_SERDE_SE</span>,
+    <span class="ident">DATA_CONVERTER</span>
+);
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uprops::casemapping::CaseMappingDataProvider</span>;
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
     <span class="kw">use</span> <span class="ident">icu_casemapping::CaseMapping</span>;
     <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_simple_mappings</span>() {
-        <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::uprops_toml_root</span>().<span class="ident">join</span>(<span class="string">&quot;ucase.toml&quot;</span>);
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CaseMappingDataProvider::try_new</span>(<span class="ident">root_dir</span>).<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CaseMappingDataProvider::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">DatagenOptions::for_test</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
         <span class="kw">let</span> <span class="ident">case_mapping</span> <span class="op">=</span> <span class="ident">CaseMapping::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>).<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
 
         <span class="comment">// Basic case mapping</span>
@@ -390,8 +442,8 @@
     <span class="comment">// These tests are taken from StringCaseTest::TestCaseConversion in ICU4C.</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_full_mappings</span>() {
-        <span class="kw">let</span> <span class="ident">root_dir</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::uprops_toml_root</span>().<span class="ident">join</span>(<span class="string">&quot;ucase.toml&quot;</span>);
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CaseMappingDataProvider::try_new</span>(<span class="ident">root_dir</span>).<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CaseMappingDataProvider::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">DatagenOptions::for_test</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">case_mapping</span> <span class="op">=</span> <span class="ident">CaseMapping::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>).<span class="ident">expect</span>(<span class="string">&quot;Loading was successful&quot;</span>);
 

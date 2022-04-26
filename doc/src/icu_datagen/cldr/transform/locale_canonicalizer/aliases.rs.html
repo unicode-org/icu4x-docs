@@ -355,83 +355,58 @@
 <span id="350">350</span>
 <span id="351">351</span>
 <span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
-<span id="360">360</span>
-<span id="361">361</span>
-<span id="362">362</span>
-<span id="363">363</span>
-<span id="364">364</span>
-<span id="365">365</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_serde</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::reader::open_reader</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::CldrPaths</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DatagenError</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_locale_canonicalizer::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">language</span>, <span class="ident">subtags</span>, <span class="ident">LanguageIdentifier</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyAsciiStr</span>;
 <span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroMap</span>, <span class="ident">ZeroSlice</span>};
 
 <span class="doccomment">/// A data provider reading from CLDR JSON likely subtags rule files.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AliasesProvider</span> {
-    <span class="ident">path</span>: <span class="ident">PathBuf</span>,
+    <span class="ident">source</span>: <span class="ident">SourceData</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">AliasesProvider</span> {
-    <span class="doccomment">/// Constructs an instance from paths to source data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">cldr_paths</span>: <span class="kw-2">&amp;</span>(<span class="kw">impl</span> <span class="ident">CldrPaths</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>)) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">path</span>: <span class="ident">cldr_paths</span>
-                .<span class="ident">cldr_core</span>()<span class="question-mark">?</span>
-                .<span class="ident">join</span>(<span class="string">&quot;supplemental&quot;</span>)
-                .<span class="ident">join</span>(<span class="string">&quot;aliases.json&quot;</span>),
-        })
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">eyre::ErrReport</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">AliasesProvider::try_new</span>(
-            <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">options</span>
-                .<span class="ident">cldr_paths</span>
-                .<span class="ident">as_ref</span>()
-                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;AliasesProvider requires cldr_paths&quot;</span>))<span class="question-mark">?</span>,
-        )
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SourceData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">SourceData</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">AliasesProvider</span> {
+            <span class="ident">source</span>: <span class="ident">source</span>.<span class="ident">clone</span>(),
+        }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">AliasesV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">AliasesProvider</span> {
     <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">AliasesV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_serde::aliases::Resource</span> <span class="op">=</span> <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">path</span>)<span class="question-mark">?</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::Json</span>(<span class="ident">e</span>, <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">path</span>.<span class="ident">clone</span>())))<span class="question-mark">?</span>;
-
         <span class="comment">// We treat searching for `und` as a request for all data. Other requests</span>
         <span class="comment">// are not currently supported.</span>
-        <span class="kw">if</span> <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
-            <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
-            <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
-                <span class="ident">metadata</span>,
-                <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">AliasesV1::from</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>))),
-            })
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::ExtraneousResourceOptions</span>.<span class="ident">with_req</span>(<span class="ident">AliasesV1Marker::KEY</span>, <span class="ident">req</span>))
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::ExtraneousResourceOptions</span>.<span class="ident">into_error</span>());
         }
+
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">source</span>
+            .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
+            .<span class="ident">cldr_core</span>()
+            .<span class="ident">join</span>(<span class="string">&quot;supplemental&quot;</span>)
+            .<span class="ident">join</span>(<span class="string">&quot;aliases.json&quot;</span>);
+        <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_serde::aliases::Resource</span> <span class="op">=</span> <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DatagenError::from</span>((<span class="ident">e</span>, <span class="ident">path</span>)))<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
+        <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
+        <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
+            <span class="ident">metadata</span>,
+            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">AliasesV1::from</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>))),
+        })
     }
 }
 
@@ -691,8 +666,7 @@
 <span class="kw">fn</span> <span class="ident">test_basic</span>() {
     <span class="kw">use</span> <span class="ident">tinystr::tinystr</span>;
 
-    <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">AliasesProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">AliasesProvider::from</span>(<span class="kw-2">&amp;</span><span class="ident">SourceData::for_test</span>());
     <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">AliasesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())
         .<span class="ident">unwrap</span>()

@@ -84,31 +84,34 @@
 <span id="79">79</span>
 <span id="80">80</span>
 <span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uprops::reader</span>::<span class="kw-2">*</span>;
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DatagenError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uprops::uprops_serde</span>;
-<span class="kw">use</span> <span class="ident">eyre</span>::{<span class="ident">eyre</span>, <span class="ident">WrapErr</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TomlEnumerated</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">uprops_serde::enumerated::EnumeratedPropertyMap</span><span class="op">&gt;</span>;
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">TomlBinary</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">uprops_serde::binary::BinaryProperty</span><span class="op">&gt;</span>;
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_binary_from_dir</span>(<span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="ident">TomlBinary</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_binary_from_dir</span>(<span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TomlBinary</span>, <span class="ident">DatagenError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
     <span class="kw">for</span> <span class="ident">path</span> <span class="kw">in</span> <span class="ident">get_dir_contents</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span> {
         <span class="kw">let</span> <span class="ident">key</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">path</span>
             .<span class="ident">file_stem</span>()
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">to_str</span>())
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;Invalid file name: {:?}&quot;</span>, <span class="ident">path</span>))<span class="question-mark">?</span>
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DatagenError::Custom</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid file name: {:?}&quot;</span>, <span class="ident">path</span>), <span class="prelude-val">None</span>))<span class="question-mark">?</span>
             .<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span> <span class="ident">read_path_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">uprops_serde::binary::Main</span> <span class="op">=</span> <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>)
-            .<span class="ident">wrap_err_with</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Could not parse TOML: {:?}&quot;</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">uprops_serde::binary::Main</span> <span class="op">=</span>
+            <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">toml_obj</span>.<span class="ident">binary_property</span>.<span class="ident">into_iter</span>().<span class="ident">next</span>() {
             <span class="ident">result</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">v</span>);
         }
@@ -116,17 +119,17 @@
     <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_enumerated_from_dir</span>(<span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="ident">TomlEnumerated</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_enumerated_from_dir</span>(<span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TomlEnumerated</span>, <span class="ident">DatagenError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
     <span class="kw">for</span> <span class="ident">path</span> <span class="kw">in</span> <span class="ident">get_dir_contents</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span> {
         <span class="kw">let</span> <span class="ident">key</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">path</span>
             .<span class="ident">file_stem</span>()
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">to_str</span>())
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;Invalid file name: {:?}&quot;</span>, <span class="ident">path</span>))<span class="question-mark">?</span>
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DatagenError::Custom</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid file name: {:?}&quot;</span>, <span class="ident">path</span>), <span class="prelude-val">None</span>))<span class="question-mark">?</span>
             .<span class="ident">to_string</span>();
         <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span> <span class="ident">read_path_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">uprops_serde::enumerated::Main</span> <span class="op">=</span> <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>)
-            .<span class="ident">wrap_err_with</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Could not parse TOML: {:?}&quot;</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">uprops_serde::enumerated::Main</span> <span class="op">=</span>
+            <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">toml_obj</span>.<span class="ident">enum_property</span>.<span class="ident">into_iter</span>().<span class="ident">next</span>() {
             <span class="ident">result</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">v</span>);
         }
@@ -136,21 +139,24 @@
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_script_extensions_from_dir</span>(
     <span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
-) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="ident">uprops_serde::script_extensions::ScriptWithExtensionsProperty</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">uprops_serde::script_extensions::ScriptWithExtensionsProperty</span>, <span class="ident">DatagenError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">root_dir</span>.<span class="ident">join</span>(<span class="string">&quot;scx&quot;</span>);
     <span class="ident">path</span>.<span class="ident">set_extension</span>(<span class="string">&quot;toml&quot;</span>);
     <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span> <span class="ident">read_path_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">uprops_serde::script_extensions::Main</span> <span class="op">=</span>
-        <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>).<span class="ident">wrap_err_with</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Could not parse TOML: {:?}&quot;</span>, <span class="ident">path</span>))<span class="question-mark">?</span>;
+        <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
 
     <span class="ident">toml_obj</span>
         .<span class="ident">script_extensions</span>
         .<span class="ident">into_iter</span>()
         .<span class="ident">next</span>()
         .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="macro">eyre!</span>(
-                <span class="string">&quot;Could not parse Script_Extensions data from TOML {:?}&quot;</span>,
-                <span class="ident">path</span>
+            <span class="ident">DatagenError::Custom</span>(
+                <span class="macro">format!</span>(
+                    <span class="string">&quot;Could not parse Script_Extensions data from TOML {:?}&quot;</span>,
+                    <span class="ident">path</span>
+                ),
+                <span class="prelude-val">None</span>,
             )
         })
 }

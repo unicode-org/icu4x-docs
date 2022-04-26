@@ -240,80 +240,18 @@
 <span id="235">235</span>
 <span id="236">236</span>
 <span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">clap</span>::{<span class="ident">App</span>, <span class="ident">Arg</span>, <span class="ident">ArgGroup</span>};
-<span class="kw">use</span> <span class="ident">icu_datagen</span>::{<span class="ident">get_all_keys</span>, <span class="ident">DatagenOptions</span>};
+<span class="kw">use</span> <span class="ident">icu_datagen</span>::{<span class="ident">get_all_keys</span>, <span class="ident">SourceData</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDynProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen</span>::{<span class="ident">DataConverter</span>, <span class="ident">HeapStatsMarker</span>};
 <span class="kw">use</span> <span class="ident">icu_provider_adapters::filter::Filterable</span>;
 
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="ident">icu_datagen::cldr::CldrPathsAllInOne</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_blob::BlobDataProvider</span>;
 <span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 <span class="kw">use</span> <span class="ident">simple_logger::SimpleLogger</span>;
@@ -322,7 +260,6 @@
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 <span class="kw">use</span> <span class="ident">std::fs</span>;
 <span class="kw">use</span> <span class="ident">std::mem::ManuallyDrop</span>;
-<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 
 <span class="attribute">#[<span class="ident">global_allocator</span>]</span>
@@ -364,31 +301,6 @@
                 .<span class="ident">short</span>(<span class="string">&quot;v&quot;</span>)
                 .<span class="ident">long</span>(<span class="string">&quot;verbose&quot;</span>)
                 .<span class="ident">help</span>(<span class="string">&quot;Requests verbose output&quot;</span>),
-        )
-        .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;POSTCARD_FILE&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;postcard-file&quot;</span>)
-                .<span class="ident">takes_value</span>(<span class="bool-val">true</span>)
-                .<span class="ident">help</span>(<span class="string">&quot;Path to .postcard file with all of the data.&quot;</span>),
-        )
-        .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;cldr-root&quot;</span>)
-                .<span class="ident">value_name</span>(<span class="string">&quot;PATH&quot;</span>)
-                .<span class="ident">help</span>(<span class="string">&quot;Path to the CLDR JSON root directory.&quot;</span>)
-                .<span class="ident">takes_value</span>(<span class="bool-val">true</span>),
-        )
-        .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;UPROPS_PATH&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;uprops-path&quot;</span>)
-                .<span class="ident">value_name</span>(<span class="string">&quot;PATH&quot;</span>)
-                .<span class="ident">help</span>(<span class="string">&quot;Path to the uprops directory.&quot;</span>)
-                .<span class="ident">takes_value</span>(<span class="bool-val">true</span>),
-        )
-        .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;input-from-testdata&quot;</span>)
-                .<span class="ident">help</span>(<span class="string">&quot;Load input data from the icu_testdata project.&quot;</span>),
         )
         .<span class="ident">arg</span>(
             <span class="ident">Arg::with_name</span>(<span class="string">&quot;CHECK&quot;</span>)
@@ -455,35 +367,7 @@
         <span class="ident">filtered</span>
     };
 
-    <span class="kw">let</span> <span class="ident">cldr_json_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cldr</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>) {
-        <span class="ident">PathBuf::from</span>(<span class="ident">cldr</span>)
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
-        <span class="ident">icu_testdata::paths::cldr_json_root</span>()
-    } <span class="kw">else</span> {
-        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Value for --cldr--root must be specified (or --input-from-testdata)&quot;</span>,)
-    };
-    <span class="kw">let</span> <span class="ident">uprops_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">uprops</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_PATH&quot;</span>) {
-        <span class="ident">PathBuf::from</span>(<span class="ident">uprops</span>)
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
-        <span class="ident">icu_testdata::paths::uprops_toml_root</span>()
-    } <span class="kw">else</span> {
-        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Value for --uprops-path must be specified (or --input-from-testdata)&quot;</span>,)
-    };
-    <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">CldrPathsAllInOne</span> {
-        <span class="ident">cldr_json_root</span>,
-        <span class="ident">locale_subset</span>: <span class="ident">matches</span>
-            .<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>)
-            .<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>)
-            .<span class="ident">to_string</span>(),
-    });
-
-    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">DatagenOptions</span> {
-        <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">cldr_paths</span>),
-        <span class="ident">uprops_root</span>: <span class="prelude-val">Some</span>(<span class="ident">uprops_root</span>),
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-        <span class="ident">segmenter_data_root</span>: <span class="prelude-val">Some</span>(<span class="ident">icu_datagen::segmenter::segmenter_data_root</span>()),
-    };
-    <span class="kw">let</span> <span class="ident">converter</span> <span class="op">=</span> <span class="macro">icu_datagen::create_datagen_provider!</span>(<span class="ident">options</span>);
+    <span class="kw">let</span> <span class="ident">converter</span> <span class="op">=</span> <span class="macro">icu_datagen::create_datagen_provider!</span>(<span class="ident">SourceData::for_test</span>());
 
     <span class="kw">let</span> <span class="ident">selected_locales</span> <span class="op">=</span> <span class="ident">icu_testdata::metadata::load</span>()<span class="question-mark">?</span>.<span class="ident">package_metadata</span>.<span class="ident">locales</span>;
 
@@ -493,13 +377,7 @@
             .<span class="ident">filter_by_langid_allowlist_strict</span>(<span class="kw-2">&amp;</span><span class="ident">selected_locales</span>),
     );
 
-    <span class="kw">let</span> <span class="ident">postcard_file</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">file</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;POSTCARD_FILE&quot;</span>) {
-        <span class="ident">PathBuf::from</span>(<span class="ident">file</span>)
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;INPUT_FROM_TESTDATA&quot;</span>) {
-        <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;testdata.postcard&quot;</span>)
-    } <span class="kw">else</span> {
-        <span class="macro">eyre::bail!</span>(<span class="string">&quot;Value for --postcard-file must be specified (or --input-from-testdata)&quot;</span>,)
-    };
+    <span class="kw">let</span> <span class="ident">postcard_file</span> <span class="op">=</span> <span class="ident">icu_testdata::paths::data_root</span>().<span class="ident">join</span>(<span class="string">&quot;testdata.postcard&quot;</span>);
     <span class="kw">let</span> <span class="ident">blob</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">fs::read</span>(<span class="ident">postcard_file</span>).<span class="ident">expect</span>(<span class="string">&quot;Reading pre-computed postcard buffer&quot;</span>);
     <span class="comment">// Create a DataProvider from it:</span>
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span>

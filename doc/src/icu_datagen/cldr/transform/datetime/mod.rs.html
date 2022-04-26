@@ -314,35 +314,20 @@
 <span id="309">309</span>
 <span id="310">310</span>
 <span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_serde</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::reader</span>::{<span class="ident">get_langid_subdirectories</span>, <span class="ident">get_langid_subdirectory</span>, <span class="ident">open_reader</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cldr::CldrPaths</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DatagenError</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">elsa::sync::FrozenBTreeMap</span>;
-
 <span class="kw">use</span> <span class="ident">icu_datetime::provider::calendar</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">unicode_ext_key</span>, <span class="ident">Locale</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
-<span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
+<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 
 <span class="kw">mod</span> <span class="ident">patterns</span>;
 <span class="kw">mod</span> <span class="ident">skeletons</span>;
@@ -352,29 +337,27 @@
 <span class="doccomment">/// Common code for a data provider reading from CLDR JSON dates files.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CommonDateProvider</span> {
-    <span class="ident">paths</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">PathBuf</span>)<span class="op">&gt;</span>,
+    <span class="ident">source</span>: <span class="ident">SourceData</span>,
+    <span class="comment">// BCP-47 value -&gt; CLDR identifier</span>
+    <span class="ident">supported_cals</span>: <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">icu_locid::extensions::unicode::Value</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="ident">data</span>: <span class="ident">FrozenBTreeMap</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">cldr_serde::ca::Dates</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">CommonDateProvider</span> {
-    <span class="doccomment">/// Constructs an instance from paths to source data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">cldr_paths</span>: <span class="kw-2">&amp;</span>(<span class="kw">impl</span> <span class="ident">CldrPaths</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>)) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">paths</span>: <span class="ident">cldr_paths</span>.<span class="ident">cldr_dates_all</span>(),
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SourceData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CommonDateProvider</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">SourceData</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">CommonDateProvider</span> {
+            <span class="ident">source</span>: <span class="ident">source</span>.<span class="ident">clone</span>(),
+            <span class="ident">supported_cals</span>: [
+                (<span class="macro">icu_locid::unicode_ext_value!</span>(<span class="string">&quot;gregory&quot;</span>), <span class="string">&quot;gregorian&quot;</span>),
+                (<span class="macro">icu_locid::unicode_ext_value!</span>(<span class="string">&quot;buddhist&quot;</span>), <span class="string">&quot;buddhist&quot;</span>),
+                (<span class="macro">icu_locid::unicode_ext_value!</span>(<span class="string">&quot;japanese&quot;</span>), <span class="string">&quot;japanese&quot;</span>),
+                (<span class="macro">icu_locid::unicode_ext_value!</span>(<span class="string">&quot;coptic&quot;</span>), <span class="string">&quot;coptic&quot;</span>),
+                (<span class="macro">icu_locid::unicode_ext_value!</span>(<span class="string">&quot;indian&quot;</span>), <span class="string">&quot;indian&quot;</span>),
+            ]
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">collect</span>(),
             <span class="ident">data</span>: <span class="ident">FrozenBTreeMap::new</span>(),
-        })
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CommonDateProvider</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">eyre::ErrReport</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">CommonDateProvider::try_new</span>(
-            <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">options</span>
-                .<span class="ident">cldr_paths</span>
-                .<span class="ident">as_ref</span>()
-                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;CommonDateProvider requires cldr_paths&quot;</span>))<span class="question-mark">?</span>,
-        )
+        }
     }
 }
 
@@ -387,43 +370,48 @@
                     <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
                 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">get_langid</span>();
-                    <span class="kw">let</span> <span class="ident">calendar</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">get_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="macro">unicode_ext_key!</span>(<span class="string">&quot;ca&quot;</span>))
-                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsVariant</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>
-                        .<span class="ident">to_string</span>();
+                    <span class="kw">let</span> <span class="ident">calendar</span> <span class="op">=</span> <span class="ident">req</span>
+                        .<span class="ident">options</span>
+                        .<span class="ident">get_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="macro">unicode_ext_key!</span>(<span class="string">&quot;ca&quot;</span>))
+                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::NeedsVariant</span>.<span class="ident">into_error</span>())<span class="question-mark">?</span>;
 
                     <span class="kw">let</span> <span class="ident">dates</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dates</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">options</span>) {
                         <span class="ident">dates</span>
                     } <span class="kw">else</span> {
-                        <span class="kw">let</span> (<span class="ident">cldr_cal</span>, <span class="kw">_</span>, <span class="ident">path</span>) <span class="op">=</span> <span class="self">self</span>
-                            .<span class="ident">paths</span>
-                            .<span class="ident">iter</span>()
-                            .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">bcp_cal</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">bcp_cal</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">calendar</span>)
-                            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingVariant</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
+                        <span class="kw">let</span> <span class="ident">cldr_cal</span> <span class="op">=</span> <span class="self">self</span>
+                            .<span class="ident">supported_cals</span>
+                            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">calendar</span>)
+                            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingVariant</span>.<span class="ident">into_error</span>())<span class="question-mark">?</span>;
 
-                        <span class="kw">let</span> <span class="ident">locale_dir</span> <span class="op">=</span> <span class="ident">get_langid_subdirectory</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>), <span class="kw-2">&amp;</span><span class="ident">langid</span>)<span class="question-mark">?</span>
-                            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
-
-                        <span class="kw">let</span> <span class="ident">cal_file</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;ca-{}.json&quot;</span>, <span class="ident">cldr_cal</span>);
-                        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">locale_dir</span>.<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="ident">cal_file</span>);
+                        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">get_langid_subdirectory</span>(
+                            <span class="kw-2">&amp;</span><span class="self">self</span>
+                                .<span class="ident">source</span>
+                                .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
+                                .<span class="ident">cldr_dates</span>(<span class="ident">cldr_cal</span>)
+                                .<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>),
+                            <span class="kw-2">&amp;</span><span class="ident">langid</span>,
+                        )<span class="question-mark">?</span>
+                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">into_error</span>())<span class="question-mark">?</span>
+                        .<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;ca-{}.json&quot;</span>, <span class="ident">cldr_cal</span>));
 
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::ca::Resource</span> <span class="op">=</span>
                             <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
-                                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::Json</span>(<span class="ident">e</span>, <span class="prelude-val">Some</span>(<span class="ident">path</span>)))<span class="question-mark">?</span>;
+                                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DatagenError::from</span>((<span class="ident">e</span>, <span class="ident">path</span>)))<span class="question-mark">?</span>;
 
-                        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">insert</span>(<span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">clone</span>(), <span class="ident">Box::new</span>(<span class="ident">resource</span>
-                            .<span class="ident">main</span>
-                            .<span class="number">0</span>
-                            .<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>)
-                            .<span class="ident">expect</span>(<span class="string">&quot;CLDR file contains the expected language&quot;</span>)
-                            .<span class="ident">dates</span>
-                            .<span class="ident">calendars</span>
-                            .<span class="ident">remove</span>(<span class="kw-2">*</span><span class="ident">cldr_cal</span>)
-                            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                                <span class="ident">Error::Custom</span>(
-                                    <span class="macro">format!</span>(<span class="string">&quot;{} does not have {} field&quot;</span>, <span class="ident">cal_file</span>, <span class="ident">cldr_cal</span>),
-                                    <span class="prelude-val">None</span>,
-                                )
-                        })<span class="question-mark">?</span>))
+                        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">insert</span>(
+                            <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">clone</span>(),
+                            <span class="ident">Box::new</span>(
+                                <span class="ident">resource</span>
+                                    .<span class="ident">main</span>
+                                    .<span class="number">0</span>
+                                    .<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>)
+                                    .<span class="ident">expect</span>(<span class="string">&quot;CLDR file contains the expected language&quot;</span>)
+                                    .<span class="ident">dates</span>
+                                    .<span class="ident">calendars</span>
+                                    .<span class="ident">remove</span>(<span class="kw-2">*</span><span class="ident">cldr_cal</span>)
+                                    .<span class="ident">expect</span>(<span class="string">&quot;CLDR file contains the expected calendar&quot;</span>),
+                            ),
+                        )
                     };
 
                     <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
@@ -431,37 +419,31 @@
                     <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                         <span class="ident">metadata</span>,
                         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::redundant_closure_call</span>)]</span>
-                        <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expr</span>)(<span class="ident">dates</span>, <span class="kw-2">&amp;</span><span class="ident">calendar</span>))),
+                        <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expr</span>)(<span class="ident">dates</span>, <span class="kw-2">&amp;</span><span class="ident">calendar</span>.<span class="ident">to_string</span>()))),
                     })
                 }
             }
 
             <span class="kw">impl</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CommonDateProvider</span> {
-                <span class="kw">fn</span> <span class="ident">supported_options</span>(
-                    <span class="kw-2">&amp;</span><span class="self">self</span>,
-                ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                    <span class="comment">// Raise an error if Gregorian paths are not available</span>
-                    <span class="self">self</span>.<span class="ident">paths</span>
-                        .<span class="ident">iter</span>()
-                        .<span class="ident">find</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">cal</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">cal</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">&quot;gregory&quot;</span>)
-                        .<span class="ident">ok_or</span>(<span class="ident">Error::MissingSource</span>(<span class="ident"><span class="kw">crate</span>::cldr::error::MissingSourceError</span> {
-                            <span class="ident">src</span>: <span class="string">&quot;cldr-dates/gregory&quot;</span>,
-                        }))<span class="question-mark">?</span>;
-
+                <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-                    <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">cal</span>, <span class="ident">path</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">paths</span> {
-                        <span class="kw">let</span> <span class="ident">cal_value</span> <span class="op">=</span> <span class="ident">icu_locid::extensions::unicode::Value::from_str</span>(<span class="ident">cal</span>)
-                            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(
-                                <span class="string">&quot;could not parse calendar identifier&quot;</span>
-                            ).<span class="ident">with_error_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>;
-                        <span class="ident">r</span>.<span class="ident">extend</span>(
-                            <span class="ident">get_langid_subdirectories</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>))<span class="question-mark">?</span>
-                                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">lid</span><span class="op">|</span> {
-                                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="ident">lid</span>.<span class="ident">into</span>();
-                                    <span class="ident">locale</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">keywords</span>.<span class="ident">set</span>(<span class="macro">unicode_ext_key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">cal_value</span>.<span class="ident">clone</span>());
-                                    <span class="ident">ResourceOptions::from</span>(<span class="ident">locale</span>)
-                                })
-                        );
+                    <span class="kw">for</span> (<span class="ident">cal_value</span>, <span class="ident">cldr_cal</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">supported_cals</span>.<span class="ident">iter</span>() {
+                        <span class="ident">r</span>.<span class="ident">extend</span>(<span class="ident">get_langid_subdirectories</span>(
+                                <span class="kw-2">&amp;</span><span class="self">self</span>
+                                    .<span class="ident">source</span>
+                                    .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
+                                    .<span class="ident">cldr_dates</span>(<span class="ident">cldr_cal</span>)
+                                    .<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>),
+                            )<span class="question-mark">?</span>
+                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">lid</span><span class="op">|</span> {
+                                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="ident">lid</span>.<span class="ident">into</span>();
+                                <span class="ident">locale</span>
+                                    .<span class="ident">extensions</span>
+                                    .<span class="ident">unicode</span>
+                                    .<span class="ident">keywords</span>
+                                    .<span class="ident">set</span>(<span class="macro">unicode_ext_key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">cal_value</span>.<span class="ident">clone</span>());
+                                <span class="ident">ResourceOptions::from</span>(<span class="ident">locale</span>)
+                            }));
                     }
                     <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">r</span>.<span class="ident">into_iter</span>()))
                 }
@@ -488,9 +470,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_basic_patterns</span>() {
-        <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span>
-            <span class="ident">CommonDateProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to retrieve provider&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::from</span>(<span class="kw-2">&amp;</span><span class="ident">SourceData::for_test</span>());
 
         <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;cs-u-ca-gregory&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
@@ -507,9 +487,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_with_numbering_system</span>() {
-        <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span>
-            <span class="ident">CommonDateProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to retrieve provider&quot;</span>);
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::from</span>(<span class="kw-2">&amp;</span><span class="ident">SourceData::for_test</span>());
 
         <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;haw-u-ca-gregory&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
@@ -528,9 +506,9 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_datetime_skeletons</span>() {
-        <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span>
-            <span class="ident">CommonDateProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to retrieve provider&quot;</span>);
+        <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
+
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::from</span>(<span class="kw-2">&amp;</span><span class="ident">SourceData::for_test</span>());
 
         <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;fil-u-ca-gregory&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">skeletons</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
@@ -572,8 +550,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_basic_symbols</span>() {
-        <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::from</span>(<span class="kw-2">&amp;</span><span class="ident">SourceData::for_test</span>());
 
         <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;cs-u-ca-gregory&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
@@ -595,8 +572,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">unalias_contexts</span>() {
-        <span class="kw">let</span> <span class="ident">cldr_paths</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::cldr::cldr_paths::for_test</span>();
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">cldr_paths</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">CommonDateProvider::from</span>(<span class="kw-2">&amp;</span><span class="ident">SourceData::for_test</span>());
 
         <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;cs-u-ca-gregory&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">cs_dates</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>

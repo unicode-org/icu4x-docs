@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["segmenter_data_root","Returns the absolute path to the directory containing the segmenter raw data."]],"struct":[["SegmenterRuleProvider","A data provider reading from segmenter rule files."]]});
+initSidebarItems({"struct":[["SegmenterRuleProvider","A data provider reading from segmenter rule files."]]});

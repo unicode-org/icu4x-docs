@@ -126,38 +126,32 @@
 <span id="121">121</span>
 <span id="122">122</span>
 <span id="123">123</span>
+<span id="124">124</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::uprops::uprops_helpers</span>::{<span class="self">self</span>, <span class="ident">get_last_component_no_version</span>, <span class="ident">TomlEnumerated</span>};
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::provider::UnicodePropertyV1</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::provider::UnicodePropertyV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDynProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSetBuilder</span>;
-<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::path::Path</span>;
+<span class="kw">use</span> <span class="ident">std::sync::RwLock</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EnumeratedPropertyUnicodeSetDataProvider</span> {
-    <span class="ident">data</span>: <span class="ident">TomlEnumerated</span>,
+    <span class="ident">source</span>: <span class="ident">SourceData</span>,
+    <span class="ident">data</span>: <span class="ident">RwLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TomlEnumerated</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="doccomment">/// A data provider reading from .toml files produced by the ICU4C icuwriteuprops tool.</span>
-<span class="kw">impl</span> <span class="ident">EnumeratedPropertyUnicodeSetDataProvider</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">root_dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">uprops_helpers::load_enumerated_from_dir</span>(<span class="ident">root_dir</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">data</span> })
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnumeratedPropertyUnicodeSetDataProvider</span> {
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">eyre::ErrReport</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenOptions</span>) -&gt; <span class="ident">eyre::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident">EnumeratedPropertyUnicodeSetDataProvider::try_new</span>(<span class="ident">options</span>.<span class="ident">uprops_root</span>.<span class="ident">as_ref</span>().<span class="ident">ok_or_else</span>(
-            <span class="op">|</span><span class="op">|</span> <span class="macro">eyre::eyre!</span>(<span class="string">&quot;EnumeratedPropertyUnicodeSetDataProvider requires uprops_root&quot;</span>),
-        )<span class="question-mark">?</span>)
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SourceData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnumeratedPropertyUnicodeSetDataProvider</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">SourceData</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">source</span>: <span class="ident">source</span>.<span class="ident">clone</span>(),
+            <span class="ident">data</span>: <span class="ident">RwLock::new</span>(<span class="prelude-val">None</span>),
+        }
     }
 }
 
@@ -198,7 +192,7 @@
     <span class="kw">fn</span> <span class="ident">load_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
+        <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">UnicodePropertyV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key_str</span> <span class="op">=</span> <span class="ident">get_last_component_no_version</span>(<span class="ident">key</span>);
 
@@ -207,16 +201,24 @@
         <span class="kw">let</span> (<span class="ident">prop_name</span>, <span class="ident">prop_value</span>) <span class="op">=</span> {
             <span class="kw">let</span> <span class="ident">parts</span> <span class="op">=</span> <span class="ident">key_str</span>.<span class="ident">split</span>(<span class="string">&#39;=&#39;</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
             <span class="kw">if</span> <span class="ident">parts</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>));
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">into_error</span>());
             }
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
             (<span class="ident">parts</span>[<span class="number">0</span>], <span class="ident">parts</span>[<span class="number">1</span>])
         };
 
-        <span class="kw">let</span> <span class="ident">toml_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>
-            .<span class="ident">data</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>().<span class="ident">is_none</span>() {
+            <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">uprops_helpers::load_enumerated_from_dir</span>(<span class="self">self</span>.<span class="ident">source</span>.<span class="ident">get_uprops_root</span>()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+            <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">data</span>);
+        }
+
+        <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>();
+
+        <span class="kw">let</span> <span class="ident">toml_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">guard</span>
+            .<span class="ident">as_ref</span>()
+            .<span class="ident">unwrap</span>()
             .<span class="ident">get</span>(<span class="ident">prop_name</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">into_error</span>())<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">valid_names</span> <span class="op">=</span> <span class="ident">expand_groupings</span>(<span class="ident">prop_name</span>, <span class="ident">prop_value</span>);
 

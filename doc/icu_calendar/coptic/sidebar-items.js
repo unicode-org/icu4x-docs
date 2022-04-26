@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Coptic",""],["CopticDateInner",""]]});
+initSidebarItems({"struct":[["Coptic","The Coptic calendar"],["CopticDateInner",""]]});

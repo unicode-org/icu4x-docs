@@ -69,6 +69,11 @@
 <span id="64">64</span>
 <span id="65">65</span>
 <span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -98,6 +103,7 @@
     <span class="ident">Hours</span>,
     <span class="ident">Minutes</span>,
     <span class="ident">Seconds</span>,
+    <span class="ident">Nanoseconds</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">TimeGranularity</span> {
@@ -111,11 +117,12 @@
     <span class="doccomment">/// the top of the hour, otherwise returns [`false`].</span>
     <span class="doccomment">/// e.g. `12:00:00` is at the top of the hour for any display granularity.</span>
     <span class="doccomment">/// e.g. `12:00:05` is only at the top of the hour if the seconds are not displayed.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_top_of_hour</span>(<span class="self">self</span>, <span class="ident">minute</span>: <span class="ident">u8</span>, <span class="ident">second</span>: <span class="ident">u8</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_top_of_hour</span>(<span class="self">self</span>, <span class="ident">minute</span>: <span class="ident">u8</span>, <span class="ident">second</span>: <span class="ident">u8</span>, <span class="ident">nanosecond</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::None</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Hours</span> =&gt; <span class="bool-val">true</span>,
             <span class="ident"><span class="self">Self</span>::Minutes</span> =&gt; <span class="ident">minute</span> <span class="op">==</span> <span class="number">0</span>,
             <span class="ident"><span class="self">Self</span>::Seconds</span> =&gt; <span class="ident">minute</span> <span class="op">+</span> <span class="ident">second</span> <span class="op">==</span> <span class="number">0</span>,
+            <span class="ident"><span class="self">Self</span>::Nanoseconds</span> =&gt; <span class="ident">minute</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">+</span> <span class="ident">second</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">+</span> <span class="ident">nanosecond</span> <span class="op">==</span> <span class="number">0</span>,
         }
     }
 }
@@ -128,7 +135,10 @@
             <span class="ident">PatternItem::Field</span>(<span class="ident">field</span>) =&gt; <span class="kw">match</span> <span class="ident">field</span>.<span class="ident">symbol</span> {
                 <span class="ident">fields::FieldSymbol::Hour</span>(<span class="kw">_</span>) =&gt; <span class="ident"><span class="self">Self</span>::Hours</span>,
                 <span class="ident">fields::FieldSymbol::Minute</span> =&gt; <span class="ident"><span class="self">Self</span>::Minutes</span>,
-                <span class="ident">fields::FieldSymbol::Second</span>(<span class="kw">_</span>) =&gt; <span class="ident"><span class="self">Self</span>::Seconds</span>,
+                <span class="ident">fields::FieldSymbol::Second</span>(<span class="ident">s</span>) =&gt; <span class="kw">match</span> <span class="ident">s</span> {
+                    <span class="ident">fields::Second::FractionalSecond</span> =&gt; <span class="ident"><span class="self">Self</span>::Nanoseconds</span>,
+                    <span class="ident">fields::Second::Millisecond</span> <span class="op">|</span> <span class="ident">fields::Second::Second</span> =&gt; <span class="ident"><span class="self">Self</span>::Seconds</span>,
+                },
                 <span class="kw">_</span> =&gt; <span class="ident"><span class="self">Self</span>::None</span>,
             },
             <span class="kw">_</span> =&gt; <span class="ident"><span class="self">Self</span>::None</span>,

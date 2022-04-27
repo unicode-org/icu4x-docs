@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["download_cldr",""],["main",""]],"struct":[["CldrJsonDownloader",""]]});

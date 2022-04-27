@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ICU4XLocaleError",""]],"struct":[["ICU4XLocale","An ICU4X Locale, capable of representing strings like `\"en-US\"`. See the Rust docs for more information."]]});
+initSidebarItems({"enum":[["ICU4XLocaleError",""]],"struct":[["ICU4XLocale","An ICU4X Locale, capable of representing strings like `\"en-US\"`."]]});

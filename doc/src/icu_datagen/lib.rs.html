@@ -229,357 +229,231 @@
 <span id="224">224</span>
 <span id="225">225</span>
 <span id="226">226</span>
-<span id="227">227</span>
-<span id="228">228</span>
-<span id="229">229</span>
-<span id="230">230</span>
-<span id="231">231</span>
-<span id="232">232</span>
-<span id="233">233</span>
-<span id="234">234</span>
-<span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="doccomment">//! `icu_datagen` contains command-line tools to generate and process ICU4X data.</span>
+<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::needless_doctest_main</span>)]</span>
+<span class="doccomment">//! `icu_datagen` is a library to generate data files that can be used in ICU4X data providers.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The tools include:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! * `icu4x-datagen`: Read source data (CLDR JSON, uprops files) and dump ICU4X-format data.</span>
-<span class="doccomment">//! * `icu4x-key-extract`: Extract `ResourceKey` objects present in a compiled executable.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! More details on each tool can be found by running `--help`.</span>
+<span class="doccomment">//! Data files can be generated either programmatically (i.e. in `build.rs`), or through a</span>
+<span class="doccomment">//! command-line utility.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Generate ICU4X Postcard blob (single file) for all keys and all locales:</span>
+<span class="doccomment">//! ## `build.rs`</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! ```no_run</span>
+<span class="doccomment">//! use icu_datagen::*;</span>
+<span class="doccomment">//! use icu_locid::langid;</span>
+<span class="doccomment">//! use std::fs::File;</span>
+<span class="doccomment">//! use std::path::PathBuf;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! fn main() {</span>
+<span class="doccomment">//!     icu_datagen::datagen(</span>
+<span class="doccomment">//!         Some(&amp;[langid!(&quot;de&quot;), langid!(&quot;en-AU&quot;)]),</span>
+<span class="doccomment">//!         &amp;icu_datagen::keys(&amp;[&quot;list/and@1&quot;]),</span>
+<span class="doccomment">//!         &amp;SourceData::default().with_uprops(PathBuf::from(&quot;/path/to/uprops/root&quot;)),</span>
+<span class="doccomment">//!         Out::Blob(Box::new(File::create(&quot;data.postcard&quot;).unwrap())),</span>
+<span class="doccomment">//!         false,</span>
+<span class="doccomment">//!     ).unwrap();</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Command line</span>
+<span class="doccomment">//! The command line interface is available with the `bin` feature.</span>
 <span class="doccomment">//! ```bash</span>
-<span class="doccomment">//! # Run from the icu4x project folder</span>
-<span class="doccomment">//! $ cargo run --bin icu4x-datagen -- \</span>
-<span class="doccomment">//!     --cldr-tag 41.0.0 \</span>
+<span class="doccomment">//! cargo run --features bin -- \</span>
+<span class="doccomment">//!     --uprops-root /path/to/uprops/root \</span>
 <span class="doccomment">//!     --all-keys \</span>
-<span class="doccomment">//!     --all-locales \</span>
+<span class="doccomment">//!     --locales de,en-AU \</span>
 <span class="doccomment">//!     --format blob \</span>
-<span class="doccomment">//!     --out /tmp/icu4x_data/icu4x_data.postcard</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Extract the keys used by an executable into a key file:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```bash</span>
-<span class="doccomment">//! # Run from the icu4x project folder</span>
-<span class="doccomment">//! $ cargo build --example work_log --release --features serde</span>
-<span class="doccomment">//! $ cargo make icu4x-key-extract \</span>
-<span class="doccomment">//!     target/release/examples/work_log \</span>
-<span class="doccomment">//!     /tmp/icu4x_data/work_log+keys.txt</span>
-<span class="doccomment">//! $ cat /tmp/icu4x_data/work_log+keys.txt</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Generate ICU4X JSON file tree from the key file for Spanish and German:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```bash</span>
-<span class="doccomment">//! # Run from the icu4x project folder</span>
-<span class="doccomment">//! $ cargo run --bin icu4x-datagen -- \</span>
-<span class="doccomment">//!     --cldr-tag 41.0.0 \</span>
-<span class="doccomment">//!     --key-file /tmp/icu4x_data/work_log+keys.txt \</span>
-<span class="doccomment">//!     --locales es \</span>
-<span class="doccomment">//!     --locales de \</span>
-<span class="doccomment">//!     --out /tmp/icu4x_data/work_log_json</span>
+<span class="doccomment">//!     --out data.postcard</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cldr</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">error</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">segmenter</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">uprops</span>;
+<span class="doccomment">//! More details can be found by running `--help`.</span>
 
+<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
+
+<span class="kw">mod</span> <span class="ident">error</span>;
+<span class="kw">mod</span> <span class="ident">registry</span>;
+<span class="kw">mod</span> <span class="ident">source</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">transform</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">is_missing_cldr_error</span>, <span class="ident">is_missing_uprops_error</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">registry::get_all_keys</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">source::SourceData</span>;
+
+<span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDynProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::export::DataExporter</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">std::path::Path</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::serde::SerializeMarker</span>;
+<span class="kw">use</span> <span class="ident">icu_provider_adapters::filter::Filterable</span>;
+<span class="kw">use</span> <span class="ident">icu_provider_fs::export::serializers</span>;
+<span class="kw">use</span> <span class="ident">rayon::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
+<span class="kw">use</span> <span class="ident">std::io</span>::{<span class="ident">BufRead</span>, <span class="ident">BufReader</span>, <span class="ident">Read</span>};
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
-<span class="doccomment">/// List of all supported keys</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_all_keys</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec!</span>[];
-    <span class="ident">v</span>.<span class="ident">extend</span>(<span class="ident">cldr::ALL_KEYS</span>);
-    <span class="ident">v</span>.<span class="ident">extend</span>(<span class="ident">icu_properties::provider::key::ALL_MAP_KEYS</span>);
-    <span class="ident">v</span>.<span class="ident">extend</span>(<span class="ident">icu_properties::provider::key::ALL_SCRIPT_EXTENSIONS_KEYS</span>);
-    <span class="ident">v</span>.<span class="ident">extend</span>(<span class="ident">icu_properties::provider::key::ALL_SET_KEYS</span>);
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-    {
-        <span class="ident">v</span>.<span class="ident">extend</span>(<span class="ident">icu_segmenter::ALL_KEYS</span>);
-        <span class="ident">v</span>.<span class="ident">push</span>(<span class="ident">icu_casemapping::provider::CaseMappingV1Marker::KEY</span>);
-    }
-    <span class="ident">v</span>
-}
-
-<span class="doccomment">/// Bag of options for datagen source data.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceData</span> {
-    <span class="ident">cldr_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">cldr::CldrPaths</span><span class="op">&gt;</span>,
-    <span class="ident">uprops_root</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">SourceData</span> {
-    <span class="doccomment">/// Adds CLDR data to this `DataSource`. The `CldrPaths` should point to</span>
-    <span class="doccomment">/// a local `cldr-{version}-json-full.zip` directory (see</span>
-    <span class="doccomment">/// &lt;https://github.com/unicode-org/cldr-json/releases&gt;).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_cldr</span>(<span class="self">self</span>, <span class="ident">cldr_paths</span>: <span class="ident">cldr::CldrPaths</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">cldr_paths</span>),
-            <span class="ident">uprops_root</span>: <span class="self">self</span>.<span class="ident">uprops_root</span>,
-        }
-    }
-
-    <span class="doccomment">/// Adds Unicode Properties data to this `DataSource`. The path should</span>
-    <span class="doccomment">/// point to a local `icuexportdata_uprops_full` directory (see</span>
-    <span class="doccomment">/// &lt;https://github.com/unicode-org/icu/releases&gt;).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_uprops</span>(<span class="self">self</span>, <span class="ident">uprops_root</span>: <span class="ident">PathBuf</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">cldr_paths</span>: <span class="self">self</span>.<span class="ident">cldr_paths</span>,
-            <span class="ident">uprops_root</span>: <span class="prelude-val">Some</span>(<span class="ident">uprops_root</span>),
-        }
-    }
-
-    <span class="doccomment">/// Create `SourceData` pointing to test data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_test</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::default</span>()
-            .<span class="ident">with_cldr</span>(<span class="ident">cldr::CldrPaths</span> {
-                <span class="ident">cldr_json_root</span>: <span class="ident">icu_testdata::paths::cldr_json_root</span>(),
-                <span class="ident">locale_subset</span>: <span class="string">&quot;full&quot;</span>.<span class="ident">to_string</span>(),
-            })
-            .<span class="ident">with_uprops</span>(<span class="ident">icu_testdata::paths::uprops_toml_root</span>())
-    }
-
-    <span class="doccomment">/// Paths to CLDR source data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_cldr_paths</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">cldr::CldrPaths</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>
-            .<span class="ident">cldr_paths</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">error::DatagenError::MissingCldrPaths</span>)<span class="question-mark">?</span>)
-    }
-
-    <span class="doccomment">/// Path to Unicode Properties source data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_uprops_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>
-            .<span class="ident">uprops_root</span>
-            .<span class="ident">as_deref</span>()
-            .<span class="ident">ok_or</span>(<span class="ident">error::DatagenError::MissingUpropsPath</span>)<span class="question-mark">?</span>)
-    }
-
-    <span class="doccomment">/// Path to segmenter data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_segmenter_data_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">PathBuf::from</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>)).<span class="ident">join</span>(<span class="string">&quot;data&quot;</span>))
-    }
-}
-
-<span class="doccomment">/// Create a data provider reading from source files that generates data for all,</span>
-<span class="doccomment">/// or a subset, of ICU4X.</span>
+<span class="doccomment">/// Parses a list of human-readable key identifiers and returns a</span>
+<span class="doccomment">/// list of [`ResourceKey`]s. Invalid key names are ignored.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The macro behaves like a function that takes the following arguments:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// 1. An instance of [`SourceData`] (required)</span>
-<span class="doccomment">/// 2. A list of providers to instantiate (optional)</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The return value is a complex type that implements all of the key data provider traits.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To create a data provider for all of ICU4X:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```no_run</span>
-<span class="doccomment">/// use icu_datagen::SourceData;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // This data provider supports all keys required by ICU4X.</span>
-<span class="doccomment">/// let provider = icu_datagen::create_datagen_provider!(SourceData::for_test());</span>
+<span class="doccomment">/// # Example</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To create a data provider for a subset:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```no_run</span>
-<span class="doccomment">/// use icu_datagen::SourceData;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // This data provider supports the keys for LocaleCanonicalizer.</span>
-<span class="doccomment">/// let provider = icu_datagen::create_datagen_provider!(SourceData::for_test(),</span>
-<span class="doccomment">/// [</span>
-<span class="doccomment">///     icu_datagen::cldr::AliasesProvider,</span>
-<span class="doccomment">///     icu_datagen::cldr::LikelySubtagsProvider,</span>
-<span class="doccomment">/// ]);</span>
+<span class="doccomment">/// # use icu_provider::ResourceMarker;</span>
+<span class="doccomment">/// assert_eq!(</span>
+<span class="doccomment">///     icu_datagen::keys(&amp;[&quot;list/and@1&quot;, &quot;list/or@1&quot;]),</span>
+<span class="doccomment">///     vec![</span>
+<span class="doccomment">///         icu_list::provider::AndListV1Marker::KEY,</span>
+<span class="doccomment">///         icu_list::provider::OrListV1Marker::KEY,</span>
+<span class="doccomment">///     ],</span>
+<span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>))]</span>
-<span class="macro">macro_rules!</span> <span class="ident">create_datagen_provider</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::create_datagen_provider!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>,
-            [
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::AliasesProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::CommonDateProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::JapaneseErasProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::LikelySubtagsProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::NumbersProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::PluralsProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::TimeZonesProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::WeekDataProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::ListProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::EnumeratedPropertyCodePointTrieProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::ScriptWithExtensionsPropertyProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::EnumeratedPropertyUnicodeSetDataProvider</span>,
-                <span class="comment">// Has to go last as it matches all props/ keys.</span>
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::BinaryPropertyUnicodeSetDataProvider</span>,
-            ]
-        )
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">keys</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">strings</span>: <span class="kw-2">&amp;</span>[<span class="ident">S</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">strings</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">AsRef::as_ref</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+    <span class="ident">get_all_keys</span>()
+        .<span class="ident">into_iter</span>()
+        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">keys</span>.<span class="ident">contains</span>(<span class="ident">k</span>.<span class="ident">get_path</span>()))
+        .<span class="ident">collect</span>()
+}
+
+<span class="doccomment">/// Parses a file of human-readable key identifiers and returns a</span>
+<span class="doccomment">/// list of [`ResourceKey`]s. Invalid key names are ignored.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Example</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// #### keys.txt</span>
+<span class="doccomment">/// ```text</span>
+<span class="doccomment">/// list/and@1</span>
+<span class="doccomment">/// list/or@1</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// #### build.rs</span>
+<span class="doccomment">/// ```no_run</span>
+<span class="doccomment">/// # use icu_provider::ResourceMarker;</span>
+<span class="doccomment">/// # use std::fs::File;</span>
+<span class="doccomment">/// # fn main() -&gt; std::io::Result&lt;()&gt; {</span>
+<span class="doccomment">/// assert_eq!(</span>
+<span class="doccomment">///     icu_datagen::keys_from_file(File::open(&quot;keys.txt&quot;)?)?,</span>
+<span class="doccomment">///     vec![</span>
+<span class="doccomment">///         icu_list::provider::AndListV1Marker::KEY,</span>
+<span class="doccomment">///         icu_list::provider::OrListV1Marker::KEY,</span>
+<span class="doccomment">///     ],</span>
+<span class="doccomment">/// );</span>
+<span class="doccomment">/// # Ok(())</span>
+<span class="doccomment">/// # }</span>
+<span class="doccomment">/// ```</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">keys_from_file</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Read</span><span class="op">&gt;</span>(<span class="ident">file</span>: <span class="ident">R</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">BufReader::new</span>(<span class="ident">file</span>)
+        .<span class="ident">lines</span>()
+        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="ident">get_all_keys</span>()
+        .<span class="ident">into_iter</span>()
+        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">keys</span>.<span class="ident">contains</span>(<span class="ident">k</span>.<span class="ident">get_path</span>()))
+        .<span class="ident">collect</span>())
+}
+
+<span class="doccomment">/// The output format.</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Out</span> {
+    <span class="doccomment">/// Output to a file system tree</span>
+    <span class="ident">Fs</span> {
+        <span class="doccomment">/// The root path.</span>
+        <span class="ident">output_path</span>: <span class="ident">PathBuf</span>,
+        <span class="doccomment">/// The serialization format. See [icu_provider_fs::export::serializers].</span>
+        <span class="ident">serializer</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">serializers::AbstractSerializer</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
+        <span class="doccomment">/// Whether to overwrite existing data.</span>
+        <span class="ident">overwrite</span>: <span class="ident">bool</span>,
+    },
+    <span class="doccomment">/// Output as a postcard blob to the given sink.</span>
+    <span class="ident">Blob</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>),
+}
+
+<span class="doccomment">/// Runs ICU4X datagen.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The argument are used as follows:</span>
+<span class="doccomment">/// * `locales`: If this is present, only locales that are either `und` or</span>
+<span class="doccomment">///   contained (strictly, i.e. `en` != `en-US`) in the slice will be generated.</span>
+<span class="doccomment">///   Otherwise, all locales supported by the source data will be generated.</span>
+<span class="doccomment">/// * `keys`: The keys for which to generate data. See [`get_all_keys()`].</span>
+<span class="doccomment">/// * `sources`: The underlying source data. CLDR and/or uprops data can be missing if no</span>
+<span class="doccomment">///   requested key requires them. Otherwise a error will be returned that can be identified</span>
+<span class="doccomment">///   with [`is_missing_cldr_error`] or [`is_missing_uprops_error`].</span>
+<span class="doccomment">/// * `out`: The output format and location. See the documentation on [`Out`]</span>
+<span class="doccomment">/// * `ignore_missing_resource_keys`: some keys are not supported by datagen yet. Using</span>
+<span class="doccomment">///   all keys will not work unless this option is set.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">datagen</span>(
+    <span class="ident">locales</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">LanguageIdentifier</span>]<span class="op">&gt;</span>,
+    <span class="ident">keys</span>: <span class="kw-2">&amp;</span>[<span class="ident">ResourceKey</span>],
+    <span class="ident">sources</span>: <span class="kw-2">&amp;</span><span class="ident">SourceData</span>,
+    <span class="ident">out</span>: <span class="ident">Out</span>,
+    <span class="ident">ignore_missing_resource_keys</span>: <span class="ident">bool</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="ident">Box::new</span>(<span class="macro">create_datagen_provider!</span>(<span class="kw-2">*</span><span class="ident">sources</span>));
+
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">locales</span>) <span class="op">=</span> <span class="ident">locales</span>.<span class="ident">as_ref</span>() {
+        <span class="ident">provider</span> <span class="op">=</span> <span class="ident">Box::new</span>(
+            <span class="ident">provider</span>
+                .<span class="ident">filterable</span>(<span class="string">&quot;icu4x-datagen locales&quot;</span>)
+                .<span class="ident">filter_by_langid</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">lid</span><span class="op">|</span> <span class="ident">lid</span>.<span class="ident">language</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">locales</span>.<span class="ident">contains</span>(<span class="ident">lid</span>)),
+        );
+    }
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exporter</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">out</span> {
+        <span class="ident">Out::Fs</span> {
+            <span class="ident">output_path</span>,
+            <span class="ident">serializer</span>,
+            <span class="ident">overwrite</span>,
+        } =&gt; {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">icu_provider_fs::export::fs_exporter::ExporterOptions::default</span>();
+            <span class="ident">options</span>.<span class="ident">root</span> <span class="op">=</span> <span class="ident">output_path</span>;
+            <span class="kw">if</span> <span class="ident">overwrite</span> {
+                <span class="ident">options</span>.<span class="ident">overwrite</span> <span class="op">=</span>
+                    <span class="ident">icu_provider_fs::export::fs_exporter::OverwriteOption::RemoveAndReplace</span>
+            }
+            <span class="ident">Box::new</span>(<span class="ident">icu_provider_fs::export::FilesystemExporter::try_new</span>(
+                <span class="ident">serializer</span>, <span class="ident">options</span>,
+            )<span class="question-mark">?</span>)
+        }
+        <span class="ident">Out::Blob</span>(<span class="ident">write</span>) =&gt; <span class="ident">Box::new</span>(<span class="ident">icu_provider_blob::export::BlobExporter::new_with_sink</span>(
+            <span class="ident">write</span>,
+        )),
     };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>:<span class="ident">expr</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">constructor</span>:<span class="ident">path</span>),<span class="op">+</span>, ]) =&gt; {{
-        <span class="kw">let</span> <span class="ident">__source</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>;
-        <span class="macro">icu_provider_adapters::make_forking_provider!</span>(
-            <span class="ident">icu_provider_adapters::fork::by_key::ForkByKeyProvider</span>,
-            [
-                $(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">constructor</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="kw-2">&amp;</span><span class="ident">__source</span>)),<span class="op">+</span>,
-            ]
-        )
-    }};
-}
 
-<span class="doccomment">/// Create a data provider reading from source files that generates data for all,</span>
-<span class="doccomment">/// or a subset, of ICU4X.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The macro behaves like a function that takes the following arguments:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// 1. An instance of [`SourceData`] (required)</span>
-<span class="doccomment">/// 2. A list of providers to instantiate (optional)</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The return value is a complex type that implements all of the key data provider traits.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To create a data provider for all of ICU4X:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```no_run</span>
-<span class="doccomment">/// use icu_datagen::SourceData;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // This data provider supports all keys required by ICU4X.</span>
-<span class="doccomment">/// let provider = icu_datagen::create_datagen_provider!(SourceData::for_test());</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// To create a data provider for a subset:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```no_run</span>
-<span class="doccomment">/// use icu_datagen::SourceData;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// // This data provider supports the keys for LocaleCanonicalizer.</span>
-<span class="doccomment">/// let provider = icu_datagen::create_datagen_provider!(SourceData::for_test(), [</span>
-<span class="doccomment">///     icu_datagen::cldr::AliasesProvider,</span>
-<span class="doccomment">///     icu_datagen::cldr::LikelySubtagsProvider,</span>
-<span class="doccomment">/// ]);</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-<span class="macro">macro_rules!</span> <span class="ident">create_datagen_provider</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::create_datagen_provider!</span>(
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>,
-            [
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::AliasesProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::CommonDateProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::JapaneseErasProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::LikelySubtagsProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::NumbersProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::PluralsProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::TimeZonesProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::WeekDataProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::cldr::ListProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::CaseMappingDataProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::EnumeratedPropertyCodePointTrieProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::ScriptWithExtensionsPropertyProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::EnumeratedPropertyUnicodeSetDataProvider</span>,
-                <span class="comment">// Has to go last as it matches all props/ keys.</span>
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::uprops::BinaryPropertyUnicodeSetDataProvider</span>,
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::segmenter::SegmenterRuleProvider</span>,
-            ]
-        )
-    };
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>:<span class="ident">expr</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">constructor</span>:<span class="ident">path</span>),<span class="op">+</span>, ]) =&gt; {{
-        <span class="kw">let</span> <span class="ident">__source</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">source_data</span>;
-        <span class="macro">icu_provider_adapters::make_forking_provider!</span>(
-            <span class="ident">icu_provider_adapters::fork::by_key::ForkByKeyProvider</span>,
-            [
-                <span class="ident">icu_provider::hello_world::HelloWorldProvider::new_with_placeholder_data</span>(),
+    <span class="ident">keys</span>.<span class="ident">into_par_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">key</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>
+            .<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>)<span class="question-mark">?</span>
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+            .<span class="ident">into_par_iter</span>()
+            .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">req</span> <span class="op">=</span> <span class="ident">DataRequest</span> {
+                    <span class="ident">options</span>: <span class="ident">options</span>.<span class="ident">clone</span>(),
+                    <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                };
+                <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
+                    .<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>)
+                    .<span class="ident">and_then</span>(<span class="ident">DataResponse::take_payload</span>)
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>))<span class="question-mark">?</span>;
+                <span class="ident">exporter</span>.<span class="ident">put_payload</span>(<span class="ident">key</span>, <span class="ident">options</span>, <span class="ident">payload</span>)
+            });
 
-                $(<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">constructor</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="kw-2">&amp;</span><span class="ident">__source</span>)),<span class="op">+</span>,
-            ]
-        )
-    }};
-}
+        <span class="ident">exporter</span>.<span class="ident">flush</span>(<span class="ident">key</span>)<span class="question-mark">?</span>;
 
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">no_key_collisions</span>() {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">std::collections::BTreeMap::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">failed</span> <span class="op">=</span> <span class="bool-val">false</span>;
-    <span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="ident">get_all_keys</span>() {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">colliding_key</span>) <span class="op">=</span> <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">key</span>.<span class="ident">get_hash</span>(), <span class="ident">key</span>) {
-            <span class="macro">println!</span>(
-                <span class="string">&quot;{:?} and {:?} collide at {:?}&quot;</span>,
-                <span class="ident">key</span>.<span class="ident">get_path</span>(),
-                <span class="ident">colliding_key</span>.<span class="ident">get_path</span>(),
-                <span class="ident">key</span>.<span class="ident">get_hash</span>()
-            );
-            <span class="ident">failed</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">if</span> <span class="ident">ignore_missing_resource_keys</span>
+            <span class="op">&amp;&amp;</span> <span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">DataErrorKind::MissingResourceKey</span>)
+        {
+            <span class="macro">log::trace!</span>(<span class="string">&quot;Skipping key: {}&quot;</span>, <span class="ident">key</span>);
+            <span class="prelude-val">Ok</span>(())
+        } <span class="kw">else</span> {
+            <span class="macro">log::info!</span>(<span class="string">&quot;Writing key: {}&quot;</span>, <span class="ident">key</span>);
+            <span class="ident">result</span>
         }
-    }
-    <span class="kw">if</span> <span class="ident">failed</span> {
-        <span class="macro">panic!</span>();
-    }
+    })<span class="question-mark">?</span>;
+
+    <span class="ident">exporter</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_datagen" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>

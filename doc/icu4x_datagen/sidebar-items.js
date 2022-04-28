@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_blob_out",""],["get_fs_out",""],["main",""]]});
+initSidebarItems({"fn":[["main",""]]});

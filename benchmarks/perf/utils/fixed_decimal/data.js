@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1651152781912,
+  "lastUpdate": 1651235673119,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -24569,6 +24569,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 94,
             "range": "± 4",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2194094f391f8e9ad421bbde41fedb8a578ad0cf",
+          "message": "fixing full-data (#1826)",
+          "timestamp": "2022-04-28T17:41:39Z",
+          "tree_id": "95a02ace5cc543273495f7c3ca838eaee4377aa6",
+          "url": "https://github.com/unicode-org/icu4x/commit/2194094f391f8e9ad421bbde41fedb8a578ad0cf"
+        },
+        "date": 1651168332893,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 128185,
+            "range": "± 1175",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25555,
+            "range": "± 242",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 70506,
+            "range": "± 129",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 231,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 98,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 93,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alextouchet@outlook.com",
+            "name": "Alex Touchet",
+            "username": "atouchet"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "392149faf593b8c7da21c8416ed7275df143cd31",
+          "message": "Fix broken crates.io badges (#1738)\n\n* Fix broken crates.io badges\r\n\r\n* generate-readme\r\n\r\n* fix\r\n\r\nCo-authored-by: Manish Goregaokar <manishsmail@gmail.com>",
+          "timestamp": "2022-04-29T12:24:33Z",
+          "tree_id": "0b6eda577b94694a8d6d755288060a68104e381b",
+          "url": "https://github.com/unicode-org/icu4x/commit/392149faf593b8c7da21c8416ed7275df143cd31"
+        },
+        "date": 1651235655548,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 106864,
+            "range": "± 311",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21263,
+            "range": "± 144",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 58804,
+            "range": "± 329",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 78,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 77,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

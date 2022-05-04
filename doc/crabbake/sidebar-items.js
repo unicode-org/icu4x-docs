@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["Bakeable",""]],"trait":[["Bakeable",""]]});
+initSidebarItems({"derive":[["Bakeable",""]],"struct":[["CrateEnv",""]],"trait":[["Bakeable",""]]});

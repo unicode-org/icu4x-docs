@@ -258,6 +258,52 @@
 <span id="253">253</span>
 <span id="254">254</span>
 <span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -304,6 +350,7 @@
 
 <span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
 
+<span class="kw">mod</span> <span class="ident">crabbake</span>;
 <span class="kw">mod</span> <span class="ident">error</span>;
 <span class="kw">mod</span> <span class="ident">registry</span>;
 <span class="kw">mod</span> <span class="ident">source</span>;
@@ -317,7 +364,6 @@
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDynProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::export::DataExporter</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::serde::SerializeMarker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_adapters::filter::Filterable</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_fs::export::serializers</span>;
 <span class="kw">use</span> <span class="ident">rayon::prelude</span>::<span class="kw-2">*</span>;
@@ -396,6 +442,16 @@
     },
     <span class="doccomment">/// Output as a postcard blob to the given sink.</span>
     <span class="ident">Blob</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::io::Write</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>),
+    <span class="doccomment">/// Output a module at the given location.</span>
+    <span class="ident">Module</span> {
+        <span class="doccomment">/// The directory of the generated module.</span>
+        <span class="ident">mod_directory</span>: <span class="ident">PathBuf</span>,
+        <span class="doccomment">/// Whether to run `rustfmt` on the generated files.</span>
+        <span class="ident">pretty</span>: <span class="ident">bool</span>,
+        <span class="doccomment">/// Whether to gate each key on its crate name. This allows using the module</span>
+        <span class="doccomment">/// even if some keys are not required and their dependencies are not included.</span>
+        <span class="ident">insert_feature_gates</span>: <span class="ident">bool</span>,
+    },
 }
 
 <span class="doccomment">/// Runs ICU4X datagen.</span>
@@ -418,18 +474,7 @@
     <span class="ident">out</span>: <span class="ident">Out</span>,
     <span class="ident">ignore_missing_resource_keys</span>: <span class="ident">bool</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span> <span class="op">=</span>
-        <span class="ident">Box::new</span>(<span class="macro">create_datagen_provider!</span>(<span class="kw-2">*</span><span class="ident">sources</span>));
-
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">locales</span>) <span class="op">=</span> <span class="ident">locales</span>.<span class="ident">as_ref</span>() {
-        <span class="ident">provider</span> <span class="op">=</span> <span class="ident">Box::new</span>(
-            <span class="ident">provider</span>
-                .<span class="ident">filterable</span>(<span class="string">&quot;icu4x-datagen locales&quot;</span>)
-                .<span class="ident">filter_by_langid</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">lid</span><span class="op">|</span> <span class="ident">lid</span>.<span class="ident">language</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">locales</span>.<span class="ident">contains</span>(<span class="ident">lid</span>)),
-        );
-    }
-
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exporter</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">out</span> {
+    <span class="kw">match</span> <span class="ident">out</span> {
         <span class="ident">Out::Fs</span> {
             <span class="ident">output_path</span>,
             <span class="ident">serializer</span>,
@@ -441,14 +486,61 @@
                 <span class="ident">options</span>.<span class="ident">overwrite</span> <span class="op">=</span>
                     <span class="ident">icu_provider_fs::export::fs_exporter::OverwriteOption::RemoveAndReplace</span>
             }
-            <span class="ident">Box::new</span>(<span class="ident">icu_provider_fs::export::FilesystemExporter::try_new</span>(
-                <span class="ident">serializer</span>, <span class="ident">options</span>,
-            )<span class="question-mark">?</span>)
+            <span class="ident">datagen_internal</span>(
+                <span class="ident">locales</span>,
+                <span class="ident">keys</span>,
+                <span class="ident">ignore_missing_resource_keys</span>,
+                <span class="ident">Box::new</span>(<span class="macro">create_datagen_provider!</span>(<span class="kw-2">*</span><span class="ident">sources</span>)),
+                <span class="ident">Box::new</span>(<span class="ident">icu_provider_fs::export::FilesystemExporter::try_new</span>(
+                    <span class="ident">serializer</span>, <span class="ident">options</span>,
+                )<span class="question-mark">?</span>),
+            )
         }
-        <span class="ident">Out::Blob</span>(<span class="ident">write</span>) =&gt; <span class="ident">Box::new</span>(<span class="ident">icu_provider_blob::export::BlobExporter::new_with_sink</span>(
-            <span class="ident">write</span>,
-        )),
-    };
+        <span class="ident">Out::Blob</span>(<span class="ident">write</span>) =&gt; <span class="ident">datagen_internal</span>(
+            <span class="ident">locales</span>,
+            <span class="ident">keys</span>,
+            <span class="ident">ignore_missing_resource_keys</span>,
+            <span class="ident">Box::new</span>(<span class="macro">create_datagen_provider!</span>(<span class="kw-2">*</span><span class="ident">sources</span>)),
+            <span class="ident">Box::new</span>(<span class="ident">icu_provider_blob::export::BlobExporter::new_with_sink</span>(
+                <span class="ident">write</span>,
+            )),
+        ),
+        <span class="ident">Out::Module</span> {
+            <span class="ident">mod_directory</span>,
+            <span class="ident">pretty</span>,
+            <span class="ident">insert_feature_gates</span>,
+        } =&gt; <span class="ident">datagen_internal</span>(
+            <span class="ident">locales</span>,
+            <span class="ident">keys</span>,
+            <span class="ident">ignore_missing_resource_keys</span>,
+            <span class="ident">Box::new</span>(<span class="macro">create_datagen_provider!</span>(
+                <span class="kw-2">*</span><span class="ident">sources</span>,
+                [<span class="ident"><span class="kw">crate</span>::transform::cldr::ListProvider</span>,]
+            )),
+            <span class="ident">Box::new</span>(<span class="ident">crabbake::ConstExporter::new</span>(
+                <span class="ident">mod_directory</span>,
+                <span class="ident">pretty</span>,
+                <span class="ident">insert_feature_gates</span>,
+            )),
+        ),
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">datagen_internal</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">DataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(
+    <span class="ident">locales</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">LanguageIdentifier</span>]<span class="op">&gt;</span>,
+    <span class="ident">keys</span>: <span class="kw-2">&amp;</span>[<span class="ident">ResourceKey</span>],
+    <span class="ident">ignore_missing_resource_keys</span>: <span class="ident">bool</span>,
+    <span class="kw-2">mut</span> <span class="ident">provider</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
+    <span class="kw-2">mut</span> <span class="ident">exporter</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">locales</span>) <span class="op">=</span> <span class="ident">locales</span> {
+        <span class="kw">let</span> <span class="ident">locales</span> <span class="op">=</span> <span class="ident">locales</span>.<span class="ident">to_vec</span>();
+        <span class="ident">provider</span> <span class="op">=</span> <span class="ident">Box::new</span>(
+            <span class="ident">provider</span>
+                .<span class="ident">filterable</span>(<span class="string">&quot;icu4x-datagen locales&quot;</span>)
+                .<span class="ident">filter_by_langid</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">lid</span><span class="op">|</span> <span class="ident">lid</span>.<span class="ident">language</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">locales</span>.<span class="ident">contains</span>(<span class="ident">lid</span>)),
+        );
+    }
 
     <span class="ident">keys</span>.<span class="ident">into_par_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">key</span><span class="op">|</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">iter</span><span class="op">|</span> {

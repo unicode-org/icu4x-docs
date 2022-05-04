@@ -176,6 +176,33 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -187,7 +214,9 @@
 <span class="kw">use</span> <span class="ident">regex_automata::dfa::sparse::DFA</span>;
 <span class="kw">use</span> <span class="ident">regex_automata::dfa::Automaton</span>;
 
+<span class="doccomment">/// A precompiled regex</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">yoke::Yokeable</span>, <span class="ident">zerofrom::ZeroFrom</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// not a public API</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="comment">// Safety: These always represent a valid DFA (DFA::from_bytes(dfa_bytes).is_ok())</span>
     <span class="ident">dfa_bytes</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -197,6 +226,18 @@
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">dfa_bytes</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">dfa_bytes</span>
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>)]</span>
+<span class="kw">impl</span> <span class="ident">crabbake::Bakeable</span> <span class="kw">for</span> <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">bake</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="ident">crabbake::CrateEnv</span>) -&gt; <span class="ident">crabbake::TokenStream</span> {
+        <span class="ident">ctx</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_list&quot;</span>);
+        <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">dfa_bytes</span>).<span class="ident">bake</span>(<span class="ident">ctx</span>);
+        <span class="comment">// Safe because our own data is safe</span>
+        <span class="macro">crabbake::quote!</span> {
+            <span class="kw">unsafe</span> { <span class="ident">::icu_list::provider::StringMatcher::from_dfa_bytes_unchecked</span>(#<span class="ident">bytes</span>) }
+        }
     }
 }
 
@@ -262,6 +303,19 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Creates a `StringMatcher` from a serialized DFA. Used internally by Crabbake.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Safety</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// `dfa_bytes` has to be a valid DFA (regex_automata::dfa::sparse::DFA::from_bytes(dfa_bytes).is_ok())</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_dfa_bytes_unchecked</span>(<span class="ident">dfa_bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">dfa_bytes</span>: <span class="ident">Cow::Borrowed</span>(<span class="ident">dfa_bytes</span>),
+            <span class="ident">pattern</span>: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Creates a `StringMatcher` from regex.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde_human&quot;</span>,))]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">pattern</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">icu_provider::DataError</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">regex_automata</span>::{
@@ -289,7 +343,7 @@
         })
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">test</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">test</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">cfg!</span>(<span class="ident">target_endian</span> <span class="op">=</span> <span class="string">&quot;little&quot;</span>)
             <span class="op">&amp;&amp;</span> <span class="macro">matches!</span>(
                 <span class="comment">// Safe due to struct invariant.</span>

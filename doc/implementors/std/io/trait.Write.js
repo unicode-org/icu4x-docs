@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["crlify"] = [{"text":"impl&lt;W:&nbsp;<a class=\"trait\" href=\"https://doc.rust-lang.org/1.60.0/std/io/trait.Write.html\" title=\"trait std::io::Write\">Write</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.60.0/std/io/trait.Write.html\" title=\"trait std::io::Write\">Write</a> for <a class=\"struct\" href=\"crlify/struct.BufWriterWithLineEndingFix.html\" title=\"struct crlify::BufWriterWithLineEndingFix\">BufWriterWithLineEndingFix</a>&lt;W&gt;","synthetic":false,"types":["crlify::BufWriterWithLineEndingFix"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

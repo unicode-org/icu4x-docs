@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["crabbake"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.60.0/core/iter/traits/collect/trait.IntoIterator.html\" title=\"trait core::iter::traits::collect::IntoIterator\">IntoIterator</a> for <a class=\"struct\" href=\"crabbake/struct.CrateEnv.html\" title=\"struct crabbake::CrateEnv\">CrateEnv</a>","synthetic":false,"types":["crabbake::CrateEnv"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

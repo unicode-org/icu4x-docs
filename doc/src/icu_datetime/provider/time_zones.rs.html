@@ -121,14 +121,70 @@
 <span id="116">116</span>
 <span id="117">117</span>
 <span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">yoke</span>, <span class="ident">zerofrom</span>};
-<span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
-<span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroMap</span>, <span class="ident">ZeroMap2d</span>};
+<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">TinyAsciiStr</span>, <span class="ident">TinyStr8</span>};
+<span class="kw">use</span> <span class="ident">zerovec::ule</span>::{<span class="ident">AsULE</span>, <span class="ident">ULE</span>};
+<span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroMap</span>, <span class="ident">ZeroMap2d</span>, <span class="ident">ZeroVec</span>};
 
 <span class="doccomment">/// An ICU4X mapping to the CLDR timeZoneNames format strings.</span>
 <span class="doccomment">/// See CLDR-JSON timeZoneNames.json for more context.</span>
@@ -163,6 +219,60 @@
     <span class="kw">pub</span> <span class="ident">fallback_format</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
+<span class="doccomment">/// TimeZone ID in BCP47 format</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Eq</span>, <span class="ident">Ord</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">yoke::Yokeable</span>, <span class="ident">ULE</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeZoneBcp47Id</span>(<span class="kw">pub</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span>);
+
+<span class="kw">impl</span> <span class="ident">AsULE</span> <span class="kw">for</span> <span class="ident">TimeZoneBcp47Id</span> {
+    <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="self">Self</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">to_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
+        <span class="self">self</span>
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="ident"><span class="self">Self</span>::ULE</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">unaligned</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">zerovec::maps::ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZoneBcp47Id</span> {
+    <span class="kw">type</span> <span class="ident">Container</span> <span class="op">=</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">TimeZoneBcp47Id</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">GetType</span> <span class="op">=</span> <span class="ident">TimeZoneBcp47Id</span>;
+    <span class="kw">type</span> <span class="ident">OwnedType</span> <span class="op">=</span> <span class="ident">TimeZoneBcp47Id</span>;
+}
+
+<span class="doccomment">/// MetaZone ID in a compact format</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Eq</span>, <span class="ident">Ord</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">yoke::Yokeable</span>, <span class="ident">ULE</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MetaZoneId</span>(<span class="kw">pub</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>);
+
+<span class="kw">impl</span> <span class="ident">AsULE</span> <span class="kw">for</span> <span class="ident">MetaZoneId</span> {
+    <span class="kw">type</span> <span class="ident">ULE</span> <span class="op">=</span> <span class="self">Self</span>;
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">to_unaligned</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ULE</span> {
+        <span class="self">self</span>
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">from_unaligned</span>(<span class="ident">unaligned</span>: <span class="ident"><span class="self">Self</span>::ULE</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">unaligned</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">zerovec::maps::ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MetaZoneId</span> {
+    <span class="kw">type</span> <span class="ident">Container</span> <span class="op">=</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">MetaZoneId</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">GetType</span> <span class="op">=</span> <span class="ident">MetaZoneId</span>;
+    <span class="kw">type</span> <span class="ident">OwnedType</span> <span class="op">=</span> <span class="ident">MetaZoneId</span>;
+}
+
 <span class="doccomment">/// An ICU4X mapping to the CLDR timeZoneNames exemplar cities.</span>
 <span class="doccomment">/// See CLDR-JSON timeZoneNames.json for more context.</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">ExemplarCitiesV1Marker</span> <span class="op">=</span> <span class="string">&quot;time_zone/exemplar_cities@1&quot;</span>)]</span>
@@ -171,7 +281,7 @@
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">prove_covariance_manually</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ExemplarCitiesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span> <span class="kw">pub</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span> <span class="kw">pub</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TimeZoneBcp47Id</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 );
 
 <span class="doccomment">/// An ICU4X mapping to the long-form generic metazone names.</span>
@@ -184,10 +294,10 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MetaZoneGenericNamesLongV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The default mapping between metazone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">MetaZoneId</span>, <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The override mapping between timezone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TimeZoneBcp47Id</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// An ICU4X mapping to the short-form generic metazone names.</span>
@@ -200,10 +310,10 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MetaZoneGenericNamesShortV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The default mapping between metazone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">MetaZoneId</span>, <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The override mapping between timezone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TimeZoneBcp47Id</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// An ICU4X mapping to the long-form specific metazone names.</span>
@@ -217,10 +327,10 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MetaZoneSpecificNamesLongV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The default mapping between metazone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">MetaZoneId</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The override mapping between timezone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TimeZoneBcp47Id</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// An ICU4X mapping to the short-form specific metazone names.</span>
@@ -234,10 +344,10 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MetaZoneSpecificNamesShortV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The default mapping between metazone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">defaults</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">MetaZoneId</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The override mapping between timezone id and localized metazone name.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">overrides</span>: <span class="ident">ZeroMap2d</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">TimeZoneBcp47Id</span>, <span class="ident">TinyStr8</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="icu_datetime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>

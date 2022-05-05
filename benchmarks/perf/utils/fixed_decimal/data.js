@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1651751519825,
+  "lastUpdate": 1651766174466,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -25529,6 +25529,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 74,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3d904fd1aeaa0dcf51d23b249c6e662d99eef078",
+          "message": "Non_exhaustive for plurals (#1793)\n\n* non_exhaustive errors\r\n\r\n* non_exhaustive plurals\r\n\r\nNote: this assumes operands will be stable\r\n\r\n* pub-crate ast itnernals\r\n\r\n* review fixes\r\n\r\n* fix",
+          "timestamp": "2022-05-05T08:39:32-07:00",
+          "tree_id": "03df9fa8f4d98b4bb28ef9287997b2a492bdebe4",
+          "url": "https://github.com/unicode-org/icu4x/commit/3d904fd1aeaa0dcf51d23b249c6e662d99eef078"
+        },
+        "date": 1651765730639,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 107315,
+            "range": "± 1081",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21212,
+            "range": "± 141",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 58762,
+            "range": "± 331",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 184,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 78,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 78,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "andrewpkq@gmail.com",
+            "name": "andrewpollack",
+            "username": "andrewpollack"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8cd78d9fc38c44fca80884d87d5efc1c133cc381",
+          "message": "Add `Date::new_from_iso(date_iso, X)` example for each calendar X (#1844)\n\n* Fixing typo\r\n\r\n* adding examples to top level calendars\r\n\r\n* Adding coptic example\r\n\r\n* Adding Buddhist Date example\r\n\r\n* Bringing up-to-date to main. Fixing Coptic",
+          "timestamp": "2022-05-05T08:45:14-07:00",
+          "tree_id": "bb304a9e88eeff5960b37a50a8498085c0490d6d",
+          "url": "https://github.com/unicode-org/icu4x/commit/8cd78d9fc38c44fca80884d87d5efc1c133cc381"
+        },
+        "date": 1651766152617,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 124639,
+            "range": "± 2494",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25052,
+            "range": "± 259",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 69448,
+            "range": "± 1540",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 213,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 90,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 91,
+            "range": "± 2",
             "unit": "ns/iter"
           }
         ]

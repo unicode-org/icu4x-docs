@@ -168,24 +168,14 @@
 <span id="163">163</span>
 <span id="164">164</span>
 <span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="doccomment">//! This module contains types and implementations for the Buddhist calendar</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso</span>::{<span class="ident">Iso</span>, <span class="ident">IsoDateInner</span>, <span class="ident">IsoDay</span>, <span class="ident">IsoMonth</span>, <span class="ident">IsoYear</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso</span>::{<span class="ident">Iso</span>, <span class="ident">IsoDateInner</span>, <span class="ident">IsoYear</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>};
-<span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">tinystr::tinystr</span>;
 
 <span class="doccomment">/// The number of years the Buddhist Era is ahead of C.E. by</span>
@@ -281,29 +271,22 @@
     <span class="doccomment">/// Years are specified as BE years.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use icu::calendar::{Date,</span>
-    <span class="doccomment">///                     iso::IsoYear,</span>
-    <span class="doccomment">///                     iso::IsoMonth,</span>
-    <span class="doccomment">///                     iso::IsoDay};</span>
+    <span class="doccomment">/// use icu::calendar::Date;</span>
     <span class="doccomment">/// use std::convert::TryFrom;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let iso_year = IsoYear(1970);</span>
-    <span class="doccomment">/// let iso_month = IsoMonth::try_from(1).unwrap();</span>
-    <span class="doccomment">/// let iso_day = IsoDay::try_from(2).unwrap();</span>
+    <span class="doccomment">/// let date_buddhist = Date::new_buddhist_date(1970, 1, 2).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// // Conversion from ISO to Buddhist</span>
-    <span class="doccomment">/// let date_buddhist = Date::new_buddhist_date(iso_year, iso_month, iso_day).unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(date_buddhist.year().number, 2513);</span>
+    <span class="doccomment">/// assert_eq!(date_buddhist.year().number, 1970);</span>
     <span class="doccomment">/// assert_eq!(date_buddhist.month().number, 1);</span>
     <span class="doccomment">/// assert_eq!(date_buddhist.day_of_month().0, 2);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_buddhist_date</span>(
-        <span class="ident">year</span>: <span class="ident">IsoYear</span>,
-        <span class="ident">month</span>: <span class="ident">IsoMonth</span>,
-        <span class="ident">day</span>: <span class="ident">IsoDay</span>,
+        <span class="ident">year</span>: <span class="ident">i32</span>,
+        <span class="ident">month</span>: <span class="ident">u8</span>,
+        <span class="ident">day</span>: <span class="ident">u8</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Date</span><span class="op">&lt;</span><span class="ident">Buddhist</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
-        <span class="ident">Date::new_iso_date</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">Date::new_from_iso</span>(<span class="ident">d</span>, <span class="ident">Buddhist</span>))
+        <span class="ident">Date::new_iso_date_from_integers</span>(<span class="ident">year</span> <span class="op">-</span> <span class="ident">BUDDHIST_ERA_OFFSET</span>, <span class="ident">month</span>, <span class="ident">day</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">Date::new_from_iso</span>(<span class="ident">d</span>, <span class="ident">Buddhist</span>))
     }
 }
 
@@ -318,16 +301,16 @@
     <span class="doccomment">///                     types::IsoMinute,</span>
     <span class="doccomment">///                     types::IsoSecond};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let datetime_buddhist = DateTime::new_buddhist_datetime_from_integers(2513, 1, 2, 13, 1, 0).unwrap();</span>
+    <span class="doccomment">/// let datetime_buddhist = DateTime::new_buddhist_datetime(1970, 1, 2, 13, 1, 0).unwrap();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(datetime_buddhist.date.year().number, 2513);</span>
+    <span class="doccomment">/// assert_eq!(datetime_buddhist.date.year().number, 1970);</span>
     <span class="doccomment">/// assert_eq!(datetime_buddhist.date.month().number, 1);</span>
     <span class="doccomment">/// assert_eq!(datetime_buddhist.date.day_of_month().0, 2);</span>
     <span class="doccomment">/// assert_eq!(datetime_buddhist.time.hour, IsoHour::new_unchecked(13));</span>
     <span class="doccomment">/// assert_eq!(datetime_buddhist.time.minute, IsoMinute::new_unchecked(1));</span>
     <span class="doccomment">/// assert_eq!(datetime_buddhist.time.second, IsoSecond::new_unchecked(0));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_buddhist_datetime_from_integers</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_buddhist_datetime</span>(
         <span class="ident">year</span>: <span class="ident">i32</span>,
         <span class="ident">month</span>: <span class="ident">u8</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
@@ -335,9 +318,8 @@
         <span class="ident">minute</span>: <span class="ident">u8</span>,
         <span class="ident">second</span>: <span class="ident">u8</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Buddhist</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">iso_year</span> <span class="op">=</span> <span class="ident">year</span> <span class="op">-</span> <span class="ident">BUDDHIST_ERA_OFFSET</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">DateTime</span> {
-            <span class="ident">date</span>: <span class="ident">Date::new_buddhist_date</span>(<span class="ident">iso_year</span>.<span class="ident">into</span>(), <span class="ident">month</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>, <span class="ident">day</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>)<span class="question-mark">?</span>,
+            <span class="ident">date</span>: <span class="ident">Date::new_buddhist_date</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>)<span class="question-mark">?</span>,
             <span class="ident">time</span>: <span class="ident">types::Time::try_new</span>(<span class="ident">hour</span>, <span class="ident">minute</span>, <span class="ident">second</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
         })
     }

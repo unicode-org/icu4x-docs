@@ -304,6 +304,8 @@
 <span id="299">299</span>
 <span id="300">300</span>
 <span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -543,33 +545,35 @@
     }
 
     <span class="ident">keys</span>.<span class="ident">into_par_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">key</span><span class="op">|</span> {
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">iter</span><span class="op">|</span> {
-            <span class="ident">iter</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-                .<span class="ident">into_par_iter</span>()
-                .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">req</span> <span class="op">=</span> <span class="ident">DataRequest</span> {
-                        <span class="ident">options</span>: <span class="ident">options</span>.<span class="ident">clone</span>(),
-                        <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                    };
-                    <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
-                        .<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>)
-                        .<span class="ident">and_then</span>(<span class="ident">DataResponse::take_payload</span>)
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>))<span class="question-mark">?</span>;
-                    <span class="ident">exporter</span>.<span class="ident">put_payload</span>(<span class="ident">key</span>, <span class="ident">options</span>, <span class="ident">payload</span>)
-                })
-        });
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">provider</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">iter</span>) =&gt; {
+                <span class="macro">log::info!</span>(<span class="string">&quot;Writing key: {}&quot;</span>, <span class="ident">key</span>);
+                <span class="ident">iter</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                    .<span class="ident">into_par_iter</span>()
+                    .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">options</span><span class="op">|</span> {
+                        <span class="kw">let</span> <span class="ident">req</span> <span class="op">=</span> <span class="ident">DataRequest</span> {
+                            <span class="ident">options</span>: <span class="ident">options</span>.<span class="ident">clone</span>(),
+                            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                        };
+                        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>
+                            .<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>)
+                            .<span class="ident">and_then</span>(<span class="ident">DataResponse::take_payload</span>)
+                            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">req</span>))<span class="question-mark">?</span>;
+                        <span class="ident">exporter</span>.<span class="ident">put_payload</span>(<span class="ident">key</span>, <span class="ident">options</span>, <span class="ident">payload</span>)
+                    })
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>)
+                <span class="kw">if</span> <span class="ident">ignore_missing_resource_keys</span> <span class="op">&amp;&amp;</span> <span class="ident">e</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">DataErrorKind::MissingResourceKey</span> =&gt;
+            {
+                <span class="macro">log::trace!</span>(<span class="string">&quot;Skipped key: {}&quot;</span>, <span class="ident">key</span>);
+                <span class="prelude-val">Ok</span>(())
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+        };
 
         <span class="ident">exporter</span>.<span class="ident">flush</span>(<span class="ident">key</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="ident">ignore_missing_resource_keys</span>
-            <span class="op">&amp;&amp;</span> <span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">DataErrorKind::MissingResourceKey</span>)
-        {
-            <span class="macro">log::trace!</span>(<span class="string">&quot;Skipping key: {}&quot;</span>, <span class="ident">key</span>);
-            <span class="prelude-val">Ok</span>(())
-        } <span class="kw">else</span> {
-            <span class="macro">log::info!</span>(<span class="string">&quot;Writing key: {}&quot;</span>, <span class="ident">key</span>);
-            <span class="ident">result</span>
-        }
+        <span class="ident">res</span>
     })<span class="question-mark">?</span>;
 
     <span class="ident">exporter</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;

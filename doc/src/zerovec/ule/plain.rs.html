@@ -302,6 +302,22 @@
 <span id="297">297</span>
 <span id="298">298</span>
 <span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -382,8 +398,12 @@
                 <span class="ident">result</span>
             }
         }
+    };
+}
 
-        <span class="kw">impl</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">unsigned</span><span class="op">&gt;</span> {
+<span class="macro">macro_rules!</span> <span class="ident">impl_const_constructors</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>:<span class="ident">literal</span>) =&gt; {
+        <span class="kw">impl</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span><span class="op">&gt;</span> {
             <span class="doccomment">/// This function can be used for constructing ZeroVecs in a const context, avoiding</span>
             <span class="doccomment">/// parsing checks.</span>
             <span class="doccomment">///</span>
@@ -394,6 +414,7 @@
             <span class="doccomment">/// See [`ZeroSlice::cast()`] for an example.</span>
             <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">try_from_bytes</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">ZeroVecError</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>();
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::modulo_one</span>)]</span>
                 <span class="kw">if</span> <span class="ident">len</span> <span class="op">%</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="kw">unsafe</span> {
                         <span class="comment">// Most of the slice manipulation functions are not yet const-stable,</span>
@@ -402,7 +423,7 @@
                         <span class="comment">//</span>
                         <span class="comment">// Safety:</span>
                         <span class="comment">// * [u8] and [RawBytesULE&lt;N&gt;] have different lengths but the same alignment</span>
-                        <span class="comment">// * ZeroSlice&lt;$unsigned&gt; is repr(transparent) with [RawBytesULE&lt;N&gt;]</span>
+                        <span class="comment">// * ZeroSlice&lt;$base&gt; is repr(transparent) with [RawBytesULE&lt;N&gt;]</span>
                         <span class="kw">let</span> [<span class="ident">ptr</span>, <span class="kw">_</span>]: [<span class="ident">usize</span>; <span class="number">2</span>] <span class="op">=</span> <span class="ident">mem::transmute</span>(<span class="ident">bytes</span>);
                         <span class="kw">let</span> <span class="ident">new_len</span> <span class="op">=</span> <span class="ident">len</span> <span class="op">/</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>;
                         <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> [<span class="ident">ptr</span>, <span class="ident">new_len</span>];
@@ -410,7 +431,7 @@
                     }
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Err</span>(<span class="ident">ZeroVecError::InvalidLength</span> {
-                        <span class="ident">ty</span>: <span class="macro">concat!</span>(<span class="string">&quot;RawBytesULE&lt; &quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>, <span class="string">&quot;&gt;&quot;</span>),
+                        <span class="ident">ty</span>: <span class="macro">concat!</span>(<span class="string">&quot;&lt;const construct: &quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>, <span class="string">&quot;&gt;&quot;</span>),
                         <span class="ident">len</span>,
                     })
                 }
@@ -420,7 +441,7 @@
             <span class="doccomment">/// parsing checks.</span>
             <span class="doccomment">///</span>
             <span class="doccomment">/// See [`ZeroSlice`] for an example.</span>
-            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_ule_slice_const</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span><span class="op">&gt;</span>]) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_ule_slice_const</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>]) -&gt; <span class="kw-2">&amp;</span><span class="self">Self</span> {
                 <span class="comment">// This is safe because ZeroSlice is transparent over [T::ULE]</span>
                 <span class="comment">// so &amp;ZeroSlice&lt;T&gt; can be safely cast from &amp;[T::ULE]</span>
                 <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="ident">slice</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="self">Self</span>) }
@@ -468,6 +489,17 @@
 <span class="macro">impl_byte_slice_type!</span>(<span class="ident">i32</span>, <span class="number">4</span>);
 <span class="macro">impl_byte_slice_type!</span>(<span class="ident">i64</span>, <span class="number">8</span>);
 <span class="macro">impl_byte_slice_type!</span>(<span class="ident">i128</span>, <span class="number">16</span>);
+
+<span class="macro">impl_const_constructors!</span>(<span class="ident">u8</span>, <span class="number">1</span>);
+<span class="macro">impl_const_constructors!</span>(<span class="ident">u16</span>, <span class="number">2</span>);
+<span class="macro">impl_const_constructors!</span>(<span class="ident">u32</span>, <span class="number">4</span>);
+<span class="macro">impl_const_constructors!</span>(<span class="ident">u64</span>, <span class="number">8</span>);
+<span class="macro">impl_const_constructors!</span>(<span class="ident">u128</span>, <span class="number">16</span>);
+
+<span class="comment">// Note: The f32 and f64 const constructors currently have limited use because</span>
+<span class="comment">// `f32::to_le_bytes` is not yet const.</span>
+
+<span class="macro">impl_const_constructors!</span>(<span class="ident">bool</span>, <span class="number">1</span>);
 
 <span class="comment">// Safety (based on the safety checklist on the ULE trait):</span>
 <span class="comment">//  1. u8 does not include any uninitialized or padding bytes.</span>

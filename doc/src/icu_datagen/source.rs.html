@@ -108,20 +108,58 @@
 <span id="103">103</span>
 <span id="104">104</span>
 <span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DatagenError</span>;
+<span class="kw">use</span> <span class="ident">icu_codepointtrie::TrieType</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 
 <span class="doccomment">/// Bag of options for datagen source data.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceData</span> {
     <span class="ident">cldr_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CldrPaths</span><span class="op">&gt;</span>,
     <span class="ident">uprops_root</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="ident">trie_type</span>: <span class="ident">TrieType</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">SourceData</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">cldr_paths</span>: <span class="prelude-val">None</span>,
+            <span class="ident">uprops_root</span>: <span class="prelude-val">None</span>,
+            <span class="ident">trie_type</span>: <span class="ident">TrieType::Small</span>,
+        }
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">SourceData</span> {
@@ -135,7 +173,7 @@
                 <span class="ident">root</span>,
                 <span class="ident">locale_subset</span>,
             }),
-            <span class="ident">uprops_root</span>: <span class="self">self</span>.<span class="ident">uprops_root</span>,
+            ..<span class="self">self</span>
         }
     }
 
@@ -144,9 +182,18 @@
     <span class="doccomment">/// [GitHub downloads](https://github.com/unicode-org/icu/releases)).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_uprops</span>(<span class="self">self</span>, <span class="ident">uprops_root</span>: <span class="ident">PathBuf</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">cldr_paths</span>: <span class="self">self</span>.<span class="ident">cldr_paths</span>,
             <span class="ident">uprops_root</span>: <span class="prelude-val">Some</span>(<span class="ident">uprops_root</span>),
+            ..<span class="self">self</span>
         }
+    }
+
+    <span class="doccomment">/// Sets the [`TrieType`] to be used when generating data, including rule-based</span>
+    <span class="doccomment">/// segmentation data.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For Unicode Properties data, the TrieType is implicitly set when selecting the</span>
+    <span class="doccomment">/// root directory (either &quot;small&quot; or &quot;fast&quot;).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_trie_type</span>(<span class="self">self</span>, <span class="ident">trie_type</span>: <span class="ident">TrieType</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> { <span class="ident">trie_type</span>, ..<span class="self">self</span> }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -177,6 +224,11 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_segmenter_data_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">PathBuf::from</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>)).<span class="ident">join</span>(<span class="string">&quot;data&quot;</span>))
+    }
+
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">trie_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TrieType</span> {
+        <span class="self">self</span>.<span class="ident">trie_type</span>
     }
 }
 

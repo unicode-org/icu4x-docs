@@ -760,6 +760,17 @@
 <span id="755">755</span>
 <span id="756">756</span>
 <span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -784,6 +795,7 @@
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrie</span>;
+<span class="kw">use</span> <span class="ident">icu_codepointtrie_builder</span>::{<span class="ident">CodePointTrieBuilder</span>, <span class="ident">CodePointTrieBuilderData</span>};
 <span class="kw">use</span> <span class="ident">icu_properties</span>::{
     <span class="ident">maps</span>, <span class="ident">sets</span>, <span class="ident">EastAsianWidth</span>, <span class="ident">GeneralCategory</span>, <span class="ident">GraphemeClusterBreak</span>, <span class="ident">LineBreak</span>, <span class="ident">SentenceBreak</span>,
     <span class="ident">WordBreak</span>,
@@ -792,6 +804,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter::symbols</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
@@ -1393,8 +1406,17 @@
         <span class="comment">// Return 127 if the complex language isn&#39;t handled.</span>
         <span class="kw">let</span> <span class="ident">complex_property</span> <span class="op">=</span> <span class="ident">get_index_from_name</span>(<span class="kw-2">&amp;</span><span class="ident">properties_names</span>, <span class="string">&quot;SA&quot;</span>).<span class="ident">unwrap_or</span>(<span class="number">127</span>);
 
+        <span class="comment">// Generate a CodePointTrie from properties_map</span>
+        <span class="kw">let</span> <span class="ident">property_trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CodePointTrieBuilder</span> {
+            <span class="ident">data</span>: <span class="ident">CodePointTrieBuilderData::ValuesByCodePoint</span>(<span class="kw-2">&amp;</span><span class="ident">properties_map</span>),
+            <span class="ident">default_value</span>: <span class="number">0</span>,
+            <span class="ident">error_value</span>: <span class="number">0</span>,
+            <span class="ident">trie_type</span>: <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">trie_type</span>(),
+        }
+        .<span class="ident">build</span>();
+
         <span class="prelude-val">Ok</span>(<span class="ident">RuleBreakDataV1</span> {
-            <span class="ident">property_table</span>: <span class="ident">RuleBreakPropertyTable</span>(<span class="ident">ZeroVec::Owned</span>(<span class="ident">properties_map</span>)),
+            <span class="ident">property_table</span>: <span class="ident">RuleBreakPropertyTable</span>(<span class="ident">property_trie</span>),
             <span class="ident">break_state_table</span>: <span class="ident">RuleBreakStateTable</span>(<span class="ident">ZeroVec::Owned</span>(<span class="ident">break_state_table</span>)),
             <span class="ident">property_count</span>: <span class="ident">property_length</span> <span class="kw">as</span> <span class="ident">u8</span>,
             <span class="ident">last_codepoint_property</span>: (<span class="ident">simple_properties_count</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">i8</span>,

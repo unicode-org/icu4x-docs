@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652386540260,
+  "lastUpdate": 1652395789791,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -26416,6 +26416,186 @@ window.BENCHMARK_DATA = {
           {
             "name": "to_string/to_string/908070605040302010",
             "value": 174,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 64,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 77,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5915ba25a6e27d97902f1c632195cfa39cc0ecaf",
+          "message": "Update roadmap.md",
+          "timestamp": "2022-05-12T15:36:07-07:00",
+          "tree_id": "521a8933d1f905362f7e46b5c43b55a487d39916",
+          "url": "https://github.com/unicode-org/icu4x/commit/5915ba25a6e27d97902f1c632195cfa39cc0ecaf"
+        },
+        "date": 1652395561907,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 110124,
+            "range": "± 743",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 23354,
+            "range": "± 46",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 69359,
+            "range": "± 420",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 76,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "32080c3fddb5020e909499944fb85fce80ae4ca7",
+          "message": "Update roadmap.md",
+          "timestamp": "2022-05-12T15:37:00-07:00",
+          "tree_id": "f8311e6344bd63467dbbb14eaaca4eb1cb8be11f",
+          "url": "https://github.com/unicode-org/icu4x/commit/32080c3fddb5020e909499944fb85fce80ae4ca7"
+        },
+        "date": 1652395731074,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 116930,
+            "range": "± 2767",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24172,
+            "range": "± 393",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66182,
+            "range": "± 2890",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 264,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 96,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 87,
+            "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "681ddadc0c5e5b09997f9c011cdd9b7ce7fb0d5a",
+          "message": "Update roadmap.md",
+          "timestamp": "2022-05-12T15:39:16-07:00",
+          "tree_id": "5c1a71d55f58311735cc5a7dae67a44fbd246282",
+          "url": "https://github.com/unicode-org/icu4x/commit/681ddadc0c5e5b09997f9c011cdd9b7ce7fb0d5a"
+        },
+        "date": 1652395769689,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 97368,
+            "range": "± 403",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 20237,
+            "range": "± 77",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 62412,
+            "range": "± 339",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 173,
             "range": "± 2",
             "unit": "ns/iter"
           },

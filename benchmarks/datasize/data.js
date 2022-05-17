@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652727757074,
+  "lastUpdate": 1652798588470,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -15053,6 +15053,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/cd0066f506863b2a5d5b256c6d659d7f56c83932"
         },
         "date": 1652727735561,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 1627470,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2fa1b05423b87cd1206266157f877ccd4baa7396",
+          "message": "Making `DataProvider: Sync + Send` (#1853)",
+          "timestamp": "2022-05-17T16:39:35+02:00",
+          "tree_id": "1cd94410e1313134956d2d118066b97e9a5613db",
+          "url": "https://github.com/unicode-org/icu4x/commit/2fa1b05423b87cd1206266157f877ccd4baa7396"
+        },
+        "date": 1652798475828,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 1627470,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ab1f91f6e78273e538c202aa5720150b789d95a3",
+          "message": "Making `time_granularity` public (#1867)",
+          "timestamp": "2022-05-17T16:41:08+02:00",
+          "tree_id": "7f09042c3eba53e981fa6056b9767d3c9edfae46",
+          "url": "https://github.com/unicode-org/icu4x/commit/ab1f91f6e78273e538c202aa5720150b789d95a3"
+        },
+        "date": 1652798566716,
         "tool": "ndjson",
         "benches": [
           {

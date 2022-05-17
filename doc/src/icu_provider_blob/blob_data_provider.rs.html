@@ -112,14 +112,19 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::blob_schema::BlobSchema</span>;
-<span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::buf::BufferFormat</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::RcWrap</span>;
 <span class="kw">use</span> <span class="ident">serde::de::Deserialize</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 <span class="kw">use</span> <span class="ident">yoke</span>::<span class="kw-2">*</span>;
@@ -131,6 +136,11 @@
 <span class="doccomment">/// at runtime, so that the code and data can be shipped separately.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// If you prefer to bake the data into your binary, see [`StaticDataProvider`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # `Sync + Send`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This provider uses a [`icu_provider::RcWrap`] internally, which can be made `Sync + Send` with the</span>
+<span class="doccomment">/// `sync` feature on the [`icu_provider`] crate.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -148,7 +158,7 @@
 <span class="doccomment">/// )).expect(&quot;Reading pre-computed postcard buffer&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Create a DataProvider from it:</span>
-<span class="doccomment">/// let provider = BlobDataProvider::new_from_rc_blob(blob.into())</span>
+<span class="doccomment">/// let provider = BlobDataProvider::new_from_blob(blob)</span>
 <span class="doccomment">///     .expect(&quot;Deserialization should succeed&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Check that it works:</span>
@@ -167,14 +177,14 @@
 <span class="doccomment">/// [`StaticDataProvider`]: crate::StaticDataProvider</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlobDataProvider</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span>
-    <span class="ident">data</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ResourceKeyHash</span>, [<span class="ident">u8</span>], [<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">data</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">ResourceKeyHash</span>, [<span class="ident">u8</span>], [<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">RcWrap</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">BlobDataProvider</span> {
-    <span class="doccomment">/// Create a [`BlobDataProvider`] from an `Rc` blob of ICU4X data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_rc_blob</span>(<span class="ident">blob</span>: <span class="ident">Rc</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Create a [`BlobDataProvider`] from a blob of ICU4X data.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_blob</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RcWrap</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">blob</span>: <span class="ident">B</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">BlobDataProvider</span> {
-            <span class="ident">data</span>: <span class="ident">Yoke::try_attach_to_cart_badly</span>(<span class="ident">blob</span>, <span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
+            <span class="ident">data</span>: <span class="ident">Yoke::try_attach_to_cart_badly</span>(<span class="ident">blob</span>.<span class="ident">into</span>(), <span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
                 <span class="ident">BlobSchema::deserialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">postcard::Deserializer::from_bytes</span>(<span class="ident">bytes</span>)).<span class="ident">map</span>(
                     <span class="op">|</span><span class="ident">blob</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">blob</span>) <span class="op">=</span> <span class="ident">blob</span>;

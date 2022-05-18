@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652892191667,
+  "lastUpdate": 1652892703161,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -26969,6 +26969,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 76,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "14597792fcd9d00e2732fe20e9c44e96fab4b1b5",
+          "message": "Removing `baked` crate (#1900)",
+          "timestamp": "2022-05-18T18:39:59+02:00",
+          "tree_id": "084d8d25ecbd47320f99eed7530fc118cf004857",
+          "url": "https://github.com/unicode-org/icu4x/commit/14597792fcd9d00e2732fe20e9c44e96fab4b1b5"
+        },
+        "date": 1652892660220,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 97136,
+            "range": "± 558",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 20278,
+            "range": "± 126",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 62446,
+            "range": "± 327",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 175,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 64,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 77,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "pandusonu@google.com",
+            "name": "Gollapudi Vamsi Krishna",
+            "username": "pandusonu2"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c3512827285eed48f8b509d6177652359f7ed75e",
+          "message": "Add cldr and any calendar for Ethiopic (#1831)\n\n* Add cldr and any calendar for Ethiopic\r\n\r\n* Clippy fix",
+          "timestamp": "2022-05-18T16:39:32Z",
+          "tree_id": "6deb550169f0cb719b4a1c2d9d940fe0c2b8d6c7",
+          "url": "https://github.com/unicode-org/icu4x/commit/c3512827285eed48f8b509d6177652359f7ed75e"
+        },
+        "date": 1652892680298,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 125660,
+            "range": "± 2972",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26925,
+            "range": "± 431",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 79754,
+            "range": "± 1644",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 219,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 112,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 86,
+            "range": "± 2",
             "unit": "ns/iter"
           }
         ]

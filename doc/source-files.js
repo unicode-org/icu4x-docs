@@ -1,5 +1,4 @@
 var N = null;var sourcesIndex = {};
-sourcesIndex["baked"] = {"name":"","dirs":[{"name":"data","dirs":[{"name":"list","files":["and_v1.rs","mod.rs","or_v1.rs","unit_v1.rs"]}],"files":["mod.rs"]}],"files":["lib.rs"]};
 sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["crabbake"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["crabbake_derive"] = {"name":"","files":["lib.rs"]};

@@ -210,13 +210,10 @@
 <span id="205">205</span>
 <span id="206">206</span>
 <span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DatagenError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::cldr_serde</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::reader</span>::{<span class="ident">get_langid_subdirectories</span>, <span class="ident">get_langid_subdirectory</span>, <span class="ident">open_reader</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
@@ -298,7 +295,7 @@
             .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">into_error</span>())<span class="question-mark">?</span>
             .<span class="ident">join</span>(<span class="string">&quot;numbers.json&quot;</span>);
             <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DatagenError::from</span>((<span class="ident">e</span>, <span class="ident">path</span>)))<span class="question-mark">?</span>
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>
         };
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
@@ -310,8 +307,9 @@
             .<span class="ident">numbers</span>;
         <span class="kw">let</span> <span class="ident">nsname</span> <span class="op">=</span> <span class="ident">numbers</span>.<span class="ident">default_numbering_system</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">DecimalSymbolsV1::try_from</span>(<span class="ident">numbers</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">DatagenError::Custom</span>(<span class="ident">s</span>.<span class="ident">to_string</span>(), <span class="prelude-val">Some</span>(<span class="ident">langid</span>.<span class="ident">clone</span>())))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">DecimalSymbolsV1::try_from</span>(<span class="ident">numbers</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
+            <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not create decimal symbols&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
+        })<span class="question-mark">?</span>;
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cldr_numbering_systems_data</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>().<span class="ident">is_none</span>() {
@@ -323,7 +321,7 @@
                 .<span class="ident">join</span>(<span class="string">&quot;numberingSystems.json&quot;</span>);
             <span class="kw">let</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::numbering_systems::Resource</span> <span class="op">=</span>
                 <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DatagenError::from</span>((<span class="ident">e</span>, <span class="ident">path</span>)))<span class="question-mark">?</span>;
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>
                 .<span class="ident">cldr_numbering_systems_data</span>
                 .<span class="ident">write</span>()
@@ -334,10 +332,8 @@
         <span class="ident">result</span>.<span class="ident">digits</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">get_digits_for_numbering_system</span>(<span class="ident">nsname</span>)
             .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                <span class="ident">DatagenError::Custom</span>(
-                    <span class="macro">format!</span>(<span class="string">&quot;Could not process numbering system: {:?}&quot;</span>, <span class="ident">nsname</span>),
-                    <span class="prelude-val">Some</span>(<span class="ident">langid</span>.<span class="ident">clone</span>()),
-                )
+                <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not process numbering system&quot;</span>)
+                    .<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">nsname</span>)
             })<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();

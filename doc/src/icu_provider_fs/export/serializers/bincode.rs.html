@@ -52,15 +52,15 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
-<span id="50">50</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::AbstractSerializer</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Error</span>;
 <span class="kw">use</span> <span class="ident">bincode::config::Options</span> <span class="kw">as</span> <span class="kw">_</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::buf::BufferFormat</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::serde::SerializeMarker</span>;
 <span class="kw">use</span> <span class="ident">std::io</span>;
 
 <span class="doccomment">/// A serializer for Bincode.</span>
@@ -75,14 +75,12 @@
 <span class="kw">impl</span> <span class="ident">AbstractSerializer</span> <span class="kw">for</span> <span class="ident">Serializer</span> {
     <span class="kw">fn</span> <span class="ident">serialize</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serialize</span>,
+        <span class="ident">obj</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span>,
         <span class="kw-2">mut</span> <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">io::Write</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="ident">obj</span>.<span class="ident">erased_serialize</span>(<span class="kw-2">&amp;mut</span> <span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serializer</span><span class="op">&gt;</span><span class="ident">::erase</span>(
-            <span class="kw-2">&amp;mut</span> <span class="ident">bincode::Serializer::new</span>(
-                <span class="kw-2">&amp;mut</span> <span class="ident">sink</span>,
-                <span class="ident">bincode::config::DefaultOptions::new</span>().<span class="ident">with_fixint_encoding</span>(),
-            ),
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="ident">obj</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">bincode::Serializer::new</span>(
+            <span class="kw-2">&amp;mut</span> <span class="ident">sink</span>,
+            <span class="ident">bincode::config::DefaultOptions::new</span>().<span class="ident">with_fixint_encoding</span>(),
         ))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }

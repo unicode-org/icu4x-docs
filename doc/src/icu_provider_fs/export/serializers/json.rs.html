@@ -84,20 +84,14 @@
 <span id="79">79</span>
 <span id="80">80</span>
 <span id="81">81</span>
-<span id="82">82</span>
-<span id="83">83</span>
-<span id="84">84</span>
-<span id="85">85</span>
-<span id="86">86</span>
-<span id="87">87</span>
-<span id="88">88</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::AbstractSerializer</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::Error</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::buf::BufferFormat</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::serde::SerializeMarker</span>;
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="self">self</span>, <span class="ident">Write</span>};
 
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
@@ -133,22 +127,14 @@
 <span class="kw">impl</span> <span class="ident">AbstractSerializer</span> <span class="kw">for</span> <span class="ident">Serializer</span> {
     <span class="kw">fn</span> <span class="ident">serialize</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serialize</span>,
+        <span class="ident">obj</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">SerializeMarker</span><span class="op">&gt;</span>,
         <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">io::Write</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sink</span> <span class="op">=</span> <span class="ident">crlify::BufWriterWithLineEndingFix::new</span>(<span class="ident">sink</span>);
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">style</span> {
-            <span class="ident">StyleOption::Compact</span> =&gt; {
-                <span class="ident">obj</span>.<span class="ident">erased_serialize</span>(<span class="kw-2">&amp;mut</span> <span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serializer</span><span class="op">&gt;</span><span class="ident">::erase</span>(
-                    <span class="kw-2">&amp;mut</span> <span class="ident">serde_json::Serializer::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">sink</span>),
-                ))<span class="question-mark">?</span>;
-            }
-            <span class="ident">StyleOption::Pretty</span> =&gt; {
-                <span class="ident">obj</span>.<span class="ident">erased_serialize</span>(<span class="kw-2">&amp;mut</span> <span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">erased_serde::Serializer</span><span class="op">&gt;</span><span class="ident">::erase</span>(
-                    <span class="kw-2">&amp;mut</span> <span class="ident">serde_json::Serializer::pretty</span>(<span class="kw-2">&amp;mut</span> <span class="ident">sink</span>),
-                ))<span class="question-mark">?</span>;
-            }
-        };
+            <span class="ident">StyleOption::Compact</span> =&gt; <span class="ident">obj</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">serde_json::Serializer::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">sink</span>)),
+            <span class="ident">StyleOption::Pretty</span> =&gt; <span class="ident">obj</span>.<span class="ident">serialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">serde_json::Serializer::pretty</span>(<span class="kw-2">&amp;mut</span> <span class="ident">sink</span>)),
+        }<span class="question-mark">?</span>;
         <span class="comment">// Write an empty line at the end of the document</span>
         <span class="macro">writeln!</span>(<span class="ident">sink</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())

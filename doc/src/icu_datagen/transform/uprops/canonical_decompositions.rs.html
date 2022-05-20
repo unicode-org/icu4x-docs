@@ -98,7 +98,6 @@
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DatagenError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrie</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
@@ -141,8 +140,8 @@
             <span class="kw">let</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">get_uprops_root</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;decompositions.toml&quot;</span>);
             <span class="kw">let</span> <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">path_buf</span>;
             <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span> <span class="ident">read_path_to_string</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">CanonicalDecompositionData</span> <span class="op">=</span>
-                <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DatagenError::from</span>((<span class="ident">e</span>, <span class="ident">path</span>)))<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">toml_obj</span>: <span class="ident">CanonicalDecompositionData</span> <span class="op">=</span> <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::error::data_error_from_toml</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="ident">path</span>))<span class="question-mark">?</span>;
             <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">toml_obj</span>);
         }
 
@@ -156,12 +155,13 @@
         }
         <span class="kw">let</span> <span class="ident">uniset</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
 
-        <span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">CodePointTrie</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">trie</span>);
+        <span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">CodePointTrie</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">trie</span>)
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;trie conversion&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata::default</span>(),
             <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">CanonicalDecompositionDataV1</span> {
-                <span class="ident">trie</span>: <span class="ident">trie</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DatagenError::Custom</span>(<span class="ident">e</span>.<span class="ident">to_string</span>(), <span class="prelude-val">None</span>))<span class="question-mark">?</span>,
+                <span class="ident">trie</span>,
                 <span class="ident">scalars16</span>: <span class="ident">ZeroVec::alloc_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">scalars16</span>),
                 <span class="ident">scalars32</span>: <span class="ident">ZeroVec::alloc_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">scalars32</span>),
                 <span class="ident">decomposition_starts_with_non_starter</span>: <span class="ident">uniset</span>,

@@ -78,30 +78,16 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
-<span id="76">76</span>
-<span id="77">77</span>
-<span id="78">78</span>
-<span id="79">79</span>
-<span id="80">80</span>
-<span id="81">81</span>
-<span id="82">82</span>
-<span id="83">83</span>
-<span id="84">84</span>
-<span id="85">85</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::manifest::Manifest</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::manifest::MANIFEST_FILE</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::serde</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
-
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
 <span class="kw">use</span> <span class="ident">std::fs</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
+<span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="doccomment">/// A data provider that reads ICU4X data from a filesystem directory.</span>
 <span class="doccomment">///</span>
@@ -115,7 +101,7 @@
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FsDataProvider</span> {
-    <span class="ident">res_root</span>: <span class="ident">PathBuf</span>,
+    <span class="ident">root</span>: <span class="ident">PathBuf</span>,
     <span class="ident">manifest</span>: <span class="ident">Manifest</span>,
 }
 
@@ -130,17 +116,11 @@
     <span class="doccomment">/// let provider = FsDataProvider::try_new(&quot;/path/to/data/directory&quot;)</span>
     <span class="doccomment">///     .expect_err(&quot;Specify a real directory in the line above&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">root_path_buf</span>: <span class="ident">PathBuf</span> <span class="op">=</span> <span class="ident">root</span>.<span class="ident">into</span>();
-        <span class="kw">let</span> <span class="ident">manifest_path</span> <span class="op">=</span> <span class="ident">root_path_buf</span>.<span class="ident">join</span>(<span class="ident">MANIFEST_FILE</span>);
-        <span class="kw">let</span> <span class="ident">manifest_str</span> <span class="op">=</span> <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">manifest_path</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">manifest_path</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">manifest</span>: <span class="ident">Manifest</span> <span class="op">=</span> <span class="ident">serde_json_core::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">manifest_str</span>)
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">obj</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">obj</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">manifest_path</span>))<span class="question-mark">?</span>;
-        <span class="ident">check_format_supported</span>(<span class="ident">manifest</span>.<span class="ident">buffer_format</span>)<span class="question-mark">?</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">root</span>.<span class="ident">into</span>();
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">res_root</span>: <span class="ident">root_path_buf</span>,
-            <span class="ident">manifest</span>,
+            <span class="ident">manifest</span>: <span class="ident">Manifest::parse</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>)<span class="question-mark">?</span>,
+            <span class="ident">root</span>,
         })
     }
 }
@@ -151,17 +131,17 @@
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">res_root</span>.<span class="ident">clone</span>();
-        <span class="ident">path_buf</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">key</span>.<span class="ident">write_to_string</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">key</span>.<span class="ident">write_to_string</span>());
         <span class="kw">if</span> <span class="op">!</span><span class="ident">path_buf</span>.<span class="ident">exists</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>));
         }
         <span class="ident">path_buf</span>.<span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">write_to_string</span>());
-        <span class="ident">path_buf</span>.<span class="ident">set_extension</span>(<span class="self">self</span>.<span class="ident">manifest</span>.<span class="ident">get_file_extension</span>());
+        <span class="ident">path_buf</span>.<span class="ident">set_extension</span>(<span class="self">self</span>.<span class="ident">manifest</span>.<span class="ident">file_extension</span>);
         <span class="kw">if</span> <span class="op">!</span><span class="ident">path_buf</span>.<span class="ident">exists</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceOptions</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>));
         }
-        <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">path_buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path</span>(<span class="kw-2">&amp;</span><span class="ident">path_buf</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span>
+            <span class="ident">fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">path_buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path_buf</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
         <span class="ident">metadata</span>.<span class="ident">buffer_format</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">manifest</span>.<span class="ident">buffer_format</span>);

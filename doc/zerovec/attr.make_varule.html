@@ -33,10 +33,10 @@ the implementation on <code>Self</code>. You can opt out of this with <code>#[ze
 <p>Note that this implementation will autogenerate <a href="ule/trait.EncodeAsVarULE.html"><code>EncodeAsVarULE</code></a> impls for <em>both</em> <code>Self</code> and <code>&amp;Self</code>
 for convenience. This allows for a little more flexibility encoding slices.</p>
 <h2 id="example"><a href="#example">Example</a></h2>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroVec</span>, <span class="ident">VarZeroVec</span>, <span class="ident">ZeroMap</span>};
-<span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
-<span class="kw">use</span> <span class="ident">zerovec::ule::encode_varule_to_box</span>;
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">zerofrom::ZeroFrom</span>;
+<span class="kw">use</span> <span class="ident">zerovec::ule::encode_varule_to_box</span>;
+<span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">VarZeroVec</span>, <span class="ident">ZeroMap</span>, <span class="ident">ZeroVec</span>};
 
 <span class="comment">// custom fixed-size ULE type for ZeroVec</span>
 <span class="attribute">#[<span class="ident">zerovec::make_ule</span>(<span class="ident">DateULE</span>)]</span>
@@ -44,7 +44,7 @@ for convenience. This allows for a little more flexibility encoding slices.</p>
 <span class="kw">struct</span> <span class="ident">Date</span> {
     <span class="ident">y</span>: <span class="ident">u64</span>,
     <span class="ident">m</span>: <span class="ident">u8</span>,
-    <span class="ident">d</span>: <span class="ident">u8</span>
+    <span class="ident">d</span>: <span class="ident">u8</span>,
 }
 
 <span class="comment">// custom variable sized VarULE type for VarZeroVec</span>
@@ -65,34 +65,41 @@ for convenience. This allows for a little more flexibility encoding slices.</p>
     <span class="ident">important_people</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">PersonULE</span><span class="op">&gt;</span>,
 }
 
-
 <span class="kw">let</span> <span class="ident">person1</span> <span class="op">=</span> <span class="ident">Person</span> {
-    <span class="ident">birthday</span>: <span class="ident">Date</span> { <span class="ident">y</span>: <span class="number">1990</span>, <span class="ident">m</span>: <span class="number">9</span>, <span class="ident">d</span>: <span class="number">7</span>},
+    <span class="ident">birthday</span>: <span class="ident">Date</span> {
+        <span class="ident">y</span>: <span class="number">1990</span>,
+        <span class="ident">m</span>: <span class="number">9</span>,
+        <span class="ident">d</span>: <span class="number">7</span>,
+    },
     <span class="ident">favorite_character</span>: <span class="string">&#39;π&#39;</span>,
-    <span class="ident">name</span>: <span class="ident">Cow::from</span>(<span class="string">&quot;Kate&quot;</span>)
+    <span class="ident">name</span>: <span class="ident">Cow::from</span>(<span class="string">&quot;Kate&quot;</span>),
 };
 <span class="kw">let</span> <span class="ident">person2</span> <span class="op">=</span> <span class="ident">Person</span> {
-    <span class="ident">birthday</span>: <span class="ident">Date</span> { <span class="ident">y</span>: <span class="number">1960</span>, <span class="ident">m</span>: <span class="number">5</span>, <span class="ident">d</span>: <span class="number">25</span>},
+    <span class="ident">birthday</span>: <span class="ident">Date</span> {
+        <span class="ident">y</span>: <span class="number">1960</span>,
+        <span class="ident">m</span>: <span class="number">5</span>,
+        <span class="ident">d</span>: <span class="number">25</span>,
+    },
     <span class="ident">favorite_character</span>: <span class="string">&#39;冇&#39;</span>,
-    <span class="ident">name</span>: <span class="ident">Cow::from</span>(<span class="string">&quot;Jesse&quot;</span>)
+    <span class="ident">name</span>: <span class="ident">Cow::from</span>(<span class="string">&quot;Jesse&quot;</span>),
 };
 
 <span class="kw">let</span> <span class="ident">important_people</span> <span class="op">=</span> <span class="ident">VarZeroVec::from</span>(<span class="kw-2">&amp;</span>[<span class="ident">person1</span>, <span class="ident">person2</span>]);
 <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">Data</span> { <span class="ident">important_people</span> };
 
-<span class="kw">let</span> <span class="ident">bincode_bytes</span> <span class="op">=</span> <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>)
-    .<span class="ident">expect</span>(<span class="string">&quot;Serialization should be successful&quot;</span>);
+<span class="kw">let</span> <span class="ident">bincode_bytes</span> <span class="op">=</span> <span class="ident">bincode::serialize</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="ident">expect</span>(<span class="string">&quot;Serialization should be successful&quot;</span>);
 
 <span class="comment">// Will deserialize without allocations</span>
-<span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">Data</span> <span class="op">=</span> <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_bytes</span>)
-    .<span class="ident">expect</span>(<span class="string">&quot;Deserialization should be successful&quot;</span>);
+<span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">Data</span> <span class="op">=</span>
+    <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_bytes</span>).<span class="ident">expect</span>(<span class="string">&quot;Deserialization should be successful&quot;</span>);
 
 <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">deserialized</span>.<span class="ident">important_people</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap</span>().<span class="ident">name</span>, <span class="string">&quot;Jesse&quot;</span>);
 <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">deserialized</span>.<span class="ident">important_people</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>().<span class="ident">name</span>, <span class="string">&quot;Kate&quot;</span>);
 
 <span class="comment">// Since VarZeroVec produces PersonULE types, it&#39;s convenient to use ZeroFrom</span>
 <span class="comment">// to recoup Person values in a zero-copy way</span>
-<span class="kw">let</span> <span class="ident">person_converted</span>: <span class="ident">Person</span> <span class="op">=</span> <span class="ident">ZeroFrom::zero_from</span>(<span class="ident">deserialized</span>.<span class="ident">important_people</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap</span>());
+<span class="kw">let</span> <span class="ident">person_converted</span>: <span class="ident">Person</span> <span class="op">=</span>
+    <span class="ident">ZeroFrom::zero_from</span>(<span class="ident">deserialized</span>.<span class="ident">important_people</span>.<span class="ident">get</span>(<span class="number">1</span>).<span class="ident">unwrap</span>());
 <span class="macro">assert_eq!</span>(<span class="ident">person_converted</span>.<span class="ident">name</span>, <span class="string">&quot;Jesse&quot;</span>);
 <span class="macro">assert_eq!</span>(<span class="ident">person_converted</span>.<span class="ident">birthday</span>.<span class="ident">y</span>, <span class="number">1960</span>);</code></pre></div>
 <p>Full docs for this proc macro can be found on the <a href="docs.rs/zerovec"><code>zerovec</code></a> crate.</p>

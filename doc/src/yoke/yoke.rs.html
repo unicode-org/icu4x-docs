@@ -1050,17 +1050,6 @@
 <span id="1045">1045</span>
 <span id="1046">1046</span>
 <span id="1047">1047</span>
-<span id="1048">1048</span>
-<span id="1049">1049</span>
-<span id="1050">1050</span>
-<span id="1051">1051</span>
-<span id="1052">1052</span>
-<span id="1053">1053</span>
-<span id="1054">1054</span>
-<span id="1055">1055</span>
-<span id="1056">1056</span>
-<span id="1057">1057</span>
-<span id="1058">1058</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1139,7 +1128,6 @@
 <span class="doccomment">/// assert_eq!(&amp;**yoke.get(), &quot;hello&quot;);</span>
 <span class="doccomment">/// assert!(matches!(yoke.get(), &amp;Cow::Borrowed(_)));</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">Y</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">C</span><span class="op">&gt;</span> {
     <span class="comment">// must be the first field for drop order</span>
     <span class="comment">// this will have a &#39;static lifetime parameter, that parameter is a lie</span>
@@ -1265,9 +1253,7 @@
     <span class="doccomment">/// let rc = Rc::new([0xb, 0xa, 0xd]);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let yoke_result: Result&lt;Yoke&lt;Cow&lt;str&gt;, Rc&lt;[u8]&gt;&gt;, _&gt; =</span>
-    <span class="doccomment">///     Yoke::try_attach_to_cart_badly(rc, |data: &amp;[u8]| {</span>
-    <span class="doccomment">///         bincode::deserialize(data)</span>
-    <span class="doccomment">///     });</span>
+    <span class="doccomment">///     Yoke::try_attach_to_cart_badly(rc, |data: &amp;[u8]| bincode::deserialize(data));</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert!(matches!(yoke_result, Err(_)));</span>
     <span class="doccomment">/// ```</span>
@@ -1340,10 +1326,7 @@
     <span class="doccomment">/// use yoke::Yoke;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let local_data = &quot;foo&quot;.to_string();</span>
-    <span class="doccomment">/// let yoke = Yoke::&lt;</span>
-    <span class="doccomment">///     &amp;&#39;static str,</span>
-    <span class="doccomment">///     Box&lt;String&gt;</span>
-    <span class="doccomment">/// &gt;::attach_to_zero_copy_cart(Box::new(local_data));</span>
+    <span class="doccomment">/// let yoke = Yoke::&lt;&amp;&#39;static str, Box&lt;String&gt;&gt;::attach_to_zero_copy_cart(Box::new(local_data));</span>
     <span class="doccomment">/// assert_eq!(*yoke.get(), &quot;foo&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Get back the cart</span>
@@ -1354,14 +1337,12 @@
     <span class="doccomment">/// Bad example: information specified in `.with_mut()` is lost.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use yoke::Yoke;</span>
     <span class="doccomment">/// use std::borrow::Cow;</span>
+    <span class="doccomment">/// use yoke::Yoke;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let local_data = &quot;foo&quot;.to_string();</span>
-    <span class="doccomment">/// let mut yoke = Yoke::&lt;</span>
-    <span class="doccomment">///     Cow&lt;&#39;static, str&gt;,</span>
-    <span class="doccomment">///     Box&lt;String&gt;</span>
-    <span class="doccomment">/// &gt;::attach_to_zero_copy_cart(Box::new(local_data));</span>
+    <span class="doccomment">/// let mut yoke =</span>
+    <span class="doccomment">///     Yoke::&lt;Cow&lt;&#39;static, str&gt;, Box&lt;String&gt;&gt;::attach_to_zero_copy_cart(Box::new(local_data));</span>
     <span class="doccomment">/// assert_eq!(yoke.get(), &quot;foo&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Override data in the cart</span>
@@ -1450,7 +1431,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// bar.with_mut(|bar| {</span>
     <span class="doccomment">///     bar.string.to_mut().push_str(&quot; world&quot;);</span>
-    <span class="doccomment">///     bar.owned.extend_from_slice(&amp;[1, 4, 1, 5, 9]);   </span>
+    <span class="doccomment">///     bar.owned.extend_from_slice(&amp;[1, 4, 1, 5, 9]);</span>
     <span class="doccomment">/// });</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(bar.get().string, &quot;hello world&quot;);</span>
@@ -1684,9 +1665,8 @@
     <span class="doccomment">/// # use yoke::Yoke;</span>
     <span class="doccomment">/// #</span>
     <span class="doccomment">/// fn slice(y: Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static [u8], Rc&lt;[u8]&gt;&gt; {</span>
-    <span class="doccomment">///    y.project(move |yk, _| yk.as_bytes())</span>
+    <span class="doccomment">///     y.project(move |yk, _| yk.as_bytes())</span>
     <span class="doccomment">/// }</span>
-    <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This can also be used to create a yoke for a subfield</span>
@@ -1704,7 +1684,7 @@
     <span class="doccomment">/// }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// fn project_string_1(bar: Yoke&lt;Bar&lt;&#39;static&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
-    <span class="doccomment">///     bar.project(|bar, _| bar.string_1)   </span>
+    <span class="doccomment">///     bar.project(|bar, _| bar.string_1)</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// #</span>
@@ -1887,16 +1867,15 @@
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use yoke::Yoke;</span>
-    <span class="doccomment">/// use yoke::erased::ErasedRcCart;</span>
     <span class="doccomment">/// use std::rc::Rc;</span>
+    <span class="doccomment">/// use yoke::erased::ErasedRcCart;</span>
+    <span class="doccomment">/// use yoke::Yoke;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let buffer1: Rc&lt;String&gt; = Rc::new(&quot;   foo bar baz  &quot;.into());</span>
     <span class="doccomment">/// let buffer2: Box&lt;String&gt; = Box::new(&quot;  baz quux  &quot;.into());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let yoke1 = Yoke::&lt;&amp;&#39;static str, _&gt;::attach_to_cart_badly(buffer1, |rc| rc.trim());</span>
     <span class="doccomment">/// let yoke2 = Yoke::&lt;&amp;&#39;static str, _&gt;::attach_to_cart_badly(buffer2, |b| b.trim());</span>
-    <span class="doccomment">///</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let erased1: Yoke&lt;_, ErasedRcCart&gt; = yoke1.erase_rc_cart();</span>
     <span class="doccomment">/// // Wrap the Box in an Rc to make it compatible</span>
@@ -1932,16 +1911,15 @@
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use yoke::Yoke;</span>
-    <span class="doccomment">/// use yoke::erased::ErasedBoxCart;</span>
     <span class="doccomment">/// use std::rc::Rc;</span>
+    <span class="doccomment">/// use yoke::erased::ErasedBoxCart;</span>
+    <span class="doccomment">/// use yoke::Yoke;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let buffer1: Rc&lt;String&gt; = Rc::new(&quot;   foo bar baz  &quot;.into());</span>
     <span class="doccomment">/// let buffer2: Box&lt;String&gt; = Box::new(&quot;  baz quux  &quot;.into());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let yoke1 = Yoke::&lt;&amp;&#39;static str, _&gt;::attach_to_cart_badly(buffer1, |rc| rc.trim());</span>
     <span class="doccomment">/// let yoke2 = Yoke::&lt;&amp;&#39;static str, _&gt;::attach_to_cart_badly(buffer2, |b| b.trim());</span>
-    <span class="doccomment">///</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Wrap the Rc in an Box to make it compatible</span>
     <span class="doccomment">/// let erased1: Yoke&lt;_, ErasedBoxCart&gt; = yoke1.wrap_cart_in_box().erase_box_cart();</span>

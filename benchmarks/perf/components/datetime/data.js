@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1652970246270,
+  "lastUpdate": 1653066500583,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -32615,6 +32615,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 4412,
             "range": "± 5",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e40ba553b10bd20b07bffc126499cf52b8d85dbe",
+          "message": "Add a collator implementation under experimental/ (#1706)",
+          "timestamp": "2022-05-20T08:55:35+03:00",
+          "tree_id": "1898ef48e412fdd1c83befd35c6c44d4fc4130d8",
+          "url": "https://github.com/unicode-org/icu4x/commit/e40ba553b10bd20b07bffc126499cf52b8d85dbe"
+        },
+        "date": 1653026822006,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 65832,
+            "range": "± 1214",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 669157,
+            "range": "± 9953",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 147331,
+            "range": "± 1059",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 64268,
+            "range": "± 573",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 70588,
+            "range": "± 1238",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 67250,
+            "range": "± 959",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 72838,
+            "range": "± 1110",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 139419,
+            "range": "± 2107",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 150800,
+            "range": "± 2402",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 147152,
+            "range": "± 465",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 152119,
+            "range": "± 2180",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 4381,
+            "range": "± 59",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "19bfd93689b3f34dc4f5b798dd03181d6a2d7454",
+          "message": "Add hsivonen and echeran as the owners of collator and normalizer (#1918)",
+          "timestamp": "2022-05-20T16:56:54Z",
+          "tree_id": "e53696a149b9bdb8ea18ed648ce0501a14c30376",
+          "url": "https://github.com/unicode-org/icu4x/commit/19bfd93689b3f34dc4f5b798dd03181d6a2d7454"
+        },
+        "date": 1653066481458,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 78454,
+            "range": "± 810",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 698422,
+            "range": "± 3077",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 149466,
+            "range": "± 632",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 73887,
+            "range": "± 251",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 82371,
+            "range": "± 212",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 69019,
+            "range": "± 424",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 75407,
+            "range": "± 225",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 145844,
+            "range": "± 1511",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 176233,
+            "range": "± 319",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 149147,
+            "range": "± 442",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 180845,
+            "range": "± 3207",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 4537,
+            "range": "± 10",
             "unit": "ns/iter"
           }
         ]

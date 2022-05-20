@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CanonicalDecompositionDataV1",""],["CanonicalDecompositionDataV1Marker","Marker type for [`CanonicalDecompositionDataV1`]: “normalizer/nfd@1”"]]});

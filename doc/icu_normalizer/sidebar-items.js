@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["error",""],["provider",""]],"struct":[["DecomposingNormalizer","A normalizer for performing decomposing normalization (currently only NFD but NFKD expected in the future)."],["Decomposition","An iterator adaptor that turns an `Iterator` over `char` into a lazily-decomposed (currently only NFD though NFKD should also be possible) `char` sequence."]]});

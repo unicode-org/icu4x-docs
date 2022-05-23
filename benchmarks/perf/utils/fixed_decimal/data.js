@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653158941468,
+  "lastUpdate": 1653293886386,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -27689,6 +27689,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 86,
             "range": "± 1",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cedb67fca4523119c29aebc7b0c6cbcb1bb3ce6e",
+          "message": "Add comments noting why unsafe blocks are OK (#1915)\n\nCloses #1909",
+          "timestamp": "2022-05-23T11:05:13+03:00",
+          "tree_id": "d9bd8c58650a91b2c898c4499fa08eb48a440805",
+          "url": "https://github.com/unicode-org/icu4x/commit/cedb67fca4523119c29aebc7b0c6cbcb1bb3ce6e"
+        },
+        "date": 1653293848473,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 132297,
+            "range": "± 346",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 29293,
+            "range": "± 78",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 82696,
+            "range": "± 94",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 224,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 114,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 91,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d639e265fa7bc01a6fd8a5b6a1f4d5ad82a759b8",
+          "message": "Remove the unused postcard dependency from the collator (#1917)\n\nCloses #1907",
+          "timestamp": "2022-05-23T11:06:03+03:00",
+          "tree_id": "c7942ec64e035d39e623600aea0e9cb81f919bc5",
+          "url": "https://github.com/unicode-org/icu4x/commit/d639e265fa7bc01a6fd8a5b6a1f4d5ad82a759b8"
+        },
+        "date": 1653293864128,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 97671,
+            "range": "± 274",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 20398,
+            "range": "± 152",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 62521,
+            "range": "± 479",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 170,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 64,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 76,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653293886386,
+  "lastUpdate": 1653328370523,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -27808,6 +27808,126 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 76,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5025df3a3d5c2af5d6bb661a6ceef98d56fc0d4e",
+          "message": "Improve integer operations in FixedDecimal (#1924)",
+          "timestamp": "2022-05-23T09:53:51-07:00",
+          "tree_id": "0dc6158aa27afcfa95b7715be58c8d3b20697b80",
+          "url": "https://github.com/unicode-org/icu4x/commit/5025df3a3d5c2af5d6bb661a6ceef98d56fc0d4e"
+        },
+        "date": 1653325576982,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 109079,
+            "range": "± 6821",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25501,
+            "range": "± 2346",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66228,
+            "range": "± 4729",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 204,
+            "range": "± 8",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 101,
+            "range": "± 11",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 87,
+            "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "326c2f245fc4fdf75e51005dd7abb4d823cf5a72",
+          "message": "Update nightly to 2022-02-17, the latest that supports clang-13 (#1928)",
+          "timestamp": "2022-05-23T19:39:24+02:00",
+          "tree_id": "b123908d0f1ada50ec7a379086e1f4da35541a14",
+          "url": "https://github.com/unicode-org/icu4x/commit/326c2f245fc4fdf75e51005dd7abb4d823cf5a72"
+        },
+        "date": 1653328350331,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 107679,
+            "range": "± 774",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22965,
+            "range": "± 197",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 59745,
+            "range": "± 362",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 185,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 94,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 77,
             "range": "± 0",
             "unit": "ns/iter"
           }

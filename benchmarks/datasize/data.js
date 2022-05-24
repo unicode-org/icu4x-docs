@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653374112122,
+  "lastUpdate": 1653418650834,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -15683,6 +15683,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/768a0c0f0351137c32333b9b68670c976e81473a"
         },
         "date": 1653374091293,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 2220821,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b914f53170fbdeed2e9929e5d4afd62601059cca",
+          "message": "Deprecate yoke's `badly` methods (#1930)",
+          "timestamp": "2022-05-24T20:48:40+02:00",
+          "tree_id": "c3189656c749852ffb52f7a1900e16eb6a7f99f4",
+          "url": "https://github.com/unicode-org/icu4x/commit/b914f53170fbdeed2e9929e5d4afd62601059cca"
+        },
+        "date": 1653418218568,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 2220821,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f6ffb443167beaa9fd488a0cce263e20418b4cb4",
+          "message": "Crabbake for utils (#1926)",
+          "timestamp": "2022-05-24T20:55:41+02:00",
+          "tree_id": "1c6c6a0fde1bcd2c17e1d240dac12e5543d3eea8",
+          "url": "https://github.com/unicode-org/icu4x/commit/f6ffb443167beaa9fd488a0cce263e20418b4cb4"
+        },
+        "date": 1653418629961,
         "tool": "ndjson",
         "benches": [
           {

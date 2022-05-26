@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653579665955,
+  "lastUpdate": 1653586438007,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -28781,6 +28781,168 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 51121292,
             "range": "± 876018",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "08bf323eda26974728f99ff05533c7b2f1606667",
+          "message": "Use variables for compiler in Makefile (#1885)",
+          "timestamp": "2022-05-26T12:23:42-05:00",
+          "tree_id": "2166afdc7fa0910a6886595f834970c05a033479",
+          "url": "https://github.com/unicode-org/icu4x/commit/08bf323eda26974728f99ff05533c7b2f1606667"
+        },
+        "date": 1653586375544,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 40658798,
+            "range": "± 124050",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6944cbb228977815fda35a8d09000d5f6c167550",
+          "message": "Simplify function in rule_segmenter (#1880)",
+          "timestamp": "2022-05-26T12:23:18-05:00",
+          "tree_id": "e583e20e4bacdae0422ca9f756743a59f753191b",
+          "url": "https://github.com/unicode-org/icu4x/commit/6944cbb228977815fda35a8d09000d5f6c167550"
+        },
+        "date": 1653586399438,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 51183309,
+            "range": "± 957003",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "72d94a270fe2ea80dfaecc9051c6b8a7412b5a0e",
+          "message": "Remove lifetime from ZeroVecLike (#1901)",
+          "timestamp": "2022-05-26T12:24:43-05:00",
+          "tree_id": "f04bbefbd4c6f931187bfd75997b7f2d3da05d3a",
+          "url": "https://github.com/unicode-org/icu4x/commit/72d94a270fe2ea80dfaecc9051c6b8a7412b5a0e"
+        },
+        "date": 1653586414548,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 51397573,
+            "range": "± 1068627",
             "unit": "ns/iter"
           },
           {

@@ -396,6 +396,12 @@
 <span id="391">391</span>
 <span id="392">392</span>
 <span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -406,59 +412,65 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::internals</span>::{<span class="ident">ClosureSet</span>, <span class="ident">DotType</span>, <span class="ident">MappingKind</span>};
 
-<span class="comment">// This represents case mapping exceptions that can&#39;t be represented as a delta applied to</span>
-<span class="comment">// the original code point. Similar to ICU4C, data is stored as a u16 array. The codepoint</span>
-<span class="comment">// trie in CaseMapping stores offsets into this array. The u16 at that index contains a</span>
-<span class="comment">// set of flags describing the subsequent data.</span>
-<span class="comment">//</span>
-<span class="comment">//   [idx + 0]  Header word:</span>
-<span class="comment">//       Bits:</span>
-<span class="comment">//         0..7  Flag bits indicating which optional slots are present (if any):</span>
-<span class="comment">//               0: Lowercase mapping (code point)</span>
-<span class="comment">//               1: Case folding (code point)</span>
-<span class="comment">//               2: Uppercase mapping (code point)</span>
-<span class="comment">//               3: Titlecase mapping (code point)</span>
-<span class="comment">//               4: Delta to simple case mapping (code point) (sign stored separately)</span>
-<span class="comment">//               5: [RESERVED]</span>
-<span class="comment">//               6: Closure mappings (string; see below)</span>
-<span class="comment">//               7: Full mappings (strings; see below)</span>
-<span class="comment">//            8  Double-width slots. If set, then each optional slot is stored as two</span>
-<span class="comment">//               elements of the array (high and low halves of 32-bit values) instead of</span>
-<span class="comment">//               a single element.</span>
-<span class="comment">//            9  Has no simple case folding, even if there is a simple lowercase mapping</span>
-<span class="comment">//           10  The value in the delta slot is negative</span>
-<span class="comment">//           11  Is case-sensitive (not exposed)</span>
-<span class="comment">//       12..13  Dot type</span>
-<span class="comment">//           14  Has conditional special casing</span>
-<span class="comment">//           15  Has conditional case folding</span>
-<span class="comment">//</span>
-<span class="comment">//   If double-width slots is false:</span>
-<span class="comment">//</span>
-<span class="comment">//   [idx + 1] First optional slot</span>
-<span class="comment">//   [idx + 2] Second optional slot</span>
-<span class="comment">//   [idx + 3] Third optional slot</span>
-<span class="comment">//   ...</span>
-<span class="comment">//</span>
-<span class="comment">//   If double-width slots is true:</span>
-<span class="comment">//</span>
-<span class="comment">//   [idx + 1] First optional slot</span>
-<span class="comment">//   [idx + 3] Second optional slot</span>
-<span class="comment">//   [idx + 5] Third optional slot</span>
-<span class="comment">//   ...</span>
-<span class="comment">//</span>
-<span class="comment">// In ICU4C, the full mapping and closure strings are stored inline in the data, encoded</span>
-<span class="comment">// as UTF-16, and the full mapping and closure slots contain information about the length</span>
-<span class="comment">// of those strings. To avoid the need for allocations when converting from UTF-16 to</span>
-<span class="comment">// UTF-8, we instead store strings encoded as UTF-8 in a side table. The full mapping and</span>
-<span class="comment">// closure slots contain indices into that side table.</span>
+<span class="doccomment">/// This represents case mapping exceptions that can&#39;t be represented as a delta applied to</span>
+<span class="doccomment">/// the original code point. Similar to ICU4C, data is stored as a u16 array. The codepoint</span>
+<span class="doccomment">/// trie in CaseMapping stores offsets into this array. The u16 at that index contains a</span>
+<span class="doccomment">/// set of flags describing the subsequent data.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///   [idx + 0]  Header word:</span>
+<span class="doccomment">///       Bits:</span>
+<span class="doccomment">///         0..7  Flag bits indicating which optional slots are present (if any):</span>
+<span class="doccomment">///               0: Lowercase mapping (code point)</span>
+<span class="doccomment">///               1: Case folding (code point)</span>
+<span class="doccomment">///               2: Uppercase mapping (code point)</span>
+<span class="doccomment">///               3: Titlecase mapping (code point)</span>
+<span class="doccomment">///               4: Delta to simple case mapping (code point) (sign stored separately)</span>
+<span class="doccomment">///               5: RESERVED</span>
+<span class="doccomment">///               6: Closure mappings (string; see below)</span>
+<span class="doccomment">///               7: Full mappings (strings; see below)</span>
+<span class="doccomment">///            8  Double-width slots. If set, then each optional slot is stored as two</span>
+<span class="doccomment">///               elements of the array (high and low halves of 32-bit values) instead of</span>
+<span class="doccomment">///               a single element.</span>
+<span class="doccomment">///            9  Has no simple case folding, even if there is a simple lowercase mapping</span>
+<span class="doccomment">///           10  The value in the delta slot is negative</span>
+<span class="doccomment">///           11  Is case-sensitive (not exposed)</span>
+<span class="doccomment">///       12..13  Dot type</span>
+<span class="doccomment">///           14  Has conditional special casing</span>
+<span class="doccomment">///           15  Has conditional case folding</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///   If double-width slots is false:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///   [idx + 1] First optional slot</span>
+<span class="doccomment">///   [idx + 2] Second optional slot</span>
+<span class="doccomment">///   [idx + 3] Third optional slot</span>
+<span class="doccomment">///   ...</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///   If double-width slots is true:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///   [idx + 1] First optional slot</span>
+<span class="doccomment">///   [idx + 3] Second optional slot</span>
+<span class="doccomment">///   [idx + 5] Third optional slot</span>
+<span class="doccomment">///   ...</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// In ICU4C, the full mapping and closure strings are stored inline in the data, encoded</span>
+<span class="doccomment">/// as UTF-16, and the full mapping and closure slots contain information about the length</span>
+<span class="doccomment">/// of those strings. To avoid the need for allocations when converting from UTF-16 to</span>
+<span class="doccomment">/// UTF-8, we instead store strings encoded as UTF-8 in a side table. The full mapping and</span>
+<span class="doccomment">/// closure slots contain indices into that side table.</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, 
+    <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>),
+    <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_casemapping::provider</span>),
+)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">yoke::Yokeable</span>, <span class="ident">zerofrom::ZeroFrom</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">CaseMappingExceptions</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CaseMappingExceptions</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">slots</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u16</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// struct doc covers this</span>
+    <span class="kw">pub</span> <span class="ident">slots</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">strings</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// struct doc covers this</span>
+    <span class="kw">pub</span> <span class="ident">strings</span>: <span class="ident">VarZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
@@ -598,7 +610,7 @@
 
     <span class="comment">// Returns whether the given slot exists for an entry.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">slot</span>: <span class="ident">ExceptionSlot</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">has_slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">slot</span>: <span class="ident">ExceptionSlot</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">has_slot</span>(<span class="ident">slot</span>)
     }
 
@@ -624,7 +636,7 @@
 
     <span class="comment">// Returns the character stored in a given slot for an entry.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">slot_char</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">slot</span>: <span class="ident">ExceptionSlot</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">slot_char</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">slot</span>: <span class="ident">ExceptionSlot</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
         <span class="macro">debug_assert!</span>(<span class="ident">slot</span>.<span class="ident">contains_char</span>());
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">has_slot</span>(<span class="ident">hdr_idx</span>, <span class="ident">slot</span>) {
             <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slot_value</span>(<span class="ident">hdr_idx</span>, <span class="ident">slot</span>);
@@ -637,7 +649,7 @@
     <span class="comment">// Given a mapping kind, returns the character for that kind, if it exists. Fold falls</span>
     <span class="comment">// back to Lower; Title falls back to Upper.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">slot_char_for_kind</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">kind</span>: <span class="ident">MappingKind</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">slot_char_for_kind</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">kind</span>: <span class="ident">MappingKind</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">kind</span> {
             <span class="ident">MappingKind::Lower</span> <span class="op">|</span> <span class="ident">MappingKind::Upper</span> =&gt; <span class="self">self</span>.<span class="ident">slot_char</span>(<span class="ident">hdr_idx</span>, <span class="ident">kind</span>.<span class="ident">into</span>()),
             <span class="ident">MappingKind::Fold</span> =&gt; <span class="self">self</span>
@@ -651,13 +663,13 @@
 
     <span class="comment">// Returns whether an entry has a delta slot.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">has_delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">has_slot</span>(<span class="ident">ExceptionSlot::Delta</span>)
     }
 
     <span class="comment">// Returns the delta value for an entry (with the correct sign).</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">i32</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">i32</span> {
         <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">has_delta</span>(<span class="ident">hdr_idx</span>));
         <span class="kw">let</span> <span class="ident">raw</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slot_value</span>(<span class="ident">hdr_idx</span>, <span class="ident">ExceptionSlot::Delta</span>) <span class="kw">as</span> <span class="kw">_</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">delta_is_negative</span>() {
@@ -675,38 +687,38 @@
 
     <span class="comment">// Returns whether there is no simple case folding for an entry.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">no_simple_case_folding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">no_simple_case_folding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">no_simple_case_folding</span>()
     }
 
     <span class="comment">// Returns whether this code point is case-sensitive.</span>
     <span class="comment">// (Note that this information is stored in the trie for code points without</span>
     <span class="comment">// exception data, but the exception index requires more bits than the delta.)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_sensitive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_sensitive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">is_sensitive</span>()
     }
 
     <span class="comment">// Returns whether there is a conditional case fold for this entry.</span>
     <span class="comment">// (This is used to implement Turkic mappings for dotted/dotless i.)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_conditional_fold</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">has_conditional_fold</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">has_conditional_fold</span>()
     }
 
     <span class="comment">// Given a header index, returns whether there is a language-specific case mapping.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_conditional_special</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">has_conditional_special</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">has_conditional_special</span>()
     }
 
     <span class="comment">// Given a header index, returns the dot type.</span>
     <span class="comment">// (Note that this information is stored in the trie for code points without</span>
     <span class="comment">// exception data, but the exception index requires more bits than the delta.)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dot_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">DotType</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">dot_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>) -&gt; <span class="ident">DotType</span> {
         <span class="self">self</span>.<span class="ident">header</span>(<span class="ident">hdr_idx</span>).<span class="ident">dot_type</span>()
     }
 
     <span class="comment">// Given a header index and a mapping kind, returns the full mapping string.</span>
     <span class="comment">// Note that the string may be empty.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">full_mapping_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">slot</span>: <span class="ident">MappingKind</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">full_mapping_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">slot</span>: <span class="ident">MappingKind</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">has_slot</span>(<span class="ident">hdr_idx</span>, <span class="ident">ExceptionSlot::FullMappings</span>));
         <span class="kw">let</span> <span class="ident">mappings_idx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slot_value</span>(<span class="ident">hdr_idx</span>, <span class="ident">ExceptionSlot::FullMappings</span>);
         <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">mappings_idx</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="ident">slot</span> <span class="kw">as</span> <span class="ident">usize</span>;
@@ -720,7 +732,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">strings</span>[<span class="ident">closure_idx</span>]
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_full_and_closure_mappings</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">ClosureSet</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">set</span>: <span class="kw-2">&amp;mut</span> <span class="ident">S</span>) {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">add_full_and_closure_mappings</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">ClosureSet</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hdr_idx</span>: <span class="ident">u16</span>, <span class="ident">set</span>: <span class="kw-2">&amp;mut</span> <span class="ident">S</span>) {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">has_slot</span>(<span class="ident">hdr_idx</span>, <span class="ident">ExceptionSlot::FullMappings</span>) {
             <span class="kw">let</span> <span class="ident">mapping_string</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">full_mapping_string</span>(<span class="ident">hdr_idx</span>, <span class="ident">MappingKind::Fold</span>);
             <span class="kw">if</span> <span class="op">!</span><span class="ident">mapping_string</span>.<span class="ident">is_empty</span>() {
@@ -735,7 +747,7 @@
         };
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">validate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">validate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">valid_indices</span> <span class="op">=</span> <span class="macro">vec!</span>[];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idx</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0</span>;
 

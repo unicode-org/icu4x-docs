@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653586621396,
+  "lastUpdate": 1653597590164,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -28469,6 +28469,306 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 85,
             "range": "± 3",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b8e055818de108804f84128a0e99b8424201871d",
+          "message": "Document the bit layout of CollationElement32 (#1913)\n\nCloses #1910",
+          "timestamp": "2022-05-26T13:18:38-07:00",
+          "tree_id": "19d802f52c21e80708fa469a4552c98783f4a0d2",
+          "url": "https://github.com/unicode-org/icu4x/commit/b8e055818de108804f84128a0e99b8424201871d"
+        },
+        "date": 1653596990247,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 100039,
+            "range": "± 472",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21627,
+            "range": "± 135",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65859,
+            "range": "± 1952",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 174,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 82,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3f9a5e608749690453928fd464c2ee69c1f97eec",
+          "message": "Validate the length of last_primaries (#1916)",
+          "timestamp": "2022-05-26T13:18:48-07:00",
+          "tree_id": "2e5559b5996b4bb486929a950fed3eab8253bed9",
+          "url": "https://github.com/unicode-org/icu4x/commit/3f9a5e608749690453928fd464c2ee69c1f97eec"
+        },
+        "date": 1653597028129,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 99247,
+            "range": "± 361",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21558,
+            "range": "± 59",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65354,
+            "range": "± 147",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 172,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 74,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ce2f1fb17ccb5e37d1ca7bc5170fc3ce88fe041c",
+          "message": "Move and unescape collator and normalizer tests (#1943)",
+          "timestamp": "2022-05-26T13:19:17-07:00",
+          "tree_id": "964f2fa2bf074b32dee453499e5bbf485769eb2c",
+          "url": "https://github.com/unicode-org/icu4x/commit/ce2f1fb17ccb5e37d1ca7bc5170fc3ce88fe041c"
+        },
+        "date": 1653597106120,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 106648,
+            "range": "± 106399",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 20872,
+            "range": "± 21",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 54558,
+            "range": "± 53",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 10",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 94,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 67,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3d72a098dc96bc5cd1a7cea68203c3e343075ad0",
+          "message": "Use a higher numeric value for `Strength::Identical` (#1942)",
+          "timestamp": "2022-05-26T13:19:01-07:00",
+          "tree_id": "b732d6f34e6d9ffd2027172c02842541ab4d93bb",
+          "url": "https://github.com/unicode-org/icu4x/commit/3d72a098dc96bc5cd1a7cea68203c3e343075ad0"
+        },
+        "date": 1653597443768,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 120105,
+            "range": "± 2829",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25710,
+            "range": "± 599",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 69172,
+            "range": "± 1889",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 232,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 99,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 89,
+            "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c6a433fe991c433e1c736a10ba4795dbae08b7f4",
+          "message": "Tweak CollationMetadataV1 documentation and dead code (#1914)",
+          "timestamp": "2022-05-26T13:19:34-07:00",
+          "tree_id": "119b50b5c8115254ef514362050b8a2decb7ad23",
+          "url": "https://github.com/unicode-org/icu4x/commit/c6a433fe991c433e1c736a10ba4795dbae08b7f4"
+        },
+        "date": 1653597568328,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 106686,
+            "range": "± 891",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22446,
+            "range": "± 125",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 60158,
+            "range": "± 543",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 94,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 76,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

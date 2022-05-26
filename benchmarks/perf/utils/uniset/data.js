@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1653586438007,
+  "lastUpdate": 1653597484294,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -28943,6 +28943,276 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 51397573,
             "range": "± 1068627",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b8e055818de108804f84128a0e99b8424201871d",
+          "message": "Document the bit layout of CollationElement32 (#1913)\n\nCloses #1910",
+          "timestamp": "2022-05-26T13:18:38-07:00",
+          "tree_id": "19d802f52c21e80708fa469a4552c98783f4a0d2",
+          "url": "https://github.com/unicode-org/icu4x/commit/b8e055818de108804f84128a0e99b8424201871d"
+        },
+        "date": 1653596866605,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 42890420,
+            "range": "± 1955625",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3f9a5e608749690453928fd464c2ee69c1f97eec",
+          "message": "Validate the length of last_primaries (#1916)",
+          "timestamp": "2022-05-26T13:18:48-07:00",
+          "tree_id": "2e5559b5996b4bb486929a950fed3eab8253bed9",
+          "url": "https://github.com/unicode-org/icu4x/commit/3f9a5e608749690453928fd464c2ee69c1f97eec"
+        },
+        "date": 1653596943310,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 40688385,
+            "range": "± 2023261",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ce2f1fb17ccb5e37d1ca7bc5170fc3ce88fe041c",
+          "message": "Move and unescape collator and normalizer tests (#1943)",
+          "timestamp": "2022-05-26T13:19:17-07:00",
+          "tree_id": "964f2fa2bf074b32dee453499e5bbf485769eb2c",
+          "url": "https://github.com/unicode-org/icu4x/commit/ce2f1fb17ccb5e37d1ca7bc5170fc3ce88fe041c"
+        },
+        "date": 1653597032735,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 42024580,
+            "range": "± 2764986",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3d72a098dc96bc5cd1a7cea68203c3e343075ad0",
+          "message": "Use a higher numeric value for `Strength::Identical` (#1942)",
+          "timestamp": "2022-05-26T13:19:01-07:00",
+          "tree_id": "b732d6f34e6d9ffd2027172c02842541ab4d93bb",
+          "url": "https://github.com/unicode-org/icu4x/commit/3d72a098dc96bc5cd1a7cea68203c3e343075ad0"
+        },
+        "date": 1653597328787,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 40527321,
+            "range": "± 73972",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c6a433fe991c433e1c736a10ba4795dbae08b7f4",
+          "message": "Tweak CollationMetadataV1 documentation and dead code (#1914)",
+          "timestamp": "2022-05-26T13:19:34-07:00",
+          "tree_id": "119b50b5c8115254ef514362050b8a2decb7ad23",
+          "url": "https://github.com/unicode-org/icu4x/commit/c6a433fe991c433e1c736a10ba4795dbae08b7f4"
+        },
+        "date": 1653597460559,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 51187506,
+            "range": "± 796216",
             "unit": "ns/iter"
           },
           {

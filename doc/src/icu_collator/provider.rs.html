@@ -281,6 +281,8 @@
 <span id="276">276</span>
 <span id="277">277</span>
 <span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -454,11 +456,15 @@
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationMetadataV1</span> {
-    <span class="doccomment">/// 8 highest bits for numeric primary.</span>
-    <span class="doccomment">/// The low 2 bits are the default strength - 1,</span>
-    <span class="doccomment">/// i.e. 0 for primary, 1 for secondary.</span>
-    <span class="doccomment">/// The rest for various flags, some of the space</span>
-    <span class="doccomment">/// being unused.</span>
+    <span class="doccomment">/// See the mask constants in the `impl` block for the</span>
+    <span class="doccomment">/// bit layout. The other bits are ignored: They could</span>
+    <span class="doccomment">/// be from the future if their semantics such that</span>
+    <span class="doccomment">/// old code may ignore them.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Note: At present, it&#39;s bogus for the bit for &quot;upper</span>
+    <span class="doccomment">/// first&quot; to be set if &quot;case first&quot; isn&#39;t also set.</span>
+    <span class="doccomment">/// However, the methods handle this case gracefully,</span>
+    <span class="doccomment">/// so there is no need for invariant validation.</span>
     <span class="kw">pub</span> <span class="ident">bits</span>: <span class="ident">u32</span>,
 }
 
@@ -466,6 +472,7 @@
     <span class="kw">const</span> <span class="ident">MAX_VARIABLE_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0b11</span>;
     <span class="kw">const</span> <span class="ident">TAILORED_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
     <span class="kw">const</span> <span class="ident">TAILORED_DIACRITICS_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
     <span class="kw">const</span> <span class="ident">TAILORED_JAMO_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
     <span class="kw">const</span> <span class="ident">REORDERING_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span>;
     <span class="kw">const</span> <span class="ident">LITHUANIAN_DOT_ABOVE_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">7</span>;
@@ -475,57 +482,56 @@
     <span class="kw">const</span> <span class="ident">UPPER_FIRST_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">11</span>;
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_variable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">MaxVariable</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">max_variable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">MaxVariable</span> {
+        <span class="comment">// Safe, because the possible numeric values for `MaxVariable` are from 0 to 3, inclusive,</span>
+        <span class="comment">// and we take the two low bits.</span>
         <span class="kw">unsafe</span> { <span class="ident">core::mem::transmute</span>((<span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::MAX_VARIABLE_MASK</span>) <span class="kw">as</span> <span class="ident">u8</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">numeric_primary</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
-        <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="number">0xFF000000</span>
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tailored</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">tailored</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::TAILORED_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Vietnamese and Ewe</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tailored_diacritics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">tailored_diacritics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::TAILORED_DIACRITICS_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Korean search</span>
+    <span class="doccomment">/// XXX: Currently ignored and being redesigned</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tailored_jamo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">tailored_jamo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::TAILORED_JAMO_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Lithuanian</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lithuanian_dot_above</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">lithuanian_dot_above</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::LITHUANIAN_DOT_ABOVE_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Canadian French</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">backward_second_level</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">backward_second_level</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::BACWARD_SECOND_LEVEL_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reordering</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">reordering</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::REORDERING_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Thai</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">alternate_shifted</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">alternate_shifted</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::ALTERNATE_SHIFTED_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">case_first</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CaseFirst</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">case_first</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CaseFirst</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::CASE_FIRST_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> <span class="ident">CollationMetadataV1::UPPER_FIRST_MASK</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="ident">CaseFirst::UpperFirst</span>
@@ -536,8 +542,6 @@
             <span class="ident">CaseFirst::Off</span>
         }
     }
-
-    <span class="comment">// XXX alternate_non_ignorable Doesn&#39;t exist in current CLDR</span>
 }
 
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationSpecialPrimariesV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/prim@1&quot;</span>)]</span>

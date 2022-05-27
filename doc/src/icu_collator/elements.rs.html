@@ -1962,6 +1962,80 @@
 <span id="1957">1957</span>
 <span id="1958">1958</span>
 <span id="1959">1959</span>
+<span id="1960">1960</span>
+<span id="1961">1961</span>
+<span id="1962">1962</span>
+<span id="1963">1963</span>
+<span id="1964">1964</span>
+<span id="1965">1965</span>
+<span id="1966">1966</span>
+<span id="1967">1967</span>
+<span id="1968">1968</span>
+<span id="1969">1969</span>
+<span id="1970">1970</span>
+<span id="1971">1971</span>
+<span id="1972">1972</span>
+<span id="1973">1973</span>
+<span id="1974">1974</span>
+<span id="1975">1975</span>
+<span id="1976">1976</span>
+<span id="1977">1977</span>
+<span id="1978">1978</span>
+<span id="1979">1979</span>
+<span id="1980">1980</span>
+<span id="1981">1981</span>
+<span id="1982">1982</span>
+<span id="1983">1983</span>
+<span id="1984">1984</span>
+<span id="1985">1985</span>
+<span id="1986">1986</span>
+<span id="1987">1987</span>
+<span id="1988">1988</span>
+<span id="1989">1989</span>
+<span id="1990">1990</span>
+<span id="1991">1991</span>
+<span id="1992">1992</span>
+<span id="1993">1993</span>
+<span id="1994">1994</span>
+<span id="1995">1995</span>
+<span id="1996">1996</span>
+<span id="1997">1997</span>
+<span id="1998">1998</span>
+<span id="1999">1999</span>
+<span id="2000">2000</span>
+<span id="2001">2001</span>
+<span id="2002">2002</span>
+<span id="2003">2003</span>
+<span id="2004">2004</span>
+<span id="2005">2005</span>
+<span id="2006">2006</span>
+<span id="2007">2007</span>
+<span id="2008">2008</span>
+<span id="2009">2009</span>
+<span id="2010">2010</span>
+<span id="2011">2011</span>
+<span id="2012">2012</span>
+<span id="2013">2013</span>
+<span id="2014">2014</span>
+<span id="2015">2015</span>
+<span id="2016">2016</span>
+<span id="2017">2017</span>
+<span id="2018">2018</span>
+<span id="2019">2019</span>
+<span id="2020">2020</span>
+<span id="2021">2021</span>
+<span id="2022">2022</span>
+<span id="2023">2023</span>
+<span id="2024">2024</span>
+<span id="2025">2025</span>
+<span id="2026">2026</span>
+<span id="2027">2027</span>
+<span id="2028">2028</span>
+<span id="2029">2029</span>
+<span id="2030">2030</span>
+<span id="2031">2031</span>
+<span id="2032">2032</span>
+<span id="2033">2033</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1982,6 +2056,7 @@
 <span class="doccomment">//! This module also declares various constants that are also used</span>
 <span class="doccomment">//! by the `comparison` module.</span>
 
+<span class="kw">use</span> <span class="ident">core::char::REPLACEMENT_CHARACTER</span>;
 <span class="kw">use</span> <span class="ident">icu_char16trie::char16trie::TrieResult</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrie</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::provider::CanonicalDecompositionDataV1</span>;
@@ -1989,6 +2064,7 @@
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ule::AsULE</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ule::RawBytesULE</span>;
+<span class="kw">use</span> <span class="ident">zerovec::ZeroSlice</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CollationDataV1</span>;
 
@@ -2047,6 +2123,82 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">NO_CE_TERTIARY</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0x0100</span>;
 <span class="kw">const</span> <span class="ident">NO_CE_VALUE</span>: <span class="ident">u64</span> <span class="op">=</span>
     ((<span class="ident">NO_CE_PRIMARY</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>) <span class="op">|</span> ((<span class="ident">NO_CE_SECONDARY</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>) <span class="op">|</span> (<span class="ident">NO_CE_TERTIARY</span> <span class="kw">as</span> <span class="ident">u64</span>); <span class="comment">// 0x101000100</span>
+
+<span class="comment">// See ICU4C collation.h and https://www.unicode.org/reports/tr10/#Trailing_Weights</span>
+<span class="kw">const</span> <span class="ident">FFFD_PRIMARY</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFFFD0000</span>; <span class="comment">// U+FFFD</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">FFFD_CE_VALUE</span>: <span class="ident">u64</span> <span class="op">=</span> ((<span class="ident">FFFD_PRIMARY</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>) <span class="op">|</span> <span class="ident">COMMON_SEC_AND_TER_CE</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">FFFD_CE</span>: <span class="ident">CollationElement</span> <span class="op">=</span> <span class="ident">CollationElement</span>(<span class="ident">FFFD_CE_VALUE</span>);
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">FFFD_CE32_VALUE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFFFD0505</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">FFFD_CE32</span>: <span class="ident">CollationElement32</span> <span class="op">=</span> <span class="ident">CollationElement32</span>(<span class="ident">FFFD_CE32_VALUE</span>);
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">EMPTY_U16</span>: <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="ident">ZeroSlice</span>::<span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::from_ule_slice_const</span>(<span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">u16</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE::from_array</span>([]));
+<span class="kw">const</span> <span class="ident">EMPTY_U32</span>: <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="ident">ZeroSlice</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::from_ule_slice_const</span>(<span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE::from_array</span>([]));
+<span class="kw">const</span> <span class="ident">SINGLE_U16</span>: <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="ident">ZeroSlice</span>::<span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::from_ule_slice_const</span>(<span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">u16</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE::from_array</span>([<span class="number">0xFFFD</span>]));
+<span class="kw">const</span> <span class="ident">SINGLE_U32</span>: <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="ident">ZeroSlice</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::from_ule_slice_const</span>(<span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE::from_array</span>([<span class="number">0xFFFD</span>]));
+
+<span class="doccomment">/// If `opt` is `Some`, unwrap it. If `None`, panic if debug assertions</span>
+<span class="doccomment">/// are enabled and return `default` if debug assertions are not enabled.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Use this only if the only reason why `opt` could be `None` is bogus</span>
+<span class="doccomment">/// data from the provider.</span>
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">unwrap_or_gigo</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">opt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">default</span>: <span class="ident">T</span>) -&gt; <span class="ident">T</span> {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">val</span>) <span class="op">=</span> <span class="ident">opt</span> {
+        <span class="ident">val</span>
+    } <span class="kw">else</span> {
+        <span class="comment">// GIGO case</span>
+        <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+        <span class="ident">default</span>
+    }
+}
+
+<span class="doccomment">/// Convert a `u32` _obtained from data provider data_ to `char`.</span>
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">fn</span> <span class="ident">char_from_u32</span>(<span class="ident">u</span>: <span class="ident">u32</span>) -&gt; <span class="ident">char</span> {
+    <span class="ident">unwrap_or_gigo</span>(<span class="ident">core::char::from_u32</span>(<span class="ident">u</span>), <span class="ident">REPLACEMENT_CHARACTER</span>)
+}
+
+<span class="doccomment">/// Convert a `u16` _obtained from data provider data_ to `char`.</span>
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">fn</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>: <span class="ident">u16</span>) -&gt; <span class="ident">char</span> {
+    <span class="ident">char_from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">u</span>))
+}
+
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">fn</span> <span class="ident">split_first_u16</span>(<span class="ident">s</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; (<span class="ident">char</span>, <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>) {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">slice</span>) <span class="op">=</span> <span class="ident">s</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">first</span>) <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">first</span>() {
+            <span class="comment">// `unwrap()` must succeed, because `first()` returned `Some`.</span>
+            <span class="kw">return</span> (
+                <span class="ident">char_from_u16</span>(<span class="ident">first</span>),
+                <span class="ident">slice</span>.<span class="ident">get_subslice</span>(<span class="number">1</span>..<span class="ident">slice</span>.<span class="ident">len</span>()).<span class="ident">unwrap</span>(),
+            );
+        }
+    }
+    <span class="comment">// GIGO case</span>
+    <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+    (<span class="ident">REPLACEMENT_CHARACTER</span>, <span class="ident">EMPTY_U16</span>)
+}
+
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">fn</span> <span class="ident">split_first_u32</span>(<span class="ident">s</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; (<span class="ident">char</span>, <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) {
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">slice</span>) <span class="op">=</span> <span class="ident">s</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">first</span>) <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">first</span>() {
+            <span class="comment">// `unwrap()` must succeed, because `first()` returned `Some`.</span>
+            <span class="kw">return</span> (
+                <span class="ident">char_from_u32</span>(<span class="ident">first</span>),
+                <span class="ident">slice</span>.<span class="ident">get_subslice</span>(<span class="number">1</span>..<span class="ident">slice</span>.<span class="ident">len</span>()).<span class="ident">unwrap</span>(),
+            );
+        }
+    }
+    <span class="comment">// GIGO case</span>
+    <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+    (<span class="ident">REPLACEMENT_CHARACTER</span>, <span class="ident">EMPTY_U32</span>)
+}
 
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
 <span class="kw">fn</span> <span class="ident">in_inclusive_range</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">start</span>: <span class="ident">char</span>, <span class="ident">end</span>: <span class="ident">char</span>) -&gt; <span class="ident">bool</span> {
@@ -2256,6 +2408,13 @@
         }
     }
 
+    <span class="doccomment">/// Expands to 64 bits if the expansion is to a single 64-bit collation</span>
+    <span class="doccomment">/// element or otherwise returns the collation element for U+FFFD.</span>
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_ce_self_contained_or_gigo</span>(<span class="self">self</span>) -&gt; <span class="ident">CollationElement</span> {
+        <span class="ident">unwrap_or_gigo</span>(<span class="self">self</span>.<span class="ident">to_ce_self_contained</span>(), <span class="ident">FFFD_CE</span>)
+    }
+
     <span class="doccomment">/// Gets the length from this element.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Panics</span>
@@ -2328,11 +2487,6 @@
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bits</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CollationElement</span>(<span class="ident">bits</span>)
-    }
-
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_ule</span>(<span class="ident">ule</span>: <span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">8</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">CollationElement</span>(<span class="ident">u64::from_unaligned</span>(<span class="ident">ule</span>))
     }
 
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
@@ -2744,14 +2898,11 @@
             <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">decomposition</span> <span class="kw">as</span> <span class="ident">u16</span>;
             <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">low</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="comment">// Decomposition into two BMP characters: starter and non-starter</span>
-                <span class="self">self</span>.<span class="ident">upcoming</span>
-                    .<span class="ident">push</span>(<span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">high</span>)).<span class="ident">unwrap</span>());
-                <span class="self">self</span>.<span class="ident">upcoming</span>
-                    .<span class="ident">push</span>(<span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">low</span>)).<span class="ident">unwrap</span>());
+                <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">char_from_u16</span>(<span class="ident">high</span>));
+                <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">char_from_u16</span>(<span class="ident">low</span>));
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="comment">// Decomposition into one BMP character</span>
-                <span class="self">self</span>.<span class="ident">upcoming</span>
-                    .<span class="ident">push</span>(<span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">high</span>)).<span class="ident">unwrap</span>());
+                <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">char_from_u16</span>(<span class="ident">high</span>));
             } <span class="kw">else</span> {
                 <span class="comment">// Complex decomposition</span>
                 <span class="comment">// Format for 16-bit value:</span>
@@ -2770,19 +2921,26 @@
                 <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x7FF</span>);
                 <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>);
                 <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">==</span> <span class="number">0</span> {
-                    <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ule</span> <span class="kw">in</span>
-                        <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">scalars16</span>.<span class="ident">as_ule_slice</span>()[<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>].<span class="ident">iter</span>()
+                    <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">unwrap_or_gigo</span>(
+                        <span class="self">self</span>.<span class="ident">decompositions</span>
+                            .<span class="ident">scalars16</span>
+                            .<span class="ident">get_subslice</span>(<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>),
+                        <span class="ident">SINGLE_U16</span>, <span class="comment">// single instead of empty for consistency with the other code path</span>
+                    )
+                    .<span class="ident">iter</span>()
                     {
-                        <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(
-                            <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">u16::from_unaligned</span>(<span class="ident">ule</span>))).<span class="ident">unwrap</span>(),
-                        );
+                        <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">char_from_u16</span>(<span class="ident">u</span>));
                     }
                 } <span class="kw">else</span> {
-                    <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ule</span> <span class="kw">in</span>
-                        <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">scalars32</span>.<span class="ident">as_ule_slice</span>()[<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>].<span class="ident">iter</span>()
+                    <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">unwrap_or_gigo</span>(
+                        <span class="self">self</span>.<span class="ident">decompositions</span>
+                            .<span class="ident">scalars32</span>
+                            .<span class="ident">get_subslice</span>(<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>),
+                        <span class="ident">SINGLE_U32</span>, <span class="comment">// single instead of empty for consistency with the other code path</span>
+                    )
+                    .<span class="ident">iter</span>()
                     {
-                        <span class="self">self</span>.<span class="ident">upcoming</span>
-                            .<span class="ident">push</span>(<span class="ident">core::char::from_u32</span>(<span class="ident">u32::from_unaligned</span>(<span class="ident">ule</span>)).<span class="ident">unwrap</span>());
+                        <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">char_from_u32</span>(<span class="ident">u</span>));
                     }
                 }
                 <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x800</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
@@ -3047,13 +3205,13 @@
                     <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">decomposition</span> <span class="kw">as</span> <span class="ident">u16</span>;
                     <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">low</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                         <span class="comment">// Decomposition into two BMP characters: starter and non-starter</span>
-                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">high</span>)).<span class="ident">unwrap</span>();
+                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">high</span>);
                         <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ce32_for_char</span>(<span class="ident">c</span>);
                         <span class="kw">if</span> <span class="ident">ce32</span> <span class="op">==</span> <span class="ident">FALLBACK_CE32</span> {
                             <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>;
                             <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ce32_for_char</span>(<span class="ident">c</span>);
                         }
-                        <span class="kw">let</span> <span class="ident">combining</span> <span class="op">=</span> <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">low</span>)).<span class="ident">unwrap</span>();
+                        <span class="kw">let</span> <span class="ident">combining</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">low</span>);
                         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_next_decomposition_starts_with_starter</span>() {
                             <span class="kw">let</span> <span class="ident">diacritic_index</span> <span class="op">=</span>
                                 (<span class="ident">low</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">wrapping_sub</span>(<span class="ident">COMBINING_DIACRITICS_BASE</span>);
@@ -3065,8 +3223,7 @@
                                     <span class="kw">let</span> <span class="ident">ce_for_combining</span> <span class="op">=</span> <span class="ident">CollationElement32::new_from_ule</span>(
                                         <span class="self">self</span>.<span class="ident">diacritics</span>[<span class="ident">diacritic_index</span>],
                                     )
-                                    .<span class="ident">to_ce_self_contained</span>()
-                                    .<span class="ident">unwrap</span>();
+                                    .<span class="ident">to_ce_self_contained_or_gigo</span>();
                                     <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(<span class="ident">ce_for_combining</span>);
                                     <span class="self">self</span>.<span class="ident">mark_prefix_unmatchable</span>();
                                     <span class="kw">return</span> <span class="ident">ce</span>;
@@ -3086,8 +3243,7 @@
                                                     <span class="ident">CollationElement32::new_from_ule</span>(
                                                         <span class="self">self</span>.<span class="ident">diacritics</span>[<span class="ident">diacritic_index</span>],
                                                     )
-                                                    .<span class="ident">to_ce_self_contained</span>()
-                                                    .<span class="ident">unwrap</span>();
+                                                    .<span class="ident">to_ce_self_contained_or_gigo</span>();
                                                 <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(<span class="ident">ce_for_combining</span>);
                                                 <span class="self">self</span>.<span class="ident">mark_prefix_unmatchable</span>();
                                                 <span class="kw">return</span> <span class="ident">ce</span>;
@@ -3114,7 +3270,7 @@
                         <span class="ident">combining_characters</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">combining</span>));
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                         <span class="comment">// Decomposition into one BMP character</span>
-                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">high</span>)).<span class="ident">unwrap</span>();
+                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">high</span>);
                         <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ce32_for_char</span>(<span class="ident">c</span>);
                         <span class="kw">if</span> <span class="ident">ce32</span> <span class="op">==</span> <span class="ident">FALLBACK_CE32</span> {
                             <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>;
@@ -3146,26 +3302,22 @@
                         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x7FF</span>);
                         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>);
                         <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">==</span> <span class="number">0</span> {
-                            <span class="kw">let</span> (<span class="kw-2">&amp;</span><span class="ident">first</span>, <span class="ident">tail</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">scalars16</span>.<span class="ident">as_ule_slice</span>()
-                                [<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>]
-                                .<span class="ident">split_first</span>()
-                                .<span class="ident">unwrap</span>();
-                            <span class="ident">c</span> <span class="op">=</span> <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">u16::from_unaligned</span>(<span class="ident">first</span>)))
-                                .<span class="ident">unwrap</span>();
+                            <span class="kw">let</span> (<span class="ident">starter</span>, <span class="ident">tail</span>) <span class="op">=</span> <span class="ident">split_first_u16</span>(
+                                <span class="self">self</span>.<span class="ident">decompositions</span>
+                                    .<span class="ident">scalars16</span>
+                                    .<span class="ident">get_subslice</span>(<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>),
+                            );
+                            <span class="ident">c</span> <span class="op">=</span> <span class="ident">starter</span>;
                             <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x800</span> <span class="op">==</span> <span class="number">0</span> {
-                                <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ule</span> <span class="kw">in</span> <span class="ident">tail</span>.<span class="ident">iter</span>() {
-                                    <span class="ident">combining_characters</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(
-                                        <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">u16::from_unaligned</span>(<span class="ident">ule</span>)))
-                                            .<span class="ident">unwrap</span>(),
-                                    ));
+                                <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">tail</span>.<span class="ident">iter</span>() {
+                                    <span class="ident">combining_characters</span>
+                                        .<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">char_from_u16</span>(<span class="ident">u</span>)));
                                 }
                             } <span class="kw">else</span> {
                                 <span class="ident">next_is_known_to_decompose_to_non_starter</span> <span class="op">=</span> <span class="bool-val">false</span>;
                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">iter</span>();
-                                <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">ule</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
-                                    <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span>
-                                        <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">u16::from_unaligned</span>(<span class="ident">ule</span>)))
-                                            .<span class="ident">unwrap</span>();
+                                <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
+                                    <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>);
                                     <span class="kw">if</span> <span class="self">self</span>
                                         .<span class="ident">decompositions</span>
                                         .<span class="ident">decomposition_starts_with_non_starter</span>
@@ -3184,12 +3336,9 @@
                                     <span class="comment">// sort the right characters.</span>
                                     <span class="self">self</span>.<span class="ident">maybe_gather_combining</span>();
 
-                                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">ule</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next_back</span>() {
+                                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next_back</span>() {
                                         <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(
-                                            <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from</span>(<span class="ident">u16::from_unaligned</span>(
-                                                <span class="ident">ule</span>,
-                                            )))
-                                            .<span class="ident">unwrap</span>(),
+                                            <span class="ident">char_from_u16</span>(<span class="ident">u</span>),
                                         );
                                     }
                                     <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(<span class="ident">ch</span>);
@@ -3197,23 +3346,22 @@
                                 }
                             }
                         } <span class="kw">else</span> {
-                            <span class="kw">let</span> (<span class="kw-2">&amp;</span><span class="ident">first</span>, <span class="ident">tail</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">scalars32</span>.<span class="ident">as_ule_slice</span>()
-                                [<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>]
-                                .<span class="ident">split_first</span>()
-                                .<span class="ident">unwrap</span>();
-                            <span class="ident">c</span> <span class="op">=</span> <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from_unaligned</span>(<span class="ident">first</span>)).<span class="ident">unwrap</span>();
+                            <span class="kw">let</span> (<span class="ident">starter</span>, <span class="ident">tail</span>) <span class="op">=</span> <span class="ident">split_first_u32</span>(
+                                <span class="self">self</span>.<span class="ident">decompositions</span>
+                                    .<span class="ident">scalars32</span>
+                                    .<span class="ident">get_subslice</span>(<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>),
+                            );
+                            <span class="ident">c</span> <span class="op">=</span> <span class="ident">starter</span>;
                             <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x800</span> <span class="op">==</span> <span class="number">0</span> {
-                                <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ule</span> <span class="kw">in</span> <span class="ident">tail</span>.<span class="ident">iter</span>() {
-                                    <span class="ident">combining_characters</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(
-                                        <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from_unaligned</span>(<span class="ident">ule</span>)).<span class="ident">unwrap</span>(),
-                                    ));
+                                <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">tail</span>.<span class="ident">iter</span>() {
+                                    <span class="ident">combining_characters</span>
+                                        .<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">char_from_u32</span>(<span class="ident">u</span>)));
                                 }
                             } <span class="kw">else</span> {
                                 <span class="ident">next_is_known_to_decompose_to_non_starter</span> <span class="op">=</span> <span class="bool-val">false</span>;
                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">iter</span>();
-                                <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">ule</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
-                                    <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span>
-                                        <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from_unaligned</span>(<span class="ident">ule</span>)).<span class="ident">unwrap</span>();
+                                <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
+                                    <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u32</span>(<span class="ident">u</span>);
                                     <span class="kw">if</span> <span class="self">self</span>
                                         .<span class="ident">decompositions</span>
                                         .<span class="ident">decomposition_starts_with_non_starter</span>
@@ -3231,9 +3379,9 @@
                                     <span class="comment">// sort the right characters.</span>
                                     <span class="self">self</span>.<span class="ident">maybe_gather_combining</span>();
 
-                                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">ule</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next_back</span>() {
+                                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next_back</span>() {
                                         <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(
-                                            <span class="ident">core::char::from_u32</span>(<span class="ident">u32::from_unaligned</span>(<span class="ident">ule</span>)).<span class="ident">unwrap</span>(),
+                                            <span class="ident">char_from_u32</span>(<span class="ident">u</span>),
                                         );
                                     }
                                     <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(<span class="ident">ch</span>);
@@ -3264,45 +3412,45 @@
                         <span class="ident">CollationElement32::new_from_ule</span>(
                             <span class="self">self</span>.<span class="ident">jamo</span>[(<span class="ident">HANGUL_V_BASE</span> <span class="op">-</span> <span class="ident">HANGUL_L_BASE</span> <span class="op">+</span> <span class="ident">v</span>) <span class="kw">as</span> <span class="ident">usize</span>],
                         )
-                        .<span class="ident">to_ce_self_contained</span>()
-                        .<span class="ident">unwrap</span>(),
+                        .<span class="ident">to_ce_self_contained_or_gigo</span>(),
                     );
                     <span class="kw">if</span> <span class="ident">t</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                         <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(
                             <span class="ident">CollationElement32::new_from_ule</span>(
                                 <span class="self">self</span>.<span class="ident">jamo</span>[(<span class="ident">HANGUL_T_BASE</span> <span class="op">-</span> <span class="ident">HANGUL_L_BASE</span> <span class="op">+</span> <span class="ident">t</span>) <span class="kw">as</span> <span class="ident">usize</span>],
                             )
-                            .<span class="ident">to_ce_self_contained</span>()
-                            .<span class="ident">unwrap</span>(),
+                            .<span class="ident">to_ce_self_contained_or_gigo</span>(),
                         );
                     }
                     <span class="kw">return</span> <span class="ident">CollationElement32::new_from_ule</span>(<span class="self">self</span>.<span class="ident">jamo</span>[<span class="ident">l</span> <span class="kw">as</span> <span class="ident">usize</span>])
-                        .<span class="ident">to_ce_self_contained</span>()
-                        .<span class="ident">unwrap</span>();
+                        .<span class="ident">to_ce_self_contained_or_gigo</span>();
                 }
 
                 <span class="comment">// Uphold the invariant that the upcoming character is a starter (or end of stream)</span>
                 <span class="comment">// at the start of the next `next()` call. We uphold this invariant by leaving the</span>
                 <span class="comment">// last jamo unmapped to `CollationElement` in `pending` and instead prepend it to</span>
                 <span class="comment">// `upcoming`.</span>
+                <span class="comment">//</span>
+                <span class="comment">// The `unsafe` blocks are OK, because the value is by construction in the Hangul</span>
+                <span class="comment">// jamo block, which is in the scalar value range.</span>
                 <span class="kw">if</span> <span class="ident">t</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                     <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(
                         <span class="ident">CollationElement32::new_from_ule</span>(
                             <span class="self">self</span>.<span class="ident">jamo</span>[(<span class="ident">HANGUL_V_BASE</span> <span class="op">-</span> <span class="ident">HANGUL_L_BASE</span> <span class="op">+</span> <span class="ident">v</span>) <span class="kw">as</span> <span class="ident">usize</span>],
                         )
-                        .<span class="ident">to_ce_self_contained</span>()
-                        .<span class="ident">unwrap</span>(),
+                        .<span class="ident">to_ce_self_contained_or_gigo</span>(),
                     );
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">core::char::from_u32</span>(<span class="ident">HANGUL_T_BASE</span> <span class="op">+</span> <span class="ident">t</span>).<span class="ident">unwrap</span>());
+                    <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="kw">unsafe</span> {
+                        <span class="ident">core::char::from_u32_unchecked</span>(<span class="ident">HANGUL_T_BASE</span> <span class="op">+</span> <span class="ident">t</span>)
+                    });
                 } <span class="kw">else</span> {
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">core::char::from_u32</span>(<span class="ident">HANGUL_V_BASE</span> <span class="op">+</span> <span class="ident">v</span>).<span class="ident">unwrap</span>());
+                    <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="kw">unsafe</span> {
+                        <span class="ident">core::char::from_u32_unchecked</span>(<span class="ident">HANGUL_V_BASE</span> <span class="op">+</span> <span class="ident">v</span>)
+                    });
                 }
 
                 <span class="kw">return</span> <span class="ident">CollationElement32::new_from_ule</span>(<span class="self">self</span>.<span class="ident">jamo</span>[<span class="ident">l</span> <span class="kw">as</span> <span class="ident">usize</span>])
-                    .<span class="ident">to_ce_self_contained</span>()
-                    .<span class="ident">unwrap</span>();
+                    .<span class="ident">to_ce_self_contained_or_gigo</span>();
             }
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">may_have_contracted_starter</span> <span class="op">=</span> <span class="bool-val">false</span>;
             <span class="comment">// Slow path</span>
@@ -3326,19 +3474,17 @@
                         <span class="kw">match</span> <span class="ident">ce32</span>.<span class="ident">tag</span>() {
                             <span class="ident">Tag::Expansion32</span> =&gt; {
                                 <span class="kw">let</span> <span class="ident">ce32s</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">get_ce32s</span>(<span class="ident">ce32</span>.<span class="ident">index</span>(), <span class="ident">ce32</span>.<span class="ident">len</span>());
-                                <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ce32_ule</span> <span class="kw">in</span> <span class="ident">ce32s</span> {
+                                <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">ce32s</span>.<span class="ident">iter</span>() {
                                     <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(
-                                        <span class="ident">CollationElement32::new_from_ule</span>(<span class="ident">ce32_ule</span>)
-                                            .<span class="ident">to_ce_self_contained</span>()
-                                            .<span class="ident">unwrap</span>(),
+                                        <span class="ident">CollationElement32::new</span>(<span class="ident">u</span>).<span class="ident">to_ce_self_contained_or_gigo</span>(),
                                     );
                                 }
                                 <span class="kw">break</span> <span class="lifetime">&#39;ce32loop</span>;
                             }
                             <span class="ident">Tag::Expansion</span> =&gt; {
                                 <span class="kw">let</span> <span class="ident">ces</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">get_ces</span>(<span class="ident">ce32</span>.<span class="ident">index</span>(), <span class="ident">ce32</span>.<span class="ident">len</span>());
-                                <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">ce_ule</span> <span class="kw">in</span> <span class="ident">ces</span> {
-                                    <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(<span class="ident">CollationElement::new_from_ule</span>(<span class="ident">ce_ule</span>));
+                                <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">ces</span>.<span class="ident">iter</span>() {
+                                    <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(<span class="ident">CollationElement::new</span>(<span class="ident">u</span>));
                                 }
                                 <span class="kw">break</span> <span class="lifetime">&#39;ce32loop</span>;
                             }
@@ -3710,8 +3856,7 @@
                                     }
                                     <span class="kw">break</span> <span class="lifetime">&#39;ce32loop</span>;
                                 }
-                                <span class="kw">let</span> <span class="ident">ce32s</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">get_ce32s</span>(<span class="ident">ce32</span>.<span class="ident">index</span>(), <span class="number">1</span>);
-                                <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">CollationElement32::new_from_ule</span>(<span class="ident">ce32s</span>[<span class="number">0</span>]);
+                                <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">get_ce32</span>(<span class="ident">ce32</span>.<span class="ident">index</span>());
                                 <span class="kw">continue</span> <span class="lifetime">&#39;ce32loop</span>;
                             }
                             <span class="comment">// XXX how common are the following two cases? Should these</span>
@@ -3734,7 +3879,10 @@
                             <span class="op">|</span> <span class="ident">Tag::LatinExpansion</span>
                             <span class="op">|</span> <span class="ident">Tag::U0000</span>
                             <span class="op">|</span> <span class="ident">Tag::Hangul</span> =&gt; {
-                                <span class="macro">unreachable!</span>();
+                                <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+                                <span class="comment">// GIGO case</span>
+                                <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(<span class="ident">FFFD_CE</span>);
+                                <span class="kw">break</span> <span class="lifetime">&#39;ce32loop</span>;
                             }
                         }
                     }
@@ -3765,11 +3913,9 @@
                                     <span class="kw">continue</span> <span class="lifetime">&#39;combining</span>;
                                 }
                             }
-                            <span class="comment">// Unwrap: expectation of data integrity</span>
                             <span class="self">self</span>.<span class="ident">pending</span>.<span class="ident">push</span>(
                                 <span class="ident">CollationElement32::new_from_ule</span>(<span class="ident">diacritic</span>)
-                                    .<span class="ident">to_ce_self_contained</span>()
-                                    .<span class="ident">unwrap</span>(),
+                                    .<span class="ident">to_ce_self_contained_or_gigo</span>(),
                             );
                             <span class="self">self</span>.<span class="ident">mark_prefix_unmatchable</span>();
                             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -3857,6 +4003,8 @@
             <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_next_decomposition_starts_with_starter</span>()
         {
             <span class="kw-2">*</span><span class="ident">next_is_known_to_decompose_to_non_starter</span> <span class="op">=</span> <span class="bool-val">false</span>;
+            <span class="comment">// `unwrap` is OK, because `!self.is_next_decomposition_starts_with_starter()`</span>
+            <span class="comment">// means the `unwrap()` must succeed.</span>
             <span class="kw">let</span> <span class="ident">combining</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_internal</span>().<span class="ident">unwrap</span>();
             <span class="kw">if</span> <span class="op">!</span><span class="ident">in_inclusive_range</span>(<span class="ident">combining</span>, <span class="string">&#39;\u{0340}&#39;</span>, <span class="string">&#39;\u{0F81}&#39;</span>) {
                 <span class="ident">combining_characters</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">combining</span>));

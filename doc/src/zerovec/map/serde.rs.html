@@ -316,7 +316,6 @@
 <span id="311">311</span>
 <span id="312">312</span>
 <span id="313">313</span>
-<span id="314">314</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -325,11 +324,11 @@
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">serde::de</span>::{<span class="self">self</span>, <span class="ident">Deserialize</span>, <span class="ident">Deserializer</span>, <span class="ident">MapAccess</span>, <span class="ident">SeqAccess</span>, <span class="ident">Visitor</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde_serialize&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">serde::ser</span>::{<span class="ident">Serialize</span>, <span class="ident">SerializeMap</span>, <span class="ident">SerializeSeq</span>, <span class="ident">Serializer</span>};
 
-<span class="doccomment">/// This impl can be made available by enabling the optional `serde_serialize` feature of the `zerovec` crate</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde_serialize&quot;</span>)]</span>
+<span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ZeroMap</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Serialize</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Ord</span>,
@@ -346,8 +345,7 @@
             <span class="comment">// than numbers and strings as map keys. For them, we can serialize</span>
             <span class="comment">// as a vec of tuples instead</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">k</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter_keys</span>().<span class="ident">next</span>() {
-                <span class="kw">let</span> <span class="ident">json</span> <span class="op">=</span> <span class="ident">K::Container::zvl_get_as_t</span>(<span class="ident">k</span>, <span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="macro">serde_json::json!</span>(<span class="ident">k</span>));
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">json</span>.<span class="ident">is_string</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">json</span>.<span class="ident">is_number</span>() {
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">K::Container::zvl_get_as_t</span>(<span class="ident">k</span>, <span class="ident"><span class="kw">super</span>::serde_helpers::is_num_or_string</span>) {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seq</span> <span class="op">=</span> <span class="ident">serializer</span>.<span class="ident">serialize_seq</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">len</span>()))<span class="question-mark">?</span>;
                     <span class="kw">for</span> (<span class="ident">k</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">iter</span>() {
                         <span class="ident">K::Container::zvl_get_as_t</span>(<span class="ident">k</span>, <span class="op">|</span><span class="ident">k</span><span class="op">|</span> {
@@ -369,8 +367,8 @@
     }
 }
 
-<span class="doccomment">/// This impl can be made available by enabling the optional `serde_serialize` feature of the `zerovec` crate</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde_serialize&quot;</span>)]</span>
+<span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ZeroMapBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Serialize</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Ord</span>,

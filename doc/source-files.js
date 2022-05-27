@@ -44,13 +44,13 @@ sourcesIndex["icu_segmenter"] = {"name":"","files":["dictionary.rs","grapheme.rs
 sourcesIndex["icu_segmenter_lstm"] = {"name":"","files":["error.rs","lib.rs","lstm.rs","math_helper.rs","structs.rs"]};
 sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","paths.rs"]};
 sourcesIndex["icu_uniset"] = {"name":"","files":["builder.rs","conversions.rs","lib.rs","uniset.rs","utils.rs"]};
-sourcesIndex["litemap"] = {"name":"","dirs":[{"name":"store","files":["mod.rs","vec_impl.rs"]}],"files":["lib.rs","map.rs","serde.rs","testing.rs"]};
+sourcesIndex["litemap"] = {"name":"","dirs":[{"name":"store","files":["mod.rs","vec_impl.rs"]}],"files":["lib.rs","map.rs","serde.rs","serde_helpers.rs","testing.rs"]};
 sourcesIndex["tinystr"] = {"name":"","files":["ascii.rs","crabbake.rs","error.rs","int_ops.rs","lib.rs","macros.rs","serde.rs","ule.rs"]};
 sourcesIndex["writeable"] = {"name":"","files":["impls.rs","lib.rs","ops.rs"]};
 sourcesIndex["yoke"] = {"name":"","files":["either.rs","erased.rs","is_covariant.rs","lib.rs","macro_impls.rs","serde.rs","trait_hack.rs","yoke.rs","yokeable.rs","zero_from.rs"]};
 sourcesIndex["yoke_derive"] = {"name":"","files":["lib.rs","visitor.rs"]};
 sourcesIndex["zerofrom"] = {"name":"","files":["lib.rs","macro_impls.rs","zero_from.rs"]};
 sourcesIndex["zerofrom_derive"] = {"name":"","files":["lib.rs","visitor.rs"]};
-sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["borrowed.rs","crabbake.rs","kv.rs","map.rs","mod.rs","serde.rs","vecs.rs"]},{"name":"map2d","files":["borrowed.rs","crabbake.rs","map.rs","mod.rs","serde.rs"]},{"name":"ule","files":["chars.rs","custom.rs","encode.rs","mod.rs","multi.rs","option.rs","plain.rs","slices.rs","tuple.rs"]},{"name":"varzerovec","files":["components.rs","crabbake.rs","mod.rs","owned.rs","serde.rs","slice.rs","vec.rs"]},{"name":"zerovec","files":["crabbake.rs","mod.rs","serde.rs","slice.rs"]}],"files":["error.rs","lib.rs","yoke_impls.rs","zerofrom_impls.rs"]};
+sourcesIndex["zerovec"] = {"name":"","dirs":[{"name":"map","files":["borrowed.rs","crabbake.rs","kv.rs","map.rs","mod.rs","serde.rs","serde_helpers.rs","vecs.rs"]},{"name":"map2d","files":["borrowed.rs","crabbake.rs","map.rs","mod.rs","serde.rs"]},{"name":"ule","files":["chars.rs","custom.rs","encode.rs","mod.rs","multi.rs","option.rs","plain.rs","slices.rs","tuple.rs"]},{"name":"varzerovec","files":["components.rs","crabbake.rs","mod.rs","owned.rs","serde.rs","slice.rs","vec.rs"]},{"name":"zerovec","files":["crabbake.rs","mod.rs","serde.rs","slice.rs"]}],"files":["error.rs","lib.rs","yoke_impls.rs","zerofrom_impls.rs"]};
 sourcesIndex["zerovec_derive"] = {"name":"","files":["lib.rs","make_ule.rs","make_varule.rs","ule.rs","utils.rs","varule.rs"]};
 createSourceSidebar();

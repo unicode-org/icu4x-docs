@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["custom_writeable",""],["data_struct",""],["decimal",""],["fixed_decimal",""],["locale",""],["locale_canonicalizer",""],["pluralrules",""],["properties_maps",""],["properties_sets",""],["provider",""],["segmenter_line",""]]});
+initSidebarItems({"mod":[["bidi",""],["custom_writeable",""],["data_struct",""],["decimal",""],["fixed_decimal",""],["locale",""],["locale_canonicalizer",""],["pluralrules",""],["properties_maps",""],["properties_sets",""],["provider",""],["segmenter_line",""]]});

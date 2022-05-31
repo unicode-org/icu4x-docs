@@ -1043,9 +1043,9 @@
 <span class="doccomment">/// ()`. `.get()` protects access by essentially reifying the erased lifetime to a safe local one</span>
 <span class="doccomment">/// when necessary.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Furthermore, there are various [`.project()`][Yoke::project] methods that allow turning a `Yoke`</span>
+<span class="doccomment">/// Furthermore, there are various [`.map_project()`][Yoke::map_project] methods that allow turning a `Yoke`</span>
 <span class="doccomment">/// into another `Yoke` containing a different type that may contain elements of the original yoked</span>
-<span class="doccomment">/// value. See the [`Yoke::project()`] docs for more details.</span>
+<span class="doccomment">/// value. See the [`Yoke::map_project()`] docs for more details.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// In general, `C` is a concrete type, but it is also possible for it to be a trait object;</span>
 <span class="doccomment">/// for more information, see [`IsCovariant`].</span>
@@ -1549,7 +1549,7 @@
     <span class="doccomment">/// described in [#86702](https://github.com/rust-lang/rust/issues/86702). This parameter</span>
     <span class="doccomment">/// should just be ignored in the function.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// To capture data and pass it to the closure, use [`Yoke::project_with_capture()`].</span>
+    <span class="doccomment">/// To capture data and pass it to the closure, use [`Yoke::map_project_with_capture()`].</span>
     <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This can be used, for example, to transform data from one format to another:</span>
@@ -1559,7 +1559,7 @@
     <span class="doccomment">/// # use yoke::Yoke;</span>
     <span class="doccomment">/// #</span>
     <span class="doccomment">/// fn slice(y: Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static [u8], Rc&lt;[u8]&gt;&gt; {</span>
-    <span class="doccomment">///     y.project(move |yk, _| yk.as_bytes())</span>
+    <span class="doccomment">///     y.map_project(move |yk, _| yk.as_bytes())</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
@@ -1577,8 +1577,8 @@
     <span class="doccomment">///     string_2: &amp;&#39;a str,</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// fn project_string_1(bar: Yoke&lt;Bar&lt;&#39;static&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
-    <span class="doccomment">///     bar.project(|bar, _| bar.string_1)</span>
+    <span class="doccomment">/// fn map_project_string_1(bar: Yoke&lt;Bar&lt;&#39;static&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
+    <span class="doccomment">///     bar.map_project(|bar, _| bar.string_1)</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// #</span>
@@ -1609,7 +1609,7 @@
     <span class="doccomment">/// ```</span>
     <span class="comment">//</span>
     <span class="comment">// Safety docs can be found below on `__project_safety_docs()`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">project</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_project</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">fn</span>(
             <span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
@@ -1626,12 +1626,12 @@
         }
     }
 
-    <span class="doccomment">/// This is similar to [`Yoke::project`], however it does not move</span>
+    <span class="doccomment">/// This is similar to [`Yoke::map_project`], however it does not move</span>
     <span class="doccomment">/// [`Self`] and instead clones the cart (only if the cart is a [`CloneableCart`])</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This is a bit more efficient than cloning the [`Yoke`] and then calling [`Yoke::project`]</span>
+    <span class="doccomment">/// This is a bit more efficient than cloning the [`Yoke`] and then calling [`Yoke::map_project`]</span>
     <span class="doccomment">/// because then it will not clone fields that are going to be discarded.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">project_cloned</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_project_cloned</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;this</span> <span class="self">self</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">fn</span>(
             <span class="kw-2">&amp;</span><span class="lifetime">&#39;this</span> <span class="op">&lt;</span><span class="ident">Y</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>,
@@ -1649,12 +1649,12 @@
         }
     }
 
-    <span class="doccomment">/// This is similar to [`Yoke::project`], but it works around it not being able to</span>
+    <span class="doccomment">/// This is similar to [`Yoke::map_project`], but it works around it not being able to</span>
     <span class="doccomment">/// use `FnOnce` by using an explicit capture input.</span>
     <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// See the docs of [`Yoke::project`] for how this works.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">project_with_capture</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span>(
+    <span class="doccomment">/// See the docs of [`Yoke::map_project`] for how this works.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_project_with_capture</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
         <span class="ident">capture</span>: <span class="ident">T</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">fn</span>(
@@ -1673,12 +1673,12 @@
         }
     }
 
-    <span class="doccomment">/// This is similar to [`Yoke::project_cloned`], however it works around it not being able to</span>
+    <span class="doccomment">/// This is similar to [`Yoke::map_project_cloned`], however it works around it not being able to</span>
     <span class="doccomment">/// use `FnOnce` by using an explicit capture input.</span>
     <span class="doccomment">/// See [#1061](https://github.com/unicode-org/icu4x/issues/1061).</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// See the docs of [`Yoke::project_cloned`] for how this works.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">project_cloned_with_capture</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span>(
+    <span class="doccomment">/// See the docs of [`Yoke::map_project_cloned`] for how this works.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_project_cloned_with_capture</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span>, <span class="ident">T</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;this</span> <span class="self">self</span>,
         <span class="ident">capture</span>: <span class="ident">T</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">fn</span>(
@@ -1698,10 +1698,10 @@
         }
     }
 
-    <span class="doccomment">/// A version of [`Yoke::project`] that takes a capture and bubbles up an error</span>
+    <span class="doccomment">/// A version of [`Yoke::map_project`] that takes a capture and bubbles up an error</span>
     <span class="doccomment">/// from the callback function.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_project_with_capture</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_map_project_with_capture</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
         <span class="ident">capture</span>: <span class="ident">T</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">fn</span>(
@@ -1720,10 +1720,10 @@
         })
     }
 
-    <span class="doccomment">/// A version of [`Yoke::project_cloned`] that takes a capture and bubbles up an error</span>
+    <span class="doccomment">/// A version of [`Yoke::map_project_cloned`] that takes a capture and bubbles up an error</span>
     <span class="doccomment">/// from the callback function.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_project_cloned_with_capture</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span>, <span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_map_project_cloned_with_capture</span><span class="op">&lt;</span><span class="lifetime">&#39;this</span>, <span class="ident">P</span>, <span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;this</span> <span class="self">self</span>,
         <span class="ident">capture</span>: <span class="ident">T</span>,
         <span class="ident">f</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">fn</span>(
@@ -1911,7 +1911,7 @@
 <span class="doccomment">/// # use yoke::Yoke;</span>
 <span class="doccomment">/// # use std::borrow::Cow;</span>
 <span class="doccomment">/// fn borrow_potentially_owned(y: &amp;Yoke&lt;Cow&lt;&#39;static, str&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
-<span class="doccomment">///    y.project_cloned(|cow, _| &amp;*cow)   </span>
+<span class="doccomment">///    y.map_project_cloned(|cow, _| &amp;*cow)   </span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -1924,7 +1924,7 @@
 <span class="doccomment">/// # use yoke::Yoke;</span>
 <span class="doccomment">/// # use std::borrow::Cow;</span>
 <span class="doccomment">/// fn borrow_potentially_owned(y: Yoke&lt;Cow&lt;&#39;static, str&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
-<span class="doccomment">///    y.project(|cow, _| &amp;*cow)   </span>
+<span class="doccomment">///    y.map_project(|cow, _| &amp;*cow)   </span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
@@ -1944,9 +1944,9 @@
 <span class="doccomment">///     string_2: &amp;&#39;a str,</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// fn project_owned(bar: &amp;Yoke&lt;Bar&lt;&#39;static&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
+<span class="doccomment">/// fn map_project_owned(bar: &amp;Yoke&lt;Bar&lt;&#39;static&gt;, Rc&lt;[u8]&gt;&gt;) -&gt; Yoke&lt;&amp;&#39;static str, Rc&lt;[u8]&gt;&gt; {</span>
 <span class="doccomment">///     // ERROR (but works if you replace owned with string_2)</span>
-<span class="doccomment">///     bar.project_cloned(|bar, _| &amp;*bar.owned)   </span>
+<span class="doccomment">///     bar.map_project_cloned(|bar, _| &amp;*bar.owned)   </span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #</span>

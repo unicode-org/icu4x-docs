@@ -212,17 +212,6 @@
 <span id="207">207</span>
 <span id="208">208</span>
 <span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -363,18 +352,10 @@
     }
 }
 
-<span class="macro">impl_dyn_provider!</span>(<span class="ident">HelloWorldProvider</span>, [<span class="ident">HelloWorldV1Marker</span>,], <span class="ident">ANY</span>);
+<span class="macro">impl_dyn_provider!</span>(<span class="ident">HelloWorldProvider</span>, [<span class="ident">HelloWorldV1Marker</span>,], <span class="ident">AnyMarker</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>)]</span>
-<span class="macro">impl_dyn_provider!</span>(
-    <span class="ident">HelloWorldProvider</span>,
-    [<span class="ident">HelloWorldV1Marker</span>,],
-    <span class="ident">SERDE_SE</span>,
-    <span class="ident">CRABBAKE</span>,
-    <span class="ident">ITERABLE_SERDE_SE</span>,
-    <span class="ident">ITERABLE_CRABBAKE</span>,
-    <span class="ident">DATA_CONVERTER</span>
-);
+<span class="macro">make_exportable_provider!</span>(<span class="ident">HelloWorldProvider</span>, [<span class="ident">HelloWorldV1Marker</span>,]);
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HelloWorldJsonProvider</span>(<span class="ident">HelloWorldProvider</span>);
 
@@ -402,23 +383,20 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">HelloWorldV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HelloWorldProvider</span> {
-    <span class="kw">fn</span> <span class="ident">supported_options</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">alloc::boxed::Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">alloc::boxed::Box::new</span>(
-            <span class="self">self</span>.<span class="ident">map</span>
-                .<span class="ident">iter_keys</span>()
-                .<span class="ident">cloned</span>()
-                .<span class="ident">map</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="ident">::into</span>),
-        ))
+    <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>
+            .<span class="ident">map</span>
+            .<span class="ident">iter_keys</span>()
+            .<span class="ident">cloned</span>()
+            .<span class="ident">map</span>(<span class="ident">ResourceOptions::from</span>)
+            .<span class="ident">collect</span>())
     }
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_iter</span>() {
     <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">HelloWorldProvider::new_with_placeholder_data</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">supported_langids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">=</span>
-        <span class="ident">provider</span>.<span class="ident">supported_options</span>().<span class="ident">unwrap</span>().<span class="ident">collect</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">supported_langids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">supported_options</span>().<span class="ident">unwrap</span>();
     <span class="ident">supported_langids</span>.<span class="ident">sort</span>();
 
     <span class="macro">assert_eq!</span>(

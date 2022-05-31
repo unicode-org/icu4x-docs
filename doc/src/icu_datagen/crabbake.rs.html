@@ -299,13 +299,15 @@
 <span id="294">294</span>
 <span id="295">295</span>
 <span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">crabbake</span>::{<span class="ident">quote</span>, <span class="ident">CrateEnv</span>, <span class="ident">TokenStream</span>};
-<span class="kw">use</span> <span class="ident">icu_provider::datagen::CrabbakeMarker</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::export::DataExporter</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::datagen</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
@@ -397,12 +399,12 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">DataExporter</span><span class="op">&lt;</span><span class="ident">CrabbakeMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ConstExporter</span> {
+<span class="kw">impl</span> <span class="ident">DataExporter</span> <span class="kw">for</span> <span class="ident">ConstExporter</span> {
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">options</span>: <span class="ident">ResourceOptions</span>,
-        <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CrabbakeMarker</span><span class="op">&gt;</span>,
+        <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span>,
+        <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">payload</span>, <span class="ident">marker_type</span>) <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">tokenize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dependencies</span>);
         <span class="kw">let</span> <span class="ident">payload_string</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">to_string</span>();
@@ -410,7 +412,10 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">map</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
             <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">key</span>, (<span class="ident">marker_type</span>.<span class="ident">to_string</span>(), <span class="ident">LiteMap::new</span>()));
         }
-        <span class="ident">map</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">insert</span>(<span class="ident">options</span>, <span class="ident">payload_string</span>);
+        <span class="ident">map</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)
+            .<span class="ident">unwrap</span>()
+            .<span class="number">1</span>
+            .<span class="ident">insert</span>(<span class="ident">options</span>.<span class="ident">clone</span>(), <span class="ident">payload_string</span>);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -547,7 +552,7 @@
 
                     #(#<span class="ident">statics</span>)<span class="op">*</span>
                 },
-            )<span class="question-mark">?</span>;
+            ).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -590,6 +595,7 @@
                         )<span class="op">*</span>
                     },
                 )
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;mod/*&quot;</span>)))
             })<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())

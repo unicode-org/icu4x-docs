@@ -44,9 +44,6 @@
 <span id="39">39</span>
 <span id="40">40</span>
 <span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -54,18 +51,17 @@
 <span class="doccomment">//! Collection of iteration APIs for data providers.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 
 <span class="doccomment">/// A [`DynProvider`] that can iterate over all supported [`ResourceOptions`] for a certain key.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Implementing this trait means that a data provider knows all of the data it can successfully</span>
 <span class="doccomment">/// return from a load request.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&gt;</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Given a [`ResourceKey`], returns a boxed iterator over [`ResourceOptions`].</span>
+    <span class="doccomment">/// Given a [`ResourceKey`], returns a list of [`ResourceOptions`].</span>
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A [`ResourceProvider`] that can iterate over all supported [`ResourceOptions`] for a certain key.</span>
@@ -73,10 +69,8 @@
 <span class="doccomment">/// Implementing this trait means that a data provider knows all of the data it can successfully</span>
 <span class="doccomment">/// return from a load request.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">ResourceMarker</span><span class="op">&gt;</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Returns a boxed iterator over [`ResourceOptions`].</span>
-    <span class="kw">fn</span> <span class="ident">supported_options</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Returns a list of [`ResourceOptions`].</span>
+    <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
@@ -87,7 +81,7 @@
     <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>)
     }
 }

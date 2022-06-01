@@ -317,9 +317,6 @@
 <span id="312">312</span>
 <span id="313">313</span>
 <span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -334,12 +331,12 @@
 <span class="doccomment">//! // `Date` type</span>
 <span class="doccomment">//! let date_iso = Date::new_iso_date_from_integers(1970, 1, 2)</span>
 <span class="doccomment">//!     .expect(&quot;Failed to initialize ISO Date instance.&quot;);</span>
-<span class="doccomment">//! let date_ethiopic = Date::new_from_iso(date_iso, Ethiopic);</span>
+<span class="doccomment">//! let date_ethiopic = Date::new_from_iso(date_iso, Ethiopic::new());</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // `DateTime` type</span>
 <span class="doccomment">//! let datetime_iso = DateTime::new_iso_datetime_from_integers(1970, 1, 2, 13, 1, 0)</span>
 <span class="doccomment">//!     .expect(&quot;Failed to initialize ISO DateTime instance.&quot;);</span>
-<span class="doccomment">//! let datetime_ethiopic = DateTime::new_from_iso(datetime_iso, Ethiopic);</span>
+<span class="doccomment">//! let datetime_ethiopic = DateTime::new_from_iso(datetime_iso, Ethiopic::new());</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // `Date` checks</span>
 <span class="doccomment">//! assert_eq!(date_ethiopic.year().number, 1962);</span>
@@ -367,17 +364,10 @@
 
 <span class="comment">// The Ethiopic Calendar</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type is stable</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ethiopic</span>;
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ethiopic</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">bool</span>);
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EthiopicDateInner</span>(<span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Ethiopic</span><span class="op">&gt;</span>, <span class="ident">bool</span>);
-
-<span class="kw">impl</span> <span class="ident">EthiopicDateInner</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_amete_alem</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amete_alem</span>: <span class="ident">bool</span>) {
-        <span class="self">self</span>.<span class="number">1</span> <span class="op">=</span> <span class="ident">amete_alem</span>;
-    }
-}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EthiopicDateInner</span>(<span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Ethiopic</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">CalendarArithmetic</span> <span class="kw">for</span> <span class="ident">Ethiopic</span> {
     <span class="kw">fn</span> <span class="ident">month_days</span>(<span class="ident">year</span>: <span class="ident">i32</span>, <span class="ident">month</span>: <span class="ident">u8</span>) -&gt; <span class="ident">u8</span> {
@@ -428,7 +418,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">day_of_week</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::DateInner</span>) -&gt; <span class="ident">types::IsoWeekday</span> {
-        <span class="ident">Iso</span>.<span class="ident">day_of_week</span>(<span class="ident">Ethiopic</span>.<span class="ident">date_to_iso</span>(<span class="ident">date</span>).<span class="ident">inner</span>())
+        <span class="ident">Iso</span>.<span class="ident">day_of_week</span>(<span class="self">self</span>.<span class="ident">date_to_iso</span>(<span class="ident">date</span>).<span class="ident">inner</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">offset_date</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;mut</span> <span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">offset</span>: <span class="ident">DateDuration</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) {
@@ -448,7 +438,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::DateInner</span>) -&gt; <span class="ident">types::Year</span> {
-        <span class="kw">if</span> <span class="ident">date</span>.<span class="number">1</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> {
             <span class="ident">types::Year</span> {
                 <span class="ident">era</span>: <span class="ident">types::Era</span>(<span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;mundi&quot;</span>)),
                 <span class="ident">number</span>: <span class="ident">date</span>.<span class="number">0</span>.<span class="ident">year</span>,
@@ -496,9 +486,22 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Ethiopic</span> {
-    <span class="doccomment">/// Construct a new Ethiopic Calendar</span>
+    <span class="doccomment">/// Construct a new Ethiopic Calendar for the Amete Mihret era naming scheme</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>
+        <span class="self">Self</span>(<span class="bool-val">false</span>)
+    }
+    <span class="doccomment">/// Construct a new Ethiopic Calendar with a value specifying whether or not it is Amete Alem</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_amete_alem</span>(<span class="ident">amete_alem</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span>(<span class="ident">amete_alem</span>)
+    }
+    <span class="doccomment">/// Set whether or not this uses the Amete Alem era scheme</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_amete_alem</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">bool</span>) {
+        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">value</span>
+    }
+
+    <span class="doccomment">/// Returns whether this has the Amete Alem era</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_amete_alem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="number">0</span>
     }
 
     <span class="comment">// &quot;Fixed&quot; is a day count representation of calendars staring from Jan 1st of year 1 of the Georgian Calendar.</span>
@@ -564,11 +567,7 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
         }
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Date::from_raw</span>(<span class="ident">EthiopicDateInner</span>(<span class="ident">inner</span>, <span class="bool-val">false</span>), <span class="ident">Ethiopic</span>))
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_amete_alem</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">bool</span>) {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">set_amete_alem</span>(<span class="ident">value</span>);
+        <span class="prelude-val">Ok</span>(<span class="ident">Date::from_raw</span>(<span class="ident">EthiopicDateInner</span>(<span class="ident">inner</span>), <span class="ident">Ethiopic::new</span>()))
     }
 }
 
@@ -578,7 +577,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use icu::calendar::{types::IsoHour, types::IsoMinute, types::IsoSecond, DateTime};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let datetime_ethiopic = DateTime::new_ethiopic_datetime(2014, 8, 25, 13, 1, 0, 0)</span>
+    <span class="doccomment">/// let datetime_ethiopic = DateTime::new_ethiopic_datetime(2014, 8, 25, 13, 1, 0)</span>
     <span class="doccomment">///     .expect(&quot;Failed to initialize Ethiopic DateTime instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(datetime_ethiopic.date.year().number, 2014);</span>
@@ -595,16 +594,11 @@
         <span class="ident">hour</span>: <span class="ident">u8</span>,
         <span class="ident">minute</span>: <span class="ident">u8</span>,
         <span class="ident">second</span>: <span class="ident">u8</span>,
-        <span class="ident">fraction</span>: <span class="ident">u32</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Ethiopic</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">DateTime</span> {
             <span class="ident">date</span>: <span class="ident">Date::new_ethiopic_date</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>)<span class="question-mark">?</span>,
-            <span class="ident">time</span>: <span class="ident">types::Time::try_new</span>(<span class="ident">hour</span>, <span class="ident">minute</span>, <span class="ident">second</span>, <span class="ident">fraction</span>)<span class="question-mark">?</span>,
+            <span class="ident">time</span>: <span class="ident">types::Time::try_new</span>(<span class="ident">hour</span>, <span class="ident">minute</span>, <span class="ident">second</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
         })
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_amete_alem</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">bool</span>) {
-        <span class="self">self</span>.<span class="ident">date</span>.<span class="ident">inner</span>.<span class="ident">set_amete_alem</span>(<span class="ident">value</span>);
     }
 }
 
@@ -616,7 +610,7 @@
     <span class="kw">fn</span> <span class="ident">test_leap_year</span>() {
         <span class="comment">// 11th September 2023 in gregorian is 6/13/2015 in ethiopic</span>
         <span class="kw">let</span> <span class="ident">iso_date</span> <span class="op">=</span> <span class="ident">Date::new_iso_date_from_integers</span>(<span class="number">2023</span>, <span class="number">9</span>, <span class="number">11</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">ethiopic_date</span> <span class="op">=</span> <span class="ident">Ethiopic</span>.<span class="ident">date_from_iso</span>(<span class="ident">iso_date</span>);
+        <span class="kw">let</span> <span class="ident">ethiopic_date</span> <span class="op">=</span> <span class="ident">Ethiopic::new</span>().<span class="ident">date_from_iso</span>(<span class="ident">iso_date</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">ethiopic_date</span>.<span class="number">0</span>.<span class="ident">year</span>, <span class="number">2015</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">ethiopic_date</span>.<span class="number">0</span>.<span class="ident">month</span>, <span class="number">13</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">ethiopic_date</span>.<span class="number">0</span>.<span class="ident">day</span>, <span class="number">6</span>);
@@ -625,7 +619,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_iso_to_ethiopic_conversion_and_back</span>() {
         <span class="kw">let</span> <span class="ident">iso_date</span> <span class="op">=</span> <span class="ident">Date::new_iso_date_from_integers</span>(<span class="number">1970</span>, <span class="number">1</span>, <span class="number">2</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">date_ethiopic</span> <span class="op">=</span> <span class="ident">Date::new_from_iso</span>(<span class="ident">iso_date</span>, <span class="ident">Ethiopic</span>);
+        <span class="kw">let</span> <span class="ident">date_ethiopic</span> <span class="op">=</span> <span class="ident">Date::new_from_iso</span>(<span class="ident">iso_date</span>, <span class="ident">Ethiopic::new</span>());
 
         <span class="macro">assert_eq!</span>(<span class="ident">date_ethiopic</span>.<span class="ident">inner</span>.<span class="number">0</span>.<span class="ident">year</span>, <span class="number">1962</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">date_ethiopic</span>.<span class="ident">inner</span>.<span class="number">0</span>.<span class="ident">month</span>, <span class="number">4</span>);

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654127252778,
+  "lastUpdate": 1654207717335,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -29992,6 +29992,114 @@ window.BENCHMARK_DATA = {
           {
             "name": "uniset/contains_range/worst",
             "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a3ba5443862fa69905c6785a365f1304c835c42c",
+          "message": "Add support for NFKD and the decomposed counterpart of UTS 46 without ignored and disallowed (#1967)",
+          "timestamp": "2022-06-02T21:47:16Z",
+          "tree_id": "8cbe416f35e37563a6db508978fea5766718f949",
+          "url": "https://github.com/unicode-org/icu4x/commit/a3ba5443862fa69905c6785a365f1304c835c42c"
+        },
+        "date": 1654207054392,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 48706584,
+            "range": "± 237834",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "58569820+nordzilla@users.noreply.github.com",
+            "name": "Erik Nordin",
+            "username": "nordzilla"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ea62d2e85010951416e921f4a78c88b91ea4cd16",
+          "message": "Parse POSIX time-zone strings using Combine (#1973)\n\nAdd POSIX time-zone string parser\r\n\r\n* Create tzif crate\r\n\r\n* Add POSIX data structs\r\n\r\n* Add POSIX parser",
+          "timestamp": "2022-06-02T14:57:39-07:00",
+          "tree_id": "0fdc8c66fbd13a48d55a73cecaea509b8c0480c9",
+          "url": "https://github.com/unicode-org/icu4x/commit/ea62d2e85010951416e921f4a78c88b91ea4cd16"
+        },
+        "date": 1654207689707,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 48325280,
+            "range": "± 1016793",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
             "range": "± 0",
             "unit": "ns/iter"
           }

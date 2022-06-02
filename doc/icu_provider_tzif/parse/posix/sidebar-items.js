@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["posix_tz_string","Parses a POSIX time-zone string according to the following specification: https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html"]]});

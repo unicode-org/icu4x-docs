@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["posix","Structs for holding data encoded by POSIX time-zone strings, as specified by https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html"],["time","Simple structs for keeping track of seconds, hours, and minutes with the type system."]]});

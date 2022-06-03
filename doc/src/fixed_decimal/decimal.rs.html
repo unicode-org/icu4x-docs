@@ -2554,6 +2554,45 @@
 <span id="2549">2549</span>
 <span id="2550">2550</span>
 <span id="2551">2551</span>
+<span id="2552">2552</span>
+<span id="2553">2553</span>
+<span id="2554">2554</span>
+<span id="2555">2555</span>
+<span id="2556">2556</span>
+<span id="2557">2557</span>
+<span id="2558">2558</span>
+<span id="2559">2559</span>
+<span id="2560">2560</span>
+<span id="2561">2561</span>
+<span id="2562">2562</span>
+<span id="2563">2563</span>
+<span id="2564">2564</span>
+<span id="2565">2565</span>
+<span id="2566">2566</span>
+<span id="2567">2567</span>
+<span id="2568">2568</span>
+<span id="2569">2569</span>
+<span id="2570">2570</span>
+<span id="2571">2571</span>
+<span id="2572">2572</span>
+<span id="2573">2573</span>
+<span id="2574">2574</span>
+<span id="2575">2575</span>
+<span id="2576">2576</span>
+<span id="2577">2577</span>
+<span id="2578">2578</span>
+<span id="2579">2579</span>
+<span id="2580">2580</span>
+<span id="2581">2581</span>
+<span id="2582">2582</span>
+<span id="2583">2583</span>
+<span id="2584">2584</span>
+<span id="2585">2585</span>
+<span id="2586">2586</span>
+<span id="2587">2587</span>
+<span id="2588">2588</span>
+<span id="2589">2589</span>
+<span id="2590">2590</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -2594,6 +2633,37 @@
 <span class="doccomment">/// Floating point numbers will be supported pending a resolution to</span>
 <span class="doccomment">/// [#166](https://github.com/unicode-org/icu4x/issues/166). In the mean time, a third-party</span>
 <span class="doccomment">/// float-to-string library may be used.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Magnitude and Position</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Each digit in a `FixedDecimal` is indexed by a *magnitude*, or the digit&#39;s power of 10.</span>
+<span class="doccomment">/// Illustration for the number &quot;12.34&quot;:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// | Magnitude | Digit | Description      |</span>
+<span class="doccomment">/// |-----------|-------|------------------|</span>
+<span class="doccomment">/// | 1         | 1     | Tens place       |</span>
+<span class="doccomment">/// | 0         | 2     | Ones place       |</span>
+<span class="doccomment">/// | -1        | 3     | Tenths place     |</span>
+<span class="doccomment">/// | -2        | 4     | Hundredths place |</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Some functions deal with a *position* for the purpose of padding, truncating, or rounding a</span>
+<span class="doccomment">/// number. In these cases, the position is the index on the right side of the digit of the</span>
+<span class="doccomment">/// corresponding magnitude. Illustration:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```text</span>
+<span class="doccomment">/// Position:   2   0  -2</span>
+<span class="doccomment">/// Number:     |1|2.3|4|</span>
+<span class="doccomment">/// Position:     1  -1</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Expected output of various operations, all with input &quot;12.34&quot;:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// | Operation       | Position  | Expected Result |</span>
+<span class="doccomment">/// |-----------------|-----------|-----------------|</span>
+<span class="doccomment">/// | Truncate Left   | 1         | 10              |</span>
+<span class="doccomment">/// | Truncate Right  | -1        | 12.3            |</span>
+<span class="doccomment">/// | Pad Left        | 4         | 0012.34         |</span>
+<span class="doccomment">/// | Pad Right       | -4        | 12.3400         |</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -2965,8 +3035,12 @@
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Zero-pad the number on the left to a particular number of integer digits,</span>
+    <span class="doccomment">/// Zero-pad the number on the left to a particular position,</span>
     <span class="doccomment">/// returning the result.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Negative numbers have no effect.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::truncated_left()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -2983,12 +3057,16 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;42&quot;, dec.clone().padded_left(1).to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">padded_left</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">digits</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">pad_left</span>(<span class="ident">digits</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">padded_left</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">pad_left</span>(<span class="ident">position</span>);
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Zero-pad the number on the left to a particular number of integer digits.</span>
+    <span class="doccomment">/// Zero-pad the number on the left to a particular position.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Negative numbers have no effect.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::truncate_left()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3010,99 +3088,103 @@
     <span class="doccomment">/// dec.pad_left(1);</span>
     <span class="doccomment">/// assert_eq!(&quot;42&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pad_left</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">digits</span>: <span class="ident">u16</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">magnitude</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">digits</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="number">0</span>
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">digits</span> <span class="op">&gt;</span> (<span class="ident">i16::MAX</span> <span class="kw">as</span> <span class="ident">u16</span>) <span class="op">+</span> <span class="number">1</span> {
-            <span class="ident">i16::MAX</span>
-        } <span class="kw">else</span> {
-            (<span class="ident">digits</span> <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">i16</span>
-        };
-        <span class="kw">if</span> <span class="ident">magnitude</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="ident">magnitude</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pad_left</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) {
+        <span class="kw">if</span> <span class="ident">position</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">return</span>;
         }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">position</span> <span class="op">-</span> <span class="number">1</span>;
         <span class="comment">// Do not truncate nonzero digits</span>
         <span class="kw">if</span> <span class="ident">magnitude</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">magnitude</span> {
             <span class="ident">magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">magnitude</span>;
         }
-
         <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">magnitude</span>;
     }
 
-    <span class="doccomment">/// Truncate the number on the left to a particular magnitude, deleting</span>
+    <span class="doccomment">/// Truncate the number on the left to a particular position, deleting</span>
     <span class="doccomment">/// digits if necessary, returning the result.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::padded_left()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.to_string());</span>
+    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3).expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.clone().truncated_left(5).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;04235.970&quot;, dec.clone().truncated_left(5).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;235&quot;, dec.clone().truncated_left(2).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;35.970&quot;, dec.clone().truncated_left(2).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;35&quot;, dec.clone().truncated_left(1).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;5.970&quot;, dec.clone().truncated_left(1).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;5&quot;, dec.clone().truncated_left(0).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.970&quot;, dec.clone().truncated_left(0).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;0&quot;, dec.clone().truncated_left(-1).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.070&quot;, dec.clone().truncated_left(-1).to_string());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.000&quot;, dec.clone().truncated_left(-2).to_string());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.0000&quot;, dec.clone().truncated_left(-4).to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncated_left</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">magnitude</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">truncate_left</span>(<span class="ident">magnitude</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncated_left</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">truncate_left</span>(<span class="ident">position</span>);
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Truncate the number on the left to a particular magnitude, deleting</span>
+    <span class="doccomment">/// Truncate the number on the left to a particular position, deleting</span>
     <span class="doccomment">/// digits if necessary.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::pad_left()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.to_string());</span>
+    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3).expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_left(5);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;04235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_left(2);</span>
-    <span class="doccomment">/// assert_eq!(&quot;235&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;35.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_left(1);</span>
-    <span class="doccomment">/// assert_eq!(&quot;35&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;5.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_left(0);</span>
-    <span class="doccomment">/// assert_eq!(&quot;5&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_left(-1);</span>
-    <span class="doccomment">/// assert_eq!(&quot;0&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.070&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_left(-2);</span>
-    <span class="doccomment">/// assert_eq!(&quot;0&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.000&quot;, dec.to_string());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// dec.truncate_left(-4);</span>
+    <span class="doccomment">/// assert_eq!(&quot;0.0000&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncate_left</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">magnitude</span>: <span class="ident">i16</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncate_left</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) {
+        <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="self">self</span>.<span class="ident">lower_magnitude</span>, <span class="ident">position</span>);
+        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">position</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> { <span class="number">0</span> } <span class="kw">else</span> { <span class="ident">position</span> <span class="op">-</span> <span class="number">1</span> };
+        <span class="kw">if</span> <span class="ident">position</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">nonzero_magnitude_right</span>() {
+            <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">clear</span>();
+            <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
+            <span class="self">self</span>.<span class="ident">check_invariants</span>();
+            <span class="kw">return</span>;
+        }
+        <span class="kw">let</span> <span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">position</span> <span class="op">-</span> <span class="number">1</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">magnitude</span> {
-            <span class="kw">let</span> <span class="ident">positive_magnitude</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">magnitude</span> <span class="op">&gt;</span> <span class="number">0</span> { <span class="ident">magnitude</span> } <span class="kw">else</span> { <span class="number">0</span> };
             <span class="kw">let</span> <span class="ident">cut</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::ops::i16_abs_sub</span>(<span class="self">self</span>.<span class="ident">magnitude</span>, <span class="ident">magnitude</span>) <span class="kw">as</span> <span class="ident">usize</span>;
-            <span class="kw">if</span> <span class="ident">cut</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">len</span>() {
-                <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">clear</span>();
-                <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">positive_magnitude</span>;
-                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
-                <span class="self">self</span>.<span class="ident">check_invariants</span>();
-                <span class="kw">return</span>;
-            }
             <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">drain</span>(<span class="number">0</span>..<span class="ident">cut</span>).<span class="ident">count</span>();
             <span class="comment">// Count number of leading zeroes</span>
             <span class="kw">let</span> <span class="ident">extra_zeroes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>).<span class="ident">unwrap_or</span>(<span class="number">0</span>);
             <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">drain</span>(<span class="number">0</span>..<span class="ident">extra_zeroes</span>).<span class="ident">count</span>();
             <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">is_empty</span>());
             <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::ops::i16_sub_unsigned</span>(<span class="ident">magnitude</span>, <span class="ident">extra_zeroes</span> <span class="kw">as</span> <span class="ident">u16</span>);
-            <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">positive_magnitude</span>;
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
@@ -3154,10 +3236,8 @@
             .<span class="ident">take_while</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">digit</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">digit</span> <span class="op">==</span> <span class="number">0</span>)
             .<span class="ident">count</span>();
 
-        <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">truncate</span>(<span class="ident"><span class="kw">crate</span>::ops::i16_sub_unsigned</span>(
-            <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">i16</span>,
-            <span class="ident">no_of_trailing_zeros</span> <span class="kw">as</span> <span class="ident">u16</span>,
-        ) <span class="kw">as</span> <span class="ident">usize</span>);
+        <span class="self">self</span>.<span class="ident">digits</span>
+            .<span class="ident">truncate</span>(<span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">no_of_trailing_zeros</span>);
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">is_empty</span>() {
             <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="number">0</span>;
@@ -3167,66 +3247,63 @@
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
     }
 
-    <span class="doccomment">/// Truncate the number on the right to a particular magnitude, deleting</span>
+    <span class="doccomment">/// Truncate the number on the right to a particular position, deleting</span>
     <span class="doccomment">/// digits if necessary.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::padded_right()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let dec = FixedDecimal::from(4235);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.to_string());</span>
+    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3).expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235.00000&quot;, dec.clone().truncated_right(-5).to_string());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;4230&quot;, dec.clone().truncated_right(1).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.97000&quot;, dec.clone().truncated_right(-5).to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;4230&quot;, dec.clone().truncated_right(1).to_string());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.clone().truncated_right(0).to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;4200&quot;, dec.clone().truncated_right(2).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;00000000000&quot;, dec.clone().truncated_right(10).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;00000&quot;, dec.clone().truncated_right(5).to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncated_right</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">magnitude</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">truncate_right</span>(<span class="ident">magnitude</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncated_right</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">truncate_right</span>(<span class="ident">position</span>);
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Truncate the number on the right to a particular magnitude, deleting</span>
+    <span class="doccomment">/// Truncate the number on the right to a particular position, deleting</span>
     <span class="doccomment">/// digits if necessary.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::pad_right()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">/// # use std::str::FromStr;</span>
-    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235 as i32);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.to_string());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3).expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_right(-5);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4235.00000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.97000&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.truncate_right(1);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4230&quot;, dec.to_string());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.truncate_right(1);</span>
-    <span class="doccomment">/// assert_eq!(&quot;4230&quot;, dec.to_string());</span>
+    <span class="doccomment">/// dec.truncate_right(-1);</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235.9&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_right(0);</span>
+    <span class="doccomment">/// assert_eq!(&quot;4235&quot;, dec.to_string());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// dec.truncate_right(1);</span>
     <span class="doccomment">/// assert_eq!(&quot;4230&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_right(5);</span>
-    <span class="doccomment">/// assert_eq!(&quot;000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;00000&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.truncate_right(2);</span>
-    <span class="doccomment">/// assert_eq!(&quot;000000&quot;, dec.to_string());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235 as i32);</span>
-    <span class="doccomment">/// dec.truncate_right(10);</span>
-    <span class="doccomment">/// assert_eq!(&quot;00000000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;00000&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;-99.999&quot;).unwrap();</span>
     <span class="doccomment">/// dec.truncate_right(-2);</span>
@@ -3240,13 +3317,20 @@
     <span class="doccomment">/// dec.truncate_right(-1);</span>
     <span class="doccomment">/// assert_eq!(&quot;0.0&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncate_right</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">i16</span>) {
-        <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="ident">n</span>, <span class="number">0</span>);
-        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="self">self</span>.<span class="ident">upper_magnitude</span>, <span class="ident">n</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">truncate_right</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) {
+        <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="ident">position</span>, <span class="number">0</span>);
+        <span class="kw">if</span> <span class="ident">position</span> <span class="op">==</span> <span class="ident">i16::MIN</span> {
+            <span class="comment">// Nothing more to do</span>
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
+            <span class="self">self</span>.<span class="ident">check_invariants</span>();
+            <span class="kw">return</span>;
+        }
+        <span class="kw">let</span> <span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">position</span> <span class="op">-</span> <span class="number">1</span>;
+        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="self">self</span>.<span class="ident">upper_magnitude</span>, <span class="ident">magnitude</span>);
 
-        <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">magnitude</span> {
+        <span class="kw">if</span> <span class="ident">magnitude</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">magnitude</span> {
             <span class="self">self</span>.<span class="ident">digits</span>
-                .<span class="ident">truncate</span>(<span class="ident"><span class="kw">crate</span>::ops::i16_abs_sub</span>(<span class="self">self</span>.<span class="ident">magnitude</span>, <span class="ident">n</span>) <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="number">1</span>);
+                .<span class="ident">truncate</span>(<span class="ident"><span class="kw">crate</span>::ops::i16_abs_sub</span>(<span class="self">self</span>.<span class="ident">magnitude</span>, <span class="ident">magnitude</span>) <span class="kw">as</span> <span class="ident">usize</span>);
             <span class="self">self</span>.<span class="ident">remove_trailing_zeros_from_digits_list</span>();
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">clear</span>();
@@ -3257,7 +3341,7 @@
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
     }
 
-    <span class="doccomment">/// Ceils the number to the power ten of n.</span>
+    <span class="doccomment">/// Take the ceiling of the number at a particular position.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3282,24 +3366,24 @@
     <span class="doccomment">/// assert_eq!(&quot;100.00&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;99.999&quot;).unwrap();</span>
-    <span class="doccomment">/// dec.ceil(-10);</span>
-    <span class="doccomment">/// assert_eq!(&quot;99.9990000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// dec.ceil(-5);</span>
+    <span class="doccomment">/// assert_eq!(&quot;99.99900&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;-99.999&quot;).unwrap();</span>
-    <span class="doccomment">/// dec.ceil(-10);</span>
-    <span class="doccomment">/// assert_eq!(&quot;-99.9990000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// dec.ceil(-5);</span>
+    <span class="doccomment">/// assert_eq!(&quot;-99.99900&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;-99.999&quot;).unwrap();</span>
     <span class="doccomment">/// dec.ceil(-2);</span>
     <span class="doccomment">/// assert_eq!(&quot;-99.99&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;99.999&quot;).unwrap();</span>
-    <span class="doccomment">/// dec.ceil(10);</span>
-    <span class="doccomment">/// assert_eq!(&quot;10000000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// dec.ceil(4);</span>
+    <span class="doccomment">/// assert_eq!(&quot;10000&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;-99.999&quot;).unwrap();</span>
-    <span class="doccomment">/// dec.ceil(10);</span>
-    <span class="doccomment">/// assert_eq!(&quot;-00000000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// dec.ceil(4);</span>
+    <span class="doccomment">/// assert_eq!(&quot;-0000&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;0.009&quot;).unwrap();</span>
     <span class="doccomment">/// dec.ceil(-1);</span>
@@ -3309,10 +3393,9 @@
     <span class="doccomment">/// dec.ceil(-1);</span>
     <span class="doccomment">/// assert_eq!(&quot;-0.0&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ceil</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">i16</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ceil</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_negative</span> {
-            <span class="self">self</span>.<span class="ident">truncate_right</span>(<span class="ident">n</span>);
-
+            <span class="self">self</span>.<span class="ident">truncate_right</span>(<span class="ident">position</span>);
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
             <span class="self">self</span>.<span class="ident">check_invariants</span>();
             <span class="kw">return</span>;
@@ -3322,7 +3405,7 @@
         <span class="kw">let</span> <span class="ident">before_truncate_is_zero</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">is_zero</span>();
         <span class="kw">let</span> <span class="ident">before_truncate_is_bottom_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">nonzero_magnitude_right</span>();
         <span class="kw">let</span> <span class="ident">before_truncate_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">magnitude</span>;
-        <span class="self">self</span>.<span class="ident">truncate_right</span>(<span class="ident">n</span>);
+        <span class="self">self</span>.<span class="ident">truncate_right</span>(<span class="ident">position</span>);
 
         <span class="kw">if</span> <span class="ident">before_truncate_is_zero</span> {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
@@ -3331,13 +3414,13 @@
         }
 
         <span class="comment">// Now, the number is positive and not zero before truncation.</span>
-        <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">before_truncate_is_bottom_magnitude</span> {
+        <span class="kw">if</span> <span class="ident">position</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">before_truncate_is_bottom_magnitude</span> {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
             <span class="self">self</span>.<span class="ident">check_invariants</span>();
             <span class="kw">return</span>;
         }
 
-        <span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">before_truncate_magnitude</span> {
+        <span class="kw">if</span> <span class="ident">position</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">before_truncate_magnitude</span> {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">increment_abs_by_one</span>();
             <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">is_err</span>() {
                 <span class="comment">// Do nothing for now.</span>
@@ -3350,13 +3433,14 @@
 
         <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">is_empty</span>());
         <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">push</span>(<span class="number">1</span>);
-        <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">n</span>;
+        <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">position</span>;
+        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="self">self</span>.<span class="ident">upper_magnitude</span>, <span class="ident">position</span>);
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
     }
 
-    <span class="doccomment">/// Floors the number to the power ten of n.</span>
+    <span class="doccomment">/// Take the floor of the number at a particular position.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3386,20 +3470,24 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;99.999&quot;).unwrap();</span>
     <span class="doccomment">/// dec.floor(10);</span>
-    <span class="doccomment">/// assert_eq!(&quot;00000000000&quot;, dec.to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;0000000000&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;-99.999&quot;).unwrap();</span>
     <span class="doccomment">/// dec.floor(10);</span>
     <span class="doccomment">/// assert_eq!(&quot;-10000000000&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">floor</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">n</span>: <span class="ident">i16</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">floor</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) {
         <span class="self">self</span>.<span class="ident">negate</span>();
-        <span class="self">self</span>.<span class="ident">ceil</span>(<span class="ident">n</span>);
+        <span class="self">self</span>.<span class="ident">ceil</span>(<span class="ident">position</span>);
         <span class="self">self</span>.<span class="ident">negate</span>();
     }
 
-    <span class="doccomment">/// Zero-pad the number on the right to a particular (negative) magnitude. Will truncate</span>
+    <span class="doccomment">/// Zero-pad the number on the right to a particular (negative) position. Will truncate</span>
     <span class="doccomment">/// trailing zeros if necessary, but will not truncate other digits, returning the result.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Positive numbers have no effect.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::truncated_right()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3410,21 +3498,25 @@
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;123.456&quot;).unwrap();</span>
     <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.clone().padded_right(1).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.clone().padded_right(-1).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.clone().padded_right(2).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.clone().padded_right(-2).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;123.4560&quot;, dec.clone().padded_right(4).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;123.456000&quot;, dec.clone().padded_right(-6).to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(&quot;123.456000&quot;, dec.clone().padded_right(6).to_string());</span>
+    <span class="doccomment">/// assert_eq!(&quot;123.4560&quot;, dec.clone().padded_right(-4).to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">padded_right</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">negative_magnitude</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">pad_right</span>(<span class="ident">negative_magnitude</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">padded_right</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">pad_right</span>(<span class="ident">position</span>);
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Zero-pad the number on the right to a particular (negative) magnitude. Will truncate</span>
+    <span class="doccomment">/// Zero-pad the number on the right to a particular (negative) position. Will truncate</span>
     <span class="doccomment">/// trailing zeros if necessary, but will not truncate other digits.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Positive numbers have no effect.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Also see [`FixedDecimal::truncate_right()`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3435,30 +3527,28 @@
     <span class="doccomment">/// let mut dec = FixedDecimal::from_str(&quot;123.456&quot;).unwrap();</span>
     <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.pad_right(1);</span>
+    <span class="doccomment">/// dec.pad_right(-1);</span>
     <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.pad_right(2);</span>
+    <span class="doccomment">/// dec.pad_right(-2);</span>
     <span class="doccomment">/// assert_eq!(&quot;123.456&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.pad_right(4);</span>
-    <span class="doccomment">/// assert_eq!(&quot;123.4560&quot;, dec.to_string());</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.pad_right(6);</span>
+    <span class="doccomment">/// dec.pad_right(-6);</span>
     <span class="doccomment">/// assert_eq!(&quot;123.456000&quot;, dec.to_string());</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// dec.pad_right(-4);</span>
+    <span class="doccomment">/// assert_eq!(&quot;123.4560&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pad_right</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">negative_magnitude</span>: <span class="ident">u16</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">magnitude</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">negative_magnitude</span> <span class="op">&gt;</span> (<span class="ident">i16::MAX</span> <span class="kw">as</span> <span class="ident">u16</span>) {
-            <span class="ident">i16::MIN</span>
-        } <span class="kw">else</span> {
-            <span class="op">-</span>(<span class="ident">negative_magnitude</span> <span class="kw">as</span> <span class="ident">i16</span>)
-        };
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pad_right</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">position</span>: <span class="ident">i16</span>) {
+        <span class="kw">if</span> <span class="ident">position</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">return</span>;
+        }
         <span class="kw">let</span> <span class="ident">bottom_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">nonzero_magnitude_right</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">position</span>;
         <span class="comment">// Do not truncate nonzero digits</span>
         <span class="kw">if</span> <span class="ident">magnitude</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">bottom_magnitude</span> {
             <span class="ident">magnitude</span> <span class="op">=</span> <span class="ident">bottom_magnitude</span>;
         }
-
         <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">magnitude</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
@@ -4913,13 +5003,13 @@
     <span class="macro">assert_eq!</span>(<span class="string">&quot;1000&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="number">2</span>);
-    <span class="macro">assert_eq!</span>(<span class="string">&quot;000&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
+    <span class="macro">assert_eq!</span>(<span class="string">&quot;00&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="number">0</span>);
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="number">3</span>);
-    <span class="macro">assert_eq!</span>(<span class="string">&quot;0&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
+    <span class="macro">assert_eq!</span>(<span class="string">&quot;000&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from_str</span>(<span class="string">&quot;0.456&quot;</span>).<span class="ident">unwrap</span>();
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0.456&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
@@ -4928,20 +5018,20 @@
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0.456&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">1</span>);
-    <span class="macro">assert_eq!</span>(<span class="string">&quot;0.456&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
-
-    <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">2</span>);
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0.056&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
-    <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">3</span>);
+    <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">2</span>);
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0.006&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
-    <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">4</span>);
+    <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">3</span>);
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0.000&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
+
+    <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="op">-</span><span class="number">4</span>);
+    <span class="macro">assert_eq!</span>(<span class="string">&quot;0.0000&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from_str</span>(<span class="string">&quot;100.01&quot;</span>).<span class="ident">unwrap</span>();
     <span class="ident">dec</span>.<span class="ident">truncate_left</span>(<span class="number">1</span>);
-    <span class="macro">assert_eq!</span>(<span class="string">&quot;00.01&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
+    <span class="macro">assert_eq!</span>(<span class="string">&quot;0.01&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -4949,19 +5039,13 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from_str</span>(<span class="string">&quot;299792.458&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">max_integer_digits</span> <span class="op">=</span> <span class="ident">core::i16::MAX</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="number">1</span>;
 
-    <span class="ident">dec</span>.<span class="ident">pad_left</span>(<span class="ident">core::u16::MAX</span>);
+    <span class="ident">dec</span>.<span class="ident">pad_left</span>(<span class="ident">core::i16::MAX</span> <span class="op">-</span> <span class="number">1</span>);
     <span class="macro">assert_eq!</span>(
-        <span class="ident">max_integer_digits</span>,
+        <span class="ident">max_integer_digits</span> <span class="op">-</span> <span class="number">2</span>,
         <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">0</span>.<span class="ident">len</span>()
     );
 
-    <span class="ident">dec</span>.<span class="ident">pad_left</span>(<span class="ident">core::i16::MAX</span> <span class="kw">as</span> <span class="ident">u16</span> <span class="op">+</span> <span class="number">1</span>);
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">max_integer_digits</span>,
-        <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">0</span>.<span class="ident">len</span>()
-    );
-
-    <span class="ident">dec</span>.<span class="ident">pad_left</span>(<span class="ident">core::i16::MAX</span> <span class="kw">as</span> <span class="ident">u16</span>);
+    <span class="ident">dec</span>.<span class="ident">pad_left</span>(<span class="ident">core::i16::MAX</span>);
     <span class="macro">assert_eq!</span>(
         <span class="ident">max_integer_digits</span> <span class="op">-</span> <span class="number">1</span>,
         <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">0</span>.<span class="ident">len</span>()
@@ -4973,21 +5057,15 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from_str</span>(<span class="string">&quot;299792.458&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">max_fractional_digits</span> <span class="op">=</span> <span class="op">-</span>(<span class="ident">core::i16::MIN</span> <span class="kw">as</span> <span class="ident">isize</span>) <span class="kw">as</span> <span class="ident">usize</span>;
 
-    <span class="ident">dec</span>.<span class="ident">pad_right</span>(<span class="ident">core::u16::MAX</span>);
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">max_fractional_digits</span>,
-        <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len</span>()
-    );
-
-    <span class="ident">dec</span>.<span class="ident">pad_right</span>(<span class="ident">core::i16::MAX</span> <span class="kw">as</span> <span class="ident">u16</span> <span class="op">+</span> <span class="number">1</span>);
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">max_fractional_digits</span>,
-        <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len</span>()
-    );
-
-    <span class="ident">dec</span>.<span class="ident">pad_right</span>(<span class="ident">core::i16::MAX</span> <span class="kw">as</span> <span class="ident">u16</span>);
+    <span class="ident">dec</span>.<span class="ident">pad_right</span>(<span class="ident">core::i16::MIN</span> <span class="op">+</span> <span class="number">1</span>);
     <span class="macro">assert_eq!</span>(
         <span class="ident">max_fractional_digits</span> <span class="op">-</span> <span class="number">1</span>,
+        <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len</span>()
+    );
+
+    <span class="ident">dec</span>.<span class="ident">pad_right</span>(<span class="ident">core::i16::MIN</span>);
+    <span class="macro">assert_eq!</span>(
+        <span class="ident">max_fractional_digits</span>,
         <span class="ident">dec</span>.<span class="ident">to_string</span>().<span class="ident">split_once</span>(<span class="string">&#39;.&#39;</span>).<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len</span>()
     );
 }

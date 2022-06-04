@@ -743,31 +743,6 @@
 <span id="738">738</span>
 <span id="739">739</span>
 <span id="740">740</span>
-<span id="741">741</span>
-<span id="742">742</span>
-<span id="743">743</span>
-<span id="744">744</span>
-<span id="745">745</span>
-<span id="746">746</span>
-<span id="747">747</span>
-<span id="748">748</span>
-<span id="749">749</span>
-<span id="750">750</span>
-<span id="751">751</span>
-<span id="752">752</span>
-<span id="753">753</span>
-<span id="754">754</span>
-<span id="755">755</span>
-<span id="756">756</span>
-<span id="757">757</span>
-<span id="758">758</span>
-<span id="759">759</span>
-<span id="760">760</span>
-<span id="761">761</span>
-<span id="762">762</span>
-<span id="763">763</span>
-<span id="764">764</span>
-<span id="765">765</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -802,9 +777,6 @@
 <span class="kw">use</span> <span class="ident">icu_segmenter::symbols</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
-<span class="kw">use</span> <span class="ident">std::fs::File</span>;
-<span class="kw">use</span> <span class="ident">std::io::Read</span>;
-<span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ZeroVec</span>;
 
 <span class="comment">// state machine name define by builtin name</span>
@@ -1023,42 +995,20 @@
 }
 
 <span class="kw">impl</span> <span class="ident">SegmenterRuleProvider</span> {
-    <span class="kw">fn</span> <span class="ident">build_rule_data_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">file_name</span> <span class="op">=</span> <span class="ident">key</span>
-            .<span class="ident">get_path</span>()
-            .<span class="ident">split</span>(<span class="kw-2">&amp;</span>[<span class="string">&#39;/&#39;</span>, <span class="string">&#39;@&#39;</span>])
-            .<span class="ident">nth</span>(<span class="number">1</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;ResourceKey format should be valid!&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">get_segmenter_data_root</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="ident">file_name</span>);
-        <span class="ident">data_path</span>.<span class="ident">set_extension</span>(<span class="string">&quot;toml&quot;</span>);
-        <span class="prelude-val">Ok</span>(<span class="ident">data_path</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">load_rule_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SegmenterRuleTable</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">build_rule_data_path</span>(<span class="ident">key</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-            <span class="ident">DataErrorKind::Io</span>(<span class="ident">e</span>.<span class="ident">kind</span>())
-                .<span class="ident">with_key</span>(<span class="ident">key</span>)
-                .<span class="ident">with_str_context</span>(<span class="string">&quot;Failed to open rule data file!&quot;</span>)
-        })<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="ident">file</span>.<span class="ident">read_to_end</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-            <span class="ident">DataErrorKind::Io</span>(<span class="ident">e</span>.<span class="ident">kind</span>())
-                .<span class="ident">with_key</span>(<span class="ident">key</span>)
-                .<span class="ident">with_str_context</span>(<span class="string">&quot;Failed to read rule data file!&quot;</span>)
-        })<span class="question-mark">?</span>;
-        <span class="ident">toml::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-            <span class="ident">DataErrorKind::MissingPayload</span>
-                .<span class="ident">with_key</span>(<span class="ident">key</span>)
-                .<span class="ident">with_str_context</span>(<span class="string">&quot;Failed to parse rule data file!&quot;</span>)
-        })
-    }
-
     <span class="kw">fn</span> <span class="ident">generate_rule_break_data</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">load_rule_data</span>(<span class="ident">key</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">source</span>
+            .<span class="ident">get_segmenter_paths</span>()<span class="question-mark">?</span>
+            .<span class="ident">read_and_parse_toml</span>::<span class="op">&lt;</span><span class="ident">SegmenterRuleTable</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                <span class="string">&quot;{}.toml&quot;</span>,
+                <span class="ident">key</span>.<span class="ident">get_path</span>()
+                    .<span class="ident">split</span>(<span class="kw-2">&amp;</span>[<span class="string">&#39;/&#39;</span>, <span class="string">&#39;@&#39;</span>])
+                    .<span class="ident">nth</span>(<span class="number">1</span>)
+                    .<span class="ident">expect</span>(<span class="string">&quot;ResourceKey format should be valid!&quot;</span>)
+            ))<span class="question-mark">?</span>;
 
         <span class="comment">// Load enumerate Unicode property dependencies.</span>
         <span class="kw">let</span> <span class="ident">cp_map_provider</span> <span class="op">=</span> <span class="ident">EnumeratedPropertyCodePointTrieProvider::from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>);

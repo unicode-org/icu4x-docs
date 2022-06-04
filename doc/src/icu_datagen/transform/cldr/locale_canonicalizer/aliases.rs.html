@@ -343,17 +343,11 @@
 <span id="338">338</span>
 <span id="339">339</span>
 <span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::cldr_serde</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::reader::open_reader</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_locale_canonicalizer::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">language</span>, <span class="ident">subtags</span>, <span class="ident">LanguageIdentifier</span>};
@@ -384,20 +378,16 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::ExtraneousResourceOptions</span>.<span class="ident">into_error</span>());
         }
 
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>
+        <span class="kw">let</span> <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::aliases::Resource</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">source</span>
             .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
             .<span class="ident">cldr_core</span>()
-            .<span class="ident">join</span>(<span class="string">&quot;supplemental&quot;</span>)
-            .<span class="ident">join</span>(<span class="string">&quot;aliases.json&quot;</span>);
-        <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">cldr_serde::aliases::Resource</span> <span class="op">=</span> <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
-
+            .<span class="ident">read_and_parse</span>(<span class="string">&quot;supplemental/aliases.json&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">metadata</span>,
-            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">AliasesV1::from</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>))),
+            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">AliasesV1::from</span>(<span class="ident">data</span>))),
         })
     }
 }

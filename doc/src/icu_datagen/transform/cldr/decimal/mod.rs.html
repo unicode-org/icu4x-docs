@@ -170,57 +170,17 @@
 <span id="165">165</span>
 <span id="166">166</span>
 <span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::cldr_serde</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::reader</span>::{<span class="ident">get_langid_subdirectories</span>, <span class="ident">get_langid_subdirectory</span>, <span class="ident">open_reader</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_decimal::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">litemap::LiteMap</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::sync::RwLock</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
 
 <span class="kw">mod</span> <span class="ident">decimal_pattern</span>;
@@ -229,50 +189,48 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NumbersProvider</span> {
     <span class="ident">source</span>: <span class="ident">SourceData</span>,
-    <span class="ident">cldr_numbering_systems_data</span>:
-        <span class="ident">RwLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">TinyStr8</span>, <span class="ident">cldr_serde::numbering_systems::NumberingSystem</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SourceData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NumbersProvider</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">SourceData</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">NumbersProvider</span> {
             <span class="ident">source</span>: <span class="ident">source</span>.<span class="ident">clone</span>(),
-            <span class="ident">cldr_numbering_systems_data</span>: <span class="ident">RwLock::new</span>(<span class="prelude-val">None</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">NumbersProvider</span> {
     <span class="doccomment">/// Returns the digits for the given numbering system name.</span>
-    <span class="kw">fn</span> <span class="ident">get_digits_for_numbering_system</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nsname</span>: <span class="ident">TinyStr8</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">char</span>; <span class="number">10</span>]<span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>
-            .<span class="ident">cldr_numbering_systems_data</span>
-            .<span class="ident">read</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">nsname</span>)
-        {
-            <span class="prelude-val">Some</span>(<span class="ident">ns</span>) =&gt; <span class="kw">match</span> <span class="ident">ns</span>.<span class="ident">digits</span>.<span class="ident">as_ref</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">digits_str</span>) =&gt; {
-                    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">digits_str</span>.<span class="ident">chars</span>();
-                    <span class="prelude-val">Some</span>([
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                        <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
-                    ])
-                }
-                <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
-            },
+    <span class="kw">fn</span> <span class="ident">get_digits_for_numbering_system</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nsname</span>: <span class="ident">TinyStr8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">char</span>; <span class="number">10</span>], <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">resource</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::numbering_systems::Resource</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">source</span>
+            .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
+            .<span class="ident">cldr_core</span>()
+            .<span class="ident">read_and_parse</span>(<span class="string">&quot;supplemental/numberingSystems.json&quot;</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">fn</span> <span class="ident">digits_str_to_chars</span>(<span class="ident">digits_str</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">char</span>; <span class="number">10</span>]<span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">digits_str</span>.<span class="ident">chars</span>();
+            <span class="prelude-val">Some</span>([
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+                <span class="ident">chars</span>.<span class="ident">next</span>()<span class="question-mark">?</span>,
+            ])
+        }
+
+        <span class="kw">match</span> <span class="ident">resource</span>.<span class="ident">supplemental</span>.<span class="ident">numbering_systems</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">nsname</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">ns</span>) =&gt; <span class="ident">ns</span>.<span class="ident">digits</span>.<span class="ident">as_deref</span>().<span class="ident">and_then</span>(<span class="ident">digits_str_to_chars</span>),
             <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         }
+        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+            <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not process numbering system&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">nsname</span>)
+        })
     }
 }
 
@@ -283,16 +241,11 @@
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">get_langid</span>();
 
-        <span class="kw">let</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::numbers::Resource</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">get_langid_subdirectory</span>(
-                <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>.<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>.<span class="ident">cldr_numbers</span>().<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>),
-                <span class="kw-2">&amp;</span><span class="ident">langid</span>,
-            )<span class="question-mark">?</span>
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">into_error</span>())<span class="question-mark">?</span>
-            .<span class="ident">join</span>(<span class="string">&quot;numbers.json&quot;</span>);
-            <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>
-        };
+        <span class="kw">let</span> <span class="ident">resource</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::numbers::Resource</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">source</span>
+            .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
+            .<span class="ident">cldr_numbers</span>()
+            .<span class="ident">read_and_parse</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>, <span class="string">&quot;numbers.json&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="kw">let</span> <span class="ident">numbers</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">resource</span>
@@ -301,41 +254,12 @@
             .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">langid</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;CLDR file contains the expected language&quot;</span>)
             .<span class="ident">numbers</span>;
-        <span class="kw">let</span> <span class="ident">nsname</span> <span class="op">=</span> <span class="ident">numbers</span>.<span class="ident">default_numbering_system</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">DecimalSymbolsV1::try_from</span>(<span class="ident">numbers</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
             <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not create decimal symbols&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)
         })<span class="question-mark">?</span>;
 
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="kw">if</span> <span class="self">self</span>
-            .<span class="ident">cldr_numbering_systems_data</span>
-            .<span class="ident">read</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
-            .<span class="ident">is_none</span>()
-        {
-            <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="ident">source</span>
-                .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
-                .<span class="ident">cldr_core</span>()
-                .<span class="ident">join</span>(<span class="string">&quot;supplemental&quot;</span>)
-                .<span class="ident">join</span>(<span class="string">&quot;numberingSystems.json&quot;</span>);
-            <span class="kw">let</span> <span class="ident">resource</span>: <span class="ident">cldr_serde::numbering_systems::Resource</span> <span class="op">=</span>
-                <span class="ident">serde_json::from_reader</span>(<span class="ident">open_reader</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="ident">cldr_numbering_systems_data</span>
-                .<span class="ident">write</span>()
-                .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
-                .<span class="ident">get_or_insert</span>(<span class="ident">resource</span>.<span class="ident">supplemental</span>.<span class="ident">numbering_systems</span>);
-        }
-
-        <span class="ident">result</span>.<span class="ident">digits</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">get_digits_for_numbering_system</span>(<span class="ident">nsname</span>)
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not process numbering system&quot;</span>)
-                    .<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">nsname</span>)
-            })<span class="question-mark">?</span>;
+        <span class="ident">result</span>.<span class="ident">digits</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_digits_for_numbering_system</span>(<span class="ident">numbers</span>.<span class="ident">default_numbering_system</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">DataResponseMetadata::default</span>();
         <span class="comment">// TODO(#1109): Set metadata.data_langid correctly.</span>
@@ -350,11 +274,13 @@
 
 <span class="kw">impl</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NumbersProvider</span> {
     <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(
-            <span class="ident">get_langid_subdirectories</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">source</span>.<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>.<span class="ident">cldr_numbers</span>().<span class="ident">join</span>(<span class="string">&quot;main&quot;</span>))<span class="question-mark">?</span>
-                .<span class="ident">map</span>(<span class="ident">ResourceOptions::from</span>)
-                .<span class="ident">collect</span>(),
-        )
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>
+            .<span class="ident">source</span>
+            .<span class="ident">get_cldr_paths</span>()<span class="question-mark">?</span>
+            .<span class="ident">cldr_numbers</span>()
+            .<span class="ident">list_langs</span>()<span class="question-mark">?</span>
+            .<span class="ident">map</span>(<span class="ident">Into</span>::<span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span><span class="ident">::into</span>)
+            .<span class="ident">collect</span>())
     }
 }
 

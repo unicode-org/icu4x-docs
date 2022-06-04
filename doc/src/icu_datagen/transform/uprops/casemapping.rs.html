@@ -286,13 +286,10 @@
 <span id="281">281</span>
 <span id="282">282</span>
 <span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::uprops::uprops_serde</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_casemapping::provider</span>::{<span class="ident">CaseMappingV1</span>, <span class="ident">CaseMappingV1Marker</span>};
 <span class="kw">use</span> <span class="ident">icu_casemapping::CaseMappingInternals</span>;
@@ -300,7 +297,6 @@
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrieHeader</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::fs</span>;
 
 <span class="doccomment">/// A data provider reading from TOML files produced by the ICU4C icuexportdata tool.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CaseMappingDataProvider</span> {
@@ -320,13 +316,13 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">CaseMappingV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">get_uprops_root</span>()<span class="question-mark">?</span>.<span class="ident">join</span>(<span class="string">&quot;ucase.toml&quot;</span>);
-        <span class="kw">let</span> <span class="ident">toml_str</span> <span class="op">=</span>
-            <span class="ident">fs::read_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">toml</span>: <span class="ident">uprops_serde::case::Main</span> <span class="op">=</span> <span class="ident">toml::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">toml_str</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident"><span class="kw">crate</span>::error::data_error_from_toml</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">toml</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>
+            .<span class="ident">source</span>
+            .<span class="ident">get_uprops_paths</span>()<span class="question-mark">?</span>
+            .<span class="ident">read_and_parse_toml</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::uprops_serde::case::Main</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="string">&quot;ucase.toml&quot;</span>)<span class="question-mark">?</span>
+            .<span class="ident">ucase</span>;
 
-        <span class="kw">let</span> <span class="ident">trie_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">toml</span>.<span class="ident">ucase</span>.<span class="ident">code_point_trie</span>;
+        <span class="kw">let</span> <span class="ident">trie_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">toml</span>.<span class="ident">code_point_trie</span>;
         <span class="kw">let</span> <span class="ident">trie_header</span> <span class="op">=</span> <span class="ident">CodePointTrieHeader::try_from</span>(<span class="ident">trie_data</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
             <span class="ident">DataError::custom</span>(<span class="string">&quot;Could not parse CodePointTrie TOML&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>)
         })<span class="question-mark">?</span>;
@@ -338,8 +334,8 @@
                 <span class="string">&quot;Did not find 16-bit data array for case mapping in TOML&quot;</span>,
             ));
         };
-        <span class="kw">let</span> <span class="ident">exceptions</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">toml</span>.<span class="ident">ucase</span>.<span class="ident">exceptions</span>.<span class="ident">exceptions</span>;
-        <span class="kw">let</span> <span class="ident">unfold</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">toml</span>.<span class="ident">ucase</span>.<span class="ident">unfold</span>.<span class="ident">unfold</span>;
+        <span class="kw">let</span> <span class="ident">exceptions</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">toml</span>.<span class="ident">exceptions</span>.<span class="ident">exceptions</span>;
+        <span class="kw">let</span> <span class="ident">unfold</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">toml</span>.<span class="ident">unfold</span>.<span class="ident">unfold</span>;
 
         <span class="kw">let</span> <span class="ident">case_mapping</span> <span class="op">=</span> <span class="ident">CaseMappingInternals::try_from_icu</span>(
             <span class="ident">trie_header</span>,

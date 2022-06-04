@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["main",""]]});
+initSidebarItems({"constant":[["IGNORED_KEYS",""]],"fn":[["main",""]]});

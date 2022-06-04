@@ -345,19 +345,24 @@
 <span id="340">340</span>
 <span id="341">341</span>
 <span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ule::AsULE</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ZeroSlice</span>, <span class="ident">ZeroVec</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ZeroSlice</span>;
 
+<span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
-<span class="kw">use</span> <span class="ident">core::ops::Range</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::map::ZeroMapKV</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::map</span>::{<span class="ident">BorrowedZeroVecLike</span>, <span class="ident">ZeroVecLike</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::map2d::KeyError</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::map2d</span>::{<span class="ident">KeyError</span>, <span class="ident">ZeroMap2dCursor</span>};
 
 <span class="doccomment">/// A borrowed-only version of [`ZeroMap2d`](super::ZeroMap2d)</span>
 <span class="doccomment">///</span>
@@ -514,7 +519,7 @@
     <span class="ident">K1</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
-    <span class="doccomment">/// Get the value associated with `key`, if it exists.</span>
+    <span class="doccomment">/// Get the value associated with `key0` and `key1`, if it exists.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is able to return values that live longer than the map itself</span>
     <span class="doccomment">/// since they borrow directly from the backing buffer. This is the</span>
@@ -542,20 +547,61 @@
     <span class="doccomment">/// assert_eq!(borrow, Ok(&quot;foo&quot;));</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">V::GetType</span>, <span class="ident">KeyError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>).<span class="ident">ok_or</span>(<span class="ident">KeyError::K0</span>)<span class="question-mark">?</span>;
-        <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span> <span class="ident">range</span>.<span class="ident">end</span>); <span class="comment">// &#39;&lt;&#39; because every key0 should have a key1</span>
-        <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_len</span>());
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">start</span>
-            <span class="op">+</span> <span class="self">self</span>
-                .<span class="ident">keys1</span>
-                .<span class="ident">zvl_binary_search_in_range</span>(<span class="ident">key1</span>, <span class="ident">range</span>)
-                .<span class="ident">unwrap</span>()
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">KeyError::K1</span>)<span class="question-mark">?</span>;
-        <span class="comment">// This unwrap is protected by the invariant keys1.len() == values.len(),</span>
-        <span class="comment">// the above debug_assert!, and the contract of zvl_binary_search_in_range.</span>
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_get</span>(<span class="ident">index</span>).<span class="ident">unwrap</span>())
+        <span class="self">self</span>.<span class="ident">get0</span>(<span class="ident">key0</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">KeyError::K0</span>)<span class="question-mark">?</span>
+            .<span class="ident">get1</span>(<span class="ident">key1</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">KeyError::K1</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K0</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span>,
+    <span class="ident">K1</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">K0</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K1</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+{
+    <span class="doccomment">/// Gets a cursor for `key0`. If `None`, then `key0` is not in the map. If `Some`,</span>
+    <span class="doccomment">/// then `key0` is in the map, and `key1` can be queried.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use zerovec::maps::ZeroMap2dBorrowed;</span>
+    <span class="doccomment">/// use zerovec::ZeroMap2d;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let mut map = ZeroMap2d::new();</span>
+    <span class="doccomment">/// map.insert(&amp;1, &quot;one&quot;, &quot;foo&quot;);</span>
+    <span class="doccomment">/// map.insert(&amp;2, &quot;two&quot;, &quot;bar&quot;);</span>
+    <span class="doccomment">/// let borrowed = map.as_borrowed();</span>
+    <span class="doccomment">/// assert!(matches!(borrowed.get0(&amp;1), Some(_)));</span>
+    <span class="doccomment">/// assert!(matches!(borrowed.get0(&amp;3), None));</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get0</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ZeroMap2dCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">key0_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_binary_search</span>(<span class="ident">key0</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>(<span class="ident">ZeroMap2dCursor::from_borrowed</span>(<span class="self">self</span>, <span class="ident">key0_index</span>))
+    }
+
+    <span class="doccomment">/// Binary search the map for `key0`, returning a cursor.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use zerovec::maps::ZeroMap2dBorrowed;</span>
+    <span class="doccomment">/// use zerovec::ZeroMap2d;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let mut map = ZeroMap2d::new();</span>
+    <span class="doccomment">/// map.insert(&amp;1, &quot;one&quot;, &quot;foo&quot;);</span>
+    <span class="doccomment">/// map.insert(&amp;2, &quot;two&quot;, &quot;bar&quot;);</span>
+    <span class="doccomment">/// let borrowed = map.as_borrowed();</span>
+    <span class="doccomment">/// assert!(matches!(borrowed.get0_by(|probe| probe.cmp(&amp;1)), Some(_)));</span>
+    <span class="doccomment">/// assert!(matches!(borrowed.get0_by(|probe| probe.cmp(&amp;3)), None));</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get0_by</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>,
+        <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">K0</span>) -&gt; <span class="ident">Ordering</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ZeroMap2dCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">key0_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_binary_search_by</span>(<span class="ident">predicate</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>(<span class="ident">ZeroMap2dCursor::from_borrowed</span>(<span class="self">self</span>, <span class="ident">key0_index</span>))
     }
 
     <span class="doccomment">/// Returns whether `key0` is contained in this map</span>
@@ -574,74 +620,38 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains_key0</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_binary_search</span>(<span class="ident">key0</span>).<span class="ident">is_ok</span>()
     }
+}
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">K0</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">K1</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">K0</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K1</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+{
     <span class="doccomment">/// Produce an ordered iterator over keys0</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_keys0</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="op">&lt;</span><span class="ident">K0</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span><span class="op">&gt;</span> {
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>())
-    }
-
-    <span class="doccomment">/// Produce an ordered iterator over keys1 for a particular key0, if key0 exists</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_keys1</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>,
-        <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>,
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="op">&lt;</span><span class="ident">K1</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>)<span class="question-mark">?</span>;
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="prelude-val">Some</span>(<span class="ident">range</span>.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>()))
-    }
-
-    <span class="doccomment">/// Produce an iterator over values, ordered by the pair (key0,key1)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_values</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="op">&lt;</span><span class="ident">V</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span><span class="op">&gt;</span> {
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>())
-    }
-
-    <span class="comment">// INTERNAL ROUTINES FOLLOW //</span>
-
-    <span class="doccomment">/// Given a value that may exist in keys0, returns the corresponding range of keys1</span>
-    <span class="kw">fn</span> <span class="ident">get_range_for_key0</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">key0_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_binary_search</span>(<span class="ident">key0</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Some</span>((<span class="ident">key0_index</span>, <span class="self">self</span>.<span class="ident">get_range_for_key0_index</span>(<span class="ident">key0_index</span>)))
-    }
-
-    <span class="doccomment">/// Given an index into the joiner array, returns the corresponding range of keys1</span>
-    <span class="kw">fn</span> <span class="ident">get_range_for_key0_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0_index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="macro">debug_assert!</span>(<span class="ident">key0_index</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">len</span>());
-        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">key0_index</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="number">0</span>
-        } <span class="kw">else</span> {
-            <span class="comment">// The unwrap is protected by the debug_assert above</span>
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-            <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">get</span>(<span class="ident">key0_index</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">unwrap</span>()
-        };
-        <span class="comment">// The unwrap is protected by the debug_assert above</span>
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="kw">let</span> <span class="ident">limit</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">get</span>(<span class="ident">key0_index</span>).<span class="ident">unwrap</span>();
-        (<span class="ident">start</span> <span class="kw">as</span> <span class="ident">usize</span>)..(<span class="ident">limit</span> <span class="kw">as</span> <span class="ident">usize</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter0</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ZeroMap2dCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
+        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">ZeroMap2dCursor::from_borrowed</span>(<span class="self">self</span>, <span class="ident">idx</span>))
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K0</span>, <span class="ident">K1</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K0</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Ord</span>,
-    <span class="ident">K1</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Ord</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Container</span> <span class="op">=</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">K0</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span>,
+    <span class="ident">K1</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">GetType</span> <span class="op">=</span> <span class="ident">V::ULE</span><span class="op">&gt;</span>,
+    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span>,
+    <span class="ident">K0</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K1</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
     <span class="doccomment">/// For cases when `V` is fixed-size, obtain a direct copy of `V` instead of `V::ULE`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_range_for_key0</span>(<span class="ident">key0</span>)<span class="question-mark">?</span>;
-        <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span> <span class="ident">range</span>.<span class="ident">end</span>); <span class="comment">// &#39;&lt;&#39; because every key0 should have a key1</span>
-        <span class="macro">debug_assert!</span>(<span class="ident">range</span>.<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_len</span>());
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">start</span>
-            <span class="op">+</span> <span class="self">self</span>
-                .<span class="ident">keys1</span>
-                .<span class="ident">zvl_binary_search_in_range</span>(<span class="ident">key1</span>, <span class="ident">range</span>)
-                .<span class="ident">unwrap</span>()
-                .<span class="ident">ok</span>()<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="ident">index</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key0</span>: <span class="kw-2">&amp;</span><span class="ident">K0</span>, <span class="ident">key1</span>: <span class="kw-2">&amp;</span><span class="ident">K1</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">V</span>, <span class="ident">KeyError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">get0</span>(<span class="ident">key0</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">KeyError::K0</span>)<span class="question-mark">?</span>
+            .<span class="ident">get1_copied</span>(<span class="ident">key1</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">KeyError::K1</span>)
     }
 }
 

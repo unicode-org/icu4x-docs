@@ -895,6 +895,10 @@
 <span id="890">890</span>
 <span id="891">891</span>
 <span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -907,8 +911,8 @@
 <span class="doccomment">//! the comparison of collation element sequences.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::elements</span>::{
-    <span class="ident">CollationElement</span>, <span class="ident">CollationElements</span>, <span class="ident">NonPrimary</span>, <span class="ident">COMBINING_DIACRITICS_COUNT</span>, <span class="ident">JAMO_COUNT</span>, <span class="ident">NO_CE</span>,
-    <span class="ident">NO_CE_PRIMARY</span>, <span class="ident">NO_CE_SECONDARY</span>, <span class="ident">NO_CE_TERTIARY</span>, <span class="ident">QUATERNARY_MASK</span>,
+    <span class="ident">CollationElement</span>, <span class="ident">CollationElements</span>, <span class="ident">NonPrimary</span>, <span class="ident">JAMO_COUNT</span>, <span class="ident">NO_CE</span>, <span class="ident">NO_CE_PRIMARY</span>,
+    <span class="ident">NO_CE_SECONDARY</span>, <span class="ident">NO_CE_TERTIARY</span>, <span class="ident">OPTIMIZED_DIACRITICS_MAX_COUNT</span>, <span class="ident">QUATERNARY_MASK</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::CollatorError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CollationDataV1Marker</span>;
@@ -1076,9 +1080,10 @@
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
+        <span class="kw">let</span> <span class="ident">tailored_diacritics</span> <span class="op">=</span> <span class="ident">metadata</span>.<span class="ident">tailored_diacritics</span>();
         <span class="kw">let</span> <span class="ident">diacritics</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationDiacriticsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">options</span>: <span class="kw">if</span> <span class="ident">metadata</span>.<span class="ident">tailored_diacritics</span>() {
+                <span class="ident">options</span>: <span class="kw">if</span> <span class="ident">tailored_diacritics</span> {
                     <span class="ident">resource_options</span>
                 } <span class="kw">else</span> {
                     <span class="ident">ResourceOptions::default</span>()
@@ -1087,7 +1092,16 @@
             })<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">COMBINING_DIACRITICS_COUNT</span> {
+        <span class="kw">if</span> <span class="ident">tailored_diacritics</span> {
+            <span class="comment">// In the tailored case we accept a shorter table in which case the tailoring is</span>
+            <span class="comment">// responsible for supplying the missing values in the trie.</span>
+            <span class="comment">// As of June 2022, none of the collations actually use a shortened table.</span>
+            <span class="comment">// Vietnamese and Ewe load a full-length alternative table and the rest use</span>
+            <span class="comment">// the default one.</span>
+            <span class="kw">if</span> <span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">secondaries</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">OPTIMIZED_DIACRITICS_MAX_COUNT</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CollatorError::MalformedData</span>);
+            }
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">secondaries</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">OPTIMIZED_DIACRITICS_MAX_COUNT</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CollatorError::MalformedData</span>);
         }
 
@@ -1323,10 +1337,7 @@
             <span class="ident">tailoring</span>.<span class="ident">get</span>(),
             <span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>; <span class="ident">JAMO_COUNT</span>]<span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="self">self</span>.<span class="ident">jamo</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">as_ule_slice</span>())
                 .<span class="ident">unwrap</span>(), <span class="comment">// length already validated</span>
-            <span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>; <span class="ident">COMBINING_DIACRITICS_COUNT</span>]<span class="op">&gt;</span><span class="ident">::try_from</span>(
-                <span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">as_ule_slice</span>(),
-            )
-            .<span class="ident">unwrap</span>(), <span class="comment">// length already validated</span>
+            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">secondaries</span>,
             <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
             <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>,
@@ -1339,10 +1350,7 @@
             <span class="ident">tailoring</span>.<span class="ident">get</span>(),
             <span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>; <span class="ident">JAMO_COUNT</span>]<span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="self">self</span>.<span class="ident">jamo</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">as_ule_slice</span>())
                 .<span class="ident">unwrap</span>(), <span class="comment">// length already validated</span>
-            <span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>; <span class="ident">COMBINING_DIACRITICS_COUNT</span>]<span class="op">&gt;</span><span class="ident">::try_from</span>(
-                <span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">as_ule_slice</span>(),
-            )
-            .<span class="ident">unwrap</span>(), <span class="comment">// length already validated</span>
+            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">secondaries</span>,
             <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
             <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>,

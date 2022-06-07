@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["posix","Parser definition for POSIX time-zone strings as specified by https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html"],["tzif","Parser definition for `TZif` binary files as specified by https://datatracker.ietf.org/doc/html/rfc8536"]]});

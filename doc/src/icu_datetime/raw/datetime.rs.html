@@ -180,6 +180,31 @@
 <span id="175">175</span>
 <span id="176">176</span>
 <span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -196,6 +221,12 @@
     <span class="ident">provider::week_data::WeekDataV1Marker</span>,
 };
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
+
+<span class="kw">use</span> <span class="ident">icu_decimal</span>::{
+    <span class="ident">options</span>::{<span class="ident">FixedDecimalFormatOptions</span>, <span class="ident">GroupingStrategy</span>, <span class="ident">SignDisplay</span>},
+    <span class="ident">provider::DecimalSymbolsV1Marker</span>,
+    <span class="ident">FixedDecimalFormat</span>,
+};
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals</span>::{<span class="ident">provider::OrdinalV1Marker</span>, <span class="ident">PluralRules</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
@@ -213,6 +244,7 @@
     <span class="kw">pub</span> <span class="ident">symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PluralRules</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">fixed_decimal_format</span>: <span class="ident">FixedDecimalFormat</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">DateTimeFormat</span> {
@@ -230,6 +262,7 @@
         <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
@@ -253,12 +286,13 @@
             <span class="prelude-val">None</span>
         };
 
+        <span class="comment">// TODO(#1109): Implement proper vertical fallback</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale_no_extensions</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
+        <span class="ident">locale_no_extensions</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">clear</span>();
+
         <span class="kw">let</span> <span class="ident">ordinal_rules</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PatternPlurals::MultipleVariants</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">patterns</span>.<span class="ident">get</span>().<span class="number">0</span> {
-            <span class="comment">// TODO(#1109): Implement proper vertical fallback</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale_no_extensions</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
-            <span class="ident">locale_no_extensions</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">clear</span>();
             <span class="prelude-val">Some</span>(<span class="ident">PluralRules::try_new_ordinal</span>(
-                <span class="ident">locale_no_extensions</span>,
+                <span class="ident">locale_no_extensions</span>.<span class="ident">clone</span>(),
                 <span class="ident">data_provider</span>,
             )<span class="question-mark">?</span>)
         } <span class="kw">else</span> {
@@ -278,12 +312,24 @@
             <span class="prelude-val">None</span>
         };
 
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fixed_decimal_format_options</span> <span class="op">=</span> <span class="ident">FixedDecimalFormatOptions::default</span>();
+        <span class="ident">fixed_decimal_format_options</span>.<span class="ident">grouping_strategy</span> <span class="op">=</span> <span class="ident">GroupingStrategy::Never</span>;
+        <span class="ident">fixed_decimal_format_options</span>.<span class="ident">sign_display</span> <span class="op">=</span> <span class="ident">SignDisplay::Never</span>;
+
+        <span class="kw">let</span> <span class="ident">fixed_decimal_format</span> <span class="op">=</span> <span class="ident">FixedDecimalFormat::try_new</span>(
+            <span class="ident">locale_no_extensions</span>,
+            <span class="ident">data_provider</span>,
+            <span class="ident">fixed_decimal_format_options</span>,
+        )
+        .<span class="ident">map_err</span>(<span class="ident">DateTimeFormatError::FixedDecimalFormat</span>)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::new</span>(
             <span class="ident">locale</span>,
             <span class="ident">patterns</span>,
             <span class="ident">symbols_data</span>,
             <span class="ident">week_data</span>,
             <span class="ident">ordinal_rules</span>,
+            <span class="ident">fixed_decimal_format</span>,
         ))
     }
 
@@ -294,6 +340,7 @@
         <span class="ident">symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PluralRules</span><span class="op">&gt;</span>,
+        <span class="ident">fixed_decimal_format</span>: <span class="ident">FixedDecimalFormat</span>,
     ) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">locale</span>,
@@ -301,6 +348,7 @@
             <span class="ident">symbols</span>,
             <span class="ident">week_data</span>,
             <span class="ident">ordinal_rules</span>,
+            <span class="ident">fixed_decimal_format</span>,
         }
     }
 
@@ -318,6 +366,7 @@
             <span class="ident">week_data</span>: <span class="self">self</span>.<span class="ident">week_data</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">locale</span>,
             <span class="ident">ordinal_rules</span>: <span class="self">self</span>.<span class="ident">ordinal_rules</span>.<span class="ident">as_ref</span>(),
+            <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">fixed_decimal_format</span>,
         }
     }
 
@@ -335,6 +384,7 @@
             <span class="ident">value</span>,
             <span class="self">self</span>.<span class="ident">week_data</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="self">self</span>.<span class="ident">ordinal_rules</span>.<span class="ident">as_ref</span>(),
+            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">fixed_decimal_format</span>,
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">locale</span>,
             <span class="ident">w</span>,
         )

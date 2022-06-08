@@ -532,8 +532,8 @@
     <span class="ident">fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>},
     <span class="ident">options</span>::{<span class="ident">components</span>, <span class="ident">length</span>},
     <span class="ident">pattern</span>::{
-        <span class="ident">hour_cycle</span>, <span class="ident">runtime</span>,
-        <span class="ident">runtime</span>::{<span class="ident">Pattern</span>, <span class="ident">PatternPlurals</span>},
+        <span class="ident">hour_cycle</span>,
+        <span class="ident">runtime</span>::{<span class="self">self</span>, <span class="ident">PatternPlurals</span>},
         <span class="ident">PatternItem</span>, <span class="ident">TimeGranularity</span>,
     },
     <span class="ident">provider::calendar</span>::{<span class="ident">patterns::GenericLengthPatternsV1</span>, <span class="ident">DateSkeletonPatternsV1</span>},
@@ -612,7 +612,7 @@
 <span class="doccomment">/// This function swaps out the the time zone name field for the appropriate one. Skeleton matching</span>
 <span class="doccomment">/// only needs to find a single &quot;v&quot; field, and then the time zone name can expand from there.</span>
 <span class="kw">fn</span> <span class="ident">naively_apply_time_zone_name</span>(
-    <span class="ident">pattern</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Pattern</span>,
+    <span class="ident">pattern</span>: <span class="kw-2">&amp;mut</span> <span class="ident">runtime::Pattern</span>,
     <span class="ident">time_zone_name</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">components::TimeZoneName</span><span class="op">&gt;</span>,
 ) {
     <span class="comment">// If there is a preference overiding the hour cycle, apply it now.</span>
@@ -701,7 +701,7 @@
             <span class="ident">BestSkeleton::AllFieldsMatch</span>(<span class="ident">fields</span>) =&gt; (<span class="prelude-val">Some</span>(<span class="ident">fields</span>), <span class="bool-val">false</span>),
             <span class="ident">BestSkeleton::NoMatch</span> =&gt; (<span class="prelude-val">None</span>, <span class="bool-val">true</span>),
         };
-    <span class="kw">let</span> <span class="ident">time_pattern</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pattern</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">time_patterns</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">pattern_plurals</span><span class="op">|</span> {
+    <span class="kw">let</span> <span class="ident">time_pattern</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">runtime::Pattern</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">time_patterns</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">pattern_plurals</span><span class="op">|</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pattern</span> <span class="op">=</span>
             <span class="ident">pattern_plurals</span>.<span class="ident">expect_pattern</span>(<span class="string">&quot;Only date patterns can contain plural variants&quot;</span>);
         <span class="ident">hour_cycle::naively_apply_preferences</span>(<span class="kw-2">&amp;mut</span> <span class="ident">pattern</span>, <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">preferences</span>);
@@ -823,7 +823,7 @@
 <span class="doccomment">/// Alters given Pattern so that its fields have the same length as &#39;fields&#39;.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///  For example the &quot;d MMM y&quot; pattern will be changed to &quot;d MMMM y&quot; given fields [&quot;y&quot;, &quot;MMMM&quot;, &quot;d&quot;].</span>
-<span class="kw">fn</span> <span class="ident">adjust_pattern_field_lengths</span>(<span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Field</span>], <span class="ident">pattern</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Pattern</span>) {
+<span class="kw">fn</span> <span class="ident">adjust_pattern_field_lengths</span>(<span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Field</span>], <span class="ident">pattern</span>: <span class="kw-2">&amp;mut</span> <span class="ident">runtime::Pattern</span>) {
     <span class="ident">runtime::helpers::maybe_replace</span>(<span class="ident">pattern</span>, <span class="op">|</span><span class="ident">item</span><span class="op">|</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PatternItem::Field</span>(<span class="ident">pattern_field</span>) <span class="op">=</span> <span class="ident">item</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">requested_field</span>) <span class="op">=</span> <span class="ident">fields</span>
@@ -848,7 +848,7 @@
 <span class="doccomment">/// pattern should be adjusted by appending the locale’s decimal separator, followed by the sequence</span>
 <span class="doccomment">/// of ‘S’ characters from the requested skeleton.</span>
 <span class="doccomment">/// (see https://unicode.org/reports/tr35/tr35-dates.html#Matching_Skeletons)</span>
-<span class="kw">fn</span> <span class="ident">append_fractional_seconds</span>(<span class="ident">pattern</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Pattern</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Field</span>]) {
+<span class="kw">fn</span> <span class="ident">append_fractional_seconds</span>(<span class="ident">pattern</span>: <span class="kw-2">&amp;mut</span> <span class="ident">runtime::Pattern</span>, <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[<span class="ident">Field</span>]) {
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">requested_field</span>) <span class="op">=</span> <span class="ident">fields</span>
         .<span class="ident">iter</span>()
         .<span class="ident">find</span>(<span class="op">|</span><span class="ident">field</span><span class="op">|</span> <span class="ident">field</span>.<span class="ident">symbol</span> <span class="op">==</span> <span class="ident">FieldSymbol::Second</span>(<span class="ident">fields::Second::FractionalSecond</span>))
@@ -866,7 +866,7 @@
                 }
             }
         }
-        <span class="kw-2">*</span><span class="ident">pattern</span> <span class="op">=</span> <span class="ident">Pattern::from</span>(<span class="ident">items</span>);
+        <span class="kw-2">*</span><span class="ident">pattern</span> <span class="op">=</span> <span class="ident">runtime::Pattern::from</span>(<span class="ident">items</span>);
         <span class="ident">pattern</span>.<span class="ident">time_granularity</span> <span class="op">=</span> <span class="ident">TimeGranularity::Nanoseconds</span>;
     }
 }
@@ -1002,7 +1002,7 @@
             <span class="comment">// A single field was requested and the best pattern either includes extra fields or can&#39;t be adjusted to match</span>
             <span class="comment">// (e.g. text vs numeric). We return the field instead of the matched pattern.</span>
             <span class="kw">return</span> <span class="ident">BestSkeleton::AllFieldsMatch</span>(
-                <span class="ident">Pattern::from</span>(<span class="macro">vec!</span>[<span class="ident">PatternItem::Field</span>(<span class="kw-2">*</span><span class="ident">field</span>)]).<span class="ident">into</span>(),
+                <span class="ident">runtime::Pattern::from</span>(<span class="macro">vec!</span>[<span class="ident">PatternItem::Field</span>(<span class="kw-2">*</span><span class="ident">field</span>)]).<span class="ident">into</span>(),
             );
         }
     }

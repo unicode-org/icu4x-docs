@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654705784573,
+  "lastUpdate": 1654712845879,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -37991,6 +37991,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 5067,
             "range": "± 9",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "69813317b6ca06545181880e45861fcdcd549678",
+          "message": "ZeroVecLike cleanup (#2024)\n\n* rm BorrowedZeroVecLike\r\n* BorrowedVariant -> SliceVariant\r\n* Add Slice to ZeroMapKV",
+          "timestamp": "2022-06-08T11:07:30-07:00",
+          "tree_id": "d6a6b8e93c014e052ac24ea0c65f8d31f0d3a084",
+          "url": "https://github.com/unicode-org/icu4x/commit/69813317b6ca06545181880e45861fcdcd549678"
+        },
+        "date": 1654712478072,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 113576,
+            "range": "± 2604",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1123628,
+            "range": "± 4296",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 231763,
+            "range": "± 11178",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 107178,
+            "range": "± 410",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 118832,
+            "range": "± 1013",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 110567,
+            "range": "± 945",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 119798,
+            "range": "± 392",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 221224,
+            "range": "± 1309",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 247220,
+            "range": "± 12207",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 234613,
+            "range": "± 13706",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 238868,
+            "range": "± 1725",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6056,
+            "range": "± 41",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "58569820+nordzilla@users.noreply.github.com",
+            "name": "Erik Nordin",
+            "username": "nordzilla"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a8c8d2c564df24d29d01985428ec2c95e6adfbb4",
+          "message": "Move tzif crate from experimental to utils for publishing (#2019)\n\n* Replace empty `.then()` with `.with()`\r\n\r\n* Update error messages\r\n\r\n* Move `tzif` from `experimental` to `utils`\r\n\r\n* Add integration test for POSIX string\r\n\r\n* Update doc comments\r\n\r\n* Add crate keywords\r\n\r\n* Update Cargo.toml",
+          "timestamp": "2022-06-08T11:12:05-07:00",
+          "tree_id": "27a3e2cc47a900a3ab88feb80a0898b9b30db294",
+          "url": "https://github.com/unicode-org/icu4x/commit/a8c8d2c564df24d29d01985428ec2c95e6adfbb4"
+        },
+        "date": 1654712816889,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 128093,
+            "range": "± 10158",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1214738,
+            "range": "± 85537",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 242982,
+            "range": "± 27121",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 142839,
+            "range": "± 13216",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 134907,
+            "range": "± 9184",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 131393,
+            "range": "± 7182",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 143301,
+            "range": "± 9081",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 234368,
+            "range": "± 20967",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 262553,
+            "range": "± 158186",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 242305,
+            "range": "± 16760",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 262860,
+            "range": "± 31398",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5990,
+            "range": "± 320",
             "unit": "ns/iter"
           }
         ]

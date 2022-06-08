@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654705692282,
+  "lastUpdate": 1654712665701,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -30833,6 +30833,114 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 43999495,
             "range": "± 2649415",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "69813317b6ca06545181880e45861fcdcd549678",
+          "message": "ZeroVecLike cleanup (#2024)\n\n* rm BorrowedZeroVecLike\r\n* BorrowedVariant -> SliceVariant\r\n* Add Slice to ZeroMapKV",
+          "timestamp": "2022-06-08T11:07:30-07:00",
+          "tree_id": "d6a6b8e93c014e052ac24ea0c65f8d31f0d3a084",
+          "url": "https://github.com/unicode-org/icu4x/commit/69813317b6ca06545181880e45861fcdcd549678"
+        },
+        "date": 1654712350226,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 37250665,
+            "range": "± 1499283",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "58569820+nordzilla@users.noreply.github.com",
+            "name": "Erik Nordin",
+            "username": "nordzilla"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a8c8d2c564df24d29d01985428ec2c95e6adfbb4",
+          "message": "Move tzif crate from experimental to utils for publishing (#2019)\n\n* Replace empty `.then()` with `.with()`\r\n\r\n* Update error messages\r\n\r\n* Move `tzif` from `experimental` to `utils`\r\n\r\n* Add integration test for POSIX string\r\n\r\n* Update doc comments\r\n\r\n* Add crate keywords\r\n\r\n* Update Cargo.toml",
+          "timestamp": "2022-06-08T11:12:05-07:00",
+          "tree_id": "27a3e2cc47a900a3ab88feb80a0898b9b30db294",
+          "url": "https://github.com/unicode-org/icu4x/commit/a8c8d2c564df24d29d01985428ec2c95e6adfbb4"
+        },
+        "date": 1654712637159,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 48029518,
+            "range": "± 1640905",
             "unit": "ns/iter"
           },
           {

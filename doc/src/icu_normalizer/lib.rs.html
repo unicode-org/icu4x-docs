@@ -903,6 +903,34 @@
 <span id="898">898</span>
 <span id="899">899</span>
 <span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -948,58 +976,6 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Hopefully Unicode never adds more decomposing non-starters, but if it does, a code update</span>
 <span class="doccomment">//! is needed instead of a mere data update.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Data size considerations</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The normalizer supports three flavors: NFD, NFKD, and the decomposed counterpart of</span>
-<span class="doccomment">//! NFKC_CaseFold without ignoring default ignorables. Logically NFKD adds data on top of NFD</span>
-<span class="doccomment">//! and case fold adds data on top of NFKD (some of the details may be a bit more complicated).</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Currently, the complex decomposition expansion data is consolidated such that there is one</span>
-<span class="doccomment">//! data struct that contains the expansions needed by NFD and there&#39;s another data instance</span>
-<span class="doccomment">//! that contains the expansions for both NFKD and fusion of case fold and NFKD.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! However, similar consolidation hasn&#39;t been applied to the trie or to the set of characters</span>
-<span class="doccomment">//! whose decompositions starts with a non-starter. These are tradeoffs between data size and</span>
-<span class="doccomment">//! run-time branchiness. It is unclear if the present situation is the right call.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! As of Unicode 14, the set of characters whose decompositions starts with a non-starter</span>
-<span class="doccomment">//! is almost the same all three cases. NFKD adds two characters to the set compared to NFD:</span>
-<span class="doccomment">//! the half-width kana voicing marks. The case fold variant then removes one character</span>
-<span class="doccomment">//! compared to regular NFKD: U+0345 COMBINING GREEK YPOGEGRAMMENI.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! There are three alternatives to the current solution of having three pre-computed sets.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! First, we could add explicit checks for the chosen normalization form and these three</span>
-<span class="doccomment">//! characters to the set lookup, which would add branches to each set lookup and would</span>
-<span class="doccomment">//! hard-code the assumption that only these three characters may differ between the</span>
-<span class="doccomment">//! normalization forms. Intuitively, it seems like a reasonable guess that these three</span>
-<span class="doccomment">//! characters are all quite unusual and it&#39;s unlikely that Unicode would add more</span>
-<span class="doccomment">//! characters that would make the sets differ in the future.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Second, we could store two small sets: additions and removals relative to the base set.</span>
-<span class="doccomment">//! However, using these would involve a heap allocation for the computed actual set.</span>
-<span class="doccomment">//! In a multi-process architecture when using crabbake, having each process carry its</span>
-<span class="doccomment">//! own heap allocation for the lifetime of the process would be worse than making the</span>
-<span class="doccomment">//! static data larger.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The third option would be to make the run-time lookup from three sets: the base,</span>
-<span class="doccomment">//! additions, and removals. Since the additions and removals would be empty sets for NFD,</span>
-<span class="doccomment">//! chances are that this would be less branchy in the NFD case than the first option,</span>
-<span class="doccomment">//! especially if we made `UnicodeSet` be able to be shallow-copied in a way that borrows</span>
-<span class="doccomment">//! its `ZeroVec` instead of making an owning copy of of the wrapped `ZeroVec`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! As for the trie, the alternative would be to have two levels of tries: supplementary</span>
-<span class="doccomment">//! and base where base would be the NFD trie and the default (zero) value from the</span>
-<span class="doccomment">//! supplementary trie would mean falling back to the base trie.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Compared to the current expansion supplement arrangement, this would differ in terms</span>
-<span class="doccomment">//! of run-time cost. In the NFD case, the expansion supplement adds one branch for the</span>
-<span class="doccomment">//! case where a character has a non-self supplementary-plane decomposition, which is</span>
-<span class="doccomment">//! rare. In contrast, having the ability to make a lookup for supplementary trie would</span>
-<span class="doccomment">//! mean having to branch on the presence of the supplementary trie for each starter.</span>
-<span class="doccomment">//! For the normalization forms that would use the supplementary trie, each starter</span>
-<span class="doccomment">//! would go through two full trie lookups instead of one.</span>
 
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>;
 
@@ -1009,10 +985,10 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::NormalizerError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CanonicalDecompositionDataV1Marker</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CompatibilityDecompositionDataV1Marker</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CompatibilityDecompositionSupplementV1Marker</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::DecompositionDataV1</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::Uts46DecompositionDataV1Marker</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::Uts46DecompositionSupplementV1Marker</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::char</span>::{<span class="ident">decode_utf16</span>, <span class="ident">DecodeUtf16Error</span>, <span class="ident">REPLACEMENT_CHARACTER</span>};
@@ -1025,6 +1001,7 @@
 <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
 <span class="kw">use</span> <span class="ident">provider::CanonicalDecompositionTablesV1Marker</span>;
 <span class="kw">use</span> <span class="ident">provider::CompatibilityDecompositionTablesV1Marker</span>;
+<span class="kw">use</span> <span class="ident">provider::DecompositionSupplementV1</span>;
 <span class="kw">use</span> <span class="ident">provider::DecompositionTablesV1</span>;
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
 <span class="kw">use</span> <span class="ident">u24::EMPTY_U24</span>;
@@ -1034,20 +1011,18 @@
 <span class="kw">use</span> <span class="ident">zerovec::ule::AsULE</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ZeroSlice</span>;
 
-<span class="kw">enum</span> <span class="ident">PayloadHolder</span> {
-    <span class="ident">Canonical</span>(<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span>),
-    <span class="ident">Compatibility</span>(<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionDataV1Marker</span><span class="op">&gt;</span>),
+<span class="kw">enum</span> <span class="ident">SupplementPayloadHolder</span> {
+    <span class="ident">Compatibility</span>(<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionSupplementV1Marker</span><span class="op">&gt;</span>),
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="ident">Uts46</span>(<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">Uts46DecompositionDataV1Marker</span><span class="op">&gt;</span>),
+    <span class="ident">Uts46</span>(<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">Uts46DecompositionSupplementV1Marker</span><span class="op">&gt;</span>),
 }
 
-<span class="kw">impl</span> <span class="ident">PayloadHolder</span> {
-    <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">DecompositionDataV1</span> {
+<span class="kw">impl</span> <span class="ident">SupplementPayloadHolder</span> {
+    <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">DecompositionSupplementV1</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">PayloadHolder::Canonical</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">get</span>(),
-            <span class="ident">PayloadHolder::Compatibility</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">get</span>(),
+            <span class="ident">SupplementPayloadHolder::Compatibility</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">get</span>(),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-            <span class="ident">PayloadHolder::Uts46</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">get</span>(),
+            <span class="ident">SupplementPayloadHolder::Uts46</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">get</span>(),
         }
     }
 }
@@ -1210,8 +1185,7 @@
 }
 
 <span class="doccomment">/// An iterator adaptor that turns an `Iterator` over `char` into</span>
-<span class="doccomment">/// a lazily-decomposed (currently only NFD though NFKD should also</span>
-<span class="doccomment">/// be possible) `char` sequence.</span>
+<span class="doccomment">/// a lazily-decomposed `char` sequence.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Decomposition</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">I</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">char</span><span class="op">&gt;</span>,
@@ -1224,12 +1198,16 @@
     <span class="ident">buffer_pos</span>: <span class="ident">usize</span>,
     <span class="ident">pending_unnormalized_starter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>, <span class="comment">// None at end of stream</span>
     <span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">supplementary_trie</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">decomposition_starts_with_non_starter</span>: <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
     <span class="ident">scalars16</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="ident">scalars24</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">U24</span><span class="op">&gt;</span>,
     <span class="ident">supplementary_scalars16</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="ident">supplementary_scalars24</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">U24</span><span class="op">&gt;</span>,
     <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
+    <span class="ident">half_width_voicing_marks_become_non_starters</span>: <span class="ident">bool</span>,
+    <span class="ident">iota_subscript_becomes_starter</span>: <span class="ident">bool</span>,
+    <span class="ident">has_starter_exceptions</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="ident">Decomposition</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">I</span><span class="op">&gt;</span>
@@ -1237,7 +1215,8 @@
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">char</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Constructs a decomposing iterator adapter from a delegate</span>
-    <span class="doccomment">/// iterator and references to the necessary data.</span>
+    <span class="doccomment">/// iterator and references to the necessary data, without</span>
+    <span class="doccomment">/// supplementary data.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Use `DecomposingNormalizer::normalize_iter()` instead unless</span>
     <span class="doccomment">/// there&#39;s a good reason to use this constructor directly.</span>
@@ -1245,9 +1224,34 @@
         <span class="ident">delegate</span>: <span class="ident">I</span>,
         <span class="ident">decompositions</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionDataV1</span>,
         <span class="ident">tables</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionTablesV1</span>,
+        <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new_with_supplements</span>(<span class="ident">delegate</span>, <span class="ident">decompositions</span>, <span class="prelude-val">None</span>, <span class="ident">tables</span>, <span class="prelude-val">None</span>, <span class="ident">ccc</span>)
+    }
+
+    <span class="doccomment">/// Constructs a decomposing iterator adapter from a delegate</span>
+    <span class="doccomment">/// iterator and references to the necessary data, including</span>
+    <span class="doccomment">/// supplementary data.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Use `DecomposingNormalizer::normalize_iter()` instead unless</span>
+    <span class="doccomment">/// there&#39;s a good reason to use this constructor directly.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_supplements</span>(
+        <span class="ident">delegate</span>: <span class="ident">I</span>,
+        <span class="ident">decompositions</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionDataV1</span>,
+        <span class="ident">supplementary_decompositions</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionSupplementV1</span><span class="op">&gt;</span>,
+        <span class="ident">tables</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionTablesV1</span>,
         <span class="ident">supplementary_tables</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionTablesV1</span><span class="op">&gt;</span>,
         <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
     ) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> (<span class="ident">half_width_voicing_marks_become_non_starters</span>, <span class="ident">iota_subscript_becomes_starter</span>) <span class="op">=</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">supplementary</span>) <span class="op">=</span> <span class="ident">supplementary_decompositions</span> {
+                (
+                    <span class="ident">supplementary</span>.<span class="ident">half_width_voicing_marks_become_non_starters</span>(),
+                    <span class="ident">supplementary</span>.<span class="ident">iota_subscript_becomes_starter</span>(),
+                )
+            } <span class="kw">else</span> {
+                (<span class="bool-val">false</span>, <span class="bool-val">false</span>)
+            };
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Decomposition</span>::<span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> {
             <span class="ident">delegate</span>,
             <span class="ident">buffer</span>: <span class="ident">SmallVec::new</span>(), <span class="comment">// Normalized</span>
@@ -1256,6 +1260,7 @@
             <span class="comment">// the real stream starts with a non-starter.</span>
             <span class="ident">pending_unnormalized_starter</span>: <span class="prelude-val">Some</span>(<span class="string">&#39;\u{FFFF}&#39;</span>),
             <span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="ident">decompositions</span>.<span class="ident">trie</span>,
+            <span class="ident">supplementary_trie</span>: <span class="ident">supplementary_decompositions</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">trie</span>),
             <span class="ident">decomposition_starts_with_non_starter</span>: <span class="ident">UnicodeSet::zero_from</span>(
                 <span class="kw-2">&amp;</span><span class="ident">decompositions</span>.<span class="ident">decomposition_starts_with_non_starter</span>,
             ),
@@ -1272,9 +1277,26 @@
                 <span class="ident">EMPTY_U24</span>
             },
             <span class="ident">ccc</span>,
+            <span class="ident">half_width_voicing_marks_become_non_starters</span>,
+            <span class="ident">iota_subscript_becomes_starter</span>,
+            <span class="ident">has_starter_exceptions</span>: <span class="ident">half_width_voicing_marks_become_non_starters</span>
+                <span class="op">|</span><span class="op">|</span> <span class="ident">iota_subscript_becomes_starter</span>,
         };
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">ret</span>.<span class="ident">next</span>(); <span class="comment">// Remove the U+FFFF placeholder</span>
         <span class="ident">ret</span>
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">decomposition_starts_with_non_starter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">bool</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">has_starter_exceptions</span> {
+            <span class="kw">if</span> <span class="ident">u32::from</span>(<span class="ident">c</span>) <span class="op">&amp;</span> <span class="op">!</span><span class="number">1</span> <span class="op">==</span> <span class="number">0xFF9E</span> {
+                <span class="kw">return</span> <span class="self">self</span>.<span class="ident">half_width_voicing_marks_become_non_starters</span>;
+            }
+            <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="string">&#39;\u{0345}&#39;</span> {
+                <span class="kw">return</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">iota_subscript_becomes_starter</span>;
+            }
+        }
+        <span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>.<span class="ident">contains</span>(<span class="ident">c</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">push_decomposition16</span>(
@@ -1298,7 +1320,7 @@
                 <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>);
                 <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">ch</span>));
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>.<span class="ident">contains</span>(<span class="ident">ch</span>) {
+                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>(<span class="ident">ch</span>) {
                     <span class="ident">combining_start</span> <span class="op">=</span> <span class="ident">i</span>;
                 }
             }
@@ -1327,7 +1349,7 @@
                 <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u24</span>(<span class="ident">u</span>);
                 <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">ch</span>));
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>.<span class="ident">contains</span>(<span class="ident">ch</span>) {
+                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>(<span class="ident">ch</span>) {
                     <span class="ident">combining_start</span> <span class="op">=</span> <span class="ident">i</span>;
                 }
             }
@@ -1357,7 +1379,19 @@
         <span class="kw">let</span> (<span class="ident">starter</span>, <span class="ident">combining_start</span>) <span class="op">=</span> {
             <span class="kw">let</span> <span class="ident">hangul_offset</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_S_BASE</span>); <span class="comment">// SIndex in the spec</span>
             <span class="kw">if</span> <span class="ident">hangul_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">HANGUL_S_COUNT</span> {
-                <span class="kw">let</span> <span class="ident">decomposition</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">c</span>));
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">decomposition</span>;
+                <span class="comment">// The loop is only broken out of as goto forward</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::never_loop</span>)]</span>
+                <span class="kw">loop</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">supplementary</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">supplementary_trie</span> {
+                        <span class="ident">decomposition</span> <span class="op">=</span> <span class="ident">supplementary</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">c</span>));
+                        <span class="kw">if</span> <span class="ident">decomposition</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                            <span class="kw">break</span>;
+                        }
+                    }
+                    <span class="ident">decomposition</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">c</span>));
+                    <span class="kw">break</span>;
+                }
                 <span class="kw">if</span> <span class="ident">decomposition</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="comment">// The character is its own decomposition</span>
                     (<span class="ident">c</span>, <span class="number">0</span>)
@@ -1459,8 +1493,10 @@
             }
         };
         <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="ident">pending_unnormalized_starter</span>, <span class="prelude-val">None</span>);
-        <span class="kw">for</span> <span class="ident">ch</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">delegate</span>.<span class="ident">by_ref</span>() {
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>.<span class="ident">contains</span>(<span class="ident">ch</span>) {
+        <span class="comment">// Not a `for` loop to avoid holding a mutable reference to `self` across</span>
+        <span class="comment">// the loop body.</span>
+        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">delegate</span>.<span class="ident">next</span>() {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">decomposition_starts_with_non_starter</span>(<span class="ident">ch</span>) {
                 <span class="kw">if</span> <span class="op">!</span>(<span class="ident">in_inclusive_range</span>(<span class="ident">ch</span>, <span class="string">&#39;\u{0340}&#39;</span>, <span class="string">&#39;\u{0F81}&#39;</span>)
                     <span class="op">|</span><span class="op">|</span> (<span class="ident">u32::from</span>(<span class="ident">ch</span>) <span class="op">&amp;</span> <span class="op">!</span><span class="number">1</span> <span class="op">==</span> <span class="number">0xFF9E</span>))
                 {
@@ -1537,7 +1573,8 @@
 
 <span class="doccomment">/// A normalizer for performing decomposing normalization.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DecomposingNormalizer</span> {
-    <span class="ident">decompositions</span>: <span class="ident">PayloadHolder</span>,
+    <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span>,
+    <span class="ident">supplementary_decompositions</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SupplementPayloadHolder</span><span class="op">&gt;</span>,
     <span class="ident">tables</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span>,
     <span class="ident">supplementary_tables</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionTablesV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">ccc</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClassV1Marker</span><span class="op">&gt;</span>,
@@ -1573,7 +1610,8 @@
             <span class="ident">icu_properties::maps::get_canonical_combining_class</span>(<span class="ident">data_provider</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">DecomposingNormalizer</span> {
-            <span class="ident">decompositions</span>: <span class="ident">PayloadHolder::Canonical</span>(<span class="ident">decompositions</span>),
+            <span class="ident">decompositions</span>,
+            <span class="ident">supplementary_decompositions</span>: <span class="prelude-val">None</span>,
             <span class="ident">tables</span>,
             <span class="ident">supplementary_tables</span>: <span class="prelude-val">None</span>,
             <span class="ident">ccc</span>,
@@ -1583,13 +1621,19 @@
     <span class="doccomment">/// NFKD constructor.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_nfkd</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">NormalizerError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionDataV1Marker</span><span class="op">&gt;</span>
+        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionSupplementV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionTablesV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">icu_properties::provider::CanonicalCombiningClassV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
+        <span class="kw">let</span> <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
+            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">supplementary_decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span>
+            <span class="ident">CompatibilityDecompositionSupplementV1Marker</span>,
+        <span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">tables</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
@@ -1619,7 +1663,10 @@
             <span class="ident">icu_properties::maps::get_canonical_combining_class</span>(<span class="ident">data_provider</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">DecomposingNormalizer</span> {
-            <span class="ident">decompositions</span>: <span class="ident">PayloadHolder::Compatibility</span>(<span class="ident">decompositions</span>),
+            <span class="ident">decompositions</span>,
+            <span class="ident">supplementary_decompositions</span>: <span class="prelude-val">Some</span>(<span class="ident">SupplementPayloadHolder::Compatibility</span>(
+                <span class="ident">supplementary_decompositions</span>,
+            )),
             <span class="ident">tables</span>,
             <span class="ident">supplementary_tables</span>: <span class="prelude-val">Some</span>(<span class="ident">supplementary_tables</span>),
             <span class="ident">ccc</span>,
@@ -1651,16 +1698,21 @@
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">NormalizerError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">Uts46DecompositionDataV1Marker</span><span class="op">&gt;</span>
+        <span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">Uts46DecompositionSupplementV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">CompatibilityDecompositionTablesV1Marker</span><span class="op">&gt;</span>
             <span class="comment">// UTS 46 tables merged into CompatibilityDecompositionTablesV1Marker</span>
             <span class="op">+</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">icu_properties::provider::CanonicalCombiningClassV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">Uts46DecompositionDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
+        <span class="kw">let</span> <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">supplementary_decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">Uts46DecompositionSupplementV1Marker</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">data_provider</span>
+                .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
+                .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">tables</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
@@ -1688,7 +1740,10 @@
             <span class="ident">icu_properties::maps::get_canonical_combining_class</span>(<span class="ident">data_provider</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">DecomposingNormalizer</span> {
-            <span class="ident">decompositions</span>: <span class="ident">PayloadHolder::Uts46</span>(<span class="ident">decompositions</span>),
+            <span class="ident">decompositions</span>,
+            <span class="ident">supplementary_decompositions</span>: <span class="prelude-val">Some</span>(<span class="ident">SupplementPayloadHolder::Uts46</span>(
+                <span class="ident">supplementary_decompositions</span>,
+            )),
             <span class="ident">tables</span>,
             <span class="ident">supplementary_tables</span>: <span class="prelude-val">Some</span>(<span class="ident">supplementary_tables</span>),
             <span class="ident">ccc</span>,
@@ -1698,9 +1753,10 @@
     <span class="doccomment">/// Wraps a delegate iterator into a decomposing iterator</span>
     <span class="doccomment">/// adapter by using the data already held by this normalizer.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normalize_iter</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">char</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="ident">Decomposition</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> {
-        <span class="ident">Decomposition::new</span>(
+        <span class="ident">Decomposition::new_with_supplements</span>(
             <span class="ident">iter</span>,
             <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
+            <span class="self">self</span>.<span class="ident">supplementary_decompositions</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
             <span class="self">self</span>.<span class="ident">supplementary_tables</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>,

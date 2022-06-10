@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654829332220,
+  "lastUpdate": 1654886915866,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -38759,6 +38759,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 4616,
             "range": "± 10",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "younies.mahmoud@gmail.com",
+            "name": "Younies Mahmoud",
+            "username": "younies"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6c9bae905c9ba1f930cdf7469f1bcb06e827b6cb",
+          "message": "Implement all the rounding options (#2000)\n\n Implement all the rounding options",
+          "timestamp": "2022-06-10T14:34:32-04:00",
+          "tree_id": "9a9e6139a5ffe597f63342f409cd0dbbfc7e9a86",
+          "url": "https://github.com/unicode-org/icu4x/commit/6c9bae905c9ba1f930cdf7469f1bcb06e827b6cb"
+        },
+        "date": 1654886875654,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 86455,
+            "range": "± 541",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 830414,
+            "range": "± 3721",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 178859,
+            "range": "± 652",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 81911,
+            "range": "± 287",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 90038,
+            "range": "± 198",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 86189,
+            "range": "± 886",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 94361,
+            "range": "± 188",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 173459,
+            "range": "± 296",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 188032,
+            "range": "± 312",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 178311,
+            "range": "± 200",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 191212,
+            "range": "± 206",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5130,
+            "range": "± 175",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "pandusonu@google.com",
+            "name": "Gollapudi Vamsi Krishna",
+            "username": "pandusonu2"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b43c3913c4375bf8e5e8968ce28ef103f02aecf2",
+          "message": "Change charULE from 4 bytes to 3 bytes (#2015)\n\n* Change charULE from 4 bytes to 3 bytes",
+          "timestamp": "2022-06-10T18:32:34Z",
+          "tree_id": "c158bf6afc09e93e87bad5a5c0414c4f3b3ce5ad",
+          "url": "https://github.com/unicode-org/icu4x/commit/b43c3913c4375bf8e5e8968ce28ef103f02aecf2"
+        },
+        "date": 1654886885592,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 118810,
+            "range": "± 5231",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1064357,
+            "range": "± 40701",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 224133,
+            "range": "± 8222",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 110348,
+            "range": "± 3337",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 121226,
+            "range": "± 3676",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 116903,
+            "range": "± 3902",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 125751,
+            "range": "± 5240",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 218218,
+            "range": "± 11219",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 235142,
+            "range": "± 6287",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 223749,
+            "range": "± 7248",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 241740,
+            "range": "± 11245",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6258,
+            "range": "± 335",
             "unit": "ns/iter"
           }
         ]

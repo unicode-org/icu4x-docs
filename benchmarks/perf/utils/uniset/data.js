@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654829237059,
+  "lastUpdate": 1654886745635,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -31288,6 +31288,114 @@ window.BENCHMARK_DATA = {
           {
             "name": "uniset/contains_range/worst",
             "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "pandusonu@google.com",
+            "name": "Gollapudi Vamsi Krishna",
+            "username": "pandusonu2"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b43c3913c4375bf8e5e8968ce28ef103f02aecf2",
+          "message": "Change charULE from 4 bytes to 3 bytes (#2015)\n\n* Change charULE from 4 bytes to 3 bytes",
+          "timestamp": "2022-06-10T18:32:34Z",
+          "tree_id": "c158bf6afc09e93e87bad5a5c0414c4f3b3ce5ad",
+          "url": "https://github.com/unicode-org/icu4x/commit/b43c3913c4375bf8e5e8968ce28ef103f02aecf2"
+        },
+        "date": 1654886673304,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 44955388,
+            "range": "± 2001607",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "younies.mahmoud@gmail.com",
+            "name": "Younies Mahmoud",
+            "username": "younies"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6c9bae905c9ba1f930cdf7469f1bcb06e827b6cb",
+          "message": "Implement all the rounding options (#2000)\n\n Implement all the rounding options",
+          "timestamp": "2022-06-10T14:34:32-04:00",
+          "tree_id": "9a9e6139a5ffe597f63342f409cd0dbbfc7e9a86",
+          "url": "https://github.com/unicode-org/icu4x/commit/6c9bae905c9ba1f930cdf7469f1bcb06e827b6cb"
+        },
+        "date": 1654886722245,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 43408224,
+            "range": "± 217090",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
             "range": "± 0",
             "unit": "ns/iter"
           }

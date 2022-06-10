@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654886879318,
+  "lastUpdate": 1654902625865,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -31169,6 +31169,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 84,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cf1e111cfe07174e1c4e228783dcb730a1432851",
+          "message": "Add new profile release-opt-size (#2043)",
+          "timestamp": "2022-06-10T14:35:10-07:00",
+          "tree_id": "a7a43f79f9e7018c890b930212d246972f6b68f4",
+          "url": "https://github.com/unicode-org/icu4x/commit/cf1e111cfe07174e1c4e228783dcb730a1432851"
+        },
+        "date": 1654897615213,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 113244,
+            "range": "± 388",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 27011,
+            "range": "± 97",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 70125,
+            "range": "± 181",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 187,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 92,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 76,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "305cc84011b54d1b65a3ff3ec1d69c7a63705040",
+          "message": "Don't panic on invalid grouping sizes (#2042)",
+          "timestamp": "2022-06-10T15:57:22-07:00",
+          "tree_id": "58f83095c4e8e13aeb76aba06d73d7aaeeb0353d",
+          "url": "https://github.com/unicode-org/icu4x/commit/305cc84011b54d1b65a3ff3ec1d69c7a63705040"
+        },
+        "date": 1654902593539,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 133181,
+            "range": "± 5911",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 32740,
+            "range": "± 1192",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 82074,
+            "range": "± 3905",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 271,
+            "range": "± 20",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 130,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 90,
+            "range": "± 3",
             "unit": "ns/iter"
           }
         ]

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AnyDateTimeFormat","[`AnyDateTimeFormat`] is a `DateTimeFormat` capable of formatting dates from any calendar, selected at runtime."]]});

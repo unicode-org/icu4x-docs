@@ -239,6 +239,32 @@
 <span id="234">234</span>
 <span id="235">235</span>
 <span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -247,6 +273,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">Iso</span>};
 <span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
+<span class="kw">use</span> <span class="ident">core::ops::Deref</span>;
 
 <span class="doccomment">/// Types that contain a calendar</span>
 <span class="doccomment">///</span>
@@ -275,6 +302,31 @@
     }
 }
 
+<span class="doccomment">/// This exists as a wrapper around `&amp;&#39;a T` so that</span>
+<span class="doccomment">/// `Date&lt;&amp;&#39;a C&gt;` is possible for calendar `C`. Unfortunately,</span>
+<span class="doccomment">/// [`AsCalendar`] cannot be implemented on `&amp;&#39;a T` directly because</span>
+<span class="doccomment">/// `&amp;&#39;a T` is `#[fundamental]` and the impl would clash with the one above with</span>
+<span class="doccomment">/// `AsCalendar` for `C: Calendar`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Use `Date&lt;Ref&lt;&#39;a, C&gt;&gt;` where you would use `Date&lt;&amp;&#39;a C&gt;`</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// newtype</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">C</span>);
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Calendar</span><span class="op">&gt;</span> <span class="ident">AsCalendar</span> <span class="kw">for</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Calendar</span> <span class="op">=</span> <span class="ident">C</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">as_calendar</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">C</span> {
+        <span class="self">self</span>.<span class="number">0</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Ref</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">C</span>;
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">C</span> {
+        <span class="self">self</span>.<span class="number">0</span>
+    }
+}
+
 <span class="doccomment">/// A date for a given calendar.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This can work with wrappers around [`Calendar`] types,</span>
@@ -293,7 +345,7 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Date</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AsCalendar</span><span class="op">&gt;</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">inner</span>: <span class="op">&lt;</span><span class="ident">A::Calendar</span> <span class="kw">as</span> <span class="ident">Calendar</span><span class="op">&gt;</span><span class="ident">::DateInner</span>,
-    <span class="ident">calendar</span>: <span class="ident">A</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">calendar</span>: <span class="ident">A</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AsCalendar</span><span class="op">&gt;</span> <span class="ident">Date</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> {

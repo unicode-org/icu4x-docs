@@ -203,34 +203,13 @@
 <span id="198">198</span>
 <span id="199">199</span>
 <span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="attribute">#[<span class="ident">diplomat::bridge</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ffi</span> {
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::ffi::ICU4XError</span>;
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
     <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
     <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
@@ -244,11 +223,6 @@
     <span class="doccomment">/// An ICU4X Locale, capable of representing strings like `&quot;en-US&quot;`.</span>
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::locid::Locale</span>, <span class="ident">Struct</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XLocale</span>(<span class="kw">pub</span> <span class="ident">Locale</span>);
-
-    <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ICU4XLocaleError</span> {
-        <span class="ident">Undefined</span>,
-        <span class="ident">Error</span>,
-    }
 
     <span class="kw">impl</span> <span class="ident">ICU4XLocale</span> {
         <span class="doccomment">/// Construct an [`ICU4XLocale`] from an locale identifier.</span>
@@ -287,14 +261,9 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">basename</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">write</span>: <span class="kw-2">&amp;mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="number">0</span>
-                .<span class="ident">id</span>
-                .<span class="ident">write_to</span>(<span class="ident">write</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
-                .<span class="ident">into</span>();
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>).<span class="ident">into</span>();
             <span class="ident">write</span>.<span class="ident">flush</span>();
             <span class="ident">result</span>
         }
@@ -305,21 +274,18 @@
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
             <span class="ident">write</span>: <span class="kw-2">&amp;mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">key</span>) <span class="op">=</span> <span class="ident">Key::from_bytes</span>(<span class="ident">bytes</span>.<span class="ident">as_bytes</span>()) {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">keywords</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
                     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
-                    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">value</span>
-                        .<span class="ident">write_to</span>(<span class="ident">write</span>)
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
-                        .<span class="ident">into</span>();
+                    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>).<span class="ident">into</span>();
                     <span class="ident">write</span>.<span class="ident">flush</span>();
                     <span class="ident">result</span>
                 } <span class="kw">else</span> {
-                    <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
+                    <span class="ident">Result::Err</span>(<span class="ident">ICU4XError::LocaleUndefinedSubtagError</span>).<span class="ident">into</span>()
                 }
             } <span class="kw">else</span> {
-                <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Error</span>).<span class="ident">into</span>()
+                <span class="ident">Result::Err</span>(<span class="ident">ICU4XError::LocaleParserError</span>).<span class="ident">into</span>()
             }
         }
 
@@ -328,14 +294,14 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">language</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">write</span>: <span class="kw-2">&amp;mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
                 .<span class="number">0</span>
                 .<span class="ident">id</span>
                 .<span class="ident">language</span>
                 .<span class="ident">write_to</span>(<span class="ident">write</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
                 .<span class="ident">into</span>();
             <span class="ident">write</span>.<span class="ident">flush</span>();
             <span class="ident">result</span>
@@ -343,7 +309,7 @@
 
         <span class="doccomment">/// Set the language part of the [`ICU4XLocale`].</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::locid::Locale::from_bytes</span>, <span class="ident">FnInStruct</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_language</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_language</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">language</span> <span class="op">=</span> <span class="ident">Language::UND</span>;
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(()).<span class="ident">into</span>();
@@ -353,7 +319,7 @@
                     <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">language</span> <span class="op">=</span> <span class="ident">language</span>;
                     <span class="prelude-val">Ok</span>(())
                 }
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ICU4XLocaleError::Error</span>),
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ICU4XError::LocaleParserError</span>),
             }
             .<span class="ident">into</span>()
         }
@@ -363,23 +329,20 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">region</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">write</span>: <span class="kw-2">&amp;mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">region</span> {
                 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
-                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">region</span>
-                    .<span class="ident">write_to</span>(<span class="ident">write</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
-                    .<span class="ident">into</span>();
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">region</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>).<span class="ident">into</span>();
                 <span class="ident">write</span>.<span class="ident">flush</span>();
                 <span class="ident">result</span>
             } <span class="kw">else</span> {
-                <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
+                <span class="ident">Result::Err</span>(<span class="ident">ICU4XError::LocaleUndefinedSubtagError</span>).<span class="ident">into</span>()
             }
         }
 
         <span class="doccomment">/// Set the region part of the [`ICU4XLocale`].</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::locid::Locale::from_bytes</span>, <span class="ident">FnInStruct</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_region</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_region</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">region</span> <span class="op">=</span> <span class="prelude-val">None</span>;
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(()).<span class="ident">into</span>();
@@ -389,7 +352,7 @@
                     <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">region</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>);
                     <span class="prelude-val">Ok</span>(())
                 }
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ICU4XLocaleError::Error</span>),
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ICU4XError::LocaleParserError</span>),
             }
             .<span class="ident">into</span>()
         }
@@ -399,23 +362,20 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">script</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">write</span>: <span class="kw-2">&amp;mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">script</span> {
                 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
-                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">script</span>
-                    .<span class="ident">write_to</span>(<span class="ident">write</span>)
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
-                    .<span class="ident">into</span>();
+                <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">script</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>).<span class="ident">into</span>();
                 <span class="ident">write</span>.<span class="ident">flush</span>();
                 <span class="ident">result</span>
             } <span class="kw">else</span> {
-                <span class="ident">Result::Err</span>(<span class="ident">ICU4XLocaleError::Undefined</span>).<span class="ident">into</span>()
+                <span class="ident">Result::Err</span>(<span class="ident">ICU4XError::LocaleUndefinedSubtagError</span>).<span class="ident">into</span>()
             }
         }
 
         <span class="doccomment">/// Set the script part of the [`ICU4XLocale`]. Pass an empty string to remove the script.</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::locid::Locale::from_bytes</span>, <span class="ident">FnInStruct</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_script</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_script</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">script</span> <span class="op">=</span> <span class="prelude-val">None</span>;
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(()).<span class="ident">into</span>();
@@ -425,7 +385,7 @@
                     <span class="self">self</span>.<span class="number">0</span>.<span class="ident">id</span>.<span class="ident">script</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>);
                     <span class="prelude-val">Ok</span>(())
                 }
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ICU4XLocaleError::Error</span>),
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ICU4XError::LocaleParserError</span>),
             }
             .<span class="ident">into</span>()
         }
@@ -435,13 +395,9 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tostring</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">write</span>: <span class="kw-2">&amp;mut</span> <span class="ident">diplomat_runtime::DiplomatWriteable</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XLocaleError</span><span class="op">&gt;</span> {
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
-                .<span class="number">0</span>
-                .<span class="ident">write_to</span>(<span class="ident">write</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ICU4XLocaleError::Error</span>)
-                .<span class="ident">into</span>();
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">write_to</span>(<span class="ident">write</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>).<span class="ident">into</span>();
             <span class="ident">write</span>.<span class="ident">flush</span>();
             <span class="ident">result</span>
         }

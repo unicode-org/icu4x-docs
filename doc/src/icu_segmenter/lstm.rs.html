@@ -172,58 +172,6 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -232,8 +180,8 @@
 
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
-<span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::char::decode_utf16</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataPayload</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter_lstm::lstm::Lstm</span>;
 <span class="kw">use</span> <span class="ident">icu_segmenter_lstm::structs</span>;
@@ -254,20 +202,18 @@
 }
 
 <span class="comment">// LSTM model depends on language, So we have to switch models per language.</span>
-<span class="kw">fn</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">codepoint</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Lstm</span> {
-    <span class="comment">// TODO:</span>
-    <span class="comment">// DataPayLoad isn&#39;t thread safe. We need anything static version.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">codepoint</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">structs::LstmDataMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">lang</span> <span class="op">=</span> <span class="ident">get_language</span>(<span class="ident">codepoint</span>);
     <span class="kw">match</span> <span class="ident">lang</span> {
-        <span class="ident">Language::Thai</span> =&gt; <span class="ident">Lstm::try_new</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">THAI_LSTM</span>.<span class="ident">clone</span>())).<span class="ident">unwrap</span>(),
-        <span class="ident">Language::Burmese</span> =&gt; <span class="ident">Lstm::try_new</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">BURMESE_LSTM</span>.<span class="ident">clone</span>())).<span class="ident">unwrap</span>(),
-        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported&quot;</span>),
+        <span class="ident">Language::Thai</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">THAI_LSTM</span>.<span class="ident">clone</span>())),
+        <span class="ident">Language::Burmese</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">BURMESE_LSTM</span>.<span class="ident">clone</span>())),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
     }
 }
 
 <span class="comment">// A word break iterator using LSTM model. Input string have to be same language.</span>
 
-<span class="kw">struct</span> <span class="ident">LstmSegmenterIterator</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LstmSegmenterIterator</span> {
     <span class="ident">input</span>: <span class="ident">String</span>,
     <span class="ident">bies_str</span>: <span class="ident">String</span>,
     <span class="ident">pos</span>: <span class="ident">usize</span>,
@@ -301,7 +247,7 @@
     }
 }
 
-<span class="kw">struct</span> <span class="ident">LstmSegmenterIteratorUtf16</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LstmSegmenterIteratorUtf16</span> {
     <span class="ident">bies_str</span>: <span class="ident">String</span>,
     <span class="ident">pos</span>: <span class="ident">usize</span>,
 }
@@ -322,8 +268,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">LstmSegmenterIteratorUtf16</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="ident">Lstm</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">lstm_output</span> <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">word_segmenter</span>(<span class="ident">input</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="ident">Lstm</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">input</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">decode_utf16</span>(<span class="ident">input</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>())
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">unwrap</span>())
+            .<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">lstm_output</span> <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">word_segmenter</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="self">Self</span> {
             <span class="ident">bies_str</span>: <span class="ident">lstm_output</span>,
             <span class="ident">pos</span>: <span class="number">0</span>,
@@ -331,81 +280,48 @@
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_break_utf8</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lang_iter</span> <span class="op">=</span> <span class="ident">LanguageIterator::new</span>(<span class="ident">input</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offset</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">loop</span> {
-        <span class="kw">let</span> <span class="ident">str_per_lang</span> <span class="op">=</span> <span class="ident">lang_iter</span>.<span class="ident">next</span>();
-        <span class="kw">if</span> <span class="ident">str_per_lang</span>.<span class="ident">is_none</span>() {
-            <span class="kw">break</span>;
-        }
-        <span class="kw">if</span> <span class="ident">offset</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">offset</span>);
-        }
-
-        <span class="kw">let</span> <span class="ident">str_per_lang</span> <span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>() <span class="kw">as</span> <span class="ident">u32</span>);
-        <span class="kw">let</span> <span class="ident">lstm_iter</span> <span class="op">=</span> <span class="ident">LstmSegmenterIterator::new</span>(<span class="kw-2">&amp;</span><span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">lstm_iter</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>).<span class="ident">collect</span>();
-        <span class="ident">result</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">r</span>);
-        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">len</span>();
-    }
-    <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">is_empty</span>() {
-        <span class="kw">return</span> <span class="prelude-val">None</span>;
-    }
-    <span class="prelude-val">Some</span>(<span class="ident">result</span>)
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LstmSegmenter</span> {
+    <span class="ident">lstm</span>: <span class="ident">Lstm</span>,
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_line_break_utf16</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">s</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">decode_utf16</span>(<span class="ident">input</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>())
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">unwrap</span>())
-        .<span class="ident">collect</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offset</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">for</span> <span class="ident">str_per_lang</span> <span class="kw">in</span> <span class="ident">LanguageIterator::new</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>) {
-        <span class="kw">if</span> <span class="ident">offset</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="comment">// language break</span>
-            <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">offset</span>);
-        }
+<span class="kw">impl</span> <span class="ident">LstmSegmenter</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">structs::LstmDataMarker</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">Lstm::try_new</span>(<span class="ident">payload</span>).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>() <span class="kw">as</span> <span class="ident">u32</span>);
-        <span class="kw">let</span> <span class="ident">lstm_iter</span> <span class="op">=</span> <span class="ident">LstmSegmenterIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">r</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">lstm_iter</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>).<span class="ident">collect</span>();
-        <span class="ident">result</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">r</span>);
-        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">fold</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">n</span>, <span class="ident">c</span><span class="op">|</span> <span class="ident">n</span> <span class="op">+</span> <span class="ident">c</span>.<span class="ident">len_utf16</span>());
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">lstm</span> })
     }
-    <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">is_empty</span>() {
-        <span class="kw">return</span> <span class="prelude-val">None</span>;
+
+    <span class="doccomment">/// Create a dictionary based break iterator for an `str` (a UTF-8 string).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">LstmSegmenterIterator</span> {
+        <span class="ident">LstmSegmenterIterator::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>, <span class="ident">input</span>)
     }
-    <span class="prelude-val">Some</span>(<span class="ident">result</span>)
+
+    <span class="doccomment">/// Create a dictionary based break iterator for a UTF-16 string.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="ident">LstmSegmenterIteratorUtf16</span> {
+        <span class="ident">LstmSegmenterIteratorUtf16::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>, <span class="ident">input</span>)
+    }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm::get_line_break_utf16</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm::get_line_break_utf8</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">thai_word_break</span>() {
         <span class="kw">const</span> <span class="ident">TEST_STR</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;ภาษาไทยภาษาไทย&quot;</span>;
 
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">get_line_break_utf8</span>(<span class="ident">TEST_STR</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>.<span class="ident">unwrap</span>(), [<span class="number">12</span>, <span class="number">21</span>, <span class="number">33</span>], <span class="string">&quot;Thai test&quot;</span>);
-    }
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">TEST_STR</span>.<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>() <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new</span>(<span class="ident">payload</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">12</span>, <span class="number">21</span>, <span class="number">33</span>], <span class="string">&quot;Thai test&quot;</span>);
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">thai_word_break_utf16</span>() {
-        <span class="kw">let</span> <span class="ident">text</span>: [<span class="ident">u16</span>; <span class="number">14</span>] <span class="op">=</span> [
-            <span class="number">0x0e20</span>, <span class="number">0x0e32</span>, <span class="number">0x0e29</span>, <span class="number">0x0e32</span>, <span class="number">0x0e44</span>, <span class="number">0x0e17</span>, <span class="number">0x0e22</span>, <span class="number">0x0e20</span>, <span class="number">0x0e32</span>, <span class="number">0x0e29</span>, <span class="number">0x0e32</span>,
-            <span class="number">0x0e44</span>, <span class="number">0x0e17</span>, <span class="number">0x0e22</span>,
-        ];
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>.<span class="ident">unwrap</span>(), [<span class="number">4</span>, <span class="number">7</span>, <span class="number">11</span>], <span class="string">&quot;Thai test&quot;</span>);
+        <span class="kw">let</span> <span class="ident">utf16</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">TEST_STR</span>.<span class="ident">encode_utf16</span>().<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">utf16</span>).<span class="ident">collect</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">4</span>, <span class="number">7</span>, <span class="number">11</span>], <span class="string">&quot;Thai test&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">text</span>: [<span class="ident">u16</span>; <span class="number">4</span>] <span class="op">=</span> [<span class="number">0x0e20</span>, <span class="number">0x0e32</span>, <span class="number">0x0e29</span>, <span class="number">0x0e32</span>];
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, <span class="prelude-val">None</span>, <span class="string">&quot;Thai test&quot;</span>);
+        <span class="comment">//let utf16: [u16; 4] = [0x0e20, 0x0e32, 0x0e29, 0x0e32];</span>
+        <span class="comment">//let breaks: Vec&lt;usize&gt; = segmenter.segment_utf16(&amp;utf16).collect();</span>
+        <span class="comment">//assert_eq!(breaks, [4], &quot;Thai test&quot;);</span>
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -413,36 +329,16 @@
         <span class="comment">// &quot;Burmese Language&quot; in Burmese</span>
         <span class="kw">const</span> <span class="ident">TEST_STR</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;မြန်မာဘာသာစကား&quot;</span>;
 
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">get_line_break_utf8</span>(<span class="ident">TEST_STR</span>);
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">TEST_STR</span>.<span class="ident">chars</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>() <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new</span>(<span class="ident">payload</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
         <span class="comment">// LSTM model breaks more characters, but it is better to return [30].</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>.<span class="ident">unwrap</span>(), [<span class="number">12</span>, <span class="number">18</span>, <span class="number">30</span>], <span class="string">&quot;Burmese test&quot;</span>);
-    }
+        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">12</span>, <span class="number">18</span>, <span class="number">30</span>], <span class="string">&quot;Burmese test&quot;</span>);
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">burmese_word_break_utf16</span>() {
-        <span class="comment">// &quot;Burmese Language&quot; in Burmese</span>
-        <span class="kw">let</span> <span class="ident">text</span>: [<span class="ident">u16</span>; <span class="number">14</span>] <span class="op">=</span> [
-            <span class="number">0x1019</span>, <span class="number">0x103c</span>, <span class="number">0x1014</span>, <span class="number">0x103a</span>, <span class="number">0x1019</span>, <span class="number">0x102c</span>, <span class="number">0x1018</span>, <span class="number">0x102c</span>, <span class="number">0x101e</span>, <span class="number">0x102c</span>, <span class="number">0x1005</span>,
-            <span class="number">0x1000</span>, <span class="number">0x102c</span>, <span class="number">0x1038</span>,
-        ];
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">get_line_break_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>);
+        <span class="kw">let</span> <span class="ident">utf16</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">TEST_STR</span>.<span class="ident">encode_utf16</span>().<span class="ident">collect</span>();
+        <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">utf16</span>).<span class="ident">collect</span>();
         <span class="comment">// LSTM model breaks more characters, but it is better to return [10].</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>.<span class="ident">unwrap</span>(), [<span class="number">4</span>, <span class="number">6</span>, <span class="number">10</span>], <span class="string">&quot;Burmese utf-16 test&quot;</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">combined_word_break</span>() {
-        <span class="kw">const</span> <span class="ident">TEST_STR_THAI</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;ภาษาไทยภาษาไทย&quot;</span>;
-        <span class="kw">const</span> <span class="ident">TEST_STR_BURMESE</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;ဗမာနွယ်ဘာသာစကားမျာ&quot;</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sample</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="ident">TEST_STR_THAI</span>);
-        <span class="ident">sample</span>.<span class="ident">push_str</span>(<span class="ident">TEST_STR_BURMESE</span>);
-
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">get_line_break_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">sample</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">breaks</span>.<span class="ident">unwrap</span>(),
-            [<span class="number">12</span>, <span class="number">21</span>, <span class="number">33</span>, <span class="number">42</span>, <span class="number">51</span>, <span class="number">63</span>, <span class="number">75</span>, <span class="number">87</span>],
-            <span class="string">&quot;Combined test&quot;</span>
-        );
+        <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">4</span>, <span class="number">6</span>, <span class="number">10</span>], <span class="string">&quot;Burmese utf-16 test&quot;</span>);
     }
 }
 </code></pre></div>

@@ -204,6 +204,23 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -245,7 +262,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let region = Region::from_bytes(b&quot;fr&quot;).expect(&quot;Parsing failed.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(region, &quot;FR&quot;);</span>
+    <span class="doccomment">/// assert_eq!(region.as_str(), &quot;FR&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::from_bytes_manual_slice</span>(<span class="ident">v</span>, <span class="number">0</span>, <span class="ident">v</span>.<span class="ident">len</span>())
@@ -314,7 +331,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let raw = region.into_raw();</span>
     <span class="doccomment">/// let region = unsafe { Region::from_raw_unchecked(raw) };</span>
-    <span class="doccomment">/// assert_eq!(region, &quot;US&quot;);</span>
+    <span class="doccomment">/// assert_eq!(region.as_str(), &quot;US&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) -&gt; [<span class="ident">u8</span>; <span class="number">3</span>] {
         <span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">all_bytes</span>()
@@ -332,7 +349,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let raw = region.into_raw();</span>
     <span class="doccomment">/// let region = unsafe { Region::from_raw_unchecked(raw) };</span>
-    <span class="doccomment">/// assert_eq!(region, &quot;US&quot;);</span>
+    <span class="doccomment">/// assert_eq!(region.as_str(), &quot;US&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Safety</span>
@@ -376,6 +393,29 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_alphabetic</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">is_ascii_alphabetic</span>()
     }
+
+    <span class="doccomment">/// Compare this `Region` with BCP-47 bytes.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The return value is equivalent to what would happen if you first converted this</span>
+    <span class="doccomment">/// `Region` to a BCP-47 string and then performed a byte comparison.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function is case-sensitive and results in a *total order*, so it is appropriate for</span>
+    <span class="doccomment">/// binary search. The only argument producing [`Ordering::Equal`](core::cmp::Ordering::Equal)</span>
+    <span class="doccomment">/// is `self.to_string()`.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">strict_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">core::cmp::Ordering</span> {
+        <span class="self">self</span>.<span class="ident">as_str</span>().<span class="ident">as_bytes</span>().<span class="ident">cmp</span>(<span class="ident">other</span>)
+    }
+
+    <span class="doccomment">/// Compare this `Region` with a potentially unnormalized BCP-47 string.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The return value is equivalent to what would happen if you first parsed the</span>
+    <span class="doccomment">/// BCP-47 string to a `Region` and then performed a structucal comparison.</span>
+    <span class="doccomment">///</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normalizing_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">as_str</span>().<span class="ident">eq_ignore_ascii_case</span>(<span class="ident">other</span>)
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">Region</span> {
@@ -387,12 +427,6 @@
 }
 
 <span class="macro">impl_writeable_for_single_subtag!</span>(<span class="ident">Region</span>, <span class="string">&quot;GB&quot;</span>);
-
-<span class="kw">impl</span> <span class="ident">PartialEq</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Region</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="op">&amp;&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">as_str</span>() <span class="op">==</span> <span class="kw-2">*</span><span class="ident">other</span>
-    }
-}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">Region</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">str</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">Region</span>) -&gt; <span class="self">Self</span> {

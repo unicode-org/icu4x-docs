@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655227605050,
+  "lastUpdate": 1655246488610,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -31882,6 +31882,114 @@ window.BENCHMARK_DATA = {
           {
             "name": "uniset/contains_range/worst",
             "value": 11,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dfb130699868ac678036ac4a605a03c318816b48",
+          "message": "More impls in zerovec crate (#2054)",
+          "timestamp": "2022-06-14T15:21:17-07:00",
+          "tree_id": "aee30513cb41fb2b7184255abe643b20f6a3439d",
+          "url": "https://github.com/unicode-org/icu4x/commit/dfb130699868ac678036ac4a605a03c318816b48"
+        },
+        "date": 1655245862184,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 39096560,
+            "range": "± 139289",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 11,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 11,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 11,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 11,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a7e496b4db689de7b8f5d79cda0b3328dbf1497b",
+          "message": "Start emitting month codes from the calendar crate, switch ISO to ArithmeticDate (#2053)\n\n* Add solar month method\r\n\r\n* Move ISO over to ArithmeticDate\r\n\r\nThis is a holdover from back when we had fewer calendars; the type\r\nsafety is nice but the code sharing between calendars is more important.\r\n\r\n* Remove IsoYear/IsoMonth/IsoDay\r\n\r\n* Make everyone use solar_month()",
+          "timestamp": "2022-06-14T22:31:13Z",
+          "tree_id": "2f57f5ba46193d2a764c536554c08e0cd21d83d5",
+          "url": "https://github.com/unicode-org/icu4x/commit/a7e496b4db689de7b8f5d79cda0b3328dbf1497b"
+        },
+        "date": 1655246464380,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 43926764,
+            "range": "± 206965",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 9,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 9,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 9,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 9,
             "range": "± 0",
             "unit": "ns/iter"
           }

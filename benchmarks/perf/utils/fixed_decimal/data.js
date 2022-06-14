@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655227658847,
+  "lastUpdate": 1655246588674,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -31709,6 +31709,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 84,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dfb130699868ac678036ac4a605a03c318816b48",
+          "message": "More impls in zerovec crate (#2054)",
+          "timestamp": "2022-06-14T15:21:17-07:00",
+          "tree_id": "aee30513cb41fb2b7184255abe643b20f6a3439d",
+          "url": "https://github.com/unicode-org/icu4x/commit/dfb130699868ac678036ac4a605a03c318816b48"
+        },
+        "date": 1655246045477,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 129230,
+            "range": "± 7059",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 31742,
+            "range": "± 906",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 77835,
+            "range": "± 2636",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 225,
+            "range": "± 10",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 125,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 86,
+            "range": "± 3",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a7e496b4db689de7b8f5d79cda0b3328dbf1497b",
+          "message": "Start emitting month codes from the calendar crate, switch ISO to ArithmeticDate (#2053)\n\n* Add solar month method\r\n\r\n* Move ISO over to ArithmeticDate\r\n\r\nThis is a holdover from back when we had fewer calendars; the type\r\nsafety is nice but the code sharing between calendars is more important.\r\n\r\n* Remove IsoYear/IsoMonth/IsoDay\r\n\r\n* Make everyone use solar_month()",
+          "timestamp": "2022-06-14T22:31:13Z",
+          "tree_id": "2f57f5ba46193d2a764c536554c08e0cd21d83d5",
+          "url": "https://github.com/unicode-org/icu4x/commit/a7e496b4db689de7b8f5d79cda0b3328dbf1497b"
+        },
+        "date": 1655246564695,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 124022,
+            "range": "± 357",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 28947,
+            "range": "± 80",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72067,
+            "range": "± 111",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 220,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 103,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 84,
+            "range": "± 1",
             "unit": "ns/iter"
           }
         ]

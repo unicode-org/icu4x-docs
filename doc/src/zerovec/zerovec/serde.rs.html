@@ -196,6 +196,32 @@
 <span id="191">191</span>
 <span id="192">192</span>
 <span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -276,7 +302,6 @@
 }
 
 <span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">AsULE</span>,
@@ -313,7 +338,34 @@
 }
 
 <span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span>, <span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsULE</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="lifetime">&#39;de</span>: <span class="lifetime">&#39;a</span>,
+{
+    <span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">deserializer</span>: <span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">D::Error</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">D</span>: <span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">if</span> <span class="ident">deserializer</span>.<span class="ident">is_human_readable</span>() {
+            <span class="prelude-val">Err</span>(<span class="ident">de::Error::custom</span>(
+                <span class="string">&quot;&amp;ZeroSlice cannot be deserialized from human-readable formats&quot;</span>,
+            ))
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ZeroVec::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">borrowed</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ZeroVec::Borrowed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="ident">deserialized</span> {
+                <span class="ident">b</span>
+            } <span class="kw">else</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">de::Error::custom</span>(
+                    <span class="string">&quot;&amp;ZeroSlice can only deserialize in zero-copy ways&quot;</span>,
+                ));
+            };
+            <span class="prelude-val">Ok</span>(<span class="ident">ZeroSlice::from_ule_slice</span>(<span class="ident">borrowed</span>))
+        }
+    }
+}
+
+<span class="doccomment">/// This impl can be made available by enabling the optional `serde` feature of the `zerovec` crate</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="ident">AsULE</span>,

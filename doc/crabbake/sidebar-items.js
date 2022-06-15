@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["Bakeable",""]],"struct":[["CrateEnv",""]],"trait":[["Bakeable",""]]});
+initSidebarItems({"derive":[["Bakeable",""]],"macro":[["test_bake","This macro tests that an expression evaluates to a value that bakes to the same expression."]],"struct":[["CrateEnv",""]],"trait":[["Bakeable",""]]});

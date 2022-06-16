@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655293921007,
+  "lastUpdate": 1655360687174,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -40391,6 +40391,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 7708,
             "range": "± 239",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6133b3158a30df9c921eb8de6b8526b6b0b42622",
+          "message": "Add LocaleFallbacker with locale fallback algorithm (#2036)\n\n- Adds more methods to ResourceOptions for vertical fallback\r\n- Adds reverse direction LSR conversion function\r\n- Changes clear() methods in icu_locid to return the old value",
+          "timestamp": "2022-06-15T17:22:41-07:00",
+          "tree_id": "5721aed1b49ea842d29c120a96f0c2eb9a7fe4af",
+          "url": "https://github.com/unicode-org/icu4x/commit/6133b3158a30df9c921eb8de6b8526b6b0b42622"
+        },
+        "date": 1655339762475,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 112945,
+            "range": "± 1458",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1121839,
+            "range": "± 3318",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 213250,
+            "range": "± 1026",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 107199,
+            "range": "± 161",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 117082,
+            "range": "± 203",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 111898,
+            "range": "± 148",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 120802,
+            "range": "± 200",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 208912,
+            "range": "± 545",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 221860,
+            "range": "± 403",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 212540,
+            "range": "± 427",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 227839,
+            "range": "± 723",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6127,
+            "range": "± 52",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "m_kato@ga2.so-net.ne.jp",
+            "name": "Makoto Kato",
+            "username": "makotokato"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "12f2ed1fba13a5e920b4488536f8e434a69b369a",
+          "message": "Remove std dependency from segmenter_lstm. (#2064)",
+          "timestamp": "2022-06-16T15:12:20+09:00",
+          "tree_id": "2ab0c94bed062547349e43bd17371121f87d3f76",
+          "url": "https://github.com/unicode-org/icu4x/commit/12f2ed1fba13a5e920b4488536f8e434a69b369a"
+        },
+        "date": 1655360663969,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 98640,
+            "range": "± 278",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1104127,
+            "range": "± 11995",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 189708,
+            "range": "± 2431",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 93988,
+            "range": "± 246",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 116680,
+            "range": "± 264",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 98709,
+            "range": "± 167",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 106367,
+            "range": "± 175",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 185357,
+            "range": "± 257",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 197062,
+            "range": "± 237",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 189209,
+            "range": "± 262",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 201917,
+            "range": "± 370",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5433,
+            "range": "± 13",
             "unit": "ns/iter"
           }
         ]

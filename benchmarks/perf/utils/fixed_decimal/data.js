@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655293774737,
+  "lastUpdate": 1655360664296,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -32056,6 +32056,126 @@ window.BENCHMARK_DATA = {
           {
             "name": "to_string/to_string/908070605040302010",
             "value": 220,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 103,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 84,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6133b3158a30df9c921eb8de6b8526b6b0b42622",
+          "message": "Add LocaleFallbacker with locale fallback algorithm (#2036)\n\n- Adds more methods to ResourceOptions for vertical fallback\r\n- Adds reverse direction LSR conversion function\r\n- Changes clear() methods in icu_locid to return the old value",
+          "timestamp": "2022-06-15T17:22:41-07:00",
+          "tree_id": "5721aed1b49ea842d29c120a96f0c2eb9a7fe4af",
+          "url": "https://github.com/unicode-org/icu4x/commit/6133b3158a30df9c921eb8de6b8526b6b0b42622"
+        },
+        "date": 1655339708977,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 124214,
+            "range": "± 503",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 28405,
+            "range": "± 111",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72078,
+            "range": "± 317",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 220,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 103,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 84,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "m_kato@ga2.so-net.ne.jp",
+            "name": "Makoto Kato",
+            "username": "makotokato"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "12f2ed1fba13a5e920b4488536f8e434a69b369a",
+          "message": "Remove std dependency from segmenter_lstm. (#2064)",
+          "timestamp": "2022-06-16T15:12:20+09:00",
+          "tree_id": "2ab0c94bed062547349e43bd17371121f87d3f76",
+          "url": "https://github.com/unicode-org/icu4x/commit/12f2ed1fba13a5e920b4488536f8e434a69b369a"
+        },
+        "date": 1655360641057,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 124619,
+            "range": "± 449",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 28513,
+            "range": "± 97",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72689,
+            "range": "± 549",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 219,
             "range": "± 0",
             "unit": "ns/iter"
           },

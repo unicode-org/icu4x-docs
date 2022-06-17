@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655489682666,
+  "lastUpdate": 1655509495424,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -17908,6 +17908,66 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 2722229,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a5468f59e0c55de4e94ab29be2ec4d5b0eff482a",
+          "message": "Fix example to use -u-nu instead of -u-ns (#2077)",
+          "timestamp": "2022-06-17T18:29:29-05:00",
+          "tree_id": "a23bf9d9819a4cf252f1ad45356528db8b7bbf63",
+          "url": "https://github.com/unicode-org/icu4x/commit/a5468f59e0c55de4e94ab29be2ec4d5b0eff482a"
+        },
+        "date": 1655508681725,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 2722229,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3736032598204a86e90273c34460160be5767b5c",
+          "message": "Use month codes in formatting (#2071)\n\n\r\n* Make MonthCode ULEable\r\n\r\n* Move month symbols to zeromap + month code\r\n\r\n* Add .get() functions to symbols converter\r\n\r\n* support contexts in .get()\r\n\r\n* introduce month code map\r\n\r\n\r\n* Special case twelve month solar calendars",
+          "timestamp": "2022-06-17T23:42:35Z",
+          "tree_id": "62ec76abf0eef9758234b3d62648bb2e7d3973da",
+          "url": "https://github.com/unicode-org/icu4x/commit/3736032598204a86e90273c34460160be5767b5c"
+        },
+        "date": 1655509469945,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 2734565,
             "unit": "bytes",
             "biggerIsBetter": false
           }

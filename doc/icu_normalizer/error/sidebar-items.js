@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["NormalizerError",""]]});
+initSidebarItems({"enum":[["NormalizerError","Normalizer-specific error"]]});

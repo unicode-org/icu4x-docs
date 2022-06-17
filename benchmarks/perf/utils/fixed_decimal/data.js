@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655374261323,
+  "lastUpdate": 1655481504873,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -32249,6 +32249,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 100,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8900f2281922e06988c6f08bd3a21531c145c0e3",
+          "message": "Add ComposingNormalizer for NFC, NFKC, and UTS 46 (#2039)\n\nPass normalization conformance tests.\r\n\r\nIncludes regenerated data that fixes an off-by-one error at the decomposition table supplement boundary. Also includes clippy lints and documentation for public items.\r\n\r\nCloses #1979\r\nCloses #1994",
+          "timestamp": "2022-06-16T19:51:41+03:00",
+          "tree_id": "6457b0b64fa92cf6afd61ad43bb0bf66583a3710",
+          "url": "https://github.com/unicode-org/icu4x/commit/8900f2281922e06988c6f08bd3a21531c145c0e3"
+        },
+        "date": 1655399149883,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 132138,
+            "range": "± 6094",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 31340,
+            "range": "± 1273",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72227,
+            "range": "± 5747",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 249,
+            "range": "± 19",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 117,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 93,
+            "range": "± 3",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ccb1b6fbf8f01ba3c2da46ce06417d5187099e2d",
+          "message": "Stabilizing `crabbake` as `databake` (#2068)\n\n* databake\r\n\r\n* fix\r\n\r\n* fmt\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* cargo.lock",
+          "timestamp": "2022-06-17T15:45:14Z",
+          "tree_id": "36e6b16d9c649ca3375d2619d1e40b1fafa41f14",
+          "url": "https://github.com/unicode-org/icu4x/commit/ccb1b6fbf8f01ba3c2da46ce06417d5187099e2d"
+        },
+        "date": 1655481473195,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 148132,
+            "range": "± 2424",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 34264,
+            "range": "± 357",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 86140,
+            "range": "± 2287",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 262,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 124,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 99,
+            "range": "± 2",
             "unit": "ns/iter"
           }
         ]

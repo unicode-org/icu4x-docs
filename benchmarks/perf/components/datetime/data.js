@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655374323339,
+  "lastUpdate": 1655481488138,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -40679,6 +40679,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 6829,
             "range": "± 353",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8900f2281922e06988c6f08bd3a21531c145c0e3",
+          "message": "Add ComposingNormalizer for NFC, NFKC, and UTS 46 (#2039)\n\nPass normalization conformance tests.\r\n\r\nIncludes regenerated data that fixes an off-by-one error at the decomposition table supplement boundary. Also includes clippy lints and documentation for public items.\r\n\r\nCloses #1979\r\nCloses #1994",
+          "timestamp": "2022-06-16T19:51:41+03:00",
+          "tree_id": "6457b0b64fa92cf6afd61ad43bb0bf66583a3710",
+          "url": "https://github.com/unicode-org/icu4x/commit/8900f2281922e06988c6f08bd3a21531c145c0e3"
+        },
+        "date": 1655399205810,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 130939,
+            "range": "± 2321",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1307655,
+            "range": "± 20914",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 250247,
+            "range": "± 3886",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 124661,
+            "range": "± 2259",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 136521,
+            "range": "± 2075",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 129902,
+            "range": "± 4369",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 139274,
+            "range": "± 2238",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 243125,
+            "range": "± 4082",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 258443,
+            "range": "± 4642",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 246360,
+            "range": "± 3520",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 265911,
+            "range": "± 3729",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 7132,
+            "range": "± 125",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ccb1b6fbf8f01ba3c2da46ce06417d5187099e2d",
+          "message": "Stabilizing `crabbake` as `databake` (#2068)\n\n* databake\r\n\r\n* fix\r\n\r\n* fmt\r\n\r\n* fix\r\n\r\n* fix\r\n\r\n* cargo.lock",
+          "timestamp": "2022-06-17T15:45:14Z",
+          "tree_id": "36e6b16d9c649ca3375d2619d1e40b1fafa41f14",
+          "url": "https://github.com/unicode-org/icu4x/commit/ccb1b6fbf8f01ba3c2da46ce06417d5187099e2d"
+        },
+        "date": 1655481461017,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 115145,
+            "range": "± 109",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1095056,
+            "range": "± 887",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 208407,
+            "range": "± 1356",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 110692,
+            "range": "± 339",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 121006,
+            "range": "± 101",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 114856,
+            "range": "± 99",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 123558,
+            "range": "± 71",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 203430,
+            "range": "± 206",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 216223,
+            "range": "± 209",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 208480,
+            "range": "± 220",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 222482,
+            "range": "± 384",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5827,
+            "range": "± 158",
             "unit": "ns/iter"
           }
         ]

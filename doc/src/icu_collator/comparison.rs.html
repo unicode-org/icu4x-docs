@@ -863,6 +863,23 @@
 <span id="858">858</span>
 <span id="859">859</span>
 <span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -887,7 +904,6 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CollationSpecialPrimariesV1Marker</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AlternateHandling</span>, <span class="ident">CollatorOptions</span>, <span class="ident">MaxVariable</span>, <span class="ident">Strength</span>};
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
-<span class="kw">use</span> <span class="ident">core::char</span>::{<span class="ident">decode_utf16</span>, <span class="ident">DecodeUtf16Error</span>, <span class="ident">REPLACEMENT_CHARACTER</span>};
 <span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
@@ -900,6 +916,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider::ResourceOptions</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::ResourceProvider</span>;
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
+<span class="kw">use</span> <span class="ident">utf16_iter::Utf16CharsEx</span>;
 <span class="kw">use</span> <span class="ident">utf8_iter::Utf8CharsEx</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ule::AsULE</span>;
 
@@ -922,13 +939,7 @@
     }
 }
 
-<span class="comment">// Hoisted to function, because the compiler doesn&#39;t like having</span>
-<span class="comment">// to identical closures.</span>
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">fn</span> <span class="ident">utf16_error_to_replacement</span>(<span class="ident">r</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">char</span>, <span class="ident">DecodeUtf16Error</span><span class="op">&gt;</span>) -&gt; <span class="ident">char</span> {
-    <span class="ident">r</span>.<span class="ident">unwrap_or</span>(<span class="ident">REPLACEMENT_CHARACTER</span>)
-}
-
+<span class="doccomment">/// Compares strings according to culturally-relevant ordering.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Collator</span> {
     <span class="ident">special_primaries</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationSpecialPrimariesV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">root</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationDataV1Marker</span><span class="op">&gt;</span>,
@@ -944,6 +955,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Collator</span> {
+    <span class="doccomment">/// Instantiates a collator for a given locale with the given options</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>(
         <span class="ident">locale</span>: <span class="ident">T</span>,
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
@@ -1134,21 +1146,20 @@
         })
     }
 
+    <span class="doccomment">/// Compare potentially-invalid UTF-16 slices. Unpaired surrogates</span>
+    <span class="doccomment">/// are compared as if each one was a REPLACEMENT CHARACTER.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare_utf16</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>], <span class="ident">right</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="ident">Ordering</span> {
         <span class="comment">// TODO(#2010): Identical prefix skipping not implemented.</span>
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">compare_impl</span>(
-            <span class="ident">decode_utf16</span>(<span class="ident">left</span>.<span class="ident">iter</span>().<span class="ident">copied</span>()).<span class="ident">map</span>(<span class="ident">utf16_error_to_replacement</span>),
-            <span class="ident">decode_utf16</span>(<span class="ident">right</span>.<span class="ident">iter</span>().<span class="ident">copied</span>()).<span class="ident">map</span>(<span class="ident">utf16_error_to_replacement</span>),
-        );
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">compare_impl</span>(<span class="ident">left</span>.<span class="ident">chars</span>(), <span class="ident">right</span>.<span class="ident">chars</span>());
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">strength</span>() <span class="op">==</span> <span class="ident">Strength::Identical</span> <span class="op">&amp;&amp;</span> <span class="ident">ret</span> <span class="op">==</span> <span class="ident">Ordering::Equal</span> {
             <span class="kw">return</span> <span class="ident">Decomposition::new</span>(
-                <span class="ident">decode_utf16</span>(<span class="ident">left</span>.<span class="ident">iter</span>().<span class="ident">copied</span>()).<span class="ident">map</span>(<span class="ident">utf16_error_to_replacement</span>),
+                <span class="ident">left</span>.<span class="ident">chars</span>(),
                 <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
                 <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>,
             )
             .<span class="ident">cmp</span>(<span class="ident">Decomposition::new</span>(
-                <span class="ident">decode_utf16</span>(<span class="ident">right</span>.<span class="ident">iter</span>().<span class="ident">copied</span>()).<span class="ident">map</span>(<span class="ident">utf16_error_to_replacement</span>),
+                <span class="ident">right</span>.<span class="ident">chars</span>(),
                 <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
                 <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
                 <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>,
@@ -1157,6 +1168,7 @@
         <span class="ident">ret</span>
     }
 
+    <span class="doccomment">/// Compare guaranteed-valid UTF-8 slices.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">right</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">Ordering</span> {
         <span class="comment">// TODO(#2010): Identical prefix skipping not implemented.</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">compare_impl</span>(<span class="ident">left</span>.<span class="ident">chars</span>(), <span class="ident">right</span>.<span class="ident">chars</span>());
@@ -1177,6 +1189,9 @@
         <span class="ident">ret</span>
     }
 
+    <span class="doccomment">/// Compare potentially-valid UTF-8 slices. Invalid input is compared</span>
+    <span class="doccomment">/// as if errors had been replaced with REPLACEMENT CHARACTERs according</span>
+    <span class="doccomment">/// to the WHATWG Encoding Standard.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare_utf8</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">right</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Ordering</span> {
         <span class="comment">// TODO(#2010): Identical prefix skipping not implemented.</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">compare_impl</span>(<span class="ident">left</span>.<span class="ident">chars</span>(), <span class="ident">right</span>.<span class="ident">chars</span>());
@@ -1235,22 +1250,31 @@
         <span class="comment">// The algorithm comes from CollationCompare::compareUpToQuaternary in ICU4C.</span>
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">any_variable</span> <span class="op">=</span> <span class="bool-val">false</span>;
+        <span class="comment">// Attribute belongs closer to `unwrap`, but</span>
+        <span class="comment">// https://github.com/rust-lang/rust/issues/15701</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
         <span class="kw">let</span> <span class="ident">variable_top</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">alternate_handling</span>() <span class="op">==</span> <span class="ident">AlternateHandling::NonIgnorable</span> {
             <span class="number">0</span>
         } <span class="kw">else</span> {
             <span class="comment">// +1 so that we can use &quot;&lt;&quot; and primary ignorables test out early.</span>
             <span class="self">self</span>.<span class="ident">special_primaries</span>
                 .<span class="ident">as_ref</span>()
+                <span class="comment">// `unwrap()` is OK, because we&#39;ve ensured in the constructor that value</span>
+                <span class="comment">// is `Some` if we have alternate handling.</span>
                 .<span class="ident">unwrap</span>()
                 .<span class="ident">get</span>()
                 .<span class="ident">last_primary_for_group</span>(<span class="self">self</span>.<span class="ident">options</span>.<span class="ident">max_variable</span>())
                 <span class="op">+</span> <span class="number">1</span>
         };
 
+        <span class="comment">// Attribute belongs on inner expression, but</span>
+        <span class="comment">// https://github.com/rust-lang/rust/issues/15701</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
         <span class="kw">let</span> <span class="ident">numeric_primary</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">numeric</span>() {
             <span class="prelude-val">Some</span>(
                 <span class="self">self</span>.<span class="ident">special_primaries</span>
                     .<span class="ident">as_ref</span>()
+                    <span class="comment">// `unwrap` is OK, because we&#39;ve ensured `Some` in the constructor</span>
                     .<span class="ident">unwrap</span>()
                     .<span class="ident">get</span>()
                     .<span class="ident">numeric_primary</span>,
@@ -1259,12 +1283,15 @@
             <span class="prelude-val">None</span>
         };
 
+        <span class="comment">// Attribute belongs on inner expression, but</span>
+        <span class="comment">// https://github.com/rust-lang/rust/issues/15701</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">left</span> <span class="op">=</span> <span class="ident">CollationElements::new</span>(
             <span class="ident">left_chars</span>,
             <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">get</span>(),
             <span class="ident">tailoring</span>.<span class="ident">get</span>(),
             <span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>; <span class="ident">JAMO_COUNT</span>]<span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="self">self</span>.<span class="ident">jamo</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">as_ule_slice</span>())
-                .<span class="ident">unwrap</span>(), <span class="comment">// length already validated</span>
+                .<span class="ident">unwrap</span>(), <span class="comment">// `unwrap` OK, because length already validated</span>
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">secondaries</span>,
             <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
             <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
@@ -1272,12 +1299,15 @@
             <span class="ident">numeric_primary</span>,
             <span class="self">self</span>.<span class="ident">lithuanian_dot_above</span>,
         );
+        <span class="comment">// Attribute belongs on inner expression, but</span>
+        <span class="comment">// https://github.com/rust-lang/rust/issues/15701</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">right</span> <span class="op">=</span> <span class="ident">CollationElements::new</span>(
             <span class="ident">right_chars</span>,
             <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">get</span>(),
             <span class="ident">tailoring</span>.<span class="ident">get</span>(),
             <span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="op">&lt;</span><span class="ident">u32</span> <span class="kw">as</span> <span class="ident">AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>; <span class="ident">JAMO_COUNT</span>]<span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="self">self</span>.<span class="ident">jamo</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">as_ule_slice</span>())
-                .<span class="ident">unwrap</span>(), <span class="comment">// length already validated</span>
+                .<span class="ident">unwrap</span>(), <span class="comment">// `unwrap` OK, because length already validated</span>
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>().<span class="ident">secondaries</span>,
             <span class="self">self</span>.<span class="ident">decompositions</span>.<span class="ident">get</span>(),
             <span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">get</span>(),
@@ -1380,8 +1410,8 @@
         <span class="comment">// Sadly, we end up pushing the sentinel value, which means these</span>
         <span class="comment">// `SmallVec`s allocate more often than if we didn&#39;t actually</span>
         <span class="comment">// store the sentinel.</span>
-        <span class="macro">debug_assert_eq!</span>(<span class="ident">left_ces</span>[<span class="ident">left_ces</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>], <span class="ident">NO_CE</span>);
-        <span class="macro">debug_assert_eq!</span>(<span class="ident">right_ces</span>[<span class="ident">right_ces</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>], <span class="ident">NO_CE</span>);
+        <span class="macro">debug_assert_eq!</span>(<span class="ident">left_ces</span>.<span class="ident">last</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">NO_CE</span>));
+        <span class="macro">debug_assert_eq!</span>(<span class="ident">right_ces</span>.<span class="ident">last</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">NO_CE</span>));
 
         <span class="comment">// Note: `unwrap_or_default` in the iterations below should never</span>
         <span class="comment">// actually end up using the &quot;_or_default&quot; part, because the sentinel</span>
@@ -1441,6 +1471,8 @@
                             <span class="macro">debug_assert_ne!</span>(<span class="ident">left_primary</span>, <span class="ident">NO_CE_PRIMARY</span>);
                         }
                         <span class="kw">let</span> <span class="ident">left_new_remaining</span> <span class="op">=</span> <span class="ident">left_iter</span>.<span class="ident">as_slice</span>();
+                        <span class="comment">// Index in range by construction</span>
+                        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
                         <span class="kw">let</span> <span class="ident">left_prefix</span> <span class="op">=</span>
                             <span class="kw-2">&amp;</span><span class="ident">left_remaining</span>[..<span class="ident">left_remaining</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> <span class="ident">left_new_remaining</span>.<span class="ident">len</span>()];
                         <span class="ident">left_remaining</span> <span class="op">=</span> <span class="ident">left_new_remaining</span>;
@@ -1454,6 +1486,8 @@
                             <span class="macro">debug_assert_ne!</span>(<span class="ident">right_primary</span>, <span class="ident">NO_CE_PRIMARY</span>);
                         }
                         <span class="kw">let</span> <span class="ident">right_new_remaining</span> <span class="op">=</span> <span class="ident">right_iter</span>.<span class="ident">as_slice</span>();
+                        <span class="comment">// Index in range by construction</span>
+                        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
                         <span class="kw">let</span> <span class="ident">right_prefix</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">right_remaining</span>
                             [..<span class="ident">right_remaining</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> <span class="ident">right_new_remaining</span>.<span class="ident">len</span>()];
                         <span class="ident">right_remaining</span> <span class="op">=</span> <span class="ident">right_new_remaining</span>;

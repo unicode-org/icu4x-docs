@@ -318,12 +318,75 @@
 <span id="313">313</span>
 <span id="314">314</span>
 <span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="comment">// The reordering algorithms in this file are adapted from ICU4C and,</span>
 <span class="comment">// therefore, are subject to the ICU license as described in LICENSE.</span>
+
+<span class="doccomment">//! Data structs for the collator</span>
 
 <span class="kw">use</span> <span class="ident">icu_char16trie::char16trie::Char16TrieIterator</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrie</span>;
@@ -374,17 +437,25 @@
     <span class="ident">primary</span> <span class="op">|</span> ((<span class="ident">p</span> <span class="op">&amp;</span> <span class="number">0xFF000000</span>) <span class="op">+</span> ((<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>))
 }
 
+<span class="doccomment">/// The main collation data either for the root or for a tailoring</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationDataV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/data@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>), <span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Mapping from `char` to `CollationElement32` (represented</span>
+    <span class="doccomment">/// as its `u32` bits).</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// `CollationElement`s used in expansions and offset CE32s</span>
+    <span class="doccomment">/// (represented as their `u64` bits)</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">ces</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// `CollationElement32`s used in expansions and as defaults</span>
+    <span class="doccomment">/// for digits when the numeric mode is not in use</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">ce32s</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Defaults and tries for prefix and contraction matching</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">contexts</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u16</span><span class="op">&gt;</span>,
 }
@@ -427,6 +498,7 @@
         <span class="ident">index</span>: <span class="ident">usize</span>,
     ) -&gt; (<span class="ident">CollationElement32</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">slice</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">contexts</span>.<span class="ident">get_subslice</span>(<span class="ident">index</span>..<span class="self">self</span>.<span class="ident">contexts</span>.<span class="ident">len</span>()) {
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
             <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">len</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="number">2</span> {
                 <span class="comment">// `unwrap` must succeed due to the length check above.</span>
                 <span class="kw">let</span> <span class="ident">first</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>();
@@ -469,38 +541,78 @@
     }
 }
 
+<span class="doccomment">/// Secondary weights for the start of the Combining Diacritics block.</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationDiacriticsV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/dia@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>), <span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationDiacriticsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Secondary weights for characters starting from U+0300 up</span>
+    <span class="doccomment">/// to but not including U+034F. May be shorter than that;</span>
+    <span class="doccomment">/// zero-length when a tailoring opts out of using this</span>
+    <span class="doccomment">/// feature altogether.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">secondaries</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u16</span><span class="op">&gt;</span>,
 }
 
+<span class="doccomment">/// `CollationElement32`s for the Hangul Jamo Unicode Block</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationJamoV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/jamo@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>), <span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationJamoV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// `CollationElement32`s (as `u32`s) for the Hangul Jamo Unicode Block.</span>
+    <span class="doccomment">/// The length must be equal to the size of the block (256).</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">ce32s</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
 }
 
+<span class="doccomment">/// Script reordering data</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationReorderingV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/reord@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>), <span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationReorderingV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Limit of last reordered range. 0 if no reordering or no split bytes.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Comment from ICU4C&#39;s `collationsettings.h`</span>
     <span class="kw">pub</span> <span class="ident">min_high_no_reorder</span>: <span class="ident">u32</span>,
+    <span class="doccomment">/// 256-byte table for reordering permutation of primary lead</span>
+    <span class="doccomment">/// bytes; NULL if no reordering. A 0 entry at a non-zero index means</span>
+    <span class="doccomment">/// that the primary lead byte is &quot;split&quot; (there are different offsets</span>
+    <span class="doccomment">/// for primaries that share that lead byte) and the reordering offset</span>
+    <span class="doccomment">/// must be determined via the reorderRanges.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Comment from ICU4C&#39;s `collationsettings.h`</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">reorder_table</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u8</span><span class="op">&gt;</span>, <span class="comment">// len always 256</span>
+    <span class="doccomment">/// Primary-weight ranges for script reordering, to be used by</span>
+    <span class="doccomment">/// reorder(p) for split-reordered primary lead bytes.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Each entry is a (limit, offset) pair. The upper 16 bits of the</span>
+    <span class="doccomment">/// entry are the upper 16 bits of the exclusive primary limit of</span>
+    <span class="doccomment">/// a range. Primaries between the previous limit and this one have</span>
+    <span class="doccomment">/// their lead bytes modified by the signed offset (-0xff..+0xff)</span>
+    <span class="doccomment">/// stored in the lower 16 bits.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// CollationData::makeReorderRanges() writes a full list where the</span>
+    <span class="doccomment">/// first range (at least for terminators and separators) has a 0</span>
+    <span class="doccomment">/// offset. The last range has a non-zero offset. minHighNoReorder</span>
+    <span class="doccomment">/// is set to the limit of that last range.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// In the settings object, the initial ranges before the first</span>
+    <span class="doccomment">/// split lead byte are omitted for efficiency; they are handled</span>
+    <span class="doccomment">/// by reorder(p) via the reorderTable. If there are no</span>
+    <span class="doccomment">/// split-reordered lead bytes, then no ranges are needed.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Comment from ICU4C&#39;s `collationsettings.h`; names refer to</span>
+    <span class="doccomment">/// ICU4C.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">reorder_ranges</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">CollationReorderingV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reorder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">primary</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">reorder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">primary</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">reorder_table</span>.<span class="ident">get</span>((<span class="ident">primary</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">24</span>) <span class="kw">as</span> <span class="ident">usize</span>) {
             <span class="kw">if</span> <span class="ident">b</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">primary</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">NO_CE_PRIMARY</span> {
                 (<span class="ident">u32::from</span>(<span class="ident">b</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>) <span class="op">|</span> (<span class="ident">primary</span> <span class="op">&amp;</span> <span class="number">0x00FFFFFF</span>)
@@ -531,9 +643,12 @@
     }
 }
 
+<span class="doccomment">/// Each non-alias collation that the data provider knows</span>
+<span class="doccomment">/// about explicitly has an data entry at least for this</span>
+<span class="doccomment">/// struct.</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationMetadataV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/meta@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>), <span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationMetadataV1</span> {
     <span class="doccomment">/// See the mask constants in the `impl` block for the</span>
@@ -614,17 +729,24 @@
     }
 }
 
+<span class="doccomment">/// Special primaries associated with the root collation</span>
 <span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">CollationSpecialPrimariesV1Marker</span> <span class="op">=</span> <span class="string">&quot;collator/prim@1&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">crabbake::Bakeable</span>), <span class="ident">crabbake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>), <span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_collator::provider</span>))]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CollationSpecialPrimariesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The primaries corresponding to `MaxVariable`</span>
+    <span class="doccomment">/// character classes packed so that each fits in</span>
+    <span class="doccomment">/// 16 bits. Length must match the number of enum</span>
+    <span class="doccomment">/// variants in `MaxVariable`, currently 4.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
     <span class="kw">pub</span> <span class="ident">last_primaries</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">u16</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// The high 8 bits of the numeric primary</span>
     <span class="kw">pub</span> <span class="ident">numeric_primary</span>: <span class="ident">u8</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">CollationSpecialPrimariesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">last_primary_for_group</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">max_variable</span>: <span class="ident">MaxVariable</span>) -&gt; <span class="ident">u32</span> {
         <span class="comment">// `unwrap` is OK, because `Collator::try_new` validates the length.</span>
         <span class="comment">//</span>

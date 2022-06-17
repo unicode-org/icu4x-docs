@@ -1,0 +1,1 @@
+initSidebarItems({"derive":[["Bake",""]],"macro":[["test_bake","This macro tests that an expression evaluates to a value that bakes to the same expression."]],"struct":[["CrateEnv","A collection of crates that are required for the evaluation of some expression."]],"trait":[["Bake","The `Bake` trait allows a piece of data to write itself into a Rust expression."]]});

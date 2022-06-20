@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ContextsV1",""],["FormatWidthsV1",""],["StandAloneWidthsV1",""],["SymbolsV1",""]]});
+initSidebarItems({"enum":[["SymbolsV1",""]],"struct":[["ContextsV1",""],["FormatWidthsV1",""],["StandAloneWidthsV1",""]]});

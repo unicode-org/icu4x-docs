@@ -1596,6 +1596,15 @@
 <span id="1591">1591</span>
 <span id="1592">1592</span>
 <span id="1593">1593</span>
+<span id="1594">1594</span>
+<span id="1595">1595</span>
+<span id="1596">1596</span>
+<span id="1597">1597</span>
+<span id="1598">1598</span>
+<span id="1599">1599</span>
+<span id="1600">1600</span>
+<span id="1601">1601</span>
+<span id="1602">1602</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1745,9 +1754,13 @@
 <span class="kw">const</span> <span class="ident">HANGUL_L_BASE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1100</span>;
 <span class="doccomment">/// Vowel jamo base</span>
 <span class="kw">const</span> <span class="ident">HANGUL_V_BASE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1161</span>;
-<span class="doccomment">/// Trail jamo base</span>
+<span class="doccomment">/// Trail jamo base (deliberately off by one to account for the absence of a trail)</span>
 <span class="kw">const</span> <span class="ident">HANGUL_T_BASE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x11A7</span>;
-<span class="doccomment">/// Trail jamo count</span>
+<span class="doccomment">/// Lead jamo count</span>
+<span class="kw">const</span> <span class="ident">HANGUL_L_COUNT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">19</span>;
+<span class="doccomment">/// Vowel jamo count</span>
+<span class="kw">const</span> <span class="ident">HANGUL_V_COUNT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">21</span>;
+<span class="doccomment">/// Trail jamo count (deliberately off by one to account for the absence of a trail)</span>
 <span class="kw">const</span> <span class="ident">HANGUL_T_COUNT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">28</span>;
 <span class="doccomment">/// Vowel jamo count times trail jamo count</span>
 <span class="kw">const</span> <span class="ident">HANGUL_N_COUNT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">588</span>;
@@ -1828,6 +1841,11 @@
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
 <span class="kw">fn</span> <span class="ident">in_inclusive_range</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">start</span>: <span class="ident">char</span>, <span class="ident">end</span>: <span class="ident">char</span>) -&gt; <span class="ident">bool</span> {
     <span class="ident">u32::from</span>(<span class="ident">c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">u32::from</span>(<span class="ident">start</span>)) <span class="op">&lt;</span><span class="op">=</span> (<span class="ident">u32::from</span>(<span class="ident">end</span>) <span class="op">-</span> <span class="ident">u32::from</span>(<span class="ident">start</span>))
+}
+
+<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+<span class="kw">fn</span> <span class="ident">in_range_len</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">start</span>: <span class="ident">u32</span>, <span class="ident">len</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
+    <span class="ident">u32::from</span>(<span class="ident">c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">start</span>) <span class="op">&lt;</span> <span class="ident">len</span>
 }
 
 <span class="doccomment">/// Pack a `char` and a `CanonicalCombiningClass` in</span>
@@ -2539,8 +2557,8 @@
                     }
                     <span class="ident">CompositionAction::HangulVowel</span> =&gt; {
                         <span class="comment">// Unicode Standard 14.0, page 145</span>
-                        <span class="macro">debug_assert!</span>(<span class="ident">in_inclusive_range</span>(<span class="ident">starter</span>, <span class="string">&#39;\u{1100}&#39;</span>, <span class="string">&#39;\u{1112}&#39;</span>));
-                        <span class="macro">debug_assert!</span>(<span class="ident">in_inclusive_range</span>(<span class="ident">next_starter</span>, <span class="string">&#39;\u{1161}&#39;</span>, <span class="string">&#39;\u{1175}&#39;</span>));
+                        <span class="macro">debug_assert!</span>(<span class="ident">in_range_len</span>(<span class="ident">starter</span>, <span class="ident">HANGUL_L_BASE</span>, <span class="ident">HANGUL_L_COUNT</span>));
+                        <span class="macro">debug_assert!</span>(<span class="ident">in_range_len</span>(<span class="ident">next_starter</span>, <span class="ident">HANGUL_V_BASE</span>, <span class="ident">HANGUL_V_COUNT</span>));
                         <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>) <span class="op">-</span> <span class="ident">HANGUL_L_BASE</span>;
                         <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">next_starter</span>) <span class="op">-</span> <span class="ident">HANGUL_V_BASE</span>;
                         <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">l</span> <span class="op">*</span> <span class="ident">HANGUL_N_COUNT</span> <span class="op">+</span> <span class="ident">v</span> <span class="op">*</span> <span class="ident">HANGUL_T_COUNT</span>;
@@ -2563,11 +2581,11 @@
             <span class="comment">// `buffer_pos` may be non-zero for NFKC and parenthesized Hangul.</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">potential</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">buffer</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">buffer_pos</span>) {
                 <span class="kw">let</span> <span class="ident">potential_c</span> <span class="op">=</span> <span class="ident">potential</span>.<span class="ident">character</span>();
-                <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">potential_c</span>, <span class="string">&#39;\u{1161}&#39;</span>, <span class="string">&#39;\u{1175}&#39;</span>) {
+                <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">potential_c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_V_BASE</span>);
+                <span class="kw">if</span> <span class="ident">v</span> <span class="op">&lt;</span> <span class="ident">HANGUL_V_COUNT</span> {
                     <span class="comment">// Hangul vowel</span>
-                    <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">starter</span>, <span class="string">&#39;\u{1100}&#39;</span>, <span class="string">&#39;\u{1112}&#39;</span>) {
-                        <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>) <span class="op">-</span> <span class="ident">HANGUL_L_BASE</span>;
-                        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">potential_c</span>) <span class="op">-</span> <span class="ident">HANGUL_V_BASE</span>;
+                    <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_L_BASE</span>);
+                    <span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span> <span class="ident">HANGUL_L_COUNT</span> {
                         <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">l</span> <span class="op">*</span> <span class="ident">HANGUL_N_COUNT</span> <span class="op">+</span> <span class="ident">v</span> <span class="op">*</span> <span class="ident">HANGUL_T_COUNT</span>;
                         <span class="comment">// Safe, because the inputs are known to be in range.</span>
                         <span class="ident">starter</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">char::from_u32_unchecked</span>(<span class="ident">HANGUL_S_BASE</span> <span class="op">+</span> <span class="ident">lv</span>) };
@@ -2581,9 +2599,9 @@
                 <span class="kw">let</span> <span class="ident">potential_c</span> <span class="op">=</span> <span class="ident">potential</span>.<span class="ident">character</span>();
                 <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">potential_c</span>, <span class="string">&#39;\u{11A8}&#39;</span>, <span class="string">&#39;\u{11C2}&#39;</span>) {
                     <span class="comment">// Hangul trail</span>
-                    <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>) <span class="op">-</span> <span class="ident">HANGUL_S_BASE</span>;
+                    <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_S_BASE</span>);
                     <span class="kw">if</span> <span class="ident">lv</span> <span class="op">&lt;</span> <span class="ident">HANGUL_S_COUNT</span> <span class="op">&amp;&amp;</span> <span class="ident">lv</span> <span class="op">%</span> <span class="ident">HANGUL_T_COUNT</span> <span class="op">==</span> <span class="number">0</span> {
-                        <span class="kw">let</span> <span class="ident">lvt</span> <span class="op">=</span> <span class="ident">lv</span> <span class="op">+</span> (<span class="ident">u32::from</span>(<span class="ident">potential_c</span>) <span class="op">-</span> <span class="ident">HANGUL_T_BASE</span>);
+                        <span class="kw">let</span> <span class="ident">lvt</span> <span class="op">=</span> <span class="ident">lv</span> <span class="op">+</span> <span class="ident">u32::from</span>(<span class="ident">potential_c</span>) <span class="op">-</span> <span class="ident">HANGUL_T_BASE</span>;
                         <span class="comment">// Safe, because the inputs are known to be in range.</span>
                         <span class="ident">starter</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">char::from_u32_unchecked</span>(<span class="ident">HANGUL_S_BASE</span> <span class="op">+</span> <span class="ident">lvt</span>) };
 
@@ -2677,7 +2695,7 @@
                 }
                 <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">pending_starter</span>, <span class="string">&#39;\u{11A8}&#39;</span>, <span class="string">&#39;\u{11C2}&#39;</span>) {
                     <span class="comment">// Hangul trail</span>
-                    <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>) <span class="op">-</span> <span class="ident">HANGUL_S_BASE</span>;
+                    <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_S_BASE</span>);
                     <span class="kw">if</span> <span class="ident">lv</span> <span class="op">&lt;</span> <span class="ident">HANGUL_S_COUNT</span> <span class="op">&amp;&amp;</span> <span class="ident">lv</span> <span class="op">%</span> <span class="ident">HANGUL_T_COUNT</span> <span class="op">==</span> <span class="number">0</span> {
                         <span class="comment">// We need to loop back in order to uphold invariants in case</span>
                         <span class="comment">// the character after decomposes to a non-starter.</span>
@@ -2693,9 +2711,9 @@
                     <span class="comment">// Won&#39;t combine in another way anyway</span>
                     <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
                 }
-                <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">pending_starter</span>, <span class="string">&#39;\u{1161}&#39;</span>, <span class="string">&#39;\u{1175}&#39;</span>) {
+                <span class="kw">if</span> <span class="ident">in_range_len</span>(<span class="ident">pending_starter</span>, <span class="ident">HANGUL_V_BASE</span>, <span class="ident">HANGUL_V_COUNT</span>) {
                     <span class="comment">// Hangul vowel</span>
-                    <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">starter</span>, <span class="string">&#39;\u{1100}&#39;</span>, <span class="string">&#39;\u{1112}&#39;</span>) {
+                    <span class="kw">if</span> <span class="ident">in_range_len</span>(<span class="ident">starter</span>, <span class="ident">HANGUL_L_BASE</span>, <span class="ident">HANGUL_L_COUNT</span>) {
                         <span class="comment">// We need to loop back in order to uphold invariants in case</span>
                         <span class="comment">// the character after decomposes to a non-starter.</span>
                         <span class="ident">undecomposed_starter</span> <span class="op">=</span> <span class="ident">pending_starter</span>;

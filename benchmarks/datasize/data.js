@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655992509995,
+  "lastUpdate": 1656006412206,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -18148,6 +18148,66 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 2734513,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dminor@mozilla.com",
+            "name": "Dan Minor",
+            "username": "dminor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3e7d4e563cb7e869947ad570a3f8f3ee961c393e",
+          "message": "Split date and time data keys. (#2093)\n\n* Split date and time data keys.\r\n\r\nThis is a first step towards fixing #380.\r\n\r\n* Revert accidental change to work_log.rs\r\n\r\n* Update readme\r\n\r\n* Address review feedback",
+          "timestamp": "2022-06-23T13:23:39-04:00",
+          "tree_id": "888beb4b69bcdcb2defab92c6f9c53aaad80b65a",
+          "url": "https://github.com/unicode-org/icu4x/commit/3e7d4e563cb7e869947ad570a3f8f3ee961c393e"
+        },
+        "date": 1656005135478,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 2737318,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6d0d0068c1b840eafdd8a4351e0112995eab03fa",
+          "message": "Add more size tests to locid (#2078)",
+          "timestamp": "2022-06-23T12:44:18-05:00",
+          "tree_id": "c7591c753d0d4022a35d226aa294545aa84e957e",
+          "url": "https://github.com/unicode-org/icu4x/commit/6d0d0068c1b840eafdd8a4351e0112995eab03fa"
+        },
+        "date": 1656006382645,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 2737318,
             "unit": "bytes",
             "biggerIsBetter": false
           }

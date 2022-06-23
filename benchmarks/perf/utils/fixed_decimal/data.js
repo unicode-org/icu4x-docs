@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1655993270160,
+  "lastUpdate": 1656007054450,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -32909,6 +32909,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 99,
             "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dminor@mozilla.com",
+            "name": "Dan Minor",
+            "username": "dminor"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3e7d4e563cb7e869947ad570a3f8f3ee961c393e",
+          "message": "Split date and time data keys. (#2093)\n\n* Split date and time data keys.\r\n\r\nThis is a first step towards fixing #380.\r\n\r\n* Revert accidental change to work_log.rs\r\n\r\n* Update readme\r\n\r\n* Address review feedback",
+          "timestamp": "2022-06-23T13:23:39-04:00",
+          "tree_id": "888beb4b69bcdcb2defab92c6f9c53aaad80b65a",
+          "url": "https://github.com/unicode-org/icu4x/commit/3e7d4e563cb7e869947ad570a3f8f3ee961c393e"
+        },
+        "date": 1656005731438,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 107983,
+            "range": "± 279",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25104,
+            "range": "± 76",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 63684,
+            "range": "± 64",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 193,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 91,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 74,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6d0d0068c1b840eafdd8a4351e0112995eab03fa",
+          "message": "Add more size tests to locid (#2078)",
+          "timestamp": "2022-06-23T12:44:18-05:00",
+          "tree_id": "c7591c753d0d4022a35d226aa294545aa84e957e",
+          "url": "https://github.com/unicode-org/icu4x/commit/6d0d0068c1b840eafdd8a4351e0112995eab03fa"
+        },
+        "date": 1656007028820,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 122454,
+            "range": "± 460",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 28416,
+            "range": "± 75",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72241,
+            "range": "± 110",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 219,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 103,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 84,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

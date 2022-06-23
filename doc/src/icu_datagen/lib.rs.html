@@ -352,6 +352,11 @@
 <span id="347">347</span>
 <span id="348">348</span>
 <span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -387,7 +392,7 @@
 <span class="doccomment">//! The command line interface is available with the `bin` feature.</span>
 <span class="doccomment">//! ```bash</span>
 <span class="doccomment">//! cargo run --features bin -- \</span>
-<span class="doccomment">//!     --uprops-root /path/to/uprops/root \</span>
+<span class="doccomment">//!     --icu_exports-root /path/to/icu_exports/root \</span>
 <span class="doccomment">//!     --all-keys \</span>
 <span class="doccomment">//!     --locales de,en-AU \</span>
 <span class="doccomment">//!     --format blob \</span>
@@ -416,9 +421,9 @@
 <span class="kw">mod</span> <span class="ident">source</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">transform</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">MISSING_CLDR_ERROR</span>, <span class="ident">MISSING_COLLATION_ERROR</span>, <span class="ident">MISSING_UPROPS_ERROR</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">registry::get_all_keys</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">source</span>::{<span class="ident">SourceData</span>, <span class="ident">TrieType</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">registry::all_keys</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">source</span>::{<span class="ident">CldrLocaleSubset</span>, <span class="ident">IcuTrieType</span>, <span class="ident">SourceData</span>};
 
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen</span>::<span class="kw-2">*</span>;
@@ -431,7 +436,9 @@
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 
 <span class="doccomment">/// Parses a list of human-readable key identifiers and returns a</span>
-<span class="doccomment">/// list of [`ResourceKey`]s. Invalid key names are ignored.</span>
+<span class="doccomment">/// list of [`ResourceKey`]s.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Unknown key names are ignored.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">/// ```</span>
@@ -446,14 +453,16 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">keys</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">strings</span>: <span class="kw-2">&amp;</span>[<span class="ident">S</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">strings</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">AsRef::as_ref</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-    <span class="ident">get_all_keys</span>()
+    <span class="ident">all_keys</span>()
         .<span class="ident">into_iter</span>()
         .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">keys</span>.<span class="ident">contains</span>(<span class="ident">k</span>.<span class="ident">get_path</span>()))
         .<span class="ident">collect</span>()
 }
 
 <span class="doccomment">/// Parses a file of human-readable key identifiers and returns a</span>
-<span class="doccomment">/// list of [`ResourceKey`]s. Invalid key names are ignored.</span>
+<span class="doccomment">/// list of [`ResourceKey`]s.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Unknown key names are ignored.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
@@ -481,14 +490,15 @@
     <span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">BufReader::new</span>(<span class="ident">std::fs::File::open</span>(<span class="ident">path</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>)
         .<span class="ident">lines</span>()
         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">get_all_keys</span>()
+    <span class="prelude-val">Ok</span>(<span class="ident">all_keys</span>()
         .<span class="ident">into_iter</span>()
         .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">keys</span>.<span class="ident">contains</span>(<span class="ident">k</span>.<span class="ident">get_path</span>()))
         .<span class="ident">collect</span>())
 }
 
-<span class="doccomment">/// Parses a compiled binary and returns a list of used [`ResourceKey`]s. Unknown</span>
-<span class="doccomment">/// key names are ignored.</span>
+<span class="doccomment">/// Parses a compiled binary and returns a list of used [`ResourceKey`]s used by it.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Unknown key names are ignored.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
@@ -527,7 +537,7 @@
         }
     }
 
-    <span class="prelude-val">Ok</span>(<span class="ident">get_all_keys</span>()
+    <span class="prelude-val">Ok</span>(<span class="ident">all_keys</span>()
         .<span class="ident">into_iter</span>()
         .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">candidates</span>.<span class="ident">contains</span>(<span class="ident">k</span>.<span class="ident">get_path</span>().<span class="ident">as_bytes</span>()))
         .<span class="ident">collect</span>())
@@ -565,9 +575,9 @@
 <span class="doccomment">/// * `locales`: If this is present, only locales that are either `und` or</span>
 <span class="doccomment">///   contained (strictly, i.e. `en` != `en-US`) in the slice will be generated.</span>
 <span class="doccomment">///   Otherwise, all locales supported by the source data will be generated.</span>
-<span class="doccomment">/// * `keys`: The keys for which to generate data. See [`get_all_keys()`].</span>
-<span class="doccomment">/// * `sources`: The underlying source data. CLDR and/or uprops data can be missing if no</span>
-<span class="doccomment">///   requested key requires them, otherwise [`MISSING_CLDR_ERROR`] or [`MISSING_UPROPS_ERROR`]</span>
+<span class="doccomment">/// * `keys`: The keys for which to generate data. See [`all_keys`], [`keys`], [`keys_from_file`], [`keys_from_bin`].</span>
+<span class="doccomment">/// * `sources`: The underlying source data. CLDR and/or ICU data can be missing if no</span>
+<span class="doccomment">///   requested key requires them, otherwise [`MISSING_CLDR_ERROR`] or [`MISSING_ICUEXPORT_ERROR`]</span>
 <span class="doccomment">///   will be returned.</span>
 <span class="doccomment">/// * `out`: The output format and location. See the documentation on [`Out`]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">datagen</span>(

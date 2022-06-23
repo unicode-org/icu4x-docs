@@ -324,18 +324,6 @@
 <span id="319">319</span>
 <span id="320">320</span>
 <span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -344,7 +332,7 @@
 <span class="kw">use</span> <span class="ident">eyre::WrapErr</span>;
 
 <span class="kw">use</span> <span class="ident">icu_codepointtrie::TrieType</span>;
-<span class="kw">use</span> <span class="ident">icu_datagen</span>::{<span class="ident">get_all_keys</span>, <span class="ident">SourceData</span>};
+<span class="kw">use</span> <span class="ident">icu_datagen::SourceData</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::hello_world::HelloWorldV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
@@ -419,8 +407,8 @@
                 .<span class="ident">takes_value</span>(<span class="bool-val">true</span>),
         )
         .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;UPROPS_TAG&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;uprops-tag&quot;</span>)
+            <span class="ident">Arg::with_name</span>(<span class="string">&quot;ICUEXPORT_TAG&quot;</span>)
+                .<span class="ident">long</span>(<span class="string">&quot;icuexport-tag&quot;</span>)
                 .<span class="ident">value_name</span>(<span class="string">&quot;TAG&quot;</span>)
                 .<span class="ident">help</span>(
                     <span class="string">&quot;Download Unicode Properties data from this GitHub tag (https://github.com/unicode-org/icu/tags)\n\
@@ -429,12 +417,12 @@
                 .<span class="ident">takes_value</span>(<span class="bool-val">true</span>),
         )
         .<span class="ident">arg</span>(
-            <span class="ident">Arg::with_name</span>(<span class="string">&quot;UPROPS_ROOT&quot;</span>)
-                .<span class="ident">long</span>(<span class="string">&quot;uprops-root&quot;</span>)
+            <span class="ident">Arg::with_name</span>(<span class="string">&quot;ICUEXPORT_ROOT&quot;</span>)
+                .<span class="ident">long</span>(<span class="string">&quot;icuexport-root&quot;</span>)
                 .<span class="ident">value_name</span>(<span class="string">&quot;PATH&quot;</span>)
                 .<span class="ident">help</span>(
                     <span class="string">&quot;Path to a local icuexportdata_uprops_full directory (see https://github.com/unicode-org/icu/releases).\n\
-                    Ignored if &#39;--uprops-tag is present.\n\
+                    Ignored if &#39;--icuexport-tag is present.\n\
                     Note that some keys do not support versions before release-71-1.&quot;</span>,
                 )
                 .<span class="ident">takes_value</span>(<span class="bool-val">true</span>),
@@ -559,7 +547,7 @@
         .<span class="ident">transpose</span>()<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">selected_keys</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;ALL_KEYS&quot;</span>) {
-        <span class="ident">get_all_keys</span>()
+        <span class="ident">icu_datagen::all_keys</span>()
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">is_present</span>(<span class="string">&quot;HELLO_WORLD&quot;</span>) {
         <span class="macro">vec!</span>[<span class="ident">HelloWorldV1Marker::KEY</span>]
     } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">paths</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">values_of</span>(<span class="string">&quot;KEYS&quot;</span>) {
@@ -575,21 +563,14 @@
         <span class="macro">eyre::bail!</span>(<span class="string">&quot;No keys selected&quot;</span>);
     }
 
-    <span class="kw">let</span> <span class="ident">cldr_locales</span> <span class="op">=</span> <span class="ident">matches</span>
-        .<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>)
-        .<span class="ident">unwrap_or</span>(<span class="string">&quot;full&quot;</span>)
-        .<span class="ident">to_string</span>();
+    <span class="kw">let</span> <span class="ident">cldr_locales</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>) {
+        <span class="prelude-val">Some</span>(<span class="string">&quot;modern&quot;</span>) =&gt; <span class="ident">icu_datagen::CldrLocaleSubset::Modern</span>,
+        <span class="kw">_</span> =&gt; <span class="ident">icu_datagen::CldrLocaleSubset::Full</span>,
+    };
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">SourceData::default</span>();
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
-        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_cldr</span>(
-            <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>()<span class="question-mark">?</span>
-                .<span class="ident">cached_path</span>(
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                        <span class="string">&quot;https://github.com/unicode-org/cldr-json/releases/download/{}/cldr-{}-json-{}.zip&quot;</span>,
-                        <span class="ident">tag</span>, <span class="ident">tag</span>, <span class="ident">cldr_locales</span>))<span class="question-mark">?</span>,
-            <span class="ident">cldr_locales</span>
-            )<span class="question-mark">?</span>;
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_cldr_for_tag</span>(<span class="ident">tag</span>, <span class="ident">cldr_locales</span>)<span class="question-mark">?</span>;
     } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>) {
         <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_cldr</span>(<span class="ident">PathBuf::from</span>(<span class="ident">path</span>), <span class="ident">cldr_locales</span>)<span class="question-mark">?</span>;
     }
@@ -600,15 +581,10 @@
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     };
 
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_TAG&quot;</span>) {
-        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_uprops</span>(
-            <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>()<span class="question-mark">?</span>
-                .<span class="ident">cached_path</span>(
-                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;https://github.com/unicode-org/icu/releases/download/{}/icuexportdata_uprops_full.zip&quot;</span>, <span class="ident">tag</span>)
-            )<span class="question-mark">?</span>,
-            <span class="ident">trie_type</span>)<span class="question-mark">?</span>;
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;UPROPS_ROOT&quot;</span>) {
-        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_uprops</span>(<span class="ident">PathBuf::from</span>(<span class="ident">path</span>), <span class="ident">trie_type</span>)<span class="question-mark">?</span>;
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ICUEXPORT_TAG&quot;</span>) {
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport_for_tag</span>(<span class="ident">tag</span>, <span class="ident">trie_type</span>)<span class="question-mark">?</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ICUEXPORT_ROOT&quot;</span>) {
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport</span>(<span class="ident">PathBuf::from</span>(<span class="ident">path</span>), <span class="ident">trie_type</span>)<span class="question-mark">?</span>;
     }
 
     <span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">matches</span>
@@ -662,8 +638,8 @@
             <span class="ident">icu_datagen::MISSING_CLDR_ERROR</span> =&gt; <span class="macro">eyre::eyre!</span>(
                 <span class="string">&quot;Either --cldr-tag or --cldr-root or --input-from-testdata must be specified&quot;</span>
             ),
-            <span class="ident">icu_datagen::MISSING_UPROPS_ERROR</span> =&gt; <span class="macro">eyre::eyre!</span>(
-                <span class="string">&quot;Either --uprops-tag or --uprops-root or --input-from-testdata must be specified&quot;</span>
+            <span class="ident">icu_datagen::MISSING_ICUEXPORT_ERROR</span> =&gt; <span class="macro">eyre::eyre!</span>(
+                <span class="string">&quot;Either --icuexport-tag or --icuexport-root or --input-from-testdata must be specified&quot;</span>
             ),
             <span class="ident">e</span> =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
         }

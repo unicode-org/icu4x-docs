@@ -246,13 +246,45 @@
 <span id="241">241</span>
 <span id="242">242</span>
 <span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::source::CldrCache</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::source::LocaleSubset</span> <span class="kw">as</span> <span class="ident">CldrLocaleSubset</span>;
 <span class="kw">use</span> <span class="ident">elsa::sync::FrozenMap</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">icu_codepointtrie::TrieType</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">icu_codepointtrie::TrieType</span> <span class="kw">as</span> <span class="ident">IcuTrieType</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 <span class="kw">use</span> <span class="ident">std::any::Any</span>;
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
@@ -267,118 +299,150 @@
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceData</span> {
     <span class="ident">cldr_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">CldrCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">uprops_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TomlCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">coll_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TomlCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">icuexport_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TomlCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">segmenter_paths</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TomlCache</span><span class="op">&gt;</span>,
-    <span class="ident">trie_type</span>: <span class="ident">TrieType</span>,
+    <span class="ident">trie_type</span>: <span class="ident">IcuTrieType</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">SourceData</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">cldr_paths</span>: <span class="prelude-val">None</span>,
-            <span class="ident">uprops_paths</span>: <span class="prelude-val">None</span>,
-            <span class="ident">coll_paths</span>: <span class="prelude-val">None</span>,
+            <span class="ident">icuexport_paths</span>: <span class="prelude-val">None</span>,
             <span class="ident">segmenter_paths</span>: <span class="ident">Arc::new</span>(<span class="ident">TomlCache::new</span>(
-                <span class="ident">AbstractFs::new</span>(
-                    <span class="ident">PathBuf::from</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>)).<span class="ident">join</span>(<span class="string">&quot;data&quot;</span>),
-                    <span class="ident">String::new</span>(),
-                )
-                .<span class="ident">expect</span>(<span class="string">&quot;valid dir&quot;</span>),
+                <span class="ident">AbstractFs::new</span>(<span class="ident">PathBuf::from</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>)).<span class="ident">join</span>(<span class="string">&quot;data&quot;</span>))
+                    .<span class="ident">expect</span>(<span class="string">&quot;valid dir&quot;</span>),
             )),
-            <span class="ident">trie_type</span>: <span class="ident">TrieType::Small</span>,
+            <span class="ident">trie_type</span>: <span class="ident">IcuTrieType::Small</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">SourceData</span> {
-    <span class="doccomment">/// Adds CLDR data to this `DataSource`. The root should point to</span>
-    <span class="doccomment">/// a local `cldr-{version}-json-full.zip` directory (see [GitHub downloads](</span>
-    <span class="doccomment">/// https://github.com/unicode-org/cldr-json/releases)), and `locale_subset`</span>
-    <span class="doccomment">/// is a valid locale subset (currently either &quot;full&quot; or &quot;modern&quot;).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_cldr</span>(<span class="self">self</span>, <span class="ident">root</span>: <span class="ident">PathBuf</span>, <span class="ident">locale_subset</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Adds CLDR data to this `DataSource`. The root should point to a local</span>
+    <span class="doccomment">/// `cldr-{version}-json-{full, modern}.zip` directory or ZIP file (see</span>
+    <span class="doccomment">/// [GitHub releases](https://github.com/unicode-org/cldr-json/releases)).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_cldr</span>(
+        <span class="self">self</span>,
+        <span class="ident">root</span>: <span class="ident">PathBuf</span>,
+        <span class="ident">locale_subset</span>: <span class="ident">CldrLocaleSubset</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">CldrCache::new</span>(
-                <span class="ident">AbstractFs::new</span>(<span class="ident">root</span>, <span class="ident">String::new</span>())<span class="question-mark">?</span>,
+                <span class="ident">AbstractFs::new</span>(<span class="ident">root</span>)<span class="question-mark">?</span>,
                 <span class="ident">locale_subset</span>,
             ))),
             ..<span class="self">self</span>
         })
     }
 
-    <span class="doccomment">/// Adds Unicode Properties data to this `DataSource`. The path should</span>
-    <span class="doccomment">/// point to a local `icuexportdata_uprops_full` directory (see</span>
-    <span class="doccomment">/// [GitHub downloads](https://github.com/unicode-org/icu/releases)).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_uprops</span>(<span class="self">self</span>, <span class="ident">root</span>: <span class="ident">PathBuf</span>, <span class="ident">trie_type</span>: <span class="ident">TrieType</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Adds ICU export data to this `DataSource`. The path should point to a local</span>
+    <span class="doccomment">/// `icuexportdata_uprops_full.zip` directory or ZIP file (see [GitHub releases](</span>
+    <span class="doccomment">/// https://github.com/unicode-org/icu/releases)).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_icuexport</span>(<span class="self">self</span>, <span class="ident">root</span>: <span class="ident">PathBuf</span>, <span class="ident">trie_type</span>: <span class="ident">IcuTrieType</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">uprops_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">TomlCache::new</span>(<span class="ident">AbstractFs::new</span>(
-                <span class="ident">root</span>,
-                <span class="macro">format!</span>(
-                    <span class="string">&quot;icuexportdata_uprops_full/{}/&quot;</span>,
-                    <span class="kw">match</span> <span class="ident">trie_type</span> {
-                        <span class="ident">TrieType::Fast</span> =&gt; <span class="string">&quot;fast&quot;</span>,
-                        <span class="ident">TrieType::Small</span> =&gt; <span class="string">&quot;small&quot;</span>,
-                    }
-                ),
-            )<span class="question-mark">?</span>))),
+            <span class="ident">icuexport_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">TomlCache::new</span>(<span class="ident">AbstractFs::new</span>(<span class="ident">root</span>)<span class="question-mark">?</span>))),
             <span class="ident">trie_type</span>,
             ..<span class="self">self</span>
         })
     }
 
-    <span class="doccomment">/// Adds collation data to this `DataSource`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_coll</span>(<span class="self">self</span>, <span class="ident">root</span>: <span class="ident">PathBuf</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">coll_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">TomlCache::new</span>(<span class="ident">AbstractFs::new</span>(
-                <span class="ident">root</span>,
-                <span class="ident">String::new</span>(),
-            )<span class="question-mark">?</span>))),
-            ..<span class="self">self</span>
-        })
+    <span class="doccomment">/// Adds CLDR data to this `DataSource`. The data will be downloaded from GitHub</span>
+    <span class="doccomment">/// using the given tag (see [GitHub releases](https://github.com/unicode-org/cldr-json/releases)).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_cldr_for_tag</span>(
+        <span class="self">self</span>,
+        <span class="ident">tag</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">locale_subset</span>: <span class="ident">CldrLocaleSubset</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">with_cldr</span>(
+            <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">cache</span><span class="op">|</span> <span class="ident">cache</span>
+                .<span class="ident">cached_path</span>(
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(
+                        <span class="string">&quot;https://github.com/unicode-org/cldr-json/releases/download/{}/cldr-{}-json-{}.zip&quot;</span>,
+                        <span class="ident">tag</span>, <span class="ident">tag</span>, <span class="ident">locale_subset</span>))).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Download&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>,
+            <span class="ident">locale_subset</span>
+            )
+    }
+
+    <span class="doccomment">/// Adds ICU export data to this `DataSource`. The data will be downloaded from GitHub</span>
+    <span class="doccomment">/// using the given tag. (see [GitHub releases](https://github.com/unicode-org/icu/releases)).</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_icuexport_for_tag</span>(
+        <span class="self">self</span>,
+        <span class="ident">tag</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">trie_type</span>: <span class="ident">IcuTrieType</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">with_icuexport</span>(
+            <span class="ident">cached_path::CacheBuilder::new</span>().<span class="ident">freshness_lifetime</span>(<span class="ident">u64::MAX</span>).<span class="ident">build</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">cache</span><span class="op">|</span> <span class="ident">cache</span>
+                .<span class="ident">cached_path</span>(
+                    <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;https://github.com/unicode-org/icu/releases/download/{}/icuexportdata_uprops_full.zip&quot;</span>, <span class="ident">tag</span>)
+            )).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Download&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>,
+            <span class="ident">trie_type</span>)
+    }
+
+    <span class="doccomment">/// Creates a [`SourceData`] object with the latest data from GitHub.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">latest</span>(
+        <span class="ident">locale_subset</span>: <span class="ident">CldrLocaleSubset</span>,
+        <span class="ident">trie_type</span>: <span class="ident">IcuTrieType</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="comment">// TODO query GitHub for the latest tags.</span>
+        <span class="ident"><span class="self">Self</span>::default</span>()
+            .<span class="ident">with_cldr_for_tag</span>(<span class="string">&quot;41.0.0&quot;</span>, <span class="ident">locale_subset</span>)<span class="question-mark">?</span>
+            .<span class="ident">with_icuexport_for_tag</span>(<span class="string">&quot;release-71-1&quot;</span>, <span class="ident">trie_type</span>)
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
     <span class="doccomment">/// Create `SourceData` pointing to test data.</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_test</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::default</span>()
-            .<span class="ident">with_cldr</span>(<span class="ident">icu_testdata::paths::cldr_json_root</span>(), <span class="string">&quot;full&quot;</span>.<span class="ident">to_string</span>())
+            .<span class="ident">with_cldr</span>(
+                <span class="ident">icu_testdata::paths::cldr_json_root</span>(),
+                <span class="ident">CldrLocaleSubset::Full</span>,
+            )
             .<span class="ident">expect</span>(<span class="string">&quot;testdata is valid&quot;</span>)
-            .<span class="ident">with_uprops</span>(<span class="ident">icu_testdata::paths::uprops_toml_root</span>(), <span class="ident">TrieType::Small</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;testdata is valid&quot;</span>)
-            .<span class="ident">with_coll</span>(<span class="ident">icu_testdata::paths::coll_toml_root</span>())
+            .<span class="ident">with_icuexport</span>(
+                <span class="ident">icu_testdata::paths::icuexport_toml_root</span>(),
+                <span class="ident">IcuTrieType::Small</span>,
+            )
             .<span class="ident">expect</span>(<span class="string">&quot;testdata is valid&quot;</span>)
     }
 
     <span class="doccomment">/// Paths to CLDR source data.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_cldr_paths</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">cldr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">cldr_paths</span>
             .<span class="ident">as_deref</span>()
             .<span class="ident">ok_or</span>(<span class="ident"><span class="kw">crate</span>::error::MISSING_CLDR_ERROR</span>)
     }
 
     <span class="doccomment">/// Path to Unicode Properties source data.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_uprops_paths</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">uprops_paths</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">icuexport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">icuexport_paths</span>
             .<span class="ident">as_deref</span>()
-            .<span class="ident">ok_or</span>(<span class="ident"><span class="kw">crate</span>::error::MISSING_UPROPS_ERROR</span>)
+            .<span class="ident">ok_or</span>(<span class="ident"><span class="kw">crate</span>::error::MISSING_ICUEXPORT_ERROR</span>)
     }
 
-    <span class="doccomment">/// Path to collation data.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_coll_paths</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">coll_paths</span>
-            .<span class="ident">as_deref</span>()
-            .<span class="ident">ok_or</span>(<span class="ident"><span class="kw">crate</span>::error::MISSING_COLLATION_ERROR</span>)
+    <span class="comment">// Uprops paths depend on the trie type, this saves some boilerplate at the call sites.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">read_and_parse_uprops</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">S</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">S</span>: <span class="ident">serde::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    {
+        <span class="self">self</span>.<span class="ident">icuexport</span>()<span class="question-mark">?</span>.<span class="ident">read_and_parse_toml</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">&quot;icuexportdata_uprops_full/{}/{}.toml&quot;</span>,
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">trie_type</span> {
+                <span class="ident">icu_codepointtrie::TrieType::Fast</span> =&gt; <span class="string">&quot;fast&quot;</span>,
+                <span class="ident">icu_codepointtrie::TrieType::Small</span> =&gt; <span class="string">&quot;small&quot;</span>,
+            },
+            <span class="ident">name</span>
+        ))
     }
 
     <span class="doccomment">/// Path to segmenter data.</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_segmenter_paths</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">segmenter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">segmenter_paths</span>)
     }
 
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">trie_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TrieType</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">trie_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">IcuTrieType</span> {
         <span class="self">self</span>.<span class="ident">trie_type</span>
     }
 }
@@ -424,26 +488,25 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">list</span>(<span class="string">&quot;&quot;</span>).<span class="ident">map</span>(<span class="ident">Vec::into_iter</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">list</span>(<span class="ident">path</span>).<span class="ident">map</span>(<span class="ident">Vec::into_iter</span>)
     }
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">AbstractFs</span> {
     <span class="ident">Fs</span>(<span class="ident">PathBuf</span>),
-    <span class="comment">// The PB points to a valid ZIP file, the String is a prefix inside the ZIP</span>
-    <span class="ident">Zip</span>(<span class="ident">PathBuf</span>, <span class="ident">String</span>),
+    <span class="ident">Zip</span>(<span class="ident">PathBuf</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">AbstractFs</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">P</span>, <span class="ident">prefix</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">std::fs::metadata</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>.<span class="ident">is_dir</span>() {
-            <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>().<span class="ident">join</span>(<span class="ident">prefix</span>)))
+            <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>().<span class="ident">to_path_buf</span>()))
         } <span class="kw">else</span> {
             <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>)<span class="question-mark">?</span>)
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Zip&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>().<span class="ident">into</span>(), <span class="ident">prefix</span>))
+            <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>().<span class="ident">into</span>()))
         }
     }
 
@@ -454,12 +517,12 @@
                 <span class="ident">std::fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>))
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>)))
             }
-            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>, <span class="ident">prefix</span>) =&gt; {
-                <span class="macro">log::trace!</span>(<span class="string">&quot;Reading: {}/{}&quot;</span>, <span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">prefix</span>).<span class="ident">display</span>(), <span class="ident">path</span>);
+            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>) =&gt; {
+                <span class="macro">log::trace!</span>(<span class="string">&quot;Reading: {}/{}&quot;</span>, <span class="ident">root</span>.<span class="ident">display</span>(), <span class="ident">path</span>);
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
                 <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="ident">root</span>)<span class="question-mark">?</span>)
                     .<span class="ident">expect</span>(<span class="string">&quot;validated in constructor&quot;</span>)
-                    .<span class="ident">by_name</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="ident">prefix</span>, <span class="ident">path</span>))
+                    .<span class="ident">by_name</span>(<span class="ident">path</span>)
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
                         <span class="ident">DataError::custom</span>(<span class="string">&quot;Zip&quot;</span>)
                             .<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>)
@@ -476,10 +539,9 @@
             <span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>) =&gt; <span class="ident">std::fs::read_dir</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>))<span class="question-mark">?</span>
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">DataError</span><span class="op">&gt;</span> { <span class="prelude-val">Ok</span>(<span class="ident">PathBuf::from</span>(<span class="ident">e</span><span class="question-mark">?</span>.<span class="ident">file_name</span>())) })
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">DataError</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
-            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>, <span class="ident">prefix</span>) =&gt; <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="ident">root</span>)<span class="question-mark">?</span>)
+            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>) =&gt; <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="ident">root</span>)<span class="question-mark">?</span>)
                 .<span class="ident">expect</span>(<span class="string">&quot;validated in constructor&quot;</span>)
                 .<span class="ident">file_names</span>()
-                .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">strip_prefix</span>(<span class="ident">prefix</span>))
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">strip_prefix</span>(<span class="string">&#39;/&#39;</span>))
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">strip_prefix</span>(<span class="ident">path</span>))
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">suffix</span><span class="op">|</span> <span class="ident">suffix</span>.<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>).<span class="ident">next</span>())

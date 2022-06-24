@@ -177,14 +177,14 @@
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::language</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm_bies::Lstm</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm_structs</span>::{<span class="ident">LstmData</span>, <span class="ident">LstmDataMarker</span>};
 
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">core::char::decode_utf16</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataPayload</span>;
-<span class="kw">use</span> <span class="ident">icu_segmenter_lstm::lstm::Lstm</span>;
-<span class="kw">use</span> <span class="ident">icu_segmenter_lstm::structs</span>;
 
 <span class="comment">// TODO:</span>
 <span class="comment">// json file is big, So I should use anoher binary format like npy.</span>
@@ -195,14 +195,14 @@
     <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/testdata/json/core/segmenter_lstm@1/my.json&quot;</span>);
 
 <span class="macro">lazy_static!</span> {
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">THAI_LSTM</span>: <span class="ident">structs::LstmData</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">THAI_LSTM</span>: <span class="ident">LstmData</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="ident">serde_json::from_slice</span>(<span class="ident">THAI_MODEL</span>).<span class="ident">expect</span>(<span class="string">&quot;JSON syntax error&quot;</span>);
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">BURMESE_LSTM</span>: <span class="ident">structs::LstmData</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">BURMESE_LSTM</span>: <span class="ident">LstmData</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span>
         <span class="ident">serde_json::from_slice</span>(<span class="ident">BURMESE_MODEL</span>).<span class="ident">expect</span>(<span class="string">&quot;JSON syntax error&quot;</span>);
 }
 
 <span class="comment">// LSTM model depends on language, So we have to switch models per language.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">codepoint</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">structs::LstmDataMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_best_lstm_model</span>(<span class="ident">codepoint</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LstmDataMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">lang</span> <span class="op">=</span> <span class="ident">get_language</span>(<span class="ident">codepoint</span>);
     <span class="kw">match</span> <span class="ident">lang</span> {
         <span class="ident">Language::Thai</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">THAI_LSTM</span>.<span class="ident">clone</span>())),
@@ -285,7 +285,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">LstmSegmenter</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">structs::LstmDataMarker</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LstmDataMarker</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">Lstm::try_new</span>(<span class="ident">payload</span>).<span class="ident">unwrap</span>();
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">lstm</span> })

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1656094965628,
+  "lastUpdate": 1656113483017,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -42599,6 +42599,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 4504,
             "range": "± 10",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1257084134cdd5b2e5fd4473eb2da50cf29eeeea",
+          "message": "Enable missing docs lint in properties (#2107)",
+          "timestamp": "2022-06-24T23:17:42Z",
+          "tree_id": "b747fa671ca5d8fbe98518aaca02cd1a0e5aa2c4",
+          "url": "https://github.com/unicode-org/icu4x/commit/1257084134cdd5b2e5fd4473eb2da50cf29eeeea"
+        },
+        "date": 1656113443335,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 95861,
+            "range": "± 2530",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 945577,
+            "range": "± 50358",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 200636,
+            "range": "± 4900",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 91637,
+            "range": "± 2763",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 111133,
+            "range": "± 9980",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 97373,
+            "range": "± 2702",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 104909,
+            "range": "± 3039",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 200084,
+            "range": "± 6140",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 213834,
+            "range": "± 6753",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 205735,
+            "range": "± 6899",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 215924,
+            "range": "± 6696",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5737,
+            "range": "± 201",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "47251d48592f7ebb0c8221dca9b60415d90c74ef",
+          "message": "Better error message for verify-diplomat-gen failures (#2106)",
+          "timestamp": "2022-06-24T23:18:19Z",
+          "tree_id": "affb3d5078cfbc0e5f7f04dbeb10b1645dd3a9ee",
+          "url": "https://github.com/unicode-org/icu4x/commit/47251d48592f7ebb0c8221dca9b60415d90c74ef"
+        },
+        "date": 1656113456906,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 86296,
+            "range": "± 206",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 838841,
+            "range": "± 2395",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 181675,
+            "range": "± 163",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 82107,
+            "range": "± 171",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 90553,
+            "range": "± 82",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 86237,
+            "range": "± 161",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 93357,
+            "range": "± 70",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 175894,
+            "range": "± 220",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 188157,
+            "range": "± 200",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 181593,
+            "range": "± 516",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 193120,
+            "range": "± 671",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5133,
+            "range": "± 5",
             "unit": "ns/iter"
           }
         ]

@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ICU4XFixedDecimalRoundingMode","How to round digits when constructing an ICU4XFixedDecimal from a floating point number"]],"struct":[["ICU4XFixedDecimal",""]]});
+initSidebarItems({"struct":[["ICU4XFixedDecimal",""]]});

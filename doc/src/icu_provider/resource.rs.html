@@ -730,6 +730,57 @@
 <span id="725">725</span>
 <span id="726">726</span>
 <span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -737,6 +788,7 @@
 <span class="doccomment">//! Resource paths and related types.</span>
 
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
+<span class="kw">use</span> <span class="ident">icu_locid::ordering::SubtagOrderingResult</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error</span>::{<span class="ident">DataError</span>, <span class="ident">DataErrorKind</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers</span>;
@@ -1164,13 +1216,63 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ResourceOptions</span> {
+    <span class="doccomment">/// Compare this [`ResourceOptions`] with BCP-47 bytes.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The return value is equivalent to what would happen if you first converted this</span>
+    <span class="doccomment">/// [`ResourceOptions`] to a BCP-47 string and then performed a byte comparison.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function is case-sensitive and results in a *total order*, so it is appropriate for</span>
+    <span class="doccomment">/// binary search. The only argument producing [`Ordering::Equal`] is `self.to_string()`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider::ResourceOptions;</span>
+    <span class="doccomment">/// use icu_locid::Locale;</span>
+    <span class="doccomment">/// use std::cmp::Ordering;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let bcp47_strings: &amp;[&amp;str] = &amp;[</span>
+    <span class="doccomment">///     &quot;ca-ES&quot;,</span>
+    <span class="doccomment">///     &quot;ca-ES-u-ca-buddhist&quot;,</span>
+    <span class="doccomment">///     &quot;ca-ES-valencia&quot;,</span>
+    <span class="doccomment">///     &quot;pl-Latn-PL&quot;,</span>
+    <span class="doccomment">///     &quot;und&quot;,</span>
+    <span class="doccomment">///     &quot;und-fonipa&quot;,</span>
+    <span class="doccomment">///     &quot;und-u-ca-hebrew&quot;,</span>
+    <span class="doccomment">///     &quot;und-u-ca-japanese&quot;,</span>
+    <span class="doccomment">///     &quot;zh&quot;,</span>
+    <span class="doccomment">/// ];</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// for ab in bcp47_strings.windows(2) {</span>
+    <span class="doccomment">///     let a = ab[0];</span>
+    <span class="doccomment">///     let b = ab[1];</span>
+    <span class="doccomment">///     assert!(a.cmp(b) == Ordering::Less);</span>
+    <span class="doccomment">///     let a_loc: ResourceOptions = a.parse::&lt;Locale&gt;().unwrap().into();</span>
+    <span class="doccomment">///     assert_eq!(a, a_loc.to_string());</span>
+    <span class="doccomment">///     assert!(a_loc.strict_cmp(a.as_bytes()) == Ordering::Equal, &quot;{} == {}&quot;, a, a);</span>
+    <span class="doccomment">///     assert!(a_loc.strict_cmp(b.as_bytes()) == Ordering::Less, &quot;{} &lt; {}&quot;, a, b);</span>
+    <span class="doccomment">///     let b_loc: ResourceOptions = b.parse::&lt;Locale&gt;().unwrap().into();</span>
+    <span class="doccomment">///     assert_eq!(b, b_loc.to_string());</span>
+    <span class="doccomment">///     assert!(b_loc.strict_cmp(b.as_bytes()) == Ordering::Equal, &quot;{} == {}&quot;, b, b);</span>
+    <span class="doccomment">///     assert!(b_loc.strict_cmp(a.as_bytes()) == Ordering::Greater, &quot;{} &gt; {}&quot;, b, a);</span>
+    <span class="doccomment">/// }</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">strict_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Ordering</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">keywords</span>.<span class="ident">is_empty</span>() {
-            <span class="self">self</span>.<span class="ident">langid</span>.<span class="ident">strict_cmp</span>(<span class="ident">other</span>)
-        } <span class="kw">else</span> {
-            <span class="comment">// TODO: Avoid the allocation</span>
-            <span class="self">self</span>.<span class="ident">write_to_string</span>().<span class="ident">as_bytes</span>().<span class="ident">cmp</span>(<span class="ident">other</span>)
+        <span class="kw">let</span> <span class="ident">subtags</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">split</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">==</span> <span class="string">b&#39;-&#39;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtag_result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">langid</span>.<span class="ident">strict_cmp_iter</span>(<span class="ident">subtags</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">has_unicode_ext</span>() {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">subtags</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">subtag_result</span> {
+                <span class="ident">SubtagOrderingResult::Subtags</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+                <span class="ident">SubtagOrderingResult::Ordering</span>(<span class="ident">o</span>) =&gt; <span class="kw">return</span> <span class="ident">o</span>,
+            };
+            <span class="kw">match</span> <span class="ident">subtags</span>.<span class="ident">next</span>() {
+                <span class="prelude-val">Some</span>(<span class="string">b&quot;u&quot;</span>) =&gt; (),
+                <span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="kw">return</span> <span class="ident">s</span>.<span class="ident">cmp</span>(<span class="string">b&quot;u&quot;</span>).<span class="ident">reverse</span>(),
+                <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">Ordering::Greater</span>,
+            }
+            <span class="ident">subtag_result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keywords</span>.<span class="ident">strict_cmp_iter</span>(<span class="ident">subtags</span>);
         }
+        <span class="ident">subtag_result</span>.<span class="ident">end</span>()
     }
 }
 

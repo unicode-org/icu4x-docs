@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ICU4XFixedDecimal",""]]});
+initSidebarItems({"enum":[["ICU4XFixedDecimalSign","The sign of a FixedDecimal, as shown in formatting."]],"struct":[["ICU4XFixedDecimal",""]]});

@@ -141,11 +141,6 @@
 <span id="136">136</span>
 <span id="137">137</span>
 <span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -170,11 +165,10 @@
 <span class="doccomment">//! // Create an adapter to provide the data to `BidiInfo`.</span>
 <span class="doccomment">//! let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let payload = maps::get_bidi_class(&amp;provider).expect(&quot;The data should be valid&quot;);</span>
-<span class="doccomment">//! let data_struct = payload.get();</span>
-<span class="doccomment">//! let bc = &amp;data_struct.code_point_trie;</span>
+<span class="doccomment">//! let data = maps::get_bidi_class(&amp;provider).expect(&quot;The data should be valid&quot;);</span>
+<span class="doccomment">//! let bc = data.as_borrowed();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let adapter = BidiClassAdapter::new(&amp;bc);</span>
+<span class="doccomment">//! let adapter = BidiClassAdapter::new(bc);</span>
 <span class="doccomment">//! // Resolve embedding levels within the text.  Pass `None` to detect the</span>
 <span class="doccomment">//! // paragraph level automatically.</span>
 <span class="doccomment">//!</span>
@@ -195,8 +189,8 @@
 <span class="doccomment">//! assert_eq!(display, concat![&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;ג&quot;, &quot;ב&quot;, &quot;א&quot;,]);</span>
 <span class="doccomment">//! ```</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::maps::CodePointMapDataBorrowed</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::props::BidiClass</span>;
-<span class="kw">use</span> <span class="ident">icu_codepointtrie::CodePointTrie</span>;
 <span class="kw">use</span> <span class="ident">unicode_bidi::data_source::BidiDataSource</span>;
 <span class="kw">use</span> <span class="ident">unicode_bidi::BidiClass</span> <span class="kw">as</span> <span class="ident">DataSourceBidiClass</span>;
 
@@ -213,22 +207,20 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let payload = maps::get_bidi_class(&amp;provider).expect(&quot;The data should be valid&quot;);</span>
-<span class="doccomment">/// let data_struct = payload.get();</span>
-<span class="doccomment">/// let bc = &amp;data_struct.code_point_trie;</span>
+<span class="doccomment">/// let data = maps::get_bidi_class(&amp;provider).expect(&quot;The data should be valid&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let adapter = BidiClassAdapter::new(&amp;bc);</span>
+<span class="doccomment">/// let adapter = BidiClassAdapter::new(data.as_borrowed());</span>
 <span class="doccomment">/// assert_eq!(adapter.bidi_class(&#39;a&#39;), DataSourceBidiClass::L);</span>
 <span class="doccomment">/// assert_eq!(adapter.bidi_class(&#39;ع&#39;), DataSourceBidiClass::AL);</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BidiClassAdapter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">bidi_trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">BidiClass</span><span class="op">&gt;</span>,
+    <span class="ident">data</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">BidiClass</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BidiClassAdapter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates new instance of `BidiClassAdapter`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bidi_trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">BidiClass</span><span class="op">&gt;</span>) -&gt; <span class="ident">BidiClassAdapter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-        <span class="ident">BidiClassAdapter</span> { <span class="ident">bidi_trie</span> }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">data</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">BidiClass</span><span class="op">&gt;</span>) -&gt; <span class="ident">BidiClassAdapter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+        <span class="ident">BidiClassAdapter</span> { <span class="ident">data</span> }
     }
 }
 
@@ -246,17 +238,15 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let payload = maps::get_bidi_class(&amp;provider).expect(&quot;The data should be valid&quot;);</span>
-    <span class="doccomment">/// let data_struct = payload.get();</span>
-    <span class="doccomment">/// let bc = &amp;data_struct.code_point_trie;</span>
+    <span class="doccomment">/// let data = maps::get_bidi_class(&amp;provider).expect(&quot;The data should be valid&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let adapter = BidiClassAdapter::new(&amp;bc);</span>
+    <span class="doccomment">/// let adapter = BidiClassAdapter::new(data.as_borrowed());</span>
     <span class="doccomment">/// assert_eq!(adapter.bidi_class(&#39;a&#39;), DataSourceBidiClass::L);</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`CodePointTrie`]: icu_codepointtrie::CodePointTrie</span>
     <span class="kw">fn</span> <span class="ident">bidi_class</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">DataSourceBidiClass</span> {
-        <span class="kw">let</span> <span class="ident">bidi_class</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bidi_trie</span>.<span class="ident">get</span>(<span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="kw">let</span> <span class="ident">bidi_class</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">c</span>);
         <span class="kw">match</span> <span class="ident">bidi_class</span> {
             <span class="ident">BidiClass::LeftToRight</span> =&gt; <span class="ident">DataSourceBidiClass::L</span>,
             <span class="ident">BidiClass::RightToLeft</span> =&gt; <span class="ident">DataSourceBidiClass::R</span>,

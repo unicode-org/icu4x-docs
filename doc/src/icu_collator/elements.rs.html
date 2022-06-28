@@ -2088,9 +2088,6 @@
 <span id="2083">2083</span>
 <span id="2084">2084</span>
 <span id="2085">2085</span>
-<span id="2086">2086</span>
-<span id="2087">2087</span>
-<span id="2088">2088</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -2118,6 +2115,7 @@
 <span class="kw">use</span> <span class="ident">icu_normalizer::provider::DecompositionTablesV1</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::u24::EMPTY_U24</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::u24::U24</span>;
+<span class="kw">use</span> <span class="ident">icu_properties::maps::CodePointMapDataBorrowed</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::CanonicalCombiningClass</span>;
 <span class="kw">use</span> <span class="ident">icu_uniset::UnicodeSet</span>;
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
@@ -2739,20 +2737,17 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">character_and_ccc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">char</span>, <span class="ident">CanonicalCombiningClass</span>) {
         (<span class="self">self</span>.<span class="ident">character</span>(), <span class="self">self</span>.<span class="ident">ccc</span>())
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_ccc_from_trie</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_ccc_from_trie</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>) {
         <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="number">0</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">24</span>, <span class="number">0xFF</span>, <span class="string">&quot;This method has already been called!&quot;</span>);
         <span class="kw">let</span> <span class="ident">scalar</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">&amp;</span> <span class="number">0xFFFFFF</span>;
-        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> ((<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">scalar</span>).<span class="number">0</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>) <span class="op">|</span> <span class="ident">scalar</span>;
+        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> ((<span class="ident">ccc</span>.<span class="ident">get_u32</span>(<span class="ident">scalar</span>).<span class="number">0</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>) <span class="op">|</span> <span class="ident">scalar</span>;
     }
 }
 
 <span class="comment">// This trivial function exists as a borrow check helper.</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">fn</span> <span class="ident">sort_slice_by_ccc</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(
-    <span class="ident">slice</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">char</span>],
-    <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
-) {
-    <span class="ident">slice</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="kw-2">*</span><span class="ident">cc</span>)));
+<span class="kw">fn</span> <span class="ident">sort_slice_by_ccc</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">char</span>], <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>) {
+    <span class="ident">slice</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">ccc</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">cc</span>));
 }
 
 <span class="doccomment">/// Iterator that transforms an iterator over `char` into an iterator</span>
@@ -2812,7 +2807,7 @@
     <span class="doccomment">/// NFD complex decompositions on supplementary planes</span>
     <span class="ident">scalars32</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">U24</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Canonical Combining Class data.</span>
-    <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
+    <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
     <span class="doccomment">/// If numeric mode is enabled, the 8 high bits of the numeric primary.</span>
     <span class="doccomment">/// `None` if disabled.</span>
     <span class="ident">numeric_primary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
@@ -2836,7 +2831,7 @@
         <span class="ident">diacritics</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
         <span class="ident">decompositions</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionDataV1</span>,
         <span class="ident">tables</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionTablesV1</span>,
-        <span class="ident">ccc</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
+        <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
         <span class="ident">numeric_primary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
         <span class="ident">lithuanian_dot_above</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="self">Self</span> {
@@ -3695,12 +3690,11 @@
                                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">longest_matching_index</span> <span class="op">=</span> <span class="number">0</span>;
                                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">attempt</span> <span class="op">=</span> <span class="number">0</span>;
                                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
-                                                <span class="ident">most_recent_skipped_ccc</span> <span class="op">=</span>
-                                                    <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">ch</span>));
+                                                <span class="ident">most_recent_skipped_ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">ch</span>);
                                                 <span class="kw">loop</span> {
                                                     <span class="kw">let</span> <span class="ident">ahead</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">look_ahead</span>(<span class="ident">looked_ahead</span> <span class="op">+</span> <span class="ident">i</span>);
                                                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="op">=</span> <span class="ident">ahead</span> {
-                                                        <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">ch</span>));
+                                                        <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">ch</span>);
                                                         <span class="kw">if</span> <span class="ident">ccc</span>
                                                             <span class="op">==</span> <span class="ident">CanonicalCombiningClass::NotReordered</span>
                                                         {

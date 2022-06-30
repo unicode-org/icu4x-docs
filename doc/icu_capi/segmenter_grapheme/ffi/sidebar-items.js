@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XGraphemeClusterBreakIteratorLatin1",""],["ICU4XGraphemeClusterBreakIteratorUtf16",""],["ICU4XGraphemeClusterBreakIteratorUtf8",""],["ICU4XGraphemeClusterBreakSegmenter","An ICU4X grapheme-cluster-break segmenter, capable of finding grapheme cluster breakpoints in strings."]]});

@@ -502,9 +502,6 @@
 <span id="497">497</span>
 <span id="498">498</span>
 <span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -527,7 +524,6 @@
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie</span>::{<span class="ident">CodePointTrie</span>, <span class="ident">TrieValue</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">zerofrom::ZeroFrom</span>;
 
 <span class="doccomment">/// A wrapper around code point set data, returned by property getters for</span>
 <span class="doccomment">/// unicode sets.</span>
@@ -590,7 +586,7 @@
     <span class="doccomment">/// assert_eq!(gc.get(&#39;🎃&#39;), GeneralCategory::OtherSymbol);  // U+1F383 JACK-O-LANTERN</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ch</span>: <span class="ident">char</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>.<span class="ident">get</span>(<span class="ident">ch</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">get_u32</span>(<span class="ident">ch</span> <span class="kw">as</span> <span class="ident">u32</span>)
     }
 
     <span class="doccomment">/// Get the value this map has associated with code point `ch`</span>
@@ -610,7 +606,7 @@
     <span class="doccomment">/// assert_eq!(gc.get_u32(0x1F383), GeneralCategory::OtherSymbol);  // U+1F383 JACK-O-LANTERN</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_u32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ch</span>: <span class="ident">u32</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>.<span class="ident">get</span>(<span class="ident">ch</span>)
+        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">get_u32</span>(<span class="ident">ch</span>)
     }
 
     <span class="doccomment">/// Get a [`CodePointSetData`] for all elements corresponding to a particular value</span>
@@ -633,7 +629,7 @@
     <span class="doccomment">/// assert!(!other_letter_set.contains(&#39;🎃&#39;));  // U+1F383 JACK-O-LANTERN</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointSetData</span> {
-        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>.<span class="ident">get_set_for_value</span>(<span class="ident">value</span>);
+        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">get_set_for_value</span>(<span class="ident">value</span>);
         <span class="ident">CodePointSetData::from_unicode_set</span>(<span class="ident">set</span>)
     }
 
@@ -649,9 +645,7 @@
 
     <span class="doccomment">/// Construct a new one an owned [`CodePointTrie`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_code_point_trie</span>(<span class="ident">trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1</span> {
-            <span class="ident">code_point_trie</span>: <span class="ident">trie</span>,
-        };
+        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1::from_code_point_trie</span>(<span class="ident">trie</span>);
         <span class="ident">CodePointMapData::from_data</span>(<span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">ErasedMaplikeMarker</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">set</span>))
     }
     <span class="doccomment">/// Convert this type to a [`CodePointTrie`], borrowing if possible,</span>
@@ -665,7 +659,7 @@
     <span class="doccomment">/// in the data, however exceptions can be made if the performance hit is considered to</span>
     <span class="doccomment">/// be okay.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_code_point_trie</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="ident">ZeroFrom::zero_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">code_point_trie</span>)
+        <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">to_code_point_trie</span>()
     }
 }
 
@@ -696,7 +690,7 @@
     <span class="doccomment">/// assert_eq!(gc.get(&#39;🎃&#39;), GeneralCategory::OtherSymbol);  // U+1F383 JACK-O-LANTERN</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ch</span>: <span class="ident">char</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">code_point_trie</span>.<span class="ident">get</span>(<span class="ident">ch</span> <span class="kw">as</span> <span class="ident">u32</span>)
+        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">get_u32</span>(<span class="ident">ch</span> <span class="kw">as</span> <span class="ident">u32</span>)
     }
 
     <span class="doccomment">/// Get the value this map has associated with code point `ch`</span>
@@ -718,7 +712,7 @@
     <span class="doccomment">/// assert_eq!(gc.get_u32(0x1F383), GeneralCategory::OtherSymbol);  // U+1F383 JACK-O-LANTERN</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_u32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ch</span>: <span class="ident">u32</span>) -&gt; <span class="ident">T</span> {
-        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">code_point_trie</span>.<span class="ident">get</span>(<span class="ident">ch</span>)
+        <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">get_u32</span>(<span class="ident">ch</span>)
     }
 
     <span class="doccomment">/// Get a [`CodePointSetData`] for all elements corresponding to a particular value</span>
@@ -742,7 +736,7 @@
     <span class="doccomment">/// assert!(!other_letter_set.contains(&#39;🎃&#39;));  // U+1F383 JACK-O-LANTERN</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointSetData</span> {
-        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">code_point_trie</span>.<span class="ident">get_set_for_value</span>(<span class="ident">value</span>);
+        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">get_set_for_value</span>(<span class="ident">value</span>);
         <span class="ident">CodePointSetData::from_unicode_set</span>(<span class="ident">set</span>)
     }
 }

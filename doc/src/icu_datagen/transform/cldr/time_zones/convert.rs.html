@@ -496,10 +496,22 @@
 <span id="491">491</span>
 <span id="492">492</span>
 <span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident">icu_calendar::DateTime</span>;
 <span class="kw">use</span> <span class="ident">icu_datetime::provider::time_zones</span>::{
     <span class="ident">ExemplarCitiesV1</span>, <span class="ident">MetaZoneGenericNamesLongV1</span>, <span class="ident">MetaZoneGenericNamesShortV1</span>, <span class="ident">MetaZoneId</span>,
     <span class="ident">MetaZonePeriodV1</span>, <span class="ident">MetaZoneSpecificNamesLongV1</span>, <span class="ident">MetaZoneSpecificNamesShortV1</span>, <span class="ident">TimeZoneBcp47Id</span>,
@@ -942,47 +954,57 @@
         <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MetaZoneForPeriod</span><span class="op">&gt;</span>,
         <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">MetaZoneId</span><span class="op">&gt;</span>,
     ),
-) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">TimeZoneBcp47Id</span>, <span class="ident">String</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MetaZoneId</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">TimeZoneBcp47Id</span>, <span class="ident">i32</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MetaZoneId</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> (<span class="ident">time_zone_key</span>, <span class="ident">periods</span>, <span class="ident">meta_zone_id_data</span>) <span class="op">=</span> <span class="ident">pair</span>;
     <span class="ident">periods</span>
         .<span class="ident">into_iter</span>()
         .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">period</span><span class="op">|</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">period</span>.<span class="ident">uses_meta_zone</span>.<span class="ident">from</span> {
             <span class="prelude-val">Some</span>(<span class="ident">from</span>) =&gt; {
+                <span class="comment">// TODO(#2127): Ideally this parsing can move into a library function</span>
+                <span class="kw">let</span> <span class="ident">parts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">from</span>.<span class="ident">split</span>(<span class="string">&#39; &#39;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>();
+                <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">parts</span>[<span class="number">0</span>];
+                <span class="kw">let</span> <span class="ident">time</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">parts</span>[<span class="number">1</span>];
+                <span class="kw">let</span> <span class="ident">date_parts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">date</span>.<span class="ident">split</span>(<span class="string">&#39;-&#39;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>();
+                <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="ident">date_parts</span>[<span class="number">0</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="ident">date_parts</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">date_parts</span>[<span class="number">2</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">time_parts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">time</span>.<span class="ident">split</span>(<span class="string">&#39;:&#39;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>();
+                <span class="kw">let</span> <span class="ident">hour</span> <span class="op">=</span> <span class="ident">time_parts</span>[<span class="number">0</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">minute</span> <span class="op">=</span> <span class="ident">time_parts</span>[<span class="number">1</span>].<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">iso</span> <span class="op">=</span> <span class="ident">DateTime::new_iso_datetime</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">hour</span>, <span class="ident">minute</span>, <span class="number">0</span>).<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">minutes</span> <span class="op">=</span> <span class="ident">iso</span>.<span class="ident">minutes_since_local_unix_epoch</span>();
+
                 <span class="kw">match</span> <span class="ident">meta_zone_id_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">period</span>.<span class="ident">uses_meta_zone</span>.<span class="ident">mzone</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">meta_zone_short_id</span>) =&gt; {
-                        (<span class="ident">time_zone_key</span>, <span class="ident">from</span>.<span class="ident">clone</span>(), <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">meta_zone_short_id</span>))
-                    }
+                    <span class="prelude-val">Some</span>(<span class="ident">meta_zone_short_id</span>) =&gt; (<span class="ident">time_zone_key</span>, <span class="ident">minutes</span>, <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">meta_zone_short_id</span>)),
                     <span class="prelude-val">None</span> =&gt; {
                         <span class="comment">// TODO(#1781): Remove this special case once the short id is updated in CLDR</span>
                         <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="ident">period</span>.<span class="ident">uses_meta_zone</span>.<span class="ident">mzone</span> <span class="op">==</span> <span class="string">&quot;Yukon&quot;</span> {
                             (
                                 <span class="ident">time_zone_key</span>,
-                                <span class="ident">from</span>.<span class="ident">clone</span>(),
+                                <span class="ident">minutes</span>,
                                 <span class="prelude-val">Some</span>(<span class="ident">MetaZoneId</span>(<span class="macro">tinystr::tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;yuko&quot;</span>))),
                             )
                         } <span class="kw">else</span> {
-                            (<span class="ident">time_zone_key</span>, <span class="ident">from</span>.<span class="ident">clone</span>(), <span class="prelude-val">None</span>)
+                            (<span class="ident">time_zone_key</span>, <span class="ident">minutes</span>, <span class="prelude-val">None</span>)
                         }
                     }
                 }
             }
             <span class="prelude-val">None</span> =&gt; {
+                <span class="kw">let</span> <span class="ident">iso</span> <span class="op">=</span> <span class="ident">DateTime::new_iso_datetime</span>(<span class="number">1970</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>).<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">minutes</span> <span class="op">=</span> <span class="ident">iso</span>.<span class="ident">minutes_since_local_unix_epoch</span>();
                 <span class="kw">match</span> <span class="ident">meta_zone_id_data</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">period</span>.<span class="ident">uses_meta_zone</span>.<span class="ident">mzone</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">meta_zone_short_id</span>) =&gt; (
-                        <span class="ident">time_zone_key</span>,
-                        <span class="ident">String::from</span>(<span class="string">&quot;1970-00-00 00:00&quot;</span>),
-                        <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">meta_zone_short_id</span>),
-                    ),
+                    <span class="prelude-val">Some</span>(<span class="ident">meta_zone_short_id</span>) =&gt; (<span class="ident">time_zone_key</span>, <span class="ident">minutes</span>, <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">meta_zone_short_id</span>)),
                     <span class="prelude-val">None</span> =&gt; {
                         <span class="comment">// TODO(#1781): Remove this special case once the short id is updated in CLDR</span>
                         <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="ident">period</span>.<span class="ident">uses_meta_zone</span>.<span class="ident">mzone</span> <span class="op">==</span> <span class="string">&quot;Yukon&quot;</span> {
                             (
                                 <span class="ident">time_zone_key</span>,
-                                <span class="ident">String::from</span>(<span class="string">&quot;1970-00-00 00:00&quot;</span>),
+                                <span class="ident">minutes</span>,
                                 <span class="prelude-val">Some</span>(<span class="ident">MetaZoneId</span>(<span class="macro">tinystr::tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;yuko&quot;</span>))),
                             )
                         } <span class="kw">else</span> {
-                            (<span class="ident">time_zone_key</span>, <span class="ident">String::from</span>(<span class="string">&quot;1970-00-00 00:00&quot;</span>), <span class="prelude-val">None</span>)
+                            (<span class="ident">time_zone_key</span>, <span class="ident">minutes</span>, <span class="prelude-val">None</span>)
                         }
                     }
                 }

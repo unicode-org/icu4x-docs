@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["GenericLengthPatternsV1",""],["LengthPatternPluralsV1",""],["LengthPatternsV1",""],["PatternPluralsV1",""]]});
+initSidebarItems({"struct":[["GenericLengthPatternsV1",""],["GenericPatternV1",""],["LengthPatternPluralsV1",""],["LengthPatternsV1",""],["PatternPluralsV1",""]]});

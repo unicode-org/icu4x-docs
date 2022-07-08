@@ -4,7 +4,7 @@
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../databake/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"><a href="#">Crate databake</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.1.0</li><li><a id="all-types" href="all.html">All Items</a></li></div></ul><section><div class="block"><ul><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#derives">Derive Macros</a></li></ul></div></section><div id="sidebar-vars" data-name="databake" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../databake/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">databake</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/databake/lib.rs.html#5-228">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This crate allows data to write itself into Rust code (bake itself in).</p>
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">databake</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/databake/lib.rs.html#5-192">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This crate allows data to write itself into Rust code (bake itself in).</p>
 <p>Types that implement the <code>Bake</code> trait can be written into Rust expressions,
 which allows using Rust code itself as a zero-overhead “serialization” strategy.</p>
 <h2 id="example"><a href="#example">Example</a></h2>
@@ -14,7 +14,38 @@ which allows using Rust code itself as a zero-overhead “serialization” strat
 <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> [<span class="prelude-val">Some</span>((<span class="number">18</span>, <span class="ident">Cow::Borrowed</span>(<span class="string">&quot;hi&quot;</span>)))];
 <span class="macro">assert_eq!</span>(
     <span class="ident">data</span>.<span class="ident">bake</span>(<span class="kw-2">&amp;</span><span class="ident">Default::default</span>()).<span class="ident">to_string</span>(),
-    <span class="string">r#&quot;[Some ((18i32 , :: alloc :: borrow :: Cow :: Borrowed (&quot;hi&quot;)))]&quot;#</span>,
+    <span class="string">r#&quot;[Some ((18i32 , alloc :: borrow :: Cow :: Borrowed (&quot;hi&quot;) ,)) ,]&quot;#</span>,
+);</code></pre></div>
+<h2 id="derive"><a href="#derive">Derive</a></h2>
+<p><code>Bake</code> can be automatically derived if the <code>derive</code> feature is enabled.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">databake</span>::<span class="kw-2">*</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Bake</span>)]</span>
+<span class="attribute">#[<span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">my_crate</span>)]</span>
+<span class="kw">struct</span> <span class="ident">MyStruct</span> {
+  <span class="ident">number</span>: <span class="ident">u32</span>,
+  <span class="ident">string</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+  <span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">bool</span>],
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Bake</span>)]</span>
+<span class="attribute">#[<span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">my_crate</span>)]</span>
+<span class="kw">struct</span> <span class="ident">AnotherOne</span>(<span class="ident">MyStruct</span>, <span class="ident">char</span>);</code></pre></div>
+<h2 id="testing"><a href="#testing">Testing</a></h2>
+<p>The <a href="macro.test_bake.html" title="test_bake"><code>test_bake</code></a> macro can be uses to assert that a particular expression is a <code>Bake</code> fixed point.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">test_bake!</span>(
+    <span class="ident">AnotherOne</span>,
+    <span class="kw">const</span>: <span class="ident"><span class="kw">crate</span>::AnotherOne</span>(
+        <span class="ident"><span class="kw">crate</span>::MyStruct</span> {
+          <span class="ident">number</span>: <span class="number">17u32</span>,
+          <span class="ident">string</span>: <span class="string">&quot;foo&quot;</span>,
+          <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="bool-val">true</span>, <span class="bool-val">false</span>],
+        },
+        <span class="string">&#39;b&#39;</span>,
+    ),
+    <span class="ident">my_crate</span>,
 );</code></pre></div>
 </div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left import-item"><code>pub use proc_macro2::<a class="struct" href="https://docs.rs/proc-macro2/1.0.32/proc_macro2/struct.TokenStream.html" title="struct proc_macro2::TokenStream">TokenStream</a>;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use quote::<a class="macro" href="https://docs.rs/quote/1.0.10/quote/macro.quote.html" title="macro quote::quote">quote</a>;</code></div><div class="item-right docblock-short"></div></div></div><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2>

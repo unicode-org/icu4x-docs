@@ -288,6 +288,15 @@
 <span id="283">283</span>
 <span id="284">284</span>
 <span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -456,10 +465,26 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
     <span class="kw">use</span> <span class="ident">zerovec::ZeroSlice</span>;
+
+    <span class="kw">fn</span> <span class="ident">get_payload</span>(
+        <span class="ident">locale</span>: <span class="ident">Locale</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
+        <span class="ident">provider</span>
+            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
+                <span class="ident">options</span>: <span class="ident">ResourceOptions::from</span>(<span class="ident">locale</span>),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+            })<span class="question-mark">?</span>
+            .<span class="ident">take_payload</span>()
+    }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">burmese_dictionary_test</span>() {
+        <span class="comment">// TODO:</span>
+        <span class="comment">// testdata doesn&#39;t include Khmer data. If adding it, replace with testdata.</span>
+        <span class="comment">//</span>
         <span class="comment">// This test data is created by the following using ICU4C tools</span>
         <span class="comment">// LD_LIBRARY_PATH=lib bin/gendict --uchars data/brkitr/dictionaries/burmesedict.txt tmp.bin</span>
         <span class="comment">// dd if=tmp.bin of=cjdict.dict bs=1 skip=64</span>
@@ -487,20 +512,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">cj_dictionary_test</span>() {
-        <span class="comment">// This test data is created by the following using ICU4C tools</span>
-        <span class="comment">// LD_LIBRARY_PATH=lib bin/gendict --uchars data/brkitr/dictionaries/cjdict.txt tmp.bin</span>
-        <span class="comment">// dd if=tmp.bin of=cjdict.dict bs=1 skip=64</span>
-        <span class="kw">const</span> <span class="ident">CJ_DICTIONARY</span>: <span class="kw-2">&amp;</span><span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ZeroSlice</span>::<span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span><span class="ident">::try_from_bytes</span>(
-            <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/testdata/cjdic.dict&quot;</span>),
-        ) {
-            <span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;invalid dictionary data&quot;</span>),
-        };
-
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">UCharDictionaryBreakDataV1</span> {
-            <span class="ident">trie_data</span>: <span class="ident">CJ_DICTIONARY</span>.<span class="ident">as_zerovec</span>(),
-        };
-        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">get_payload</span>(<span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>)).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
 
         <span class="comment">// Match case</span>
@@ -524,6 +536,9 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">khmer_dictionary_test</span>() {
+        <span class="comment">// TODO:</span>
+        <span class="comment">// testdata doesn&#39;t include Khmer data. If adding it, replace with testdata.</span>
+        <span class="comment">//</span>
         <span class="comment">// This test data is created by the following using ICU4C tools</span>
         <span class="comment">// LD_LIBRARY_PATH=lib bin/gendict --uchars data/brkitr/dictionaries/khmerdict.txt tmp.bin</span>
         <span class="comment">// dd if=tmp.bin of=khmer.dict bs=1 skip=64</span>
@@ -550,6 +565,9 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">lao_dictionary_test</span>() {
+        <span class="comment">// TODO:</span>
+        <span class="comment">// testdata doesn&#39;t include Lao. If adding it, replace with testdata.</span>
+        <span class="comment">//</span>
         <span class="comment">// This test data is created by the following using ICU4C tools</span>
         <span class="comment">// LD_LIBRARY_PATH=lib bin/gendict --uchars data/brkitr/dictionaries/laodict.txt tmp.bin</span>
         <span class="comment">// dd if=tmp.bin of=lao.dict bs=1 skip=64</span>

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["SegmenterRuleProvider","A data provider reading from segmenter rule files."]]});
+initSidebarItems({"struct":[["SegmenterDictionaryProvider","A data provider reading from segmenter dictionary files."],["SegmenterRuleProvider","A data provider reading from segmenter rule files."]]});

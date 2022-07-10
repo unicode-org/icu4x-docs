@@ -330,6 +330,21 @@
 <span id="325">325</span>
 <span id="326">326</span>
 <span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -337,8 +352,7 @@
 <span class="kw">use</span> <span class="ident">clap</span>::{<span class="ident">App</span>, <span class="ident">Arg</span>, <span class="ident">ArgGroup</span>};
 <span class="kw">use</span> <span class="ident">eyre::WrapErr</span>;
 
-<span class="kw">use</span> <span class="ident">icu_codepointtrie::TrieType</span>;
-<span class="kw">use</span> <span class="ident">icu_datagen::SourceData</span>;
+<span class="kw">use</span> <span class="ident">icu_datagen</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::hello_world::HelloWorldV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
@@ -449,6 +463,14 @@
                     information, see the TrieType enum.&quot;</span>
                 )
                 .<span class="ident">default_value</span>(<span class="string">&quot;small&quot;</span>),
+        )
+        .<span class="ident">arg</span>(
+            <span class="ident">Arg::with_name</span>(<span class="string">&quot;COLLATION_HAN_DATABASE&quot;</span>)
+                .<span class="ident">long</span>(<span class="string">&quot;collation-han-database&quot;</span>)
+                .<span class="ident">takes_value</span>(<span class="bool-val">true</span>)
+                .<span class="ident">possible_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;unihan&quot;</span>, <span class="string">&quot;implicit&quot;</span>])
+                .<span class="ident">default_value</span>(<span class="string">&quot;implicit&quot;</span>)
+                .<span class="ident">help</span>(<span class="string">&quot;Which collation han database to use.&quot;</span>)
         )
         .<span class="ident">arg</span>(
             <span class="ident">Arg::with_name</span>(<span class="string">&quot;CLDR_LOCALE_SUBSET&quot;</span>)
@@ -580,23 +602,31 @@
     };
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">SourceData::default</span>();
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
+    <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="string">&quot;latest&quot;</span>) <span class="op">==</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_cldr_latest</span>(<span class="ident">cldr_locales</span>)<span class="question-mark">?</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_TAG&quot;</span>) {
         <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_cldr_for_tag</span>(<span class="ident">tag</span>, <span class="ident">cldr_locales</span>)<span class="question-mark">?</span>;
     } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;CLDR_ROOT&quot;</span>) {
         <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_cldr</span>(<span class="ident">PathBuf::from</span>(<span class="ident">path</span>), <span class="ident">cldr_locales</span>)<span class="question-mark">?</span>;
     }
 
-    <span class="kw">let</span> <span class="ident">trie_type</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;TRIE_TYPE&quot;</span>) {
-        <span class="prelude-val">Some</span>(<span class="string">&quot;small&quot;</span>) =&gt; <span class="ident">TrieType::Small</span>,
-        <span class="prelude-val">Some</span>(<span class="string">&quot;fast&quot;</span>) =&gt; <span class="ident">TrieType::Fast</span>,
-        <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-    };
-
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ICUEXPORT_TAG&quot;</span>) {
-        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport_for_tag</span>(<span class="ident">tag</span>, <span class="ident">trie_type</span>)<span class="question-mark">?</span>;
+    <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="string">&quot;latest&quot;</span>) <span class="op">==</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ICUEXPORT_TAG&quot;</span>) {
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport_latest</span>()<span class="question-mark">?</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tag</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ICUEXPORT_TAG&quot;</span>) {
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport_for_tag</span>(<span class="ident">tag</span>)<span class="question-mark">?</span>;
     } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;ICUEXPORT_ROOT&quot;</span>) {
-        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport</span>(<span class="ident">PathBuf::from</span>(<span class="ident">path</span>), <span class="ident">trie_type</span>)<span class="question-mark">?</span>;
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_icuexport</span>(<span class="ident">PathBuf::from</span>(<span class="ident">path</span>))<span class="question-mark">?</span>;
     }
+
+    <span class="kw">if</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;TRIE_TYPE&quot;</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="string">&quot;fast&quot;</span>) {
+        <span class="ident">source_data</span> <span class="op">=</span> <span class="ident">source_data</span>.<span class="ident">with_fast_tries</span>();
+    }
+
+    <span class="ident">source_data</span> <span class="op">=</span>
+        <span class="ident">source_data</span>.<span class="ident">with_collation_han_database</span>(<span class="kw">match</span> <span class="ident">matches</span>.<span class="ident">value_of</span>(<span class="string">&quot;COLLATION_HAN_DATABASE&quot;</span>) {
+            <span class="prelude-val">Some</span>(<span class="string">&quot;unihan&quot;</span>) =&gt; <span class="ident">CollationHanDatabase::Unihan</span>,
+            <span class="kw">_</span> =&gt; <span class="ident">CollationHanDatabase::Implicit</span>,
+        });
 
     <span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">matches</span>
         .<span class="ident">value_of</span>(<span class="string">&quot;FORMAT&quot;</span>)

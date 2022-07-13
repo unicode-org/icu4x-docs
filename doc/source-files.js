@@ -8,7 +8,6 @@ sourcesIndex["fixed_decimal"] = {"name":"","files":["decimal.rs","lib.rs","ops.r
 sourcesIndex["icu"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["icu4x_datagen"] = {"name":"","files":["datagen.rs"]};
-sourcesIndex["icu4x_ecma402"] = {"name":"","files":["lib.rs","pluralrules.rs"]};
 sourcesIndex["icu4x_testdata_datagen"] = {"name":"","files":["datagen.rs"]};
 sourcesIndex["icu4x_testdata_download_sources"] = {"name":"","files":["download-sources.rs"]};
 sourcesIndex["icu_benchmark_binsize"] = {"name":"","files":["main.rs"]};

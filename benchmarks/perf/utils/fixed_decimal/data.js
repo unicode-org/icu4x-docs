@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1657684467963,
+  "lastUpdate": 1657727235245,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -36389,6 +36389,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 87,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1175630884e7ae7e700f5ea8501f4865afbad901",
+          "message": "Add helloworld to testdata (#2173)",
+          "timestamp": "2022-07-13T11:21:20+02:00",
+          "tree_id": "2517ce6523bdf3c720a086bb71f1cd0fed9f35f7",
+          "url": "https://github.com/unicode-org/icu4x/commit/1175630884e7ae7e700f5ea8501f4865afbad901"
+        },
+        "date": 1657705022118,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 105492,
+            "range": "± 436",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21273,
+            "range": "± 84",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 64196,
+            "range": "± 311",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 168,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 70,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8630047933107c05b56164bd0bd115cbf96af90c",
+          "message": "Adding size to data fingerprints (#2177)",
+          "timestamp": "2022-07-13T17:34:28+02:00",
+          "tree_id": "ba49bdcd12839b27d7c323853ff907221938fab9",
+          "url": "https://github.com/unicode-org/icu4x/commit/8630047933107c05b56164bd0bd115cbf96af90c"
+        },
+        "date": 1657727204327,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 138894,
+            "range": "± 7936",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 29100,
+            "range": "± 1422",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 81025,
+            "range": "± 4402",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 233,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 108,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 100,
+            "range": "± 3",
             "unit": "ns/iter"
           }
         ]

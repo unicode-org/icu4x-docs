@@ -347,6 +347,13 @@
 <span id="342">342</span>
 <span id="343">343</span>
 <span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -356,12 +363,15 @@
 <span class="kw">use</span> <span class="ident">elsa::sync::FrozenMap</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataError</span>;
 <span class="kw">use</span> <span class="ident">std::any::Any</span>;
+<span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 <span class="kw">use</span> <span class="ident">std::fmt::Debug</span>;
-<span class="kw">use</span> <span class="ident">std::fs::File</span>;
+<span class="kw">use</span> <span class="ident">std::io::Cursor</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
+<span class="kw">use</span> <span class="ident">std::sync::RwLock</span>;
+<span class="kw">use</span> <span class="ident">zip::ZipArchive</span>;
 
 <span class="doccomment">/// Bag of options for datagen source data.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
@@ -627,14 +637,14 @@
 
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">list</span>(<span class="ident">path</span>).<span class="ident">map</span>(<span class="ident">Vec::into_iter</span>)
+        <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">list</span>(<span class="ident">path</span>)
     }
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">AbstractFs</span> {
     <span class="ident">Fs</span>(<span class="ident">PathBuf</span>),
-    <span class="ident">Zip</span>(<span class="ident">PathBuf</span>),
+    <span class="ident">Zip</span>(<span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ZipArchive</span><span class="op">&lt;</span><span class="ident">Cursor</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">AbstractFs</span> {
@@ -645,9 +655,10 @@
         {
             <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>().<span class="ident">to_path_buf</span>()))
         } <span class="kw">else</span> {
-            <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>)<span class="question-mark">?</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Zip&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>().<span class="ident">into</span>()))
+            <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">RwLock::new</span>(
+                <span class="ident">ZipArchive::new</span>(<span class="ident">Cursor::new</span>(<span class="ident">std::fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>)<span class="question-mark">?</span>))
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Zip&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>,
+            )))
         }
     }
 
@@ -658,11 +669,11 @@
                 <span class="ident">std::fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>))
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>)))
             }
-            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>) =&gt; {
-                <span class="macro">log::trace!</span>(<span class="string">&quot;Reading: {}/{}&quot;</span>, <span class="ident">root</span>.<span class="ident">display</span>(), <span class="ident">path</span>);
+            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">zip</span>) =&gt; {
+                <span class="macro">log::trace!</span>(<span class="string">&quot;Reading: &lt;zip&gt;/{}&quot;</span>, <span class="ident">path</span>);
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-                <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="ident">root</span>)<span class="question-mark">?</span>)
-                    .<span class="ident">expect</span>(<span class="string">&quot;validated in constructor&quot;</span>)
+                <span class="ident">zip</span>.<span class="ident">write</span>()
+                    .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
                     .<span class="ident">by_name</span>(<span class="ident">path</span>)
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
                         <span class="ident">DataError::custom</span>(<span class="string">&quot;Zip&quot;</span>)
@@ -675,19 +686,22 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>) =&gt; <span class="ident">std::fs::read_dir</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>))
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_display_context</span>(<span class="ident">path</span>))<span class="question-mark">?</span>
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">DataError</span><span class="op">&gt;</span> { <span class="prelude-val">Ok</span>(<span class="ident">PathBuf::from</span>(<span class="ident">e</span><span class="question-mark">?</span>.<span class="ident">file_name</span>())) })
-                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">DataError</span><span class="op">&gt;</span><span class="op">&gt;</span>()<span class="question-mark">?</span>,
-            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">root</span>) =&gt; <span class="ident">zip::ZipArchive::new</span>(<span class="ident">File::open</span>(<span class="ident">root</span>)<span class="question-mark">?</span>)
-                .<span class="ident">expect</span>(<span class="string">&quot;validated in constructor&quot;</span>)
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">map</span>(<span class="ident">HashSet::into_iter</span>)<span class="question-mark">?</span>,
+            <span class="ident"><span class="self">Self</span>::Zip</span>(<span class="ident">zip</span>) =&gt; <span class="ident">zip</span>
+                .<span class="ident">read</span>()
+                .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
                 .<span class="ident">file_names</span>()
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">strip_prefix</span>(<span class="ident">path</span>))
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">suffix</span><span class="op">|</span> <span class="ident">suffix</span>.<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>).<span class="ident">find</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="op">!</span><span class="ident">s</span>.<span class="ident">is_empty</span>()))
                 .<span class="ident">map</span>(<span class="ident">PathBuf::from</span>)
-                .<span class="ident">collect</span>(),
+                .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+                .<span class="ident">into_iter</span>(),
         })
     }
 }

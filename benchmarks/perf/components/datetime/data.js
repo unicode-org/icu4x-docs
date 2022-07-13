@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1657727315169,
+  "lastUpdate": 1657731621745,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -47495,6 +47495,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 4611,
             "range": "± 8",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d465df1c14ed76dbe1be5e5f5613dd4a721de767",
+          "message": "Comparing rules without `LanguageIdentifier: Ord` (#2167)",
+          "timestamp": "2022-07-13T18:39:01+02:00",
+          "tree_id": "e03f875a31860853fe53d966176bb2c4ed9ce0a1",
+          "url": "https://github.com/unicode-org/icu4x/commit/d465df1c14ed76dbe1be5e5f5613dd4a721de767"
+        },
+        "date": 1657731137284,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 109967,
+            "range": "± 1578",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1031744,
+            "range": "± 14951",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 226812,
+            "range": "± 14264",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 100684,
+            "range": "± 1634",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 108137,
+            "range": "± 1683",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 107579,
+            "range": "± 1739",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 117617,
+            "range": "± 1737",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 210174,
+            "range": "± 3904",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 229981,
+            "range": "± 699",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 225171,
+            "range": "± 2907",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 242270,
+            "range": "± 1275",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6119,
+            "range": "± 46",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fa6189afd1863f63bfd634c83f0f8b14af744e77",
+          "message": "Datagen performance improvements (#2178)",
+          "timestamp": "2022-07-13T18:47:24+02:00",
+          "tree_id": "be3c4f6954b4abe2134074170df23bee0170f75a",
+          "url": "https://github.com/unicode-org/icu4x/commit/fa6189afd1863f63bfd634c83f0f8b14af744e77"
+        },
+        "date": 1657731586021,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 107819,
+            "range": "± 3328",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1032150,
+            "range": "± 38268",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 217002,
+            "range": "± 7499",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_write",
+            "value": 94668,
+            "range": "± 2726",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormat/format_to_string",
+            "value": 108405,
+            "range": "± 2301",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 110603,
+            "range": "± 1377",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 119488,
+            "range": "± 1603",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_write",
+            "value": 209178,
+            "range": "± 5287",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormat/format_to_string",
+            "value": 225146,
+            "range": "± 3351",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 219179,
+            "range": "± 4221",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 234987,
+            "range": "± 8157",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5928,
+            "range": "± 189",
             "unit": "ns/iter"
           }
         ]

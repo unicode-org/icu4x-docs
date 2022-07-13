@@ -792,8 +792,6 @@
 <span id="787">787</span>
 <span id="788">788</span>
 <span id="789">789</span>
-<span id="790">790</span>
-<span id="791">791</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -906,7 +904,7 @@
 <span class="doccomment">/// # use icu_provider::prelude::ResourceKey;</span>
 <span class="doccomment">/// const K: ResourceKey = icu_provider::resource_key!(&quot;foo/../bar@1&quot;);</span>
 <span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ResourceKey</span> {
     <span class="comment">// This string literal is wrapped in leading_tag!() and trailing_tag!() to make it detectable</span>
     <span class="comment">// in a compiled binary.</span>
@@ -914,21 +912,21 @@
     <span class="ident">hash</span>: <span class="ident">ResourceKeyHash</span>,
 }
 
-<span class="comment">// I don&#39;t think this lint makes sense, see https://github.com/rust-lang/rust-clippy/issues/2627.</span>
-<span class="comment">// It&#39;s not possible to violate the hash invariant (k1 == k2 -&gt; hash(k1) == hash(k2)) without</span>
-<span class="comment">// using non-determinism or unsafe code when PartialEq is derived.</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::derive_hash_xor_eq</span>)]</span>
+<span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">ResourceKey</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">hash</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">hash</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">get_path</span>() <span class="op">==</span> <span class="ident">other</span>.<span class="ident">get_path</span>()
+    }
+}
 
-<span class="comment">// Custom implementation to avoid hashing the path.</span>
+<span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">ResourceKey</span> {}
+
 <span class="kw">impl</span> <span class="ident">core::hash::Hash</span> <span class="kw">for</span> <span class="ident">ResourceKey</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">hash</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">core::hash::Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">H</span>) {
         <span class="self">self</span>.<span class="ident">hash</span>.<span class="ident">hash</span>(<span class="ident">state</span>)
     }
 }
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="macro">static_assertions::const_assert_eq!</span>(<span class="number">24</span>, <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">ResourceKey</span><span class="op">&gt;</span>());
 
 <span class="kw">impl</span> <span class="ident">ResourceKey</span> {
     <span class="doccomment">/// Gets a human-readable representation of a [`ResourceKey`].</span>
@@ -939,7 +937,7 @@
     <span class="doccomment">/// Useful for reading and writing data to a file system.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="comment">// This becomes const with `const_ptr_offset` and `const_slice_from_raw_parts`.</span>
+        <span class="comment">// This becomes const in 1.64</span>
         <span class="kw">unsafe</span> {
             <span class="comment">// Safe due to invariant that self.path is tagged correctly</span>
             <span class="ident">core::str::from_utf8_unchecked</span>(<span class="ident">core::slice::from_raw_parts</span>(
@@ -949,11 +947,9 @@
         }
     }
 
-    <span class="doccomment">/// Gets a machine-readable representation of a [`ResourceKey`].</span>
+    <span class="doccomment">/// Gets a platform-independent hash of a [`ResourceKey`].</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// The machine-readable hash is 4 bytes and can be used as the key in a map.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The hash is a 32-bit FxHash of the path, computed as if on a little-endian platform.</span>
+    <span class="doccomment">/// The hash is 4 bytes and allows for fast key comparison.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ResourceKeyHash</span> {
         <span class="self">self</span>.<span class="ident">hash</span>

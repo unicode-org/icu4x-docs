@@ -471,6 +471,7 @@
 <span id="466">466</span>
 <span id="467">467</span>
 <span id="468">468</span>
+<span id="469">469</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -484,10 +485,16 @@
 <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">core::ops::Range</span>;
-<span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">iter</span>, <span class="ident">mem</span>};
 
-<span class="kw">fn</span> <span class="ident">usizeify</span>(<span class="ident">x</span>: <span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
-    <span class="ident">u32::from_unaligned</span>(<span class="ident">x</span>) <span class="kw">as</span> <span class="ident">usize</span>
+<span class="comment">// Also used by owned.rs</span>
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const</span> <span class="ident">LENGTH_WIDTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const</span> <span class="ident">METADATA_WIDTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0</span>;
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const</span> <span class="ident">INDEX_WIDTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const</span> <span class="ident">MAX_LENGTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">u32::MAX</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">const</span> <span class="ident">MAX_INDEX</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">u32::MAX</span> <span class="kw">as</span> <span class="ident">usize</span>;
+
+<span class="kw">fn</span> <span class="ident">usizeify</span>(<span class="ident">x</span>: <span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="ident">INDEX_WIDTH</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
+    <span class="ident">x</span>.<span class="ident">as_unsigned_int</span>() <span class="kw">as</span> <span class="ident">usize</span>
 }
 
 <span class="doccomment">/// A more parsed version of `VarZeroSlice`. This type is where most of the VarZeroVec</span>
@@ -500,8 +507,10 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// See [`VarZeroVecComponents::parse_byte_slice()`] for information on the internal invariants involved</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VarZeroVecComponents</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The number of elements</span>
+    <span class="ident">len</span>: <span class="ident">u32</span>,
     <span class="doccomment">/// The list of indices into the `things` slice</span>
-    <span class="ident">indices</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>],
+    <span class="ident">indices</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
     <span class="doccomment">/// The contiguous list of `T::VarULE`s</span>
     <span class="ident">things</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
     <span class="doccomment">/// The original slice this was constructed from</span>
@@ -515,6 +524,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">VarZeroVecComponents</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">VarZeroVecComponents</span> {
+            <span class="ident">len</span>: <span class="self">self</span>.<span class="ident">len</span>,
             <span class="ident">indices</span>: <span class="self">self</span>.<span class="ident">indices</span>,
             <span class="ident">things</span>: <span class="self">self</span>.<span class="ident">things</span>,
             <span class="ident">entire_slice</span>: <span class="self">self</span>.<span class="ident">entire_slice</span>,
@@ -534,6 +544,7 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
+            <span class="ident">len</span>: <span class="number">0</span>,
             <span class="ident">indices</span>: <span class="kw-2">&amp;</span>[],
             <span class="ident">things</span>: <span class="kw-2">&amp;</span>[],
             <span class="ident">entire_slice</span>: <span class="kw-2">&amp;</span>[],
@@ -553,29 +564,36 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_byte_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ZeroVecError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">VarZeroVecComponents</span> {
+                <span class="ident">len</span>: <span class="number">0</span>,
                 <span class="ident">indices</span>: <span class="kw-2">&amp;</span>[],
                 <span class="ident">things</span>: <span class="kw-2">&amp;</span>[],
                 <span class="ident">entire_slice</span>: <span class="ident">slice</span>,
                 <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
             });
         }
-        <span class="kw">let</span> <span class="ident">len_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get</span>(<span class="number">0</span>..<span class="number">4</span>).<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">len_ule</span> <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::parse_byte_slice</span>(<span class="ident">len_bytes</span>)
+        <span class="kw">let</span> <span class="ident">len_bytes</span> <span class="op">=</span> <span class="ident">slice</span>
+            .<span class="ident">get</span>(<span class="number">0</span>..<span class="ident">LENGTH_WIDTH</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">len_ule</span> <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="ident">LENGTH_WIDTH</span><span class="op">&gt;</span><span class="ident">::parse_byte_slice</span>(<span class="ident">len_bytes</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">u32::from_unaligned</span>(<span class="kw-2">*</span><span class="ident">len_ule</span>.<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>)
-            <span class="kw">as</span> <span class="ident">usize</span>;
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">len_ule</span>
+            .<span class="ident">get</span>(<span class="number">0</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>
+            .<span class="ident">as_unsigned_int</span>();
         <span class="kw">let</span> <span class="ident">indices_bytes</span> <span class="op">=</span> <span class="ident">slice</span>
-            .<span class="ident">get</span>(<span class="number">4</span>..<span class="number">4</span> <span class="op">*</span> <span class="ident">len</span> <span class="op">+</span> <span class="number">4</span>)
+            .<span class="ident">get</span>(
+                <span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span>
+                    ..<span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span> <span class="op">+</span> <span class="ident">INDEX_WIDTH</span> <span class="op">*</span> (<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>),
+            )
             .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">indices</span> <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::parse_byte_slice</span>(<span class="ident">indices_bytes</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">things</span> <span class="op">=</span> <span class="ident">slice</span>
-            .<span class="ident">get</span>(<span class="number">4</span> <span class="op">*</span> <span class="ident">len</span> <span class="op">+</span> <span class="number">4</span>..)
+            .<span class="ident">get</span>(<span class="ident">INDEX_WIDTH</span> <span class="op">*</span> (<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">+</span> <span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span>..)
             .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">borrowed</span> <span class="op">=</span> <span class="ident">VarZeroVecComponents</span> {
-            <span class="ident">indices</span>,
+            <span class="ident">len</span>,
+            <span class="ident">indices</span>: <span class="ident">indices_bytes</span>,
             <span class="ident">things</span>,
             <span class="ident">entire_slice</span>: <span class="ident">slice</span>,
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
@@ -599,22 +617,27 @@
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_bytes_unchecked</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span> <span class="ident">VarZeroVecComponents</span> {
+                <span class="ident">len</span>: <span class="number">0</span>,
                 <span class="ident">indices</span>: <span class="kw-2">&amp;</span>[],
                 <span class="ident">things</span>: <span class="kw-2">&amp;</span>[],
                 <span class="ident">entire_slice</span>: <span class="ident">slice</span>,
                 <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
             };
         }
-        <span class="kw">let</span> <span class="ident">len_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get_unchecked</span>(<span class="number">0</span>..<span class="number">4</span>);
-        <span class="kw">let</span> <span class="ident">len_ule</span> <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked</span>(<span class="ident">len_bytes</span>);
+        <span class="kw">let</span> <span class="ident">len_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get_unchecked</span>(<span class="number">0</span>..<span class="ident">LENGTH_WIDTH</span>);
+        <span class="kw">let</span> <span class="ident">len_ule</span> <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="ident">LENGTH_WIDTH</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked</span>(<span class="ident">len_bytes</span>);
 
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">u32::from_unaligned</span>(<span class="kw-2">*</span><span class="ident">len_ule</span>.<span class="ident">get_unchecked</span>(<span class="number">0</span>)) <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">let</span> <span class="ident">indices_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get_unchecked</span>(<span class="number">4</span>..<span class="number">4</span> <span class="op">*</span> <span class="ident">len</span> <span class="op">+</span> <span class="number">4</span>);
-        <span class="kw">let</span> <span class="ident">indices</span> <span class="op">=</span> <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked</span>(<span class="ident">indices_bytes</span>);
-        <span class="kw">let</span> <span class="ident">things</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get_unchecked</span>(<span class="number">4</span> <span class="op">*</span> <span class="ident">len</span> <span class="op">+</span> <span class="number">4</span>..);
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">len_ule</span>.<span class="ident">get_unchecked</span>(<span class="number">0</span>).<span class="ident">as_unsigned_int</span>();
+        <span class="kw">let</span> <span class="ident">indices_bytes</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">get_unchecked</span>(
+            <span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span>
+                ..<span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span> <span class="op">+</span> <span class="ident">INDEX_WIDTH</span> <span class="op">*</span> (<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>),
+        );
+        <span class="kw">let</span> <span class="ident">things</span> <span class="op">=</span>
+            <span class="ident">slice</span>.<span class="ident">get_unchecked</span>(<span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span> <span class="op">+</span> <span class="ident">INDEX_WIDTH</span> <span class="op">*</span> (<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>)..);
 
         <span class="ident">VarZeroVecComponents</span> {
-            <span class="ident">indices</span>,
+            <span class="ident">len</span>,
+            <span class="ident">indices</span>: <span class="ident">indices_bytes</span>,
             <span class="ident">things</span>,
             <span class="ident">entire_slice</span>: <span class="ident">slice</span>,
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
@@ -624,7 +647,7 @@
     <span class="doccomment">/// Get the number of elements in this vector</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">len</span>()
+        <span class="self">self</span>.<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>
     }
 
     <span class="doccomment">/// Returns `true` if the vector contains no elements.</span>
@@ -659,11 +682,11 @@
     <span class="doccomment">/// - `idx` must be in bounds (`idx &lt; self.len()`)</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_things_range</span>(<span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">get_unchecked</span>(<span class="ident">idx</span>));
+        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indices_slice</span>().<span class="ident">get_unchecked</span>(<span class="ident">idx</span>));
         <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">len</span>() {
             <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">len</span>()
         } <span class="kw">else</span> {
-            <span class="ident">usizeify</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">get_unchecked</span>(<span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span>))
+            <span class="ident">usizeify</span>(<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">indices_slice</span>().<span class="ident">get_unchecked</span>(<span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span>))
         };
         <span class="macro">debug_assert!</span>(<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">end</span>);
         <span class="ident">start</span>..<span class="ident">end</span>
@@ -694,82 +717,57 @@
     <span class="doccomment">/// assume that the slice has been passed through iter_checked</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">iter_checked</span>(<span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>, <span class="ident">ZeroVecError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">last</span> <span class="op">=</span> <span class="ident">iter::from_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_empty</span>() {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="self">self</span>.<span class="ident">indices</span>[<span class="self">self</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">len</span>();
-                <span class="prelude-val">Some</span>(
-                    <span class="self">self</span>.<span class="ident">things</span>
-                        .<span class="ident">get</span>(<span class="ident">start</span>..<span class="ident">end</span>)
-                        .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>),
-                )
-            } <span class="kw">else</span> {
-                <span class="prelude-val">None</span>
-            }
-        })
-        .<span class="ident">take</span>(<span class="number">1</span>);
-        <span class="self">self</span>.<span class="ident">indices</span>
-            .<span class="ident">windows</span>(<span class="number">2</span>)
-            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">win</span><span class="op">|</span> {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="ident">win</span>[<span class="number">0</span>]);
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="ident">win</span>[<span class="number">1</span>]);
-                <span class="comment">// the .get() here automatically verifies that end&gt;=start</span>
+        <span class="self">self</span>.<span class="ident">indices_slice</span>()
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">as_unsigned_int</span>() <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">zip</span>(
+                <span class="self">self</span>.<span class="ident">indices_slice</span>()
+                    .<span class="ident">iter</span>()
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">as_unsigned_int</span>() <span class="kw">as</span> <span class="ident">usize</span>)
+                    .<span class="ident">skip</span>(<span class="number">1</span>)
+                    .<span class="ident">chain</span>(<span class="ident">core::iter::once</span>(<span class="self">self</span>.<span class="ident">things</span>.<span class="ident">len</span>())),
+            )
+            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">start</span>, <span class="ident">end</span>)<span class="op">|</span> {
                 <span class="self">self</span>.<span class="ident">things</span>
                     .<span class="ident">get</span>(<span class="ident">start</span>..<span class="ident">end</span>)
                     .<span class="ident">ok_or</span>(<span class="ident">ZeroVecError::VarZeroVecFormatError</span>)
             })
-            .<span class="ident">chain</span>(<span class="ident">last</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">T::parse_byte_slice</span>(<span class="ident">s</span>)))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bytes_result</span><span class="op">|</span> <span class="ident">bytes_result</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="ident">T::parse_byte_slice</span>(<span class="ident">bytes</span>)))
     }
 
     <span class="doccomment">/// Create an iterator over the Ts contained in VarZeroVecComponents</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">last</span> <span class="op">=</span> <span class="ident">iter::from_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_empty</span>() {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="self">self</span>.<span class="ident">indices</span>[<span class="self">self</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">len</span>();
-                <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">get_unchecked</span>(<span class="ident">start</span>..<span class="ident">end</span>) })
-            } <span class="kw">else</span> {
-                <span class="prelude-val">None</span>
-            }
-        })
-        .<span class="ident">take</span>(<span class="number">1</span>);
-        <span class="self">self</span>.<span class="ident">indices</span>
-            .<span class="ident">windows</span>(<span class="number">2</span>)
-            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">win</span><span class="op">|</span> {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="ident">win</span>[<span class="number">0</span>]);
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">usizeify</span>(<span class="ident">win</span>[<span class="number">1</span>]);
-                <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">get_unchecked</span>(<span class="ident">start</span>..<span class="ident">end</span>) }
-            })
-            .<span class="ident">chain</span>(<span class="ident">last</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">T::from_byte_slice_unchecked</span>(<span class="ident">s</span>) })
+        <span class="self">self</span>.<span class="ident">indices_slice</span>()
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">as_unsigned_int</span>() <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">zip</span>(
+                <span class="self">self</span>.<span class="ident">indices_slice</span>()
+                    .<span class="ident">iter</span>()
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">as_unsigned_int</span>() <span class="kw">as</span> <span class="ident">usize</span>)
+                    .<span class="ident">skip</span>(<span class="number">1</span>)
+                    .<span class="ident">chain</span>(<span class="ident">core::iter::once</span>(<span class="self">self</span>.<span class="ident">things</span>.<span class="ident">len</span>())),
+            )
+            .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">start</span>, <span class="ident">end</span>)<span class="op">|</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">things</span>.<span class="ident">get_unchecked</span>(<span class="ident">start</span>..<span class="ident">end</span>) })
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">T::from_byte_slice_unchecked</span>(<span class="ident">bytes</span>) })
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_vec</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">T::to_boxed</span>).<span class="ident">collect</span>()
     }
 
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">indices_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="ident">INDEX_WIDTH</span><span class="op">&gt;</span>] {
+        <span class="kw">unsafe</span> { <span class="ident">RawBytesULE</span>::<span class="op">&lt;</span><span class="ident">INDEX_WIDTH</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked</span>(<span class="self">self</span>.<span class="ident">indices</span>) }
+    }
+
     <span class="comment">// Dump a debuggable representation of this type</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused</span>)]</span> <span class="comment">// useful for debugging</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">dump</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="kw">let</span> <span class="ident">indices</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">indices</span>
+            .<span class="ident">indices_slice</span>()
             .<span class="ident">iter</span>()
-            .<span class="ident">copied</span>()
-            .<span class="ident">map</span>(<span class="ident">u32::from_unaligned</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">as_unsigned_int</span>())
             .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
         <span class="macro">format!</span>(<span class="string">&quot;VarZeroVecComponents {{ indices: {:?} }}&quot;</span>, <span class="ident">indices</span>)
     }
@@ -784,7 +782,7 @@
     <span class="doccomment">/// Binary searches a sorted `VarZeroVecComponents&lt;T&gt;` for the given element. For more information, see</span>
     <span class="doccomment">/// the primitive function [`binary_search`](slice::binary_search).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">needle</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">binary_search_impl</span>(<span class="op">|</span><span class="ident">probe</span><span class="op">|</span> <span class="ident">probe</span>.<span class="ident">cmp</span>(<span class="ident">needle</span>), <span class="self">self</span>.<span class="ident">indices</span>)
+        <span class="self">self</span>.<span class="ident">binary_search_impl</span>(<span class="op">|</span><span class="ident">probe</span><span class="op">|</span> <span class="ident">probe</span>.<span class="ident">cmp</span>(<span class="ident">needle</span>), <span class="self">self</span>.<span class="ident">indices_slice</span>())
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search_in_range</span>(
@@ -792,7 +790,7 @@
         <span class="ident">needle</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
         <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">indices_slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">get</span>(<span class="ident">range</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">indices_slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indices_slice</span>().<span class="ident">get</span>(<span class="ident">range</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">binary_search_impl</span>(<span class="op">|</span><span class="ident">probe</span><span class="op">|</span> <span class="ident">probe</span>.<span class="ident">cmp</span>(<span class="ident">needle</span>), <span class="ident">indices_slice</span>))
     }
 }
@@ -805,7 +803,7 @@
     <span class="doccomment">/// Binary searches a sorted `VarZeroVecComponents&lt;T&gt;` for the given predicate. For more information, see</span>
     <span class="doccomment">/// the primitive function [`binary_search_by`](slice::binary_search_by).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search_by</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">binary_search_impl</span>(<span class="ident">predicate</span>, <span class="self">self</span>.<span class="ident">indices</span>)
+        <span class="self">self</span>.<span class="ident">binary_search_impl</span>(<span class="ident">predicate</span>, <span class="self">self</span>.<span class="ident">indices_slice</span>())
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">binary_search_in_range_by</span>(
@@ -813,7 +811,7 @@
         <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>,
         <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">indices_slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">get</span>(<span class="ident">range</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">indices_slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indices_slice</span>().<span class="ident">get</span>(<span class="ident">range</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">binary_search_impl</span>(<span class="ident">predicate</span>, <span class="ident">indices_slice</span>))
     }
 
@@ -822,7 +820,7 @@
     <span class="kw">fn</span> <span class="ident">binary_search_impl</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">predicate</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">Ordering</span>,
-        <span class="ident">indices_slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="number">4</span><span class="op">&gt;</span>],
+        <span class="ident">indices_slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">RawBytesULE</span><span class="op">&lt;</span><span class="ident">INDEX_WIDTH</span><span class="op">&gt;</span>],
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="comment">// This code is an absolute atrocity. This code is not a place of honor. This</span>
         <span class="comment">// code is known to the State of California to cause cancer.</span>
@@ -850,9 +848,9 @@
         <span class="comment">// only searching a subslice of it.</span>
         <span class="kw">let</span> <span class="ident">zero_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">indices</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">indices_slice</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">probe</span>: <span class="kw-2">&amp;</span><span class="kw">_</span><span class="op">|</span> {
-            <span class="comment">// `self.indices` is a vec of unaligned u32s, so we divide by sizeof(u32)</span>
+            <span class="comment">// `self.indices` is a vec of unaligned INDEX_WIDTH values, so we divide by INDEX_WIDTH</span>
             <span class="comment">// to get the actual index</span>
-            <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> (<span class="ident">probe</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="ident">zero_index</span>) <span class="op">/</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>();
+            <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> (<span class="ident">probe</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="ident">zero_index</span>) <span class="op">/</span> <span class="ident">INDEX_WIDTH</span>;
             <span class="comment">// safety: we know this is in bounds</span>
             <span class="kw">let</span> <span class="ident">actual_probe</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">get_unchecked</span>(<span class="ident">index</span>) };
             <span class="ident">predicate</span>(<span class="ident">actual_probe</span>)
@@ -867,7 +865,7 @@
     <span class="ident">A</span>: <span class="ident">EncodeAsVarULE</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">compute_serializable_len</span>(<span class="ident">elements</span>)<span class="question-mark">?</span>;
-    <span class="macro">debug_assert!</span>(<span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">4</span>);
+    <span class="macro">debug_assert!</span>(<span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">LENGTH_WIDTH</span> <span class="kw">as</span> <span class="ident">u32</span>);
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">alloc::vec!</span>[<span class="number">0</span>; <span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>];
     <span class="ident">write_serializable_bytes</span>(<span class="ident">elements</span>, <span class="kw-2">&amp;mut</span> <span class="ident">output</span>);
     <span class="prelude-val">Some</span>(<span class="ident">output</span>)
@@ -885,30 +883,31 @@
     <span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">A</span>: <span class="ident">EncodeAsVarULE</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-    <span class="kw">let</span> <span class="ident">num_elements</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">elements</span>.<span class="ident">len</span>()).<span class="ident">ok</span>().<span class="ident">unwrap</span>();
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-    <span class="ident">output</span>[<span class="number">0</span>..<span class="number">4</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">num_elements</span>.<span class="ident">to_unaligned</span>().<span class="number">0</span>);
+    <span class="macro">assert!</span>(<span class="ident">elements</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">MAX_LENGTH</span>);
+    <span class="kw">let</span> <span class="ident">num_elements_bytes</span> <span class="op">=</span> <span class="ident">elements</span>.<span class="ident">len</span>().<span class="ident">to_le_bytes</span>();
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// Function contract allows panicky behavior</span>
+    <span class="ident">output</span>[<span class="number">0</span>..<span class="ident">LENGTH_WIDTH</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">num_elements_bytes</span>[<span class="number">0</span>..<span class="ident">LENGTH_WIDTH</span>]);
 
     <span class="comment">// idx_offset = offset from the start of the buffer for the next index</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idx_offset</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idx_offset</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span>;
     <span class="comment">// first_dat_offset = offset from the start of the buffer of the first data block</span>
-    <span class="kw">let</span> <span class="ident">first_dat_offset</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span> <span class="op">+</span> <span class="ident">elements</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="number">4</span>;
+    <span class="kw">let</span> <span class="ident">first_dat_offset</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">idx_offset</span> <span class="op">+</span> <span class="ident">elements</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">INDEX_WIDTH</span>;
     <span class="comment">// dat_offset = offset from the start of the buffer of the next data block</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dat_offset</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">first_dat_offset</span>;
 
     <span class="kw">for</span> <span class="ident">element</span> <span class="kw">in</span> <span class="ident">elements</span>.<span class="ident">iter</span>() {
         <span class="kw">let</span> <span class="ident">element_len</span> <span class="op">=</span> <span class="ident">element</span>.<span class="ident">encode_var_ule_len</span>();
 
-        <span class="kw">let</span> <span class="ident">idx_limit</span> <span class="op">=</span> <span class="ident">idx_offset</span> <span class="op">+</span> <span class="number">4</span>;
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+        <span class="kw">let</span> <span class="ident">idx_limit</span> <span class="op">=</span> <span class="ident">idx_offset</span> <span class="op">+</span> <span class="ident">INDEX_WIDTH</span>;
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// Function contract allows panicky behavior</span>
         <span class="kw">let</span> <span class="ident">idx_slice</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">output</span>[<span class="ident">idx_offset</span>..<span class="ident">idx_limit</span>];
         <span class="comment">// VZV expects data offsets to be stored relative to the first data block</span>
-        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> (<span class="ident">dat_offset</span> <span class="op">-</span> <span class="ident">first_dat_offset</span>) <span class="kw">as</span> <span class="ident">u32</span>;
-        <span class="ident">idx_slice</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">offset</span>.<span class="ident">to_unaligned</span>().<span class="number">0</span>);
+        <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">dat_offset</span> <span class="op">-</span> <span class="ident">first_dat_offset</span>;
+        <span class="macro">assert!</span>(<span class="ident">idx</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">MAX_INDEX</span>);
+        <span class="ident">idx_slice</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">idx</span>.<span class="ident">to_le_bytes</span>()[..<span class="ident">INDEX_WIDTH</span>]);
 
         <span class="kw">let</span> <span class="ident">dat_limit</span> <span class="op">=</span> <span class="ident">dat_offset</span> <span class="op">+</span> <span class="ident">element_len</span>;
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// Function contract allows panicky behavior</span>
         <span class="kw">let</span> <span class="ident">dat_slice</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">output</span>[<span class="ident">dat_offset</span>..<span class="ident">dat_limit</span>];
         <span class="ident">element</span>.<span class="ident">encode_var_ule_write</span>(<span class="ident">dat_slice</span>);
         <span class="macro">debug_assert_eq!</span>(<span class="ident">T::validate_byte_slice</span>(<span class="ident">dat_slice</span>), <span class="prelude-val">Ok</span>(()));
@@ -917,7 +916,10 @@
         <span class="ident">dat_offset</span> <span class="op">=</span> <span class="ident">dat_limit</span>;
     }
 
-    <span class="macro">debug_assert_eq!</span>(<span class="ident">idx_offset</span>, <span class="number">4</span> <span class="op">+</span> <span class="number">4</span> <span class="op">*</span> <span class="ident">elements</span>.<span class="ident">len</span>());
+    <span class="macro">debug_assert_eq!</span>(
+        <span class="ident">idx_offset</span>,
+        <span class="ident">LENGTH_WIDTH</span> <span class="op">+</span> <span class="ident">METADATA_WIDTH</span> <span class="op">+</span> <span class="ident">INDEX_WIDTH</span> <span class="op">*</span> <span class="ident">elements</span>.<span class="ident">len</span>()
+    );
     <span class="macro">assert_eq!</span>(<span class="ident">dat_offset</span>, <span class="ident">output</span>.<span class="ident">len</span>());
 }
 
@@ -926,11 +928,11 @@
     <span class="ident">T</span>: <span class="ident">VarULE</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="ident">A</span>: <span class="ident">EncodeAsVarULE</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
-    <span class="comment">// 4 for length + 4 for each offset + the body</span>
     <span class="kw">let</span> <span class="ident">idx_len</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">u32::try_from</span>(<span class="ident">elements</span>.<span class="ident">len</span>())
         .<span class="ident">ok</span>()<span class="question-mark">?</span>
-        .<span class="ident">checked_mul</span>(<span class="number">4</span>)<span class="question-mark">?</span>
-        .<span class="ident">checked_add</span>(<span class="number">4</span>)<span class="question-mark">?</span>;
+        .<span class="ident">checked_mul</span>(<span class="ident">INDEX_WIDTH</span> <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>
+        .<span class="ident">checked_add</span>(<span class="ident">LENGTH_WIDTH</span> <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>
+        .<span class="ident">checked_add</span>(<span class="ident">METADATA_WIDTH</span> <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">data_len</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">elements</span>
         .<span class="ident">iter</span>()
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">u32::try_from</span>(<span class="ident">v</span>.<span class="ident">encode_var_ule_len</span>()).<span class="ident">ok</span>())

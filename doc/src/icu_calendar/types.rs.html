@@ -474,6 +474,25 @@
 <span id="469">469</span>
 <span id="470">470</span>
 <span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -495,9 +514,12 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Era</span>(<span class="kw">pub</span> <span class="ident">TinyStr16</span>);
 
 <span class="doccomment">/// Representation of a formattable year.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// More fields may be added in the future, for things like</span>
+<span class="doccomment">/// the cyclic or extended year</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type is stable</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Year</span> {
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FormattableYear</span> {
     <span class="doccomment">/// The era containing the year.</span>
     <span class="kw">pub</span> <span class="ident">era</span>: <span class="ident">Era</span>,
 
@@ -506,9 +528,25 @@
 
     <span class="doccomment">/// The related ISO year. This is normally the ISO (proleptic Gregorian) year having the greatest</span>
     <span class="doccomment">/// overlap with the calendar year. It is used in certain date formatting patterns.</span>
-    <span class="kw">pub</span> <span class="ident">related_iso</span>: <span class="ident">i32</span>,
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Can be None if the calendar does not typically use related_iso (and CLDR does not contain patterns</span>
+    <span class="doccomment">/// using it)</span>
+    <span class="kw">pub</span> <span class="ident">related_iso</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span>,
 }
 
+<span class="kw">impl</span> <span class="ident">FormattableYear</span> {
+    <span class="doccomment">/// Construct a new Year given an era and number</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Other fields can be set mutably after construction</span>
+    <span class="doccomment">/// as needed</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">era</span>: <span class="ident">Era</span>, <span class="ident">number</span>: <span class="ident">i32</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">era</span>,
+            <span class="ident">number</span>,
+            <span class="ident">related_iso</span>: <span class="prelude-val">None</span>,
+        }
+    }
+}
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Hash</span>)]</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this is a newtype</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(
@@ -544,7 +582,7 @@
 <span class="doccomment">/// Representation of a formattable month.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type is stable</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Month</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FormattableMonth</span> {
     <span class="doccomment">/// The month number in this given year. For calendars with leap months, all months after</span>
     <span class="doccomment">/// the leap month will end up with an incremented number.</span>
     <span class="doccomment">///</span>
@@ -566,11 +604,11 @@
     <span class="doccomment">/// The number of days in a year.</span>
     <span class="kw">pub</span> <span class="ident">days_in_year</span>: <span class="ident">u32</span>,
     <span class="doccomment">/// The previous year.</span>
-    <span class="kw">pub</span> <span class="ident">prev_year</span>: <span class="ident">Year</span>,
+    <span class="kw">pub</span> <span class="ident">prev_year</span>: <span class="ident">FormattableYear</span>,
     <span class="doccomment">/// The number of days in the previous year.</span>
     <span class="kw">pub</span> <span class="ident">days_in_prev_year</span>: <span class="ident">u32</span>,
     <span class="doccomment">/// The next year.</span>
-    <span class="kw">pub</span> <span class="ident">next_year</span>: <span class="ident">Year</span>,
+    <span class="kw">pub</span> <span class="ident">next_year</span>: <span class="ident">FormattableYear</span>,
 }
 
 <span class="doccomment">/// A day number in a month. Usually 1-based.</span>

@@ -26,12 +26,62 @@
 <span id="21">21</span>
 <span id="22">22</span>
 <span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">zerovec::maps::ZeroMap2dBorrowed</span>;
+<span class="kw">use</span> <span class="ident">zerovec::VarZeroSlice</span>;
 
 <span class="doccomment">/// A versioned Serde schema for ICU4X data blobs.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>)]</span>
@@ -42,12 +92,60 @@
 }
 
 <span class="doccomment">/// Version 1 of the ICU4X data blob schema.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>, <span class="ident">yoke::Yokeable</span>)]</span>
+<span class="attribute">#[<span class="ident">yoke</span>(<span class="ident">prove_covariance_manually</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;export&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Map from key hash and locale to buffer</span>
+    <span class="doccomment">/// Map from key hash and locale to buffer index.</span>
+    <span class="doccomment">/// Weak invariant: the `usize` values are valid indices into `self.buffers`</span>
+    <span class="doccomment">/// Weak invariant: there is at least one value for every integer in 0..self.buffers.len()</span>
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">borrow</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">resources</span>: <span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">ResourceKeyHash</span>, [<span class="ident">u8</span>], [<span class="ident">u8</span>]<span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">keys</span>: <span class="ident">ZeroMap2dBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">ResourceKeyHash</span>, [<span class="ident">u8</span>], <span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Vector of buffers</span>
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">borrow</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">buffers</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">keys</span>: <span class="ident">ZeroMap2dBorrowed::new</span>(),
+            <span class="ident">buffers</span>: <span class="ident">VarZeroSlice::new_empty</span>(),
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Verifies the weak invariants using debug assertions</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">check_invariants</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">use</span> <span class="ident">zerovec::maps::ZeroVecLike</span>;
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">buffers</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">return</span>;
+        }
+        <span class="comment">// Note: We could check that every index occurs at least once, but that&#39;s a more expensive</span>
+        <span class="comment">// operation, so we will just check for the min and max index.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seen_min</span> <span class="op">=</span> <span class="bool-val">false</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seen_max</span> <span class="op">=</span> <span class="bool-val">false</span>;
+        <span class="kw">for</span> <span class="ident">cursor</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">iter0</span>() {
+            <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">ule</span>) <span class="kw">in</span> <span class="ident">cursor</span>.<span class="ident">iter1</span>() {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="prelude-ty">Option</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="ident">::None</span>;
+                <span class="ident">zerovec::vecs::FlexZeroVec::zvl_get_as_t</span>(<span class="ident">ule</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">result</span>.<span class="ident">replace</span>(<span class="kw-2">*</span><span class="ident">v</span>));
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
+                <span class="comment">// `zvl_get_as_t` guarantees that the callback is invoked</span>
+                <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">unwrap</span>();
+                <span class="macro">debug_assert!</span>(<span class="ident">idx</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">buffers</span>.<span class="ident">len</span>());
+                <span class="kw">if</span> <span class="ident">idx</span> <span class="op">==</span> <span class="number">0</span> {
+                    <span class="ident">seen_min</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                }
+                <span class="kw">if</span> <span class="ident">idx</span> <span class="op">+</span> <span class="number">1</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">buffers</span>.<span class="ident">len</span>() {
+                    <span class="ident">seen_max</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                }
+            }
+        }
+        <span class="macro">debug_assert!</span>(<span class="ident">seen_min</span>);
+        <span class="macro">debug_assert!</span>(<span class="ident">seen_max</span>);
+    }
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_provider_blob" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>

@@ -258,6 +258,61 @@
 <span id="253">253</span>
 <span id="254">254</span>
 <span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -281,8 +336,8 @@
 <span class="doccomment">//! let key_fallbacker = fallbacker.for_config(Default::default());</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Set up the fallback iterator.</span>
-<span class="doccomment">//! let loc = icu_locid::locale!(&quot;hi-Latn-IN&quot;);</span>
-<span class="doccomment">//! let mut fallback_iterator = key_fallbacker.fallback_for(loc.into());</span>
+<span class="doccomment">//! let loc: icu_provider::ResourceOptions = icu_locid::locale!(&quot;hi-Latn-IN&quot;).into();</span>
+<span class="doccomment">//! let mut fallback_iterator = key_fallbacker.fallback_for(loc);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Run the algorithm and check the results.</span>
 <span class="doccomment">//! assert_eq!(fallback_iterator.get().to_string(), &quot;hi-Latn-IN&quot;);</span>
@@ -301,34 +356,40 @@
 <span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode</span>::{<span class="ident">Key</span>, <span class="ident">Value</span>};
 <span class="kw">use</span> <span class="ident">icu_locid::subtags::Variants</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">FallbackPriority</span>, <span class="ident">ResourceKeyMetadata</span>};
 
+<span class="kw">mod</span> <span class="ident">adapter</span>;
 <span class="kw">mod</span> <span class="ident">algorithms</span>;
-
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">provider</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">adapter::LocaleFallbackProvider</span>;
 
 <span class="kw">use</span> <span class="ident">provider</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Strategy for choosing which subtags to drop during locale fallback.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="doccomment">/// Configuration settings for a particular fallback operation.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Default</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LocaleFallbackStrategy</span> {
-    <span class="doccomment">/// Retain the language and script subtags until the final step.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleFallbackConfig</span> {
+    <span class="doccomment">/// Strategy for choosing which subtags to drop during locale fallback.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Retain the language and script subtags until the final step:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbacker;</span>
     <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackConfig;</span>
-    <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackStrategy;</span>
+    <span class="doccomment">/// use icu_provider::FallbackPriority;</span>
+    <span class="doccomment">/// use icu_provider::ResourceOptions;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Set up the fallback iterator.</span>
-    <span class="doccomment">/// let loc = icu_locid::Locale::from_bytes(b&quot;ca-ES-valencia&quot;).unwrap();</span>
+    <span class="doccomment">/// let loc: ResourceOptions = icu_locid::Locale::from_bytes(b&quot;ca-ES-valencia&quot;).unwrap().into();</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let fallbacker = LocaleFallbacker::try_new(&amp;provider).expect(&quot;data&quot;);</span>
     <span class="doccomment">/// let mut config = LocaleFallbackConfig::default();</span>
-    <span class="doccomment">/// config.strategy = LocaleFallbackStrategy::LanguagePriority;</span>
+    <span class="doccomment">/// config.priority = FallbackPriority::Language;</span>
     <span class="doccomment">/// let key_fallbacker = fallbacker.for_config(config);</span>
-    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc.into());</span>
+    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Run the algorithm and check the results.</span>
     <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;ca-ES-valencia&quot;);</span>
@@ -339,25 +400,23 @@
     <span class="doccomment">/// fallback_iterator.step();</span>
     <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;und&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="ident">LanguagePriority</span>,
-
-    <span class="doccomment">/// Retain the region subtag until the final step.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">/// Retain the region subtag until the final step:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbacker;</span>
     <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackConfig;</span>
-    <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackStrategy;</span>
+    <span class="doccomment">/// use icu_provider::FallbackPriority;</span>
+    <span class="doccomment">/// use icu_provider::ResourceOptions;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Set up the fallback iterator.</span>
-    <span class="doccomment">/// let loc = icu_locid::Locale::from_bytes(b&quot;ca-ES-valencia&quot;).unwrap();</span>
+    <span class="doccomment">/// let loc: ResourceOptions = icu_locid::Locale::from_bytes(b&quot;ca-ES-valencia&quot;).unwrap().into();</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let fallbacker = LocaleFallbacker::try_new(&amp;provider).expect(&quot;data&quot;);</span>
     <span class="doccomment">/// let mut config = LocaleFallbackConfig::default();</span>
-    <span class="doccomment">/// config.strategy = LocaleFallbackStrategy::RegionPriority;</span>
+    <span class="doccomment">/// config.priority = FallbackPriority::Region;</span>
     <span class="doccomment">/// let key_fallbacker = fallbacker.for_config(config);</span>
-    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc.into());</span>
+    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Run the algorithm and check the results.</span>
     <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;ca-ES-valencia&quot;);</span>
@@ -370,23 +429,7 @@
     <span class="doccomment">/// fallback_iterator.step();</span>
     <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;und&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="ident">RegionPriority</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">LocaleFallbackStrategy</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::LanguagePriority</span>
-    }
-}
-
-<span class="doccomment">/// Configuration settings for a particular fallback operation.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Default</span>)]</span>
-<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleFallbackConfig</span> {
-    <span class="doccomment">/// Strategy for choosing which subtags to drop during locale fallback.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// See [`LocaleFallbackStrategy`] for examples.</span>
-    <span class="kw">pub</span> <span class="ident">strategy</span>: <span class="ident">LocaleFallbackStrategy</span>,
+    <span class="kw">pub</span> <span class="ident">priority</span>: <span class="ident">FallbackPriority</span>,
     <span class="doccomment">/// An extension keyword to retain during locale fallback.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
@@ -394,16 +437,16 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbacker;</span>
     <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackConfig;</span>
-    <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackStrategy;</span>
+    <span class="doccomment">/// use icu_provider::ResourceOptions;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Set up the fallback iterator.</span>
-    <span class="doccomment">/// let loc = icu_locid::Locale::from_bytes(b&quot;ar-EG-u-nu-latn&quot;).unwrap();</span>
+    <span class="doccomment">/// let loc: ResourceOptions = icu_locid::Locale::from_bytes(b&quot;ar-EG-u-nu-latn&quot;).unwrap().into();</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let fallbacker = LocaleFallbacker::try_new(&amp;provider).expect(&quot;data&quot;);</span>
     <span class="doccomment">/// let mut config = LocaleFallbackConfig::default();</span>
-    <span class="doccomment">/// config.extension_kw = Some(icu_locid::extensions_unicode_key!(&quot;nu&quot;));</span>
+    <span class="doccomment">/// config.extension_key = Some(icu_locid::extensions_unicode_key!(&quot;nu&quot;));</span>
     <span class="doccomment">/// let key_fallbacker = fallbacker.for_config(config);</span>
-    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc.into());</span>
+    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Run the algorithm and check the results.</span>
     <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;ar-EG-u-nu-latn&quot;);</span>
@@ -414,7 +457,16 @@
     <span class="doccomment">/// fallback_iterator.step();</span>
     <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;und&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="ident">extension_kw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">extension_key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ResourceKeyMetadata</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LocaleFallbackConfig</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">key_metadata</span>: <span class="ident">ResourceKeyMetadata</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">LocaleFallbackConfig</span> {
+            <span class="ident">priority</span>: <span class="ident">key_metadata</span>.<span class="ident">fallback_priority</span>,
+            <span class="ident">extension_key</span>: <span class="ident">key_metadata</span>.<span class="ident">extension_key</span>,
+        }
+    }
 }
 
 <span class="doccomment">/// Entry type for locale fallbacking.</span>
@@ -431,21 +483,26 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleFallbackerWithConfig</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">likely_subtags</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">LocaleFallbackLikelySubtagsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     <span class="ident">parents</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">LocaleFallbackParentsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">key_metadata</span>: <span class="ident">LocaleFallbackConfig</span>,
+    <span class="ident">config</span>: <span class="ident">LocaleFallbackConfig</span>,
+}
+
+<span class="doccomment">/// Inner iteration type. Does not own the item under fallback.</span>
+<span class="kw">struct</span> <span class="ident">LocaleFallbackIteratorInner</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
+    <span class="ident">likely_subtags</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">LocaleFallbackLikelySubtagsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">parents</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">LocaleFallbackParentsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+    <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">LocaleFallbackConfig</span>,
+    <span class="ident">backup_extension</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span>,
+    <span class="ident">backup_subdivision</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span>,
+    <span class="ident">backup_variants</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Variants</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Iteration type for locale fallback operations.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Because the `Iterator` trait does not allow items to borrow from the iterator, this class does</span>
 <span class="doccomment">/// not implement that trait. Instead, use `.step()` and `.get()`.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-    <span class="ident">likely_subtags</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">LocaleFallbackLikelySubtagsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">parents</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">LocaleFallbackParentsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">key_metadata</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">LocaleFallbackConfig</span>,
-    <span class="ident">current</span>: <span class="ident">ResourceOptions</span>,
-    <span class="ident">backup_extension</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span>,
-    <span class="ident">backup_subdivision</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span>,
-    <span class="ident">backup_variants</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Variants</span><span class="op">&gt;</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="ident">current</span>: <span class="ident">T</span>,
+    <span class="ident">inner</span>: <span class="ident">LocaleFallbackIteratorInner</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">LocaleFallbacker</span> {
@@ -478,12 +535,47 @@
     }
 
     <span class="doccomment">/// Creates the intermediate [`LocaleFallbackerWithConfig`] with configuration options.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_config</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_metadata</span>: <span class="ident">LocaleFallbackConfig</span>) -&gt; <span class="ident">LocaleFallbackerWithConfig</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_config</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">config</span>: <span class="ident">LocaleFallbackConfig</span>) -&gt; <span class="ident">LocaleFallbackerWithConfig</span> {
         <span class="ident">LocaleFallbackerWithConfig</span> {
             <span class="ident">likely_subtags</span>: <span class="self">self</span>.<span class="ident">likely_subtags</span>.<span class="ident">get</span>(),
             <span class="ident">parents</span>: <span class="self">self</span>.<span class="ident">parents</span>.<span class="ident">get</span>(),
-            <span class="ident">key_metadata</span>,
+            <span class="ident">config</span>,
         }
+    }
+
+    <span class="doccomment">/// Creates the intermediate [`LocaleFallbackerWithConfig`] based on a [`ResourceKey`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbacker;</span>
+    <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">/// use std::borrow::Cow;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Define the data struct with key.</span>
+    <span class="doccomment">/// #[icu_provider::data_struct(</span>
+    <span class="doccomment">///     marker(FooV1Marker, &quot;demo/foo@1&quot;, fallback_by = &quot;region&quot;)</span>
+    <span class="doccomment">/// )]</span>
+    <span class="doccomment">/// pub struct FooV1&lt;&#39;data&gt; {</span>
+    <span class="doccomment">///     message: Cow&lt;&#39;data, str&gt;,</span>
+    <span class="doccomment">/// };</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Set up the fallback iterator.</span>
+    <span class="doccomment">/// let loc: ResourceOptions = icu_locid::Locale::from_bytes(b&quot;en-GB&quot;).unwrap().into();</span>
+    <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// let fallbacker = LocaleFallbacker::try_new(&amp;provider).expect(&quot;data&quot;);</span>
+    <span class="doccomment">/// let key_fallbacker = fallbacker.for_key(FooV1Marker::KEY);</span>
+    <span class="doccomment">/// let mut fallback_iterator = key_fallbacker.fallback_for(loc);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Run the algorithm and check the results.</span>
+    <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;en-GB&quot;);</span>
+    <span class="doccomment">/// fallback_iterator.step();</span>
+    <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;und-GB&quot;);</span>
+    <span class="doccomment">/// fallback_iterator.step();</span>
+    <span class="doccomment">/// assert_eq!(fallback_iterator.get().to_string(), &quot;und&quot;);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">resource_key</span>: <span class="ident">ResourceKey</span>) -&gt; <span class="ident">LocaleFallbackerWithConfig</span> {
+        <span class="self">self</span>.<span class="ident">for_config</span>(<span class="ident">resource_key</span>.<span class="ident">get_metadata</span>().<span class="ident">into</span>())
     }
 }
 
@@ -493,24 +585,42 @@
     <span class="doccomment">/// When first initialized, the locale is normalized according to the fallback algorithm.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`Locale`]: icu_locid::Locale</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fallback_for</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ro</span>: <span class="ident">ResourceOptions</span>) -&gt; <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">normalize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">ro</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fallback_for</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ro</span>: <span class="ident">T</span>) -&gt; <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">T</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>,
+    {
+        <span class="self">self</span>.<span class="ident">normalize</span>(<span class="ident">ro</span>.<span class="ident">as_mut</span>());
         <span class="ident">LocaleFallbackIterator</span> {
-            <span class="ident">likely_subtags</span>: <span class="self">self</span>.<span class="ident">likely_subtags</span>,
-            <span class="ident">parents</span>: <span class="self">self</span>.<span class="ident">parents</span>,
-            <span class="ident">key_metadata</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key_metadata</span>,
             <span class="ident">current</span>: <span class="ident">ro</span>,
-            <span class="ident">backup_extension</span>: <span class="prelude-val">None</span>,
-            <span class="ident">backup_subdivision</span>: <span class="prelude-val">None</span>,
-            <span class="ident">backup_variants</span>: <span class="prelude-val">None</span>,
+            <span class="ident">inner</span>: <span class="ident">LocaleFallbackIteratorInner</span> {
+                <span class="ident">likely_subtags</span>: <span class="self">self</span>.<span class="ident">likely_subtags</span>,
+                <span class="ident">parents</span>: <span class="self">self</span>.<span class="ident">parents</span>,
+                <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span>,
+                <span class="ident">backup_extension</span>: <span class="prelude-val">None</span>,
+                <span class="ident">backup_subdivision</span>: <span class="prelude-val">None</span>,
+                <span class="ident">backup_variants</span>: <span class="prelude-val">None</span>,
+            },
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Gets the current [`ResourceOptions`] under fallback.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">current</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">LocaleFallbackIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>,
+{
+    <span class="doccomment">/// Performs one step of the locale fallback algorithm.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The fallback is completed once the inner [`ResourceOptions`] becomes `und`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">step</span>(<span class="self">self</span>.<span class="ident">current</span>.<span class="ident">as_mut</span>());
+        <span class="self">self</span>
     }
 }
 </code></pre></div>

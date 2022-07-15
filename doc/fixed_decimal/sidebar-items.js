@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["Error",""]],"mod":[["decimal",""],["signum","Sign function for FixedDecimal."]]});
+initSidebarItems({"enum":[["Error",""]],"mod":[["decimal",""]]});

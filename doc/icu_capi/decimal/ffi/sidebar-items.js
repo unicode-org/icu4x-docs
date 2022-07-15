@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ICU4XFixedDecimalGroupingStrategy",""],["ICU4XFixedDecimalSignDisplay",""]],"struct":[["ICU4XFixedDecimalFormat","An ICU4X Fixed Decimal Format object, capable of formatting a [`ICU4XFixedDecimal`] as a string."],["ICU4XFixedDecimalFormatOptions",""]]});
+initSidebarItems({"enum":[["ICU4XFixedDecimalGroupingStrategy",""]],"struct":[["ICU4XFixedDecimalFormat","An ICU4X Fixed Decimal Format object, capable of formatting a [`ICU4XFixedDecimal`] as a string."]]});

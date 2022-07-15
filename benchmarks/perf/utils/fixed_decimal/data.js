@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1657860346472,
+  "lastUpdate": 1657919761641,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -36929,6 +36929,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 70,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5fa85371fb3c8f97575cbe8c4dd2bc6e2f214d42",
+          "message": "Move collator and normalizer from experimental to components (#2058)\n\nCloses #971. Closes #972.",
+          "timestamp": "2022-07-15T09:55:18+03:00",
+          "tree_id": "9725e641f8c30e6fd3f765b06026ccde0b5ca911",
+          "url": "https://github.com/unicode-org/icu4x/commit/5fa85371fb3c8f97575cbe8c4dd2bc6e2f214d42"
+        },
+        "date": 1657868792929,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 123107,
+            "range": "± 440",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22372,
+            "range": "± 175",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71964,
+            "range": "± 500",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 224,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 87,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yzhang1994@gmail.com",
+            "name": "Yvonne Z",
+            "username": "yzhang1994"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e3c32af3576978551d06e838dd2cd8e08e686c9d",
+          "message": "Make langid and locale macro rules run with a single variant (#2065)\n\n* Change Variants to be a ShortVec<Variant>\r\n\r\n* Remove unused methods and make ShortVec crate-private.\r\n\r\n* Make langid and locale macro rules run with a single variant\r\n\r\n* Fix broken tests\r\n\r\n* Disable clippy type complexity check\r\n\r\n* Update langid const parser and edit macros doc.\r\n\r\n* Address reviewer feedback.\r\n\r\n* Fix issue - langid macors should panic when parsing multiple variants.\r\n\r\n* Fix broken doc test\r\n\r\nCo-authored-by: Yvonne Zhang <yvonnezhang@google.com>",
+          "timestamp": "2022-07-15T21:03:22Z",
+          "tree_id": "67b0863cbea3989fb7591ed72576b623d8b60f29",
+          "url": "https://github.com/unicode-org/icu4x/commit/e3c32af3576978551d06e838dd2cd8e08e686c9d"
+        },
+        "date": 1657919727071,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 123364,
+            "range": "± 6247",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25367,
+            "range": "± 1261",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71974,
+            "range": "± 5607",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 217,
+            "range": "± 12",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 74,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 89,
+            "range": "± 4",
             "unit": "ns/iter"
           }
         ]

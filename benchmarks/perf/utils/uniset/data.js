@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1657860259238,
+  "lastUpdate": 1657919608696,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -36574,6 +36574,114 @@ window.BENCHMARK_DATA = {
           {
             "name": "uniset/contains_range/best",
             "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5fa85371fb3c8f97575cbe8c4dd2bc6e2f214d42",
+          "message": "Move collator and normalizer from experimental to components (#2058)\n\nCloses #971. Closes #972.",
+          "timestamp": "2022-07-15T09:55:18+03:00",
+          "tree_id": "9725e641f8c30e6fd3f765b06026ccde0b5ca911",
+          "url": "https://github.com/unicode-org/icu4x/commit/5fa85371fb3c8f97575cbe8c4dd2bc6e2f214d42"
+        },
+        "date": 1657868664411,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 55586103,
+            "range": "± 683157",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "yzhang1994@gmail.com",
+            "name": "Yvonne Z",
+            "username": "yzhang1994"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e3c32af3576978551d06e838dd2cd8e08e686c9d",
+          "message": "Make langid and locale macro rules run with a single variant (#2065)\n\n* Change Variants to be a ShortVec<Variant>\r\n\r\n* Remove unused methods and make ShortVec crate-private.\r\n\r\n* Make langid and locale macro rules run with a single variant\r\n\r\n* Fix broken tests\r\n\r\n* Disable clippy type complexity check\r\n\r\n* Update langid const parser and edit macros doc.\r\n\r\n* Address reviewer feedback.\r\n\r\n* Fix issue - langid macors should panic when parsing multiple variants.\r\n\r\n* Fix broken doc test\r\n\r\nCo-authored-by: Yvonne Zhang <yvonnezhang@google.com>",
+          "timestamp": "2022-07-15T21:03:22Z",
+          "tree_id": "67b0863cbea3989fb7591ed72576b623d8b60f29",
+          "url": "https://github.com/unicode-org/icu4x/commit/e3c32af3576978551d06e838dd2cd8e08e686c9d"
+        },
+        "date": 1657919574054,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 45507602,
+            "range": "± 2057530",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
             "range": "± 0",
             "unit": "ns/iter"
           },

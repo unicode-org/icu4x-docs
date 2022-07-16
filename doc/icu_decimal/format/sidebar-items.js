@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["FormattedFixedDecimal","An intermediate structure returned by `FixedDecimalFormat`. Use [`Writeable`][Writeable] to render the formatted decimal to a string or buffer."]]});
+initSidebarItems({"struct":[["FormattedFixedDecimal","An intermediate structure returned by `FixedDecimalFormatter`. Use [`Writeable`][Writeable] to render the formatted decimal to a string or buffer."]]});

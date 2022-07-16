@@ -590,6 +590,7 @@
 <span id="585">585</span>
 <span id="586">586</span>
 <span id="587">587</span>
+<span id="588">588</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -597,7 +598,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::date</span>::{
     <span class="ident">DateTimeInput</span>, <span class="ident">DateTimeInputWithLocale</span>, <span class="ident">ExtractedDateTimeInput</span>, <span class="ident">LocalizedDateTimeInput</span>,
 };
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DateTimeFormatError</span> <span class="kw">as</span> <span class="ident">Error</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DateTimeFormatterError</span> <span class="kw">as</span> <span class="ident">Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>, <span class="ident">Second</span>, <span class="ident">Week</span>, <span class="ident">Year</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pattern</span>::{
     <span class="ident">runtime</span>::{<span class="ident">Pattern</span>, <span class="ident">PatternPlurals</span>},
@@ -610,14 +611,14 @@
 
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">fixed_decimal::FixedDecimal</span>;
-<span class="kw">use</span> <span class="ident">icu_decimal::FixedDecimalFormat</span>;
+<span class="kw">use</span> <span class="ident">icu_decimal::FixedDecimalFormatter</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::PluralRules</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataPayload</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="doccomment">/// [`FormattedDateTime`] is a intermediate structure which can be retrieved as</span>
-<span class="doccomment">/// an output from [`DateTimeFormat`](crate::DateTimeFormat).</span>
+<span class="doccomment">/// an output from [`DateTimeFormatter`](crate::DateTimeFormatter).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// The structure contains all the information needed to display formatted value,</span>
 <span class="doccomment">/// and it will also contain additional methods allowing the user to introspect</span>
@@ -627,12 +628,12 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-<span class="doccomment">/// use icu::datetime::DateTimeFormat;</span>
+<span class="doccomment">/// use icu::datetime::DateTimeFormatter;</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
 <span class="doccomment">/// # let provider = icu_provider::inv::InvariantDataProvider;</span>
-<span class="doccomment">/// # let options = icu::datetime::DateTimeFormatOptions::default();</span>
-<span class="doccomment">/// let dtf = DateTimeFormat::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, &amp;options)</span>
-<span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormat instance.&quot;);</span>
+<span class="doccomment">/// # let options = icu::datetime::DateTimeFormatterOptions::default();</span>
+<span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, &amp;options)</span>
+<span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
 <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
@@ -649,7 +650,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">WeekDataV1</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">Locale</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">PluralRules</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">FixedDecimalFormat</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">FixedDecimalFormatter</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> <span class="ident">Writeable</span> <span class="kw">for</span> <span class="ident">FormattedDateTime</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> {
@@ -680,7 +681,7 @@
 <span class="comment">// Apply length to input number and write to result using fixed_decimal_format.</span>
 <span class="kw">fn</span> <span class="ident">format_number</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span>(
     <span class="ident">result</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>,
-    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormat</span>,
+    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormatter</span>,
     <span class="kw-2">mut</span> <span class="ident">num</span>: <span class="ident">FixedDecimal</span>,
     <span class="ident">length</span>: <span class="ident">FieldLength</span>,
 ) -&gt; <span class="ident">fmt::Result</span>
@@ -720,7 +721,7 @@
     <span class="ident">date_symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">provider::calendar::DateSymbolsV1</span><span class="op">&gt;</span>,
     <span class="ident">time_symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">provider::calendar::TimeSymbolsV1</span><span class="op">&gt;</span>,
     <span class="ident">loc_datetime</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">LocalizedDateTimeInput</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormat</span>,
+    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormatter</span>,
     <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -755,7 +756,7 @@
     <span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
     <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">WeekDataV1</span><span class="op">&gt;</span>,
     <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PluralRules</span><span class="op">&gt;</span>,
-    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormat</span>,
+    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormatter</span>,
     <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">Locale</span>,
     <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
@@ -788,7 +789,7 @@
     <span class="ident">date_symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::provider::calendar::DateSymbolsV1</span><span class="op">&gt;</span>,
     <span class="ident">time_symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::provider::calendar::TimeSymbolsV1</span><span class="op">&gt;</span>,
     <span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">LocalizedDateTimeInput</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormat</span>,
+    <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormatter</span>,
     <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -1092,7 +1093,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">icu_decimal::options</span>::{<span class="ident">FixedDecimalFormatOptions</span>, <span class="ident">GroupingStrategy</span>};
+    <span class="kw">use</span> <span class="ident">icu_decimal::options</span>::{<span class="ident">FixedDecimalFormatterOptions</span>, <span class="ident">GroupingStrategy</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
@@ -1122,7 +1123,8 @@
         <span class="kw">let</span> <span class="ident">pattern</span> <span class="op">=</span> <span class="string">&quot;MMM&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">datetime</span> <span class="op">=</span> <span class="ident">DateTime::new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">12</span>, <span class="number">34</span>, <span class="number">28</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">fixed_decimal_format</span> <span class="op">=</span>
-            <span class="ident">FixedDecimalFormat::try_new</span>(<span class="ident">locale</span>.<span class="ident">id</span>.<span class="ident">language</span>, <span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
+            <span class="ident">FixedDecimalFormatter::try_new</span>(<span class="ident">locale</span>.<span class="ident">id</span>.<span class="ident">language</span>, <span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="ident">Default::default</span>())
+                .<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sink</span> <span class="op">=</span> <span class="ident">String::new</span>();
         <span class="kw">let</span> <span class="ident">loc_datetime</span> <span class="op">=</span> <span class="ident">DateTimeInputWithLocale::new</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="string">&quot;und&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>());
@@ -1153,9 +1155,9 @@
         ];
 
         <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fixed_decimal_format_options</span> <span class="op">=</span> <span class="ident">FixedDecimalFormatOptions::default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fixed_decimal_format_options</span> <span class="op">=</span> <span class="ident">FixedDecimalFormatterOptions::default</span>();
         <span class="ident">fixed_decimal_format_options</span>.<span class="ident">grouping_strategy</span> <span class="op">=</span> <span class="ident">GroupingStrategy::Never</span>;
-        <span class="kw">let</span> <span class="ident">fixed_decimal_format</span> <span class="op">=</span> <span class="ident">FixedDecimalFormat::try_new</span>(
+        <span class="kw">let</span> <span class="ident">fixed_decimal_format</span> <span class="op">=</span> <span class="ident">FixedDecimalFormatter::try_new</span>(
             <span class="macro">icu_locid::locale!</span>(<span class="string">&quot;en&quot;</span>),
             <span class="kw-2">&amp;</span><span class="ident">provider</span>,
             <span class="ident">fixed_decimal_format_options</span>,

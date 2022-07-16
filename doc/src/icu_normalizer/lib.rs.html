@@ -1580,41 +1580,6 @@
 <span id="1575">1575</span>
 <span id="1576">1576</span>
 <span id="1577">1577</span>
-<span id="1578">1578</span>
-<span id="1579">1579</span>
-<span id="1580">1580</span>
-<span id="1581">1581</span>
-<span id="1582">1582</span>
-<span id="1583">1583</span>
-<span id="1584">1584</span>
-<span id="1585">1585</span>
-<span id="1586">1586</span>
-<span id="1587">1587</span>
-<span id="1588">1588</span>
-<span id="1589">1589</span>
-<span id="1590">1590</span>
-<span id="1591">1591</span>
-<span id="1592">1592</span>
-<span id="1593">1593</span>
-<span id="1594">1594</span>
-<span id="1595">1595</span>
-<span id="1596">1596</span>
-<span id="1597">1597</span>
-<span id="1598">1598</span>
-<span id="1599">1599</span>
-<span id="1600">1600</span>
-<span id="1601">1601</span>
-<span id="1602">1602</span>
-<span id="1603">1603</span>
-<span id="1604">1604</span>
-<span id="1605">1605</span>
-<span id="1606">1606</span>
-<span id="1607">1607</span>
-<span id="1608">1608</span>
-<span id="1609">1609</span>
-<span id="1610">1610</span>
-<span id="1611">1611</span>
-<span id="1612">1612</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1783,6 +1748,9 @@
 <span class="doccomment">/// Syllable count</span>
 <span class="kw">const</span> <span class="ident">HANGUL_S_COUNT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">11172</span>;
 
+<span class="doccomment">/// One past the conjoining jamo block</span>
+<span class="kw">const</span> <span class="ident">HANGUL_JAMO_LIMIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1200</span>;
+
 <span class="doccomment">/// If `opt` is `Some`, unwrap it. If `None`, panic if debug assertions</span>
 <span class="doccomment">/// are enabled and return `default` if debug assertions are not enabled.</span>
 <span class="doccomment">///</span>
@@ -1857,11 +1825,6 @@
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
 <span class="kw">fn</span> <span class="ident">in_inclusive_range</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">start</span>: <span class="ident">char</span>, <span class="ident">end</span>: <span class="ident">char</span>) -&gt; <span class="ident">bool</span> {
     <span class="ident">u32::from</span>(<span class="ident">c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">u32::from</span>(<span class="ident">start</span>)) <span class="op">&lt;</span><span class="op">=</span> (<span class="ident">u32::from</span>(<span class="ident">end</span>) <span class="op">-</span> <span class="ident">u32::from</span>(<span class="ident">start</span>))
-}
-
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">fn</span> <span class="ident">in_range_len</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">start</span>: <span class="ident">u32</span>, <span class="ident">len</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
-    <span class="ident">u32::from</span>(<span class="ident">c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">start</span>) <span class="op">&lt;</span> <span class="ident">len</span>
 }
 
 <span class="doccomment">/// Pack a `char` and a `CanonicalCombiningClass` in</span>
@@ -2435,6 +2398,35 @@
         }
     }
 
+    <span class="doccomment">/// Performs canonical composition (including Hangul) on a pair of</span>
+    <span class="doccomment">/// characters or returns `None` if these characters don&#39;t compose.</span>
+    <span class="doccomment">/// Composition exclusions are taken into account.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compose</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">starter</span>: <span class="ident">char</span>, <span class="ident">second</span>: <span class="ident">char</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">second</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_V_BASE</span>);
+        <span class="kw">if</span> <span class="ident">v</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">HANGUL_JAMO_LIMIT</span> <span class="op">-</span> <span class="ident">HANGUL_V_BASE</span> {
+            <span class="kw">return</span> <span class="self">self</span>.<span class="ident">compose_non_hangul</span>(<span class="ident">starter</span>, <span class="ident">second</span>);
+        }
+        <span class="kw">if</span> <span class="ident">v</span> <span class="op">&lt;</span> <span class="ident">HANGUL_V_COUNT</span> {
+            <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_L_BASE</span>);
+            <span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span> <span class="ident">HANGUL_L_COUNT</span> {
+                <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">l</span> <span class="op">*</span> <span class="ident">HANGUL_N_COUNT</span> <span class="op">+</span> <span class="ident">v</span> <span class="op">*</span> <span class="ident">HANGUL_T_COUNT</span>;
+                <span class="comment">// Safe, because the inputs are known to be in range.</span>
+                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="ident">char::from_u32_unchecked</span>(<span class="ident">HANGUL_S_BASE</span> <span class="op">+</span> <span class="ident">lv</span>) });
+            }
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
+        }
+        <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">second</span>, <span class="string">&#39;\u{11A8}&#39;</span>, <span class="string">&#39;\u{11C2}&#39;</span>) {
+            <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_S_BASE</span>);
+            <span class="kw">if</span> <span class="ident">lv</span> <span class="op">&lt;</span> <span class="ident">HANGUL_S_COUNT</span> <span class="op">&amp;&amp;</span> <span class="ident">lv</span> <span class="op">%</span> <span class="ident">HANGUL_T_COUNT</span> <span class="op">==</span> <span class="number">0</span> {
+                <span class="kw">let</span> <span class="ident">lvt</span> <span class="op">=</span> <span class="ident">lv</span> <span class="op">+</span> (<span class="ident">u32::from</span>(<span class="ident">second</span>) <span class="op">-</span> <span class="ident">HANGUL_T_BASE</span>);
+                <span class="comment">// Safe, because the inputs are known to be in range.</span>
+                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="ident">char::from_u32_unchecked</span>(<span class="ident">HANGUL_S_BASE</span> <span class="op">+</span> <span class="ident">lvt</span>) });
+            }
+        }
+        <span class="prelude-val">None</span>
+    }
+
     <span class="doccomment">/// Performs (non-Hangul) canonical composition on a pair of characters</span>
     <span class="doccomment">/// or returns `None` if these characters don&#39;t compose. Composition</span>
     <span class="doccomment">/// exclusions are taken into account.</span>
@@ -2551,7 +2543,11 @@
             }
         }
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">starter</span> <span class="op">=</span> <span class="string">&#39;\u{0}&#39;</span>; <span class="comment">// The compiler can&#39;t figure out this gets overwritten before use.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">composition_action</span> <span class="op">=</span> <span class="ident">CompositionAction::EnteringLoop</span>;
+
+        <span class="comment">// The point of having this boolean is to have only one call site to</span>
+        <span class="comment">// `self.decomposition.decomposing_next`, which is hopefully beneficial for</span>
+        <span class="comment">// code size under inlining.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">attempt_composition</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="kw">loop</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">unprocessed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">unprocessed_starter</span>.<span class="ident">take</span>() {
                 <span class="macro">debug_assert_eq!</span>(<span class="ident">undecomposed_starter</span>, <span class="string">&#39;\u{0}&#39;</span>);
@@ -2560,39 +2556,15 @@
             } <span class="kw">else</span> {
                 <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">buffer_pos</span>, <span class="number">0</span>);
                 <span class="kw">let</span> <span class="ident">next_starter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">decomposing_next</span>(<span class="ident">undecomposed_starter</span>);
-                <span class="kw">match</span> <span class="ident">composition_action</span> {
-                    <span class="ident">CompositionAction::EnteringLoop</span> =&gt; {
-                        <span class="ident">starter</span> <span class="op">=</span> <span class="ident">next_starter</span>;
-                    }
-                    <span class="ident">CompositionAction::NonHangul</span> =&gt; {
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">composed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">compose_non_hangul</span>(<span class="ident">starter</span>, <span class="ident">next_starter</span>) {
-                            <span class="ident">starter</span> <span class="op">=</span> <span class="ident">composed</span>;
-                        } <span class="kw">else</span> {
-                            <span class="comment">// This is our yield point. We&#39;ll pick this up above in the</span>
-                            <span class="comment">// next call to `next()`.</span>
-                            <span class="self">self</span>.<span class="ident">unprocessed_starter</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">next_starter</span>);
-                            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
-                        }
-                    }
-                    <span class="ident">CompositionAction::HangulVowel</span> =&gt; {
-                        <span class="comment">// Unicode Standard 14.0, page 145</span>
-                        <span class="macro">debug_assert!</span>(<span class="ident">in_range_len</span>(<span class="ident">starter</span>, <span class="ident">HANGUL_L_BASE</span>, <span class="ident">HANGUL_L_COUNT</span>));
-                        <span class="macro">debug_assert!</span>(<span class="ident">in_range_len</span>(<span class="ident">next_starter</span>, <span class="ident">HANGUL_V_BASE</span>, <span class="ident">HANGUL_V_COUNT</span>));
-                        <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>) <span class="op">-</span> <span class="ident">HANGUL_L_BASE</span>;
-                        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">next_starter</span>) <span class="op">-</span> <span class="ident">HANGUL_V_BASE</span>;
-                        <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">l</span> <span class="op">*</span> <span class="ident">HANGUL_N_COUNT</span> <span class="op">+</span> <span class="ident">v</span> <span class="op">*</span> <span class="ident">HANGUL_T_COUNT</span>;
-                        <span class="comment">// Safe, because the inputs are known to be in range.</span>
-                        <span class="ident">starter</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">char::from_u32_unchecked</span>(<span class="ident">HANGUL_S_BASE</span> <span class="op">+</span> <span class="ident">lv</span>) };
-                    }
-                    <span class="ident">CompositionAction::HangulTrail</span> =&gt; {
-                        <span class="comment">// Unicode Standard 14.0, page 146</span>
-                        <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>) <span class="op">-</span> <span class="ident">HANGUL_S_BASE</span>;
-                        <span class="macro">debug_assert_eq!</span>(<span class="ident">lv</span> <span class="op">%</span> <span class="ident">HANGUL_T_COUNT</span>, <span class="number">0</span>);
-                        <span class="macro">debug_assert!</span>(<span class="ident">in_inclusive_range</span>(<span class="ident">next_starter</span>, <span class="string">&#39;\u{11A8}&#39;</span>, <span class="string">&#39;\u{11C2}&#39;</span>));
-                        <span class="kw">let</span> <span class="ident">lvt</span> <span class="op">=</span> <span class="ident">lv</span> <span class="op">+</span> (<span class="ident">u32::from</span>(<span class="ident">next_starter</span>) <span class="op">-</span> <span class="ident">HANGUL_T_BASE</span>);
-                        <span class="comment">// Safe, because the inputs are known to be in range.</span>
-                        <span class="ident">starter</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">char::from_u32_unchecked</span>(<span class="ident">HANGUL_S_BASE</span> <span class="op">+</span> <span class="ident">lvt</span>) };
-                    }
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">attempt_composition</span> {
+                    <span class="ident">starter</span> <span class="op">=</span> <span class="ident">next_starter</span>;
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">composed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">compose</span>(<span class="ident">starter</span>, <span class="ident">next_starter</span>) {
+                    <span class="ident">starter</span> <span class="op">=</span> <span class="ident">composed</span>;
+                } <span class="kw">else</span> {
+                    <span class="comment">// This is our yield point. We&#39;ll pick this up above in the</span>
+                    <span class="comment">// next call to `next()`.</span>
+                    <span class="self">self</span>.<span class="ident">unprocessed_starter</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">next_starter</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
                 }
             }
             <span class="comment">// Even a Hangul LVT syllable may have decomposed if followed by something that</span>
@@ -2712,61 +2684,19 @@
                     <span class="comment">// Won&#39;t combine backwards anyway.</span>
                     <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
                 }
-                <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">pending_starter</span>, <span class="string">&#39;\u{11A8}&#39;</span>, <span class="string">&#39;\u{11C2}&#39;</span>) {
-                    <span class="comment">// Hangul trail</span>
-                    <span class="kw">let</span> <span class="ident">lv</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">starter</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_S_BASE</span>);
-                    <span class="kw">if</span> <span class="ident">lv</span> <span class="op">&lt;</span> <span class="ident">HANGUL_S_COUNT</span> <span class="op">&amp;&amp;</span> <span class="ident">lv</span> <span class="op">%</span> <span class="ident">HANGUL_T_COUNT</span> <span class="op">==</span> <span class="number">0</span> {
-                        <span class="comment">// We need to loop back in order to uphold invariants in case</span>
-                        <span class="comment">// the character after decomposes to a non-starter.</span>
-                        <span class="ident">undecomposed_starter</span> <span class="op">=</span> <span class="ident">pending_starter</span>;
-                        <span class="comment">// The following line is OK, because we&#39;re about to loop back</span>
-                        <span class="comment">// to `self.decomposition.decomposing_next(c);`, which will</span>
-                        <span class="comment">// restore the between-`next()`-calls invariant of `pending`</span>
-                        <span class="comment">// before this function returns.</span>
-                        <span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">pending</span> <span class="op">=</span> <span class="prelude-val">None</span>; <span class="comment">// Consume what we peeked</span>
-                        <span class="ident">composition_action</span> <span class="op">=</span> <span class="ident">CompositionAction::HangulTrail</span>;
-                        <span class="kw">continue</span>;
-                    }
-                    <span class="comment">// Won&#39;t combine in another way anyway</span>
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
-                }
-                <span class="kw">if</span> <span class="ident">in_range_len</span>(<span class="ident">pending_starter</span>, <span class="ident">HANGUL_V_BASE</span>, <span class="ident">HANGUL_V_COUNT</span>) {
-                    <span class="comment">// Hangul vowel</span>
-                    <span class="kw">if</span> <span class="ident">in_range_len</span>(<span class="ident">starter</span>, <span class="ident">HANGUL_L_BASE</span>, <span class="ident">HANGUL_L_COUNT</span>) {
-                        <span class="comment">// We need to loop back in order to uphold invariants in case</span>
-                        <span class="comment">// the character after decomposes to a non-starter.</span>
-                        <span class="ident">undecomposed_starter</span> <span class="op">=</span> <span class="ident">pending_starter</span>;
-                        <span class="comment">// The following line is OK, because we&#39;re about to loop back</span>
-                        <span class="comment">// to `self.decomposition.decomposing_next(c);`, which will</span>
-                        <span class="comment">// restore the between-`next()`-calls invariant of `pending`</span>
-                        <span class="comment">// before this function returns.</span>
-                        <span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">pending</span> <span class="op">=</span> <span class="prelude-val">None</span>; <span class="comment">// Consume what we peeked</span>
-                        <span class="ident">composition_action</span> <span class="op">=</span> <span class="ident">CompositionAction::HangulVowel</span>;
-                        <span class="kw">continue</span>;
-                    }
-                    <span class="comment">// Won&#39;t combine in another way anyway</span>
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
-                }
                 <span class="ident">undecomposed_starter</span> <span class="op">=</span> <span class="ident">pending_starter</span>;
                 <span class="comment">// The following line is OK, because we&#39;re about to loop back</span>
                 <span class="comment">// to `self.decomposition.decomposing_next(c);`, which will</span>
                 <span class="comment">// restore the between-`next()`-calls invariant of `pending`</span>
                 <span class="comment">// before this function returns.</span>
                 <span class="self">self</span>.<span class="ident">decomposition</span>.<span class="ident">pending</span> <span class="op">=</span> <span class="prelude-val">None</span>; <span class="comment">// Consume what we peeked</span>
-                <span class="ident">composition_action</span> <span class="op">=</span> <span class="ident">CompositionAction::NonHangul</span>;
+                <span class="ident">attempt_composition</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 <span class="kw">continue</span>;
             }
             <span class="comment">// End of input</span>
             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">starter</span>);
         }
     }
-}
-
-<span class="kw">enum</span> <span class="ident">CompositionAction</span> {
-    <span class="ident">EnteringLoop</span>,
-    <span class="ident">NonHangul</span>,
-    <span class="ident">HangulVowel</span>,
-    <span class="ident">HangulTrail</span>,
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">normalizer_methods</span> {

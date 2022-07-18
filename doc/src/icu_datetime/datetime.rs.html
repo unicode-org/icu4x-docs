@@ -616,6 +616,9 @@
 <span id="611">611</span>
 <span id="612">612</span>
 <span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -635,11 +638,13 @@
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">icu_decimal::provider::DecimalSymbolsV1Marker</span>;
-<span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>, <span class="ident">Locale</span>};
+<span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::provider::OrdinalV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">date::DateTimeInput</span>, <span class="ident">CldrCalendar</span>, <span class="ident">DateTimeFormatterError</span>, <span class="ident">FormattedDateTime</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">calendar</span>, <span class="ident">date::DateTimeInput</span>, <span class="ident">CldrCalendar</span>, <span class="ident">DateTimeFormatterError</span>, <span class="ident">FormattedDateTime</span>,
+};
 
 <span class="doccomment">/// [`TimeFormatter`] is a structure of the [`icu_datetime`] component that provides time formatting only.</span>
 <span class="doccomment">/// When constructed, it uses data from the [data provider], selected [`Locale`] and provided preferences to</span>
@@ -655,19 +660,24 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-<span class="doccomment">/// use icu::datetime::{TimeFormatter, options::length::Time};</span>
+<span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
-<span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+<span class="doccomment">/// use writeable::assert_writeable_eq;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let provider = InvariantDataProvider;</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, Time::Full, None)</span>
-<span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
+<span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+<span class="doccomment">///     locale!(&quot;en&quot;),</span>
+<span class="doccomment">///     &amp;provider,</span>
+<span class="doccomment">///     Time::Short,</span>
+<span class="doccomment">///     None,</span>
+<span class="doccomment">/// )</span>
+<span class="doccomment">/// .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
 <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let value = tf.format_to_string(&amp;datetime);</span>
+<span class="doccomment">/// assert_writeable_eq!(tf.format(&amp;datetime), &quot;12:34 PM&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
@@ -684,15 +694,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::Gregorian;</span>
-    <span class="doccomment">/// use icu::datetime::{TimeFormatter, options::length::Time};</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// use icu::locid::locale;</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, Time::Short, None);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(tf.is_ok(), true);</span>
+    <span class="doccomment">/// TimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">///     locale!(&quot;en&quot;),</span>
+    <span class="doccomment">///     &amp;provider,</span>
+    <span class="doccomment">///     Time::Short,</span>
+    <span class="doccomment">///     None,</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .unwrap();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [data provider]: icu_provider</span>
@@ -710,13 +723,8 @@
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
-        <span class="comment">// TODO(#419): Resolve the locale calendar with the API calendar.</span>
-        <span class="ident">locale</span>
-            .<span class="ident">extensions</span>
-            .<span class="ident">unicode</span>
-            .<span class="ident">keywords</span>
-            .<span class="ident">set</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">C::BCP_47_IDENTIFIER</span>);
 
+        <span class="ident">calendar::potentially_fixup_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
             <span class="ident">raw::TimeFormatter::try_new</span>(<span class="ident">locale</span>, <span class="ident">data_provider</span>, <span class="ident">length</span>, <span class="ident">preferences</span>)<span class="question-mark">?</span>,
             <span class="ident">PhantomData</span>,
@@ -730,19 +738,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{TimeFormatter, options::length::Time};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
-    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Time::Full, None)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// let tf =</span>
+    <span class="doccomment">///     TimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Time::Short, None)</span>
+    <span class="doccomment">///         .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let formatted = tf.format(&amp;datetime);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = format!(&quot;Time: {}&quot;, formatted);</span>
+    <span class="doccomment">/// assert_writeable_eq!(tf.format(&amp;datetime), &quot;12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// At the moment, there&#39;s little value in using that over one of the other `format` methods,</span>
@@ -763,12 +770,12 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{TimeFormatter, options::length::Time};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
-    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Time::Short, None)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// let tf =</span>
+    <span class="doccomment">///     TimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Time::Short, None)</span>
+    <span class="doccomment">///         .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
@@ -777,7 +784,7 @@
     <span class="doccomment">/// tf.format_to_write(&amp;mut buffer, &amp;datetime)</span>
     <span class="doccomment">///     .expect(&quot;Failed to write to a buffer.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = format!(&quot;Time: {}&quot;, buffer);</span>
+    <span class="doccomment">/// assert_eq!(buffer, &quot;12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_write</span>(
@@ -794,17 +801,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{TimeFormatter, options::length::Time};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
-    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Time::Long, None)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// let tf =</span>
+    <span class="doccomment">///     TimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Time::Short, None)</span>
+    <span class="doccomment">///         .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = tf.format_to_string(&amp;datetime);</span>
+    <span class="doccomment">/// assert_eq!(tf.format_to_string(&amp;datetime), &quot;12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span>) -&gt; <span class="ident">String</span> {
@@ -826,11 +833,10 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-<span class="doccomment">/// use icu::datetime::{DateFormatter, options::length::Date};</span>
+<span class="doccomment">/// use icu::datetime::{options::length::Date, DateFormatter};</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
-<span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let provider = InvariantDataProvider;</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, Date::Full)</span>
 <span class="doccomment">///     .expect(&quot;Failed to create DateFormatter instance.&quot;);</span>
@@ -838,7 +844,7 @@
 <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
 <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let value = df.format_to_string(&amp;datetime);</span>
+<span class="doccomment">/// assert_eq!(df.format_to_string(&amp;datetime), &quot;Tuesday, September 1, 2020&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
@@ -854,15 +860,13 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::Gregorian;</span>
-    <span class="doccomment">/// use icu::datetime::{DateFormatter, options::length::Date};</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Date, DateFormatter};</span>
     <span class="doccomment">/// use icu::locid::locale;</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, Date::Full);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(df.is_ok(), true);</span>
+    <span class="doccomment">/// DateFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, Date::Full)</span>
+    <span class="doccomment">///     .unwrap();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [data provider]: icu_provider</span>
@@ -881,13 +885,7 @@
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
-        <span class="comment">// TODO(#419): Resolve the locale calendar with the API calendar.</span>
-        <span class="ident">locale</span>
-            .<span class="ident">extensions</span>
-            .<span class="ident">unicode</span>
-            .<span class="ident">keywords</span>
-            .<span class="ident">set</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">C::BCP_47_IDENTIFIER</span>);
-
+        <span class="ident">calendar::potentially_fixup_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
             <span class="ident">raw::DateFormatter::try_new</span>(<span class="ident">locale</span>, <span class="ident">data_provider</span>, <span class="ident">length</span>)<span class="question-mark">?</span>,
             <span class="ident">PhantomData</span>,
@@ -901,19 +899,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{DateFormatter, options::length::Date};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Date, DateFormatter};</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Date::Full)</span>
     <span class="doccomment">///     .expect(&quot;Failed to create DateFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let formatted = df.format(&amp;datetime);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = format!(&quot;Time: {}&quot;, formatted);</span>
+    <span class="doccomment">/// assert_writeable_eq!(df.format(&amp;datetime), &quot;Tuesday, September 1, 2020&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// At the moment, there&#39;s little value in using that over one of the other `format` methods,</span>
@@ -934,10 +930,9 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{DateFormatter, options::length::Date};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Date, DateFormatter};</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Date::Short)</span>
     <span class="doccomment">///     .expect(&quot;Failed to create DateFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
@@ -948,7 +943,7 @@
     <span class="doccomment">/// df.format_to_write(&amp;mut buffer, &amp;datetime)</span>
     <span class="doccomment">///     .expect(&quot;Failed to write to a buffer.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = format!(&quot;Time: {}&quot;, buffer);</span>
+    <span class="doccomment">/// assert_eq!(buffer, &quot;9/1/20&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_write</span>(
@@ -965,17 +960,16 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{DateFormatter, options::length::Date};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::{options::length::Date, DateFormatter};</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, Date::Short)</span>
     <span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = df.format_to_string(&amp;datetime);</span>
+    <span class="doccomment">/// assert_eq!(df.format_to_string(&amp;datetime), &quot;9/1/20&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span><span class="op">&lt;</span><span class="ident">Calendar</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">String</span> {
@@ -999,20 +993,25 @@
 <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
 <span class="doccomment">/// use icu::datetime::{options::length, DateTimeFormatter};</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
-<span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let provider = InvariantDataProvider;</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let mut options = length::Bag::from_date_time_style(length::Date::Medium, length::Time::Short);</span>
+<span class="doccomment">/// let mut options = length::Bag::from_date_time_style(</span>
+<span class="doccomment">///     length::Date::Medium,</span>
+<span class="doccomment">///     length::Time::Short,</span>
+<span class="doccomment">/// );</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, &amp;options.into())</span>
-<span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
-<span class="doccomment">///</span>
+<span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+<span class="doccomment">///     locale!(&quot;en&quot;),</span>
+<span class="doccomment">///     &amp;provider,</span>
+<span class="doccomment">///     &amp;options.into(),</span>
+<span class="doccomment">/// )</span>
+<span class="doccomment">/// .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
 <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let value = dtf.format_to_string(&amp;datetime);</span>
+<span class="doccomment">/// assert_eq!(dtf.format_to_string(&amp;datetime), &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
@@ -1027,19 +1026,28 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::Gregorian;</span>
-    <span class="doccomment">/// use icu::datetime::{options::length, DateFormatter, DateTimeFormatter, TimeFormatter};</span>
+    <span class="doccomment">/// use icu::datetime::{</span>
+    <span class="doccomment">///     options::length, DateFormatter, DateTimeFormatter, TimeFormatter,</span>
+    <span class="doccomment">/// };</span>
     <span class="doccomment">/// use icu::locid::locale;</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, length::Time::Short, None)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
-    <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, length::Date::Short)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to create DateFormatter instance.&quot;);</span>
-    <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_from_date_and_time(df, tf);</span>
+    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">///     locale!(&quot;en&quot;),</span>
+    <span class="doccomment">///     &amp;provider,</span>
+    <span class="doccomment">///     length::Time::Short,</span>
+    <span class="doccomment">///     None,</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
+    <span class="doccomment">/// let df = DateFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">///     locale!(&quot;en&quot;),</span>
+    <span class="doccomment">///     &amp;provider,</span>
+    <span class="doccomment">///     length::Date::Short,</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .expect(&quot;Failed to create DateFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(dtf.is_ok(), true);</span>
+    <span class="doccomment">/// DateTimeFormatter::&lt;Gregorian&gt;::try_from_date_and_time(df, tf).unwrap();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [data provider]: icu_provider</span>
@@ -1062,17 +1070,19 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::Gregorian;</span>
-    <span class="doccomment">/// use icu::datetime::{DateTimeFormatter, DateTimeFormatterOptions};</span>
+    <span class="doccomment">/// use icu::datetime::{options::length, DateTimeFormatter};</span>
     <span class="doccomment">/// use icu::locid::locale;</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let provider = InvariantDataProvider;</span>
+    <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let options = DateTimeFormatterOptions::default();</span>
+    <span class="doccomment">/// let options = length::Bag::from_time_style(length::Time::Medium);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, &amp;options);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(dtf.is_ok(), true);</span>
+    <span class="doccomment">/// DateTimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">///     locale!(&quot;en&quot;),</span>
+    <span class="doccomment">///     &amp;provider,</span>
+    <span class="doccomment">///     &amp;options.into(),</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .unwrap();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [data provider]: icu_provider</span>
@@ -1094,12 +1104,8 @@
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
-        <span class="comment">// TODO(#419): Resolve the locale calendar with the API calendar.</span>
-        <span class="ident">locale</span>
-            .<span class="ident">extensions</span>
-            .<span class="ident">unicode</span>
-            .<span class="ident">keywords</span>
-            .<span class="ident">set</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">C::BCP_47_IDENTIFIER</span>);
+
+        <span class="ident">calendar::potentially_fixup_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
             <span class="ident">raw::DateTimeFormatter::try_new</span>(<span class="ident">locale</span>, <span class="ident">data_provider</span>, <span class="ident">options</span>)<span class="question-mark">?</span>,
             <span class="ident">PhantomData</span>,
@@ -1113,20 +1119,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{DateTimeFormatter, DateTimeFormatterOptions};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::DateTimeFormatter;</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
-    <span class="doccomment">/// # let options = DateTimeFormatterOptions::default();</span>
-    <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, &amp;options)</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// # let options = icu::datetime::options::length::Bag::from_time_style(icu::datetime::options::length::Time::Medium);</span>
+    <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, &amp;options.into())</span>
     <span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let formatted_date = dtf.format(&amp;datetime);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = format!(&quot;Date: {}&quot;, formatted_date);</span>
+    <span class="doccomment">/// assert_writeable_eq!(dtf.format(&amp;datetime), &quot;12:34:28 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// At the moment, there&#39;s little value in using that over one of the other `format` methods,</span>
@@ -1147,11 +1151,10 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{DateTimeFormatter, DateTimeFormatterOptions};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::DateTimeFormatter;</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
-    <span class="doccomment">/// # let options = DateTimeFormatterOptions::default();</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// # let options = icu::datetime::options::length::Bag::from_time_style(icu::datetime::options::length::Time::Medium);</span>
     <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, &amp;options.into())</span>
     <span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
@@ -1162,7 +1165,7 @@
     <span class="doccomment">/// dtf.format_to_write(&amp;mut buffer, &amp;datetime)</span>
     <span class="doccomment">///     .expect(&quot;Failed to write to a buffer.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = format!(&quot;Date: {}&quot;, buffer);</span>
+    <span class="doccomment">/// assert_eq!(buffer, &quot;12:34:28 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_write</span>(
@@ -1179,18 +1182,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
-    <span class="doccomment">/// use icu::datetime::{DateTimeFormatter, DateTimeFormatterOptions};</span>
-    <span class="doccomment">/// use icu_provider::inv::InvariantDataProvider;</span>
+    <span class="doccomment">/// use icu::datetime::DateTimeFormatter;</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
-    <span class="doccomment">/// # let provider = InvariantDataProvider;</span>
-    <span class="doccomment">/// # let options = DateTimeFormatterOptions::default();</span>
+    <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">/// # let options = icu::datetime::options::length::Bag::from_time_style(icu::datetime::options::length::Time::Medium);</span>
     <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale, &amp;provider, &amp;options.into())</span>
     <span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let _ = dtf.format_to_string(&amp;datetime);</span>
+    <span class="doccomment">/// assert_eq!(dtf.format_to_string(&amp;datetime), &quot;12:34:28 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span><span class="op">&lt;</span><span class="ident">Calendar</span> <span class="op">=</span> <span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="ident">String</span> {
@@ -1215,8 +1217,12 @@
     <span class="doccomment">/// let options = length::Bag::from_date_style(length::Date::Medium).into();</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
-    <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(locale!(&quot;en&quot;), &amp;provider, &amp;options)</span>
-    <span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
+    <span class="doccomment">/// let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">///     locale!(&quot;en&quot;),</span>
+    <span class="doccomment">///     &amp;provider,</span>
+    <span class="doccomment">///     &amp;options,</span>
+    <span class="doccomment">/// )</span>
+    <span class="doccomment">/// .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut expected_components_bag = components::Bag::default();</span>
     <span class="doccomment">/// expected_components_bag.year = Some(components::Year::Numeric);</span>

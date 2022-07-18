@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Japanese","The Japanese Calendar"],["JapaneseDateInner","The inner date type used for representing Date"]]});
+initSidebarItems({"enum":[["JapaneseEraStyle","Which eras to include in the calendar."]],"struct":[["Japanese","The Japanese Calendar"],["JapaneseDateInner","The inner date type used for representing Date"]]});

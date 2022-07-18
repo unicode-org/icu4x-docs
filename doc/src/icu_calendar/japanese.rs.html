@@ -257,6 +257,47 @@
 <span id="252">252</span>
 <span id="253">253</span>
 <span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -264,13 +305,14 @@
 <span class="doccomment">//! This module contains types and implementations for the Japanese calendar.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! use icu::calendar::{japanese::Japanese, types::Era, Date, DateTime};</span>
+<span class="doccomment">//! use icu::calendar::{types::Era, Date, DateTime};</span>
+<span class="doccomment">//! use icu::calendar::japanese::{Japanese, JapaneseEraStyle};</span>
 <span class="doccomment">//! use tinystr::tinystr;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // `icu_testdata::get_provider` contains information specifying era dates.</span>
 <span class="doccomment">//! // Production code should probably use its own data provider</span>
 <span class="doccomment">//! let provider = icu_testdata::get_provider();</span>
-<span class="doccomment">//! let japanese_calendar = Japanese::try_new(&amp;provider).expect(&quot;Cannot load japanese data&quot;);</span>
+<span class="doccomment">//! let japanese_calendar = Japanese::try_new(&amp;provider, JapaneseEraStyle::Modern).expect(&quot;Cannot load japanese data&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // `Date` type</span>
 <span class="doccomment">//! let date_iso = Date::new_iso_date(1970, 1, 2)</span>
@@ -305,44 +347,78 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso</span>::{<span class="ident">Iso</span>, <span class="ident">IsoDateInner</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::{<span class="self">self</span>, <span class="ident">EraStartDate</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>};
+<span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
+<span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr</span>, <span class="ident">TinyStr16</span>};
+
+<span class="doccomment">/// Which eras to include in the calendar.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">JapaneseEraStyle</span> {
+    <span class="doccomment">/// This includes all &quot;modern&quot; (post-Meiji) eras,</span>
+    <span class="doccomment">/// using Gregorian eras for dates preceding the Meiji era</span>
+    <span class="ident">Modern</span>,
+    <span class="doccomment">/// This includes all known eras, using Gregorian eras for dates</span>
+    <span class="doccomment">/// preceding the earliest known era</span>
+    <span class="ident">All</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">JapaneseEraStyle</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::Modern</span>
+    }
+}
 
 <span class="doccomment">/// The Japanese Calendar</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Japanese</span> {
     <span class="ident">eras</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">provider::JapaneseErasV1Marker</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">japanext</span>: <span class="ident">bool</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="doccomment">/// The inner date type used for representing Date&lt;Japanese&gt;</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">JapaneseDateInner</span> {
     <span class="ident">inner</span>: <span class="ident">IsoDateInner</span>,
+    <span class="ident">adjusted_year</span>: <span class="ident">i32</span>,
     <span class="ident">era</span>: <span class="ident">TinyStr16</span>,
-    <span class="comment">// The year this era started</span>
-    <span class="ident">era_start</span>: <span class="ident">i32</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Japanese</span> {
     <span class="doccomment">/// Creates a new [`Japanese`] from locale data and an options bag.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Setting `historical_eras` will load historical (pre-meiji) era data</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// can be removed after #1800</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">provider::JapaneseErasV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
+        <span class="ident">era_style</span>: <span class="ident">JapaneseEraStyle</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">eras</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
-            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">eras</span> })
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">DataRequest::default</span>();
+        <span class="kw">let</span> <span class="ident">japanext</span> <span class="op">=</span> <span class="ident">era_style</span> <span class="op">==</span> <span class="ident">JapaneseEraStyle::All</span>;
+        <span class="comment">// TODO: can use macro after #1800</span>
+        <span class="kw">let</span> <span class="ident">cal</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">japanext</span> {
+            <span class="string">&quot;und-u-ca-japanext&quot;</span>
+        } <span class="kw">else</span> {
+            <span class="string">&quot;und-u-ca-japanese&quot;</span>
+        };
+
+        <span class="ident">request</span>.<span class="ident">options</span> <span class="op">=</span> <span class="ident">Locale::from_str</span>(<span class="ident">cal</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;Locale string is known valid&quot;</span>)
+            .<span class="ident">into</span>();
+        <span class="kw">let</span> <span class="ident">eras</span> <span class="op">=</span> <span class="ident">data_provider</span>.<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>)<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">eras</span>, <span class="ident">japanext</span> })
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Calendar</span> <span class="kw">for</span> <span class="ident">Japanese</span> {
     <span class="kw">type</span> <span class="ident">DateInner</span> <span class="op">=</span> <span class="ident">JapaneseDateInner</span>;
     <span class="kw">fn</span> <span class="ident">date_from_iso</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">iso</span>: <span class="ident">Date</span><span class="op">&lt;</span><span class="ident">Iso</span><span class="op">&gt;</span>) -&gt; <span class="ident">JapaneseDateInner</span> {
-        <span class="kw">let</span> (<span class="ident">era_start</span>, <span class="ident">era</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">era_for</span>(<span class="ident">iso</span>.<span class="ident">inner</span>());
+        <span class="kw">let</span> (<span class="ident">adjusted_year</span>, <span class="ident">era</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">adjusted_year_for</span>(<span class="ident">iso</span>.<span class="ident">inner</span>());
         <span class="ident">JapaneseDateInner</span> {
             <span class="ident">inner</span>: <span class="kw-2">*</span><span class="ident">iso</span>.<span class="ident">inner</span>(),
+            <span class="ident">adjusted_year</span>,
             <span class="ident">era</span>,
-            <span class="ident">era_start</span>: <span class="ident">era_start</span>.<span class="ident">year</span>,
         }
     }
 
@@ -363,7 +439,10 @@
     }
 
     <span class="kw">fn</span> <span class="ident">offset_date</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;mut</span> <span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">offset</span>: <span class="ident">DateDuration</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) {
-        <span class="ident">Iso</span>.<span class="ident">offset_date</span>(<span class="kw-2">&amp;mut</span> <span class="ident">date</span>.<span class="ident">inner</span>, <span class="ident">offset</span>.<span class="ident">cast_unit</span>())
+        <span class="ident">Iso</span>.<span class="ident">offset_date</span>(<span class="kw-2">&amp;mut</span> <span class="ident">date</span>.<span class="ident">inner</span>, <span class="ident">offset</span>.<span class="ident">cast_unit</span>());
+        <span class="kw">let</span> (<span class="ident">adjusted_year</span>, <span class="ident">era</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">adjusted_year_for</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>.<span class="ident">inner</span>);
+        <span class="ident">date</span>.<span class="ident">adjusted_year</span> <span class="op">=</span> <span class="ident">adjusted_year</span>;
+        <span class="ident">date</span>.<span class="ident">era</span> <span class="op">=</span> <span class="ident">era</span>
     }
 
     <span class="kw">fn</span> <span class="ident">until</span>(
@@ -388,7 +467,7 @@
     <span class="kw">fn</span> <span class="ident">year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::DateInner</span>) -&gt; <span class="ident">types::FormattableYear</span> {
         <span class="ident">types::FormattableYear</span> {
             <span class="ident">era</span>: <span class="ident">types::Era</span>(<span class="ident">date</span>.<span class="ident">era</span>),
-            <span class="ident">number</span>: <span class="ident">date</span>.<span class="ident">adjusted_year</span>(),
+            <span class="ident">number</span>: <span class="ident">date</span>.<span class="ident">adjusted_year</span>,
             <span class="ident">related_iso</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -424,19 +503,11 @@
     }
 
     <span class="kw">fn</span> <span class="ident">any_calendar_kind</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AnyCalendarKind</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">AnyCalendarKind::Japanese</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">JapaneseDateInner</span> {
-    <span class="doccomment">/// Returns the current year relative to the era</span>
-    <span class="kw">fn</span> <span class="ident">adjusted_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">i32</span> {
-        <span class="comment">// The year in which an era starts is Year 1, and it may be short</span>
-        <span class="comment">// The only time this function will experience dates that are *before*</span>
-        <span class="comment">// the era start date are for the first era (Currently, taika-645),</span>
-        <span class="comment">// where we elect to still report the year as year 1 when it is in the same</span>
-        <span class="comment">// Gregorian year, and use zero/negative years before that.</span>
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="number">0</span>.<span class="ident">year</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">era_start</span> <span class="op">+</span> <span class="number">1</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">japanext</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">AnyCalendarKind::Japanext</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">AnyCalendarKind::Japanese</span>)
+        }
     }
 }
 
@@ -469,46 +540,57 @@
 <span class="kw">const</span> <span class="ident">FALLBACK_ERA</span>: (<span class="ident">EraStartDate</span>, <span class="ident">TinyStr16</span>) <span class="op">=</span> (<span class="ident">REIWA_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;reiwa&quot;</span>));
 
 <span class="kw">impl</span> <span class="ident">Japanese</span> {
-    <span class="doccomment">/// Given an ISO date, obtain the era data</span>
-    <span class="kw">fn</span> <span class="ident">era_for</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="ident">IsoDateInner</span>) -&gt; (<span class="ident">EraStartDate</span>, <span class="ident">TinyStr16</span>) {
+    <span class="doccomment">/// Given an ISO date, give year and era for that date in the Japanese calendar</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This will also use Gregorian eras for eras that are before the earliest era</span>
+    <span class="kw">fn</span> <span class="ident">adjusted_year_for</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="kw-2">&amp;</span><span class="ident">IsoDateInner</span>) -&gt; (<span class="ident">i32</span>, <span class="ident">TinyStr16</span>) {
         <span class="kw">let</span> <span class="ident">date</span>: <span class="ident">EraStartDate</span> <span class="op">=</span> <span class="ident">date</span>.<span class="ident">into</span>();
+        <span class="kw">let</span> (<span class="ident">start</span>, <span class="ident">era</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">japanese_era_for</span>(<span class="ident">date</span>);
+        <span class="comment">// The year in which an era starts is Year 1, and it may be short</span>
+        <span class="comment">// The only time this function will experience dates that are *before*</span>
+        <span class="comment">// the era start date are for the first era (Currently, taika-645</span>
+        <span class="comment">// for japanext, meiji for japanese),</span>
+        <span class="comment">// In such a case, we instead fall back to Gregorian era codes</span>
+        <span class="kw">if</span> <span class="ident">date</span> <span class="op">&lt;</span> <span class="ident">start</span> {
+            <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">year</span> <span class="op">&lt;</span> <span class="number">0</span> {
+                (<span class="number">1</span> <span class="op">-</span> <span class="ident">date</span>.<span class="ident">year</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;bce&quot;</span>))
+            } <span class="kw">else</span> {
+                (<span class="ident">date</span>.<span class="ident">year</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;ce&quot;</span>))
+            }
+        } <span class="kw">else</span> {
+            (<span class="ident">date</span>.<span class="ident">year</span> <span class="op">-</span> <span class="ident">start</span>.<span class="ident">year</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">era</span>)
+        }
+    }
+
+    <span class="doccomment">/// Given an date, obtain the era data (not counting spliced gregorian eras)</span>
+    <span class="kw">fn</span> <span class="ident">japanese_era_for</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">date</span>: <span class="ident">EraStartDate</span>) -&gt; (<span class="ident">EraStartDate</span>, <span class="ident">TinyStr16</span>) {
         <span class="kw">let</span> <span class="ident">era_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">eras</span>.<span class="ident">get</span>();
         <span class="comment">// We optimize for the five &quot;modern&quot; post-Meiji eras, which are stored in a smaller</span>
         <span class="comment">// array and also hardcoded. The hardcoded version is not used if data indicates the</span>
         <span class="comment">// presence of newer eras.</span>
-        <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MEIJI_START</span> {
-            <span class="kw">if</span> <span class="ident">era_data</span>.<span class="ident">dates_to_eras</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">5</span> {
-                <span class="comment">// Fast path in case eras have not changed since this code was written</span>
-                <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">REIWA_START</span> {
-                    (<span class="ident">REIWA_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;reiwa&quot;</span>))
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">HEISEI_START</span> {
-                    (<span class="ident">HEISEI_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;heisei&quot;</span>))
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">SHOWA_START</span> {
-                    (<span class="ident">SHOWA_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;showa&quot;</span>))
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">TAISHO_START</span> {
-                    (<span class="ident">TAISHO_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;taisho&quot;</span>))
-                } <span class="kw">else</span> {
-                    (<span class="ident">MEIJI_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;meiji&quot;</span>))
-                }
+        <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MEIJI_START</span>
+            <span class="op">&amp;&amp;</span> <span class="ident">era_data</span>.<span class="ident">dates_to_eras</span>.<span class="ident">last</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">1</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;reiwa&quot;</span>))
+        {
+            <span class="comment">// Fast path in case eras have not changed since this code was written</span>
+            <span class="kw">return</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">REIWA_START</span> {
+                (<span class="ident">REIWA_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;reiwa&quot;</span>))
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">HEISEI_START</span> {
+                (<span class="ident">HEISEI_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;heisei&quot;</span>))
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">SHOWA_START</span> {
+                (<span class="ident">SHOWA_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;showa&quot;</span>))
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">TAISHO_START</span> {
+                (<span class="ident">TAISHO_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;taisho&quot;</span>))
             } <span class="kw">else</span> {
-                <span class="ident">era_data</span>
-                    .<span class="ident">dates_to_eras</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">rev</span>()
-                    .<span class="ident">find</span>(<span class="op">|</span><span class="kw-2">&amp;</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span> <span class="op">&lt;</span> <span class="ident">date</span>)
-                    .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>)
-            }
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">historical</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">era_data</span>.<span class="ident">dates_to_historical_eras</span>;
-            <span class="kw">match</span> <span class="ident">historical</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span>(<span class="ident">d</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">d</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>)) {
-                <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; <span class="ident">historical</span>.<span class="ident">get</span>(<span class="ident">index</span>),
-                <span class="prelude-val">Err</span>(<span class="ident">index</span>) <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="number">0</span> =&gt; <span class="ident">historical</span>.<span class="ident">get</span>(<span class="ident">index</span>),
-                <span class="prelude-val">Err</span>(<span class="ident">index</span>) =&gt; <span class="ident">historical</span>
-                    .<span class="ident">get</span>(<span class="ident">index</span> <span class="op">-</span> <span class="number">1</span>)
-                    .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">historical</span>.<span class="ident">iter</span>().<span class="ident">next_back</span>()),
-            }
-            .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>)
+                (<span class="ident">MEIJI_START</span>, <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;meiji&quot;</span>))
+            };
         }
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">era_data</span>.<span class="ident">dates_to_eras</span>;
+        <span class="kw">match</span> <span class="ident">data</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span>(<span class="ident">d</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">d</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>)) {
+            <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; <span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">index</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">index</span>) <span class="kw">if</span> <span class="ident">index</span> <span class="op">==</span> <span class="number">0</span> =&gt; <span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">index</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">index</span>) =&gt; <span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">index</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">data</span>.<span class="ident">iter</span>().<span class="ident">next_back</span>()),
+        }
+        .<span class="ident">unwrap_or</span>(<span class="ident">FALLBACK_ERA</span>)
     }
 }
 </code></pre></div>

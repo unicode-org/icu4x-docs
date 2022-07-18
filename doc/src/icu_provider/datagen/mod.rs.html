@@ -100,15 +100,33 @@
 <span id="95">95</span>
 <span id="96">96</span>
 <span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="doccomment">//! This module contains various utilities required to generate ICU4X data files, typically</span>
-<span class="doccomment">//! via the `icu4x-datagen` tool. End users should not need to consume anything in this module</span>
-<span class="doccomment">//! as a library unless defining new types that integrate with `icu4x-datagen`.</span>
+<span class="doccomment">//! via the `icu_datagen` reference crate. End users should not need to consume anything in</span>
+<span class="doccomment">//! this module as a library unless defining new types that integrate with `icu_datagen`.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! This module can be enabled with the `datagen` feature on `icu4x-provider-core`.</span>
+<span class="doccomment">//! This module can be enabled with the `datagen` feature on `icu_provider`.</span>
 
 <span class="kw">mod</span> <span class="ident">data_conversion</span>;
 <span class="kw">mod</span> <span class="ident">heap_measure</span>;
@@ -116,7 +134,11 @@
 <span class="kw">mod</span> <span class="ident">payload</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">data_conversion</span>::{<span class="ident">DataConverter</span>, <span class="ident">ReturnedPayloadError</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">heap_measure</span>::{<span class="ident">HeapStats</span>, <span class="ident">HeapStatsMarker</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter</span>::{<span class="ident">IterableDynProvider</span>, <span class="ident">IterableResourceProvider</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter::IterableResourceProvider</span>;
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span> <span class="comment">// exposed for make_exportable_provider</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter::IterableDynProvider</span>;
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span> <span class="comment">// exposed for make_exportable_provider</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">payload</span>::{<span class="ident">ExportBox</span>, <span class="ident">ExportMarker</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
@@ -147,9 +169,23 @@
 }
 
 <span class="doccomment">/// A [`DynProvider`] that can be used for exporting data.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Use [`make_exportable_provider`] to implement this.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ExportableProvider</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> {}
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ExportableProvider</span> <span class="kw">for</span> <span class="ident">T</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> {}
 
+<span class="doccomment">/// This macro can be used on a data provider to allow it to be used for data generation.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Data generation &#39;compiles&#39; data by using this data provider (which usually translates data from</span>
+<span class="doccomment">/// different sources and doesn&#39;t have to be efficient) to generate data structs, and then writing</span>
+<span class="doccomment">/// them to an efficient format like [`BlobDataProvider`] or [`BakedDataProvider`]. The requirements</span>
+<span class="doccomment">/// for `make_exportable_provider` are:</span>
+<span class="doccomment">/// * The data struct has to implement [`serde::Serialize`](::serde::Serialize) and [`databake::Bake`]</span>
+<span class="doccomment">/// * The provider needs to implement [`IterableResourceProvider`] for all specified [`ResourceMarker`]s.</span>
+<span class="doccomment">///   This allows the generating code to know which [`ResourceOptions`] to collect.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`BlobDataProvider`]: ../../icu_provider_blob/struct.BlobDataProvider.html</span>
+<span class="doccomment">/// [`BakedDataProvider`]: ../../icu_datagen/index.html</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">make_exportable_provider</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ident</span>),<span class="op">+</span>, ]) =&gt; {

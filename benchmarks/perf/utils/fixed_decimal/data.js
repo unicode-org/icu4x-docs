@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1657955593081,
+  "lastUpdate": 1658163411689,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -37289,6 +37289,186 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 87,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cadb64258a5831017173af4dabe201dfa869c0b6",
+          "message": "Add japanext calendar (#2181)\n\n* Move calendar type into japanese key\r\n\r\n* Generate separate data for japanese/japanext\r\n\r\n* Allow constructing japanext calendars\r\n\r\n* Generate japanese and japanext dtf data\r\n* Return gregorian eras from japanese calendar for older dates\r\n\r\n* move gregorian over to ce/bce era codes",
+          "timestamp": "2022-07-18T06:49:49Z",
+          "tree_id": "9df3c41028460b6a7922bb76efa724a64af40509",
+          "url": "https://github.com/unicode-org/icu4x/commit/cadb64258a5831017173af4dabe201dfa869c0b6"
+        },
+        "date": 1658127630511,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 123950,
+            "range": "± 377",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25427,
+            "range": "± 141",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71949,
+            "range": "± 348",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 201,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 87,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f1bd39b071a7b6e280dc8e19bc350d21d867f724",
+          "message": "List cleanup (#2190)",
+          "timestamp": "2022-07-18T17:47:12+02:00",
+          "tree_id": "877ee49d86552d4d3bb2f42fa315dafc4b062c5c",
+          "url": "https://github.com/unicode-org/icu4x/commit/f1bd39b071a7b6e280dc8e19bc350d21d867f724"
+        },
+        "date": 1658159968691,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 127648,
+            "range": "± 5396",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25704,
+            "range": "± 1328",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 69469,
+            "range": "± 3401",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 212,
+            "range": "± 15",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 80,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 93,
+            "range": "± 4",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f187f24aff979b7875e5fe1c35faa4b6ff42f404",
+          "message": "Removing `InvariantDataProvider` and touching up docs (#2159)",
+          "timestamp": "2022-07-18T18:43:40+02:00",
+          "tree_id": "bf9cdc9e280d1f647f14bc99f51f20dd8f4bac81",
+          "url": "https://github.com/unicode-org/icu4x/commit/f187f24aff979b7875e5fe1c35faa4b6ff42f404"
+        },
+        "date": 1658163374136,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 124267,
+            "range": "± 5594",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25448,
+            "range": "± 1377",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72510,
+            "range": "± 5402",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 217,
+            "range": "± 8",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 78,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 91,
+            "range": "± 3",
             "unit": "ns/iter"
           }
         ]

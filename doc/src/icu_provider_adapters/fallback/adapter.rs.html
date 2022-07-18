@@ -223,6 +223,12 @@
 <span id="218">218</span>
 <span id="219">219</span>
 <span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -241,7 +247,9 @@
 <span class="doccomment">/// use icu_provider::hello_world::*;</span>
 <span class="doccomment">/// use icu_provider_adapters::fallback::LocaleFallbackProvider;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">/// // Note: icu_testdata::get_provider() is itself a LocaleFallbackProvider,</span>
+<span class="doccomment">/// // so we need to use icu_testdata::get_postcard_provider() instead.</span>
+<span class="doccomment">/// let provider = icu_testdata::get_postcard_provider();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let req = DataRequest {</span>
 <span class="doccomment">///     options: locale!(&quot;ja-JP&quot;).into(),</span>
@@ -361,7 +369,7 @@
     {
         <span class="kw">let</span> <span class="ident">key_fallbacker</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">fallbacker</span>.<span class="ident">for_key</span>(<span class="ident">key</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fallback_iterator</span> <span class="op">=</span> <span class="ident">key_fallbacker</span>.<span class="ident">fallback_for</span>(<span class="ident">base_req</span>.<span class="ident">clone</span>());
-        <span class="kw">while</span> <span class="op">!</span><span class="ident">fallback_iterator</span>.<span class="ident">get</span>().<span class="ident">options</span>.<span class="ident">is_empty</span>() {
+        <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">f1</span>(<span class="ident">fallback_iterator</span>.<span class="ident">get</span>());
             <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_options</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
                 <span class="kw">return</span> <span class="ident">result</span>
@@ -371,6 +379,10 @@
                     })
                     <span class="comment">// Log the original request rather than the fallback request</span>
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">base_req</span>));
+            }
+            <span class="comment">// If we just checked und, break out of the loop.</span>
+            <span class="kw">if</span> <span class="ident">fallback_iterator</span>.<span class="ident">get</span>().<span class="ident">options</span>.<span class="ident">is_empty</span>() {
+                <span class="kw">break</span>;
             }
             <span class="ident">fallback_iterator</span>.<span class="ident">step</span>();
         }

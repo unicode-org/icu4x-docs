@@ -387,8 +387,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LocaleFallbackerWithConfig</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">normalize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ro</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ResourceOptions</span>) {
         <span class="kw">let</span> <span class="ident">language</span> <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">language</span>();
-        <span class="comment">// 1. Populate the region</span>
-        <span class="kw">if</span> <span class="ident">ro</span>.<span class="ident">region</span>().<span class="ident">is_none</span>() {
+        <span class="comment">// 1. Populate the region (required for region fallback only)</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">priority</span> <span class="op">==</span> <span class="ident">FallbackPriority::Region</span> <span class="op">&amp;&amp;</span> <span class="ident">ro</span>.<span class="ident">region</span>().<span class="ident">is_none</span>() {
             <span class="comment">// 1a. First look for region based on language+script</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">script</span>() {
                 <span class="ident">ro</span>.<span class="ident">set_region</span>(
@@ -612,14 +612,14 @@
             <span class="ident">input</span>: <span class="string">&quot;en-u-hc-h12-sd-usca&quot;</span>,
             <span class="ident">requires_data</span>: <span class="bool-val">true</span>,
             <span class="ident">extension_key</span>: <span class="prelude-val">None</span>,
-            <span class="ident">expected_language_chain</span>: <span class="kw-2">&amp;</span>[<span class="string">&quot;en-US-u-sd-usca&quot;</span>, <span class="string">&quot;en-US&quot;</span>, <span class="string">&quot;en&quot;</span>],
+            <span class="ident">expected_language_chain</span>: <span class="kw-2">&amp;</span>[<span class="string">&quot;en-u-sd-usca&quot;</span>, <span class="string">&quot;en&quot;</span>],
             <span class="ident">expected_region_chain</span>: <span class="kw-2">&amp;</span>[<span class="string">&quot;en-US-u-sd-usca&quot;</span>, <span class="string">&quot;en-US&quot;</span>, <span class="string">&quot;und-US-u-sd-usca&quot;</span>, <span class="string">&quot;und-US&quot;</span>],
         },
         <span class="ident">TestCase</span> {
             <span class="ident">input</span>: <span class="string">&quot;en-Latn-u-sd-usca&quot;</span>,
             <span class="ident">requires_data</span>: <span class="bool-val">true</span>,
             <span class="ident">extension_key</span>: <span class="prelude-val">None</span>,
-            <span class="ident">expected_language_chain</span>: <span class="kw-2">&amp;</span>[<span class="string">&quot;en-US-u-sd-usca&quot;</span>, <span class="string">&quot;en-US&quot;</span>, <span class="string">&quot;en&quot;</span>],
+            <span class="ident">expected_language_chain</span>: <span class="kw-2">&amp;</span>[<span class="string">&quot;en-u-sd-usca&quot;</span>, <span class="string">&quot;en&quot;</span>],
             <span class="ident">expected_region_chain</span>: <span class="kw-2">&amp;</span>[<span class="string">&quot;en-US-u-sd-usca&quot;</span>, <span class="string">&quot;en-US&quot;</span>, <span class="string">&quot;und-US-u-sd-usca&quot;</span>, <span class="string">&quot;und-US&quot;</span>],
         },
         <span class="ident">TestCase</span> {
@@ -697,7 +697,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_fallback</span>() {
         <span class="kw">let</span> <span class="ident">fallbacker_no_data</span> <span class="op">=</span> <span class="ident">LocaleFallbacker::new_without_data</span>();
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
+        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_postcard_provider</span>();
         <span class="kw">let</span> <span class="ident">fallbacker_with_data</span> <span class="op">=</span> <span class="ident">LocaleFallbacker::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>).<span class="ident">unwrap</span>();
         <span class="kw">for</span> <span class="ident">cas</span> <span class="kw">in</span> <span class="ident">TEST_CASES</span> {
             <span class="kw">for</span> (<span class="ident">priority</span>, <span class="ident">expected_chain</span>) <span class="kw">in</span> [

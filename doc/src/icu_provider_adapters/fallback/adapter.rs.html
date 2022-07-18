@@ -186,6 +186,43 @@
 <span id="181">181</span>
 <span id="182">182</span>
 <span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -221,13 +258,16 @@
 <span class="doccomment">///     .expect(&quot;Fallback data present&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // ...then we can load &quot;ja-JP&quot; based on &quot;ja&quot; data</span>
-<span class="doccomment">/// let result: Result&lt;DataResponse&lt;HelloWorldV1Marker&gt;, DataError&gt; =</span>
-<span class="doccomment">///     provider.load_resource(&amp;req);</span>
-<span class="doccomment">/// assert!(matches!(result, Ok(_)));</span>
+<span class="doccomment">/// let response: DataResponse&lt;HelloWorldV1Marker&gt; =</span>
+<span class="doccomment">///     provider.load_resource(&amp;req).expect(&quot;successful with vertical fallback&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(</span>
+<span class="doccomment">///     &quot;ja&quot;,</span>
+<span class="doccomment">///     response.metadata.data_locale.unwrap().to_string()</span>
+<span class="doccomment">/// );</span>
+<span class="doccomment">/// assert_eq!(</span>
 <span class="doccomment">///     &quot;こんにちは世界&quot;,</span>
-<span class="doccomment">///     result.unwrap().take_payload().unwrap().get().message</span>
+<span class="doccomment">///     response.payload.unwrap().get().message</span>
 <span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LocaleFallbackProvider</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
@@ -301,22 +341,36 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">run_fallback</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">R</span><span class="op">&gt;</span>(
+    <span class="doccomment">/// Run the fallback algorithm with the data request using the inner data provider.</span>
+    <span class="doccomment">/// Internal function; external clients should use one of the trait impls below.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Function arguments:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// - F1 should perform a data load for a single DataRequest and return the result of it</span>
+    <span class="doccomment">/// - F2 should map from the provider-specific response type to DataResponseMetadata</span>
+    <span class="kw">fn</span> <span class="ident">run_fallback</span><span class="op">&lt;</span><span class="ident">F1</span>, <span class="ident">F2</span>, <span class="ident">R</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
         <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-        <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>,
+        <span class="kw-2">mut</span> <span class="ident">f1</span>: <span class="ident">F1</span>,
+        <span class="kw-2">mut</span> <span class="ident">f2</span>: <span class="ident">F2</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">DataError</span><span class="op">&gt;</span>,
+        <span class="ident">F1</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">DataError</span><span class="op">&gt;</span>,
+        <span class="ident">F2</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;mut</span> <span class="ident">R</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">DataResponseMetadata</span>,
     {
         <span class="kw">let</span> <span class="ident">key_fallbacker</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">fallbacker</span>.<span class="ident">for_key</span>(<span class="ident">key</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fallback_iterator</span> <span class="op">=</span> <span class="ident">key_fallbacker</span>.<span class="ident">fallback_for</span>(<span class="ident">base_req</span>.<span class="ident">clone</span>());
         <span class="kw">while</span> <span class="op">!</span><span class="ident">fallback_iterator</span>.<span class="ident">get</span>().<span class="ident">options</span>.<span class="ident">is_empty</span>() {
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">f</span>(<span class="ident">fallback_iterator</span>.<span class="ident">get</span>());
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">f1</span>(<span class="ident">fallback_iterator</span>.<span class="ident">get</span>());
             <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_options</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
-                <span class="comment">// Log the original request rather than the fallback request</span>
-                <span class="kw">return</span> <span class="ident">result</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">base_req</span>));
+                <span class="kw">return</span> <span class="ident">result</span>
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">res</span><span class="op">|</span> {
+                        <span class="ident">f2</span>(<span class="kw-2">&amp;mut</span> <span class="ident">res</span>).<span class="ident">data_locale</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">fallback_iterator</span>.<span class="ident">take</span>().<span class="ident">options</span>);
+                        <span class="ident">res</span>
+                    })
+                    <span class="comment">// Log the original request rather than the fallback request</span>
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">base_req</span>));
             }
             <span class="ident">fallback_iterator</span>.<span class="ident">step</span>();
         }
@@ -329,7 +383,12 @@
     <span class="ident">P</span>: <span class="ident">AnyProvider</span>,
 {
     <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>, <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">run_fallback</span>(<span class="ident">key</span>, <span class="ident">base_req</span>, <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_any</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+        <span class="self">self</span>.<span class="ident">run_fallback</span>(
+            <span class="ident">key</span>,
+            <span class="ident">base_req</span>,
+            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_any</span>(<span class="ident">key</span>, <span class="ident">req</span>),
+            <span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="kw-2">&amp;mut</span> <span class="ident">res</span>.<span class="ident">metadata</span>,
+        )
     }
 }
 
@@ -342,7 +401,12 @@
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
         <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">run_fallback</span>(<span class="ident">key</span>, <span class="ident">base_req</span>, <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_buffer</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+        <span class="self">self</span>.<span class="ident">run_fallback</span>(
+            <span class="ident">key</span>,
+            <span class="ident">base_req</span>,
+            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_buffer</span>(<span class="ident">key</span>, <span class="ident">req</span>),
+            <span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="kw-2">&amp;mut</span> <span class="ident">res</span>.<span class="ident">metadata</span>,
+        )
     }
 }
 
@@ -356,7 +420,12 @@
         <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
         <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">run_fallback</span>(<span class="ident">key</span>, <span class="ident">base_req</span>, <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+        <span class="self">self</span>.<span class="ident">run_fallback</span>(
+            <span class="ident">key</span>,
+            <span class="ident">base_req</span>,
+            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>),
+            <span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="kw-2">&amp;mut</span> <span class="ident">res</span>.<span class="ident">metadata</span>,
+        )
     }
 }
 
@@ -366,7 +435,12 @@
     <span class="ident">M</span>: <span class="ident">ResourceMarker</span>,
 {
     <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">run_fallback</span>(<span class="ident">M::KEY</span>, <span class="ident">base_req</span>, <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_resource</span>(<span class="ident">req</span>))
+        <span class="self">self</span>.<span class="ident">run_fallback</span>(
+            <span class="ident">M::KEY</span>,
+            <span class="ident">base_req</span>,
+            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_resource</span>(<span class="ident">req</span>),
+            <span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="kw-2">&amp;mut</span> <span class="ident">res</span>.<span class="ident">metadata</span>,
+        )
     }
 }
 </code></pre></div>

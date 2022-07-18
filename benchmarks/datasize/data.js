@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658162720497,
+  "lastUpdate": 1658167575472,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -20428,6 +20428,66 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 3958887,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "321350bce1ca2d8ab80f8f8092b037dc8789fc74",
+          "message": "Provide raw canonical composition and decomposition (#2099)\n\nCloses #2073.",
+          "timestamp": "2022-07-18T20:10:50+03:00",
+          "tree_id": "04c13d75ba3554981053a312f23484ba6ed55062",
+          "url": "https://github.com/unicode-org/icu4x/commit/321350bce1ca2d8ab80f8f8092b037dc8789fc74"
+        },
+        "date": 1658164423912,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3963063,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d176e6d207fa62b78d98904f6dabe0ac6d43a74d",
+          "message": "Restructure icu_provider files (#2168)",
+          "timestamp": "2022-07-18T20:04:32+02:00",
+          "tree_id": "5eb2d4e29aa35b08de5e4e6252e14bc28d8fd93b",
+          "url": "https://github.com/unicode-org/icu4x/commit/d176e6d207fa62b78d98904f6dabe0ac6d43a74d"
+        },
+        "date": 1658167540809,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3963063,
             "unit": "bytes",
             "biggerIsBetter": false
           }

@@ -174,7 +174,7 @@
 <span class="kw">use</span> <span class="ident">icu_calendar::arithmetic::week_of::CalendarInfo</span>;
 <span class="kw">use</span> <span class="ident">icu_datetime::provider::week_data</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::LanguageIdentifier</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableResourceProvider</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDataProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashSet</span>;
 
@@ -192,16 +192,16 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">IterableResourceProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WeekDataProvider</span> {
+<span class="kw">impl</span> <span class="ident">IterableDataProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WeekDataProvider</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::needless_collect</span>)]</span> <span class="comment">// https://github.com/rust-lang/rust-clippy/issues/7526</span>
-    <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">supported_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">week_data</span>: <span class="kw-2">&amp;</span><span class="ident">cldr_serde::week_data::Resource</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">source</span>
             .<span class="ident">cldr</span>()<span class="question-mark">?</span>
             .<span class="ident">core</span>()
             .<span class="ident">read_and_parse</span>(<span class="string">&quot;supplemental/weekData.json&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">week_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">week_data</span>.<span class="ident">supplemental</span>.<span class="ident">week_data</span>;
-        <span class="kw">let</span> <span class="ident">regions</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">week_data</span>
+        <span class="kw">let</span> <span class="ident">regions</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">DataOptions</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">week_data</span>
             .<span class="ident">min_days</span>
             .<span class="ident">keys</span>()
             .<span class="ident">chain</span>(<span class="ident">week_data</span>.<span class="ident">first_day</span>.<span class="ident">keys</span>())
@@ -211,13 +211,13 @@
                 <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
             })
             .<span class="ident">map</span>(<span class="ident">LanguageIdentifier::from</span>)
-            .<span class="ident">map</span>(<span class="ident">ResourceOptions::from</span>)
+            .<span class="ident">map</span>(<span class="ident">DataOptions::from</span>)
             .<span class="ident">collect</span>();
         <span class="prelude-val">Ok</span>(<span class="ident">regions</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WeekDataProvider</span> {
+<span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WeekDataProvider</span> {
     <span class="kw">fn</span> <span class="ident">load_resource</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
@@ -271,7 +271,7 @@
 
     <span class="kw">let</span> <span class="ident">default_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions::default</span>(),
+            <span class="ident">options</span>: <span class="ident">DataOptions::default</span>(),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()
@@ -282,7 +282,7 @@
 
     <span class="kw">let</span> <span class="ident">fr_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions::from</span>(<span class="macro">langid!</span>(<span class="string">&quot;und-FR&quot;</span>)),
+            <span class="ident">options</span>: <span class="ident">DataOptions::from</span>(<span class="macro">langid!</span>(<span class="string">&quot;und-FR&quot;</span>)),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()
@@ -293,7 +293,7 @@
 
     <span class="kw">let</span> <span class="ident">iq_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions::from</span>(<span class="macro">langid!</span>(<span class="string">&quot;und-IQ&quot;</span>)),
+            <span class="ident">options</span>: <span class="ident">DataOptions::from</span>(<span class="macro">langid!</span>(<span class="string">&quot;und-IQ&quot;</span>)),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()
@@ -308,7 +308,7 @@
 
     <span class="kw">let</span> <span class="ident">gg_week_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
         .<span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-            <span class="ident">options</span>: <span class="ident">ResourceOptions::from</span>(<span class="macro">langid!</span>(<span class="string">&quot;und-GG&quot;</span>)),
+            <span class="ident">options</span>: <span class="ident">DataOptions::from</span>(<span class="macro">langid!</span>(<span class="string">&quot;und-GG&quot;</span>)),
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
         })
         .<span class="ident">unwrap</span>()

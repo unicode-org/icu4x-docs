@@ -134,10 +134,10 @@
 <span class="kw">mod</span> <span class="ident">payload</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">data_conversion</span>::{<span class="ident">DataConverter</span>, <span class="ident">ReturnedPayloadError</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">heap_measure</span>::{<span class="ident">HeapStats</span>, <span class="ident">HeapStatsMarker</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter::IterableResourceProvider</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter::IterableDataProvider</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span> <span class="comment">// exposed for make_exportable_provider</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter::IterableDynProvider</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">iter::IterableDynamicDataProvider</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span> <span class="comment">// exposed for make_exportable_provider</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">payload</span>::{<span class="ident">ExportBox</span>, <span class="ident">ExportMarker</span>};
 
@@ -149,14 +149,14 @@
     <span class="doccomment">/// Takes non-mut self as it can be called concurrently.</span>
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span>,
+        <span class="ident">key</span>: <span class="ident">DataKey</span>,
+        <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">DataOptions</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Function called after all keys have been fully dumped.</span>
     <span class="doccomment">/// Takes non-mut self as it can be called concurrently.</span>
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_key</span>: <span class="ident">ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_key</span>: <span class="ident">DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -168,11 +168,11 @@
     }
 }
 
-<span class="doccomment">/// A [`DynProvider`] that can be used for exporting data.</span>
+<span class="doccomment">/// A [`DynamicDataProvider`] that can be used for exporting data.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Use [`make_exportable_provider`] to implement this.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ExportableProvider</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> {}
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ExportableProvider</span> <span class="kw">for</span> <span class="ident">T</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">IterableDynProvider</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> {}
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ExportableProvider</span>: <span class="ident">IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ExportableProvider</span> <span class="kw">for</span> <span class="ident">T</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> {}
 
 <span class="doccomment">/// This macro can be used on a data provider to allow it to be used for data generation.</span>
 <span class="doccomment">///</span>
@@ -181,44 +181,44 @@
 <span class="doccomment">/// them to an efficient format like [`BlobDataProvider`] or [`BakedDataProvider`]. The requirements</span>
 <span class="doccomment">/// for `make_exportable_provider` are:</span>
 <span class="doccomment">/// * The data struct has to implement [`serde::Serialize`](::serde::Serialize) and [`databake::Bake`]</span>
-<span class="doccomment">/// * The provider needs to implement [`IterableResourceProvider`] for all specified [`ResourceMarker`]s.</span>
-<span class="doccomment">///   This allows the generating code to know which [`ResourceOptions`] to collect.</span>
+<span class="doccomment">/// * The provider needs to implement [`IterableDataProvider`] for all specified [`KeyedDataMarker`]s.</span>
+<span class="doccomment">///   This allows the generating code to know which [`DataOptions`] to collect.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`BlobDataProvider`]: ../../icu_provider_blob/struct.BlobDataProvider.html</span>
 <span class="doccomment">/// [`BakedDataProvider`]: ../../icu_datagen/index.html</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">make_exportable_provider</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ident</span>),<span class="op">+</span>, ]) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
+        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dynamic_data_provider!</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
             [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>),<span class="op">+</span>, ],
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ExportMarker</span>
         );
 
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ExportMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
-            <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceOptions</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
+        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ExportMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
+            <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataOptions</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
                 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_upper_case_globals</span>)]</span>
                 <span class="comment">// Reusing the struct names as identifiers</span>
                 $(
-                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>: <span class="ident">ResourceKeyHash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span>.<span class="ident">get_hash</span>();
+                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>: <span class="ident">DataKeyHash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::KeyedDataMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span>.<span class="ident">get_hash</span>();
                 )<span class="op">+</span>
                 <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">get_hash</span>() {
                     $(
                         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> =&gt; {
-                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableResourceProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options</span>(<span class="self">self</span>)
+                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDataProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options</span>(<span class="self">self</span>)
                         }
                     )<span class="op">+</span>,
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
                 }
             }
         }
 
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::DataConverter</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::buf::BufferMarker</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::HeapStatsMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
-            <span class="kw">fn</span> <span class="ident">convert</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>, <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::buf::BufferMarker</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataPayload</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::HeapStatsMarker</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::buf::BufferMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">convert</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span>, <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::buf::BufferMarker</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataPayload</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::HeapStatsMarker</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::buf::BufferMarker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
                 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_upper_case_globals</span>)]</span>
                 <span class="comment">// Reusing the struct names as identifiers</span>
                 $(
-                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>: <span class="ident">ResourceKeyHash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span>.<span class="ident">get_hash</span>();
+                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>: <span class="ident">DataKeyHash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::KeyedDataMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span>.<span class="ident">get_hash</span>();
                 )<span class="op">+</span>
                 <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">get_hash</span>() {
                     $(
@@ -227,7 +227,7 @@
                             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataPayload::from_owned</span>(<span class="ident">heap_stats</span>));
                         }
                     )<span class="op">+</span>,
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ReturnedPayloadError</span>(<span class="ident">from</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>)))
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ReturnedPayloadError</span>(<span class="ident">from</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>)))
                 }
             }
         }

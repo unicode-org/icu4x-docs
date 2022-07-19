@@ -203,12 +203,12 @@
 <span class="doccomment">//! `icu_provider` is one of the [`ICU4X`] components.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! `icu_provider` defines traits and structs for transmitting data through the ICU4X locale</span>
-<span class="doccomment">//! data pipeline. The primary trait is [`ResourceProvider`]. It is parameterized by a</span>
-<span class="doccomment">//! [`ResourceMarker`], which contains the data type and a [`ResourceKey`]. It has one method,</span>
-<span class="doccomment">//! [`ResourceProvider::load_resource`], which transforms a [`DataRequest`]</span>
+<span class="doccomment">//! data pipeline. The primary trait is [`DataProvider`]. It is parameterized by a</span>
+<span class="doccomment">//! [`KeyedDataMarker`], which contains the data type and a [`DataKey`]. It has one method,</span>
+<span class="doccomment">//! [`DataProvider::load_resource`], which transforms a [`DataRequest`]</span>
 <span class="doccomment">//! into a [`DataResponse`].</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - [`ResourceKey`] is a fixed identifier for the data type, such as `&quot;plurals/cardinal@1&quot;`.</span>
+<span class="doccomment">//! - [`DataKey`] is a fixed identifier for the data type, such as `&quot;plurals/cardinal@1&quot;`.</span>
 <span class="doccomment">//! - [`DataRequest`] contains additional annotations to choose a specific variant of the key,</span>
 <span class="doccomment">//!   such as a locale.</span>
 <span class="doccomment">//! - [`DataResponse`] contains the data if the request was successful.</span>
@@ -217,7 +217,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! - [`AnyProvider`] returns data as `dyn Any` trait objects.</span>
 <span class="doccomment">//! - [`BufferProvider`] returns data as `[u8]` buffers.</span>
-<span class="doccomment">//! - [`DynProvider`] returns structured data but is not specific to a key.</span>
+<span class="doccomment">//! - [`DynamicDataProvider`] returns structured data but is not specific to a key.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The most common types required for this crate are included via the prelude:</span>
 <span class="doccomment">//!</span>
@@ -236,7 +236,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Type 1 providers generally implement [`AnyProvider`], which returns structured data cast into</span>
 <span class="doccomment">//! `dyn Any` trait objects. Users can call [`as_downcasting()`] to get an object implementing</span>
-<span class="doccomment">//! [`ResourceProvider`] by downcasting the trait objects.</span>
+<span class="doccomment">//! [`DataProvider`] by downcasting the trait objects.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Examples of Type 1 providers:</span>
 <span class="doccomment">//!</span>
@@ -249,7 +249,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Type 2 providers generally implement [`BufferProvider`], which returns unstructured data</span>
 <span class="doccomment">//! typically represented as [`serde`]-serialized buffers. Users can call [`as_deserializing()`]</span>
-<span class="doccomment">//! to get an object implementing [`ResourceProvider`] by invoking Serde Deserialize.</span>
+<span class="doccomment">//! to get an object implementing [`DataProvider`] by invoking Serde Deserialize.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Examples of Type 2 providers:</span>
 <span class="doccomment">//!</span>
@@ -287,15 +287,15 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`ICU4X`]: ../icu/index.html</span>
 <span class="doccomment">//! [`DataProvider`]: data_provider::DataProvider</span>
-<span class="doccomment">//! [`ResourceKey`]: key::ResourceKey</span>
-<span class="doccomment">//! [`ResourceOptions`]: request::ResourceOptions</span>
-<span class="doccomment">//! [`IterableDynProvider`]: datagen::IterableDynProvider</span>
-<span class="doccomment">//! [`IterableResourceProvider`]: datagen::IterableResourceProvider</span>
+<span class="doccomment">//! [`DataKey`]: key::DataKey</span>
+<span class="doccomment">//! [`DataOptions`]: request::DataOptions</span>
+<span class="doccomment">//! [`IterableDynamicDataProvider`]: datagen::IterableDynamicDataProvider</span>
+<span class="doccomment">//! [`IterableDataProvider`]: datagen::IterableDataProvider</span>
 <span class="doccomment">//! [`AnyPayloadProvider`]: ../icu_provider_adapters/any_payload/struct.AnyPayloadProvider.html</span>
 <span class="doccomment">//! [`HelloWorldProvider`]: hello_world::HelloWorldProvider</span>
 <span class="doccomment">//! [`AnyProvider`]: any::AnyProvider</span>
 <span class="doccomment">//! [`Yokeable`]: yoke::Yokeable</span>
-<span class="doccomment">//! [`impl_dyn_provider!`]: impl_dyn_provider</span>
+<span class="doccomment">//! [`impl_dynamic_data_provider!`]: impl_dynamic_data_provider</span>
 <span class="doccomment">//! [`icu_provider_adapters`]: ../icu_provider_adapters/index.html</span>
 <span class="doccomment">//! [`as_downcasting()`]: AsDowncastingAnyProvider::as_downcasting</span>
 <span class="doccomment">//! [`as_deserializing()`]: AsDeserializingBufferProvider::as_deserializing</span>
@@ -351,23 +351,23 @@
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AnyResponse</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buf::BufferMarker</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buf::BufferProvider</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DynProvider</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::ResourceProvider</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_key</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DataProvider</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_provider::DynamicDataProvider</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DataError</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DataErrorKind</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::ResourceKey</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::ResourceKeyHash</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::DataKey</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::DataKeyHash</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::marker::DataMarker</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::marker::ResourceMarker</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::marker::KeyedDataMarker</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::request::DataOptions</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::request::DataRequest</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::request::ResourceOptions</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::resource_key</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::response::DataPayload</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::response::DataResponse</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::response::DataResponseMetadata</span>;
 
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AsDowncastingAnyProvider</span>;
-    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AsDynProviderAnyMarkerWrap</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any::AsDynamicDataProviderAnyMarkerWrap</span>;
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serde::AsDeserializingBufferProvider</span>;
 
@@ -380,8 +380,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
 <span class="comment">// Less important non-prelude items</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::DataKeyMetadata</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::FallbackPriority</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::key::ResourceKeyMetadata</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::response::RcWrap</span>;
 
 <span class="comment">// For macros</span>

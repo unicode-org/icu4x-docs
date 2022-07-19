@@ -236,7 +236,7 @@
 
 <span class="doccomment">/// Trait to allow conversion from `DataPayload&lt;T&gt;` to `DataPayload&lt;S&gt;`.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This trait can be manually implemented in order to enable [`impl_dyn_provider`].</span>
+<span class="doccomment">/// This trait can be manually implemented in order to enable [`impl_dynamic_data_provider`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`DataPayload::downcast`]: crate::DataPayload::downcast</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">UpcastDataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>
@@ -267,27 +267,27 @@
     <span class="kw">fn</span> <span class="ident">upcast</span>(<span class="ident">other</span>: <span class="ident"><span class="kw">crate</span>::DataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="kw">crate</span>::DataPayload</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 }
 
-<span class="doccomment">/// Implements [`DynProvider`] for a marker type `S` on a type that already implements</span>
-<span class="doccomment">/// [`DynProvider`] or [`ResourceProvider`] for one or more `M`, where `M` is a concrete type</span>
+<span class="doccomment">/// Implements [`DynamicDataProvider`] for a marker type `S` on a type that already implements</span>
+<span class="doccomment">/// [`DynamicDataProvider`] or [`DataProvider`] for one or more `M`, where `M` is a concrete type</span>
 <span class="doccomment">/// that is convertible to `S` via [`UpcastDataPayload`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Use this macro to add support to your data provider for:</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// - [`AnyPayload`] if your provider can return typed objects as [`Any`](core::any::Any).</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ## Wrapping ResourceProvider</span>
+<span class="doccomment">/// ## Wrapping DataProvider</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// If your type implements [`ResourceProvider`], pass a list of markers as the second argument.</span>
-<span class="doccomment">/// This results in a `DynProvider` that delegates to a specific marker if the key</span>
-<span class="doccomment">/// matches or else returns [`DataErrorKind::MissingResourceKey`].</span>
+<span class="doccomment">/// If your type implements [`DataProvider`], pass a list of markers as the second argument.</span>
+<span class="doccomment">/// This results in a `DynamicDataProvider` that delegates to a specific marker if the key</span>
+<span class="doccomment">/// matches or else returns [`DataErrorKind::MissingDataKey`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu_provider::prelude::*;</span>
 <span class="doccomment">/// use icu_provider::hello_world::*;</span>
 <span class="doccomment">/// #</span>
-<span class="doccomment">/// # // Duplicating HelloWorldProvider because the real one already implements DynProvider&lt;AnyMarker&gt;</span>
+<span class="doccomment">/// # // Duplicating HelloWorldProvider because the real one already implements DynamicDataProvider&lt;AnyMarker&gt;</span>
 <span class="doccomment">/// # struct HelloWorldProvider;</span>
-<span class="doccomment">/// # impl ResourceProvider&lt;HelloWorldV1Marker&gt; for HelloWorldProvider {</span>
+<span class="doccomment">/// # impl DataProvider&lt;HelloWorldV1Marker&gt; for HelloWorldProvider {</span>
 <span class="doccomment">/// #     fn load_resource(</span>
 <span class="doccomment">/// #         &amp;self,</span>
 <span class="doccomment">/// #         req: &amp;DataRequest,</span>
@@ -296,8 +296,8 @@
 <span class="doccomment">/// #     }</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // Implement DataProvider&lt;AnyMarker&gt; on HelloWorldProvider: ResourceProvider&lt;HelloWorldV1Marker&gt;</span>
-<span class="doccomment">/// icu_provider::impl_dyn_provider!(HelloWorldProvider, [HelloWorldV1Marker,], AnyMarker);</span>
+<span class="doccomment">/// // Implement DynamicDataProvider&lt;AnyMarker&gt; on HelloWorldProvider: DataProvider&lt;HelloWorldV1Marker&gt;</span>
+<span class="doccomment">/// icu_provider::impl_dynamic_data_provider!(HelloWorldProvider, [HelloWorldV1Marker,], AnyMarker);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let req = DataRequest {</span>
 <span class="doccomment">///     options: icu_locid::locale!(&quot;de&quot;).into(),</span>
@@ -307,16 +307,16 @@
 <span class="doccomment">/// // Successful because the key matches:</span>
 <span class="doccomment">/// HelloWorldProvider.load_payload(HelloWorldV1Marker::KEY, &amp;req).unwrap();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // MissingResourceKey error as the key does not match:</span>
+<span class="doccomment">/// // MissingDataKey error as the key does not match:</span>
 <span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     HelloWorldProvider.load_payload(icu_provider::resource_key!(&quot;dummy@1&quot;), &amp;req).unwrap_err().kind,</span>
-<span class="doccomment">///     DataErrorKind::MissingResourceKey,</span>
+<span class="doccomment">///     HelloWorldProvider.load_payload(icu_provider::data_key!(&quot;dummy@1&quot;), &amp;req).unwrap_err().kind,</span>
+<span class="doccomment">///     DataErrorKind::MissingDataKey,</span>
 <span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ## Wrapping DynProvider</span>
+<span class="doccomment">/// ## Wrapping DynamicDataProvider</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// It is also possible to wrap a [`DynProvider`] to create another [`DynProvider`]. To do this,</span>
+<span class="doccomment">/// It is also possible to wrap a [`DynamicDataProvider`] to create another [`DynamicDataProvider`]. To do this,</span>
 <span class="doccomment">/// pass a match-like statement for keys as the second argument:</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
@@ -324,18 +324,18 @@
 <span class="doccomment">/// use icu_provider::hello_world::*;</span>
 <span class="doccomment">/// #</span>
 <span class="doccomment">/// # struct HelloWorldProvider;</span>
-<span class="doccomment">/// # impl DynProvider&lt;HelloWorldV1Marker&gt; for HelloWorldProvider {</span>
-<span class="doccomment">/// #     fn load_payload(&amp;self, key: ResourceKey, req: &amp;DataRequest)</span>
+<span class="doccomment">/// # impl DynamicDataProvider&lt;HelloWorldV1Marker&gt; for HelloWorldProvider {</span>
+<span class="doccomment">/// #     fn load_payload(&amp;self, key: DataKey, req: &amp;DataRequest)</span>
 <span class="doccomment">/// #             -&gt; Result&lt;DataResponse&lt;HelloWorldV1Marker&gt;, DataError&gt; {</span>
 <span class="doccomment">/// #         icu_provider::hello_world::HelloWorldProvider.load_resource(req)</span>
 <span class="doccomment">/// #     }</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // Implement DataProvider&lt;AnyMarker&gt; on HelloWorldProvider: DynProvider&lt;HelloWorldV1Marker&gt;</span>
-<span class="doccomment">/// icu_provider::impl_dyn_provider!(HelloWorldProvider, {</span>
-<span class="doccomment">///     // Match HelloWorldV1Marker::KEY and delegate to DynProvider&lt;HelloWorldV1Marker&gt;.</span>
+<span class="doccomment">/// // Implement DataProvider&lt;AnyMarker&gt; on HelloWorldProvider: DynamicDataProvider&lt;HelloWorldV1Marker&gt;</span>
+<span class="doccomment">/// icu_provider::impl_dynamic_data_provider!(HelloWorldProvider, {</span>
+<span class="doccomment">///     // Match HelloWorldV1Marker::KEY and delegate to DynamicDataProvider&lt;HelloWorldV1Marker&gt;.</span>
 <span class="doccomment">///     HW = HelloWorldV1Marker::KEY =&gt; HelloWorldV1Marker,</span>
-<span class="doccomment">///     // Send the wildcard match also to DynProvider&lt;HelloWorldV1Marker&gt;.</span>
+<span class="doccomment">///     // Send the wildcard match also to DynamicDataProvider&lt;HelloWorldV1Marker&gt;.</span>
 <span class="doccomment">///     _ =&gt; HelloWorldV1Marker,</span>
 <span class="doccomment">/// }, AnyMarker);</span>
 <span class="doccomment">///</span>
@@ -348,25 +348,25 @@
 <span class="doccomment">/// HelloWorldProvider.as_any_provider().load_any(HelloWorldV1Marker::KEY, &amp;req).unwrap();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Because of the wildcard, any key actually works:</span>
-<span class="doccomment">/// HelloWorldProvider.as_any_provider().load_any(icu_provider::resource_key!(&quot;dummy@1&quot;), &amp;req).unwrap();</span>
+<span class="doccomment">/// HelloWorldProvider.as_any_provider().load_any(icu_provider::data_key!(&quot;dummy@1&quot;), &amp;req).unwrap();</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// [`DynProvider`]: crate::DynProvider</span>
-<span class="doccomment">/// [`ResourceProvider`]: crate::ResourceProvider</span>
+<span class="doccomment">/// [`DynamicDataProvider`]: crate::DynamicDataProvider</span>
+<span class="doccomment">/// [`DataProvider`]: crate::DataProvider</span>
 <span class="doccomment">/// [`AnyPayload`]: (crate::any::AnyPayload)</span>
-<span class="doccomment">/// [`DataErrorKind::MissingResourceKey`]: (crate::DataErrorKind::MissingResourceKey)</span>
+<span class="doccomment">/// [`DataErrorKind::MissingDataKey`]: (crate::DataErrorKind::MissingDataKey)</span>
 <span class="doccomment">/// [`SerializeMarker`]: (crate::serde::SerializeMarker)</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
-<span class="macro">macro_rules!</span> <span class="ident">impl_dyn_provider</span> {
+<span class="macro">macro_rules!</span> <span class="ident">impl_dynamic_data_provider</span> {
     <span class="comment">// allow passing in multiple things to do and get dispatched</span>
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arms</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>:<span class="ident">path</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">path</span>),<span class="op">+</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
+        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dynamic_data_provider!</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arms</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">one</span>
         );
 
-        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dyn_provider!</span>(
+        <span class="macro-nonterminal">$</span><span class="macro">crate::impl_dynamic_data_provider!</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arms</span>,
             $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>),<span class="op">+</span>
@@ -374,24 +374,24 @@
     };
 
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>:<span class="ident">ident</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">key</span>:<span class="ident">path</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ty</span>),<span class="op">+</span>, $(<span class="kw">_</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_d</span>:<span class="ident">ty</span>,)<span class="question-mark">?</span>}, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span>:<span class="ident">ty</span>) =&gt; {
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
+        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynamicDataProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
         {
             <span class="kw">fn</span> <span class="ident">load_payload</span>(
                 <span class="kw-2">&amp;</span><span class="self">self</span>,
-                <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>,
+                <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span>,
                 <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataRequest</span>,
             ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span>,
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span>,
             <span class="op">&gt;</span> {
                 $(
-                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>: <span class="ident">ResourceKeyHash</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">key</span>.<span class="ident">get_hash</span>();
+                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>: <span class="ident">DataKeyHash</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">key</span>.<span class="ident">get_hash</span>();
                 )<span class="op">+</span>
                 <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">get_hash</span>() {
                     $(
                         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span> =&gt; {
                             <span class="kw">let</span> <span class="ident">result</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span> <span class="op">=</span>
-                                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::load_payload</span>(<span class="self">self</span>, <span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
+                                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynamicDataProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::load_payload</span>(<span class="self">self</span>, <span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
                             <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                                 <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,
                                 <span class="ident">payload</span>: <span class="ident">result</span>.<span class="ident">payload</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
@@ -403,7 +403,7 @@
                     $(
                         <span class="kw">_</span> =&gt; {
                             <span class="kw">let</span> <span class="ident">result</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_d</span><span class="op">&gt;</span> <span class="op">=</span>
-                                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_d</span><span class="op">&gt;</span><span class="ident">::load_payload</span>(<span class="self">self</span>, <span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
+                                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynamicDataProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_d</span><span class="op">&gt;</span><span class="ident">::load_payload</span>(<span class="self">self</span>, <span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
                             <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                                 <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,
                                 <span class="ident">payload</span>: <span class="ident">result</span>.<span class="ident">payload</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
@@ -412,18 +412,18 @@
                             })
                         }
                     )<span class="question-mark">?</span>
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingDataKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
                 }
             }
         }
 
     };
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">ty</span>, [ $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>:<span class="ident">ident</span>),<span class="op">+</span>, ], <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span>:<span class="ident">path</span>) =&gt; {
-        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
+        <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DynamicDataProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>
         {
             <span class="kw">fn</span> <span class="ident">load_payload</span>(
                 <span class="kw-2">&amp;</span><span class="self">self</span>,
-                <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKey</span>,
+                <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span>,
                 <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataRequest</span>,
             ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dyn_m</span><span class="op">&gt;</span>,
@@ -432,13 +432,13 @@
                 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_upper_case_globals</span>)]</span>
                 <span class="comment">// Reusing the struct names as identifiers</span>
                 $(
-                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceKeyHash</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m::KEY</span>.<span class="ident">get_hash</span>();
+                    <span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKeyHash</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m::KEY</span>.<span class="ident">get_hash</span>();
                 )<span class="op">+</span>
                 <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">get_hash</span>() {
                     $(
                         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> =&gt; {
                             <span class="kw">let</span> <span class="ident">result</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataResponse</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span> <span class="op">=</span>
-                                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::ResourceProvider::load_resource</span>(<span class="self">self</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
+                                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataProvider::load_resource</span>(<span class="self">self</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
                             <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                                 <span class="ident">metadata</span>: <span class="ident">result</span>.<span class="ident">metadata</span>,
                                 <span class="ident">payload</span>: <span class="ident">result</span>.<span class="ident">payload</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
@@ -447,7 +447,7 @@
                             })
                         }
                     )<span class="op">+</span>,
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingDataKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
                 }
             }
         }

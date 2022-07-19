@@ -202,10 +202,6 @@
 <span id="197">197</span>
 <span id="198">198</span>
 <span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -306,7 +302,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
     <span class="ident">P</span>: <span class="ident">BufferProvider</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
@@ -315,11 +311,7 @@
     <span class="comment">// Necessary workaround bound (see `yoke::trait_hack` docs):</span>
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">buffer_response</span> <span class="op">=</span> <span class="ident">BufferProvider::load_buffer</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">key</span>, <span class="ident">req</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">buffer_format</span> <span class="op">=</span> <span class="ident">buffer_response</span>
             .<span class="ident">metadata</span>
@@ -335,9 +327,9 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">M</span>: <span class="ident">ResourceMarker</span>,
+    <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span>,
     <span class="ident">P</span>: <span class="ident">BufferProvider</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     <span class="comment">// Actual bound:</span>
     <span class="comment">//     for&lt;&#39;de&gt; &lt;M::Yokeable as Yokeable&lt;&#39;de&gt;&gt;::Output: Deserialize&lt;&#39;de&gt;,</span>
@@ -350,14 +342,14 @@
     }
 }
 
-<span class="doccomment">/// Implements [ResourceProvider] and [DynProvider] if [BufferProvider] is implemented.</span>
+<span class="doccomment">/// Implements [DataProvider] and [DynamicDataProvider] if [BufferProvider] is implemented.</span>
 <span class="doccomment">/// This allows dropping the call to `.as_deserializing()`.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">impl_auto_deserializing</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">buffer_provider</span>: <span class="ident">ty</span>) =&gt; {
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">buffer_provider</span>
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">buffer_provider</span>
         <span class="kw">where</span>
-            <span class="ident">M</span>: <span class="ident">ResourceMarker</span>,
+            <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span>,
             <span class="comment">// Actual bound:</span>
             <span class="comment">//     for&lt;&#39;de&gt; &lt;M::Yokeable as Yokeable&lt;&#39;de&gt;&gt;::Output: serde::de::Deserialize&lt;&#39;de&gt;,</span>
             <span class="comment">// Necessary workaround bound (see `yoke::trait_hack` docs):</span>
@@ -369,7 +361,7 @@
             }
         }
 
-        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">buffer_provider</span>
+        <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">buffer_provider</span>
         <span class="kw">where</span>
             <span class="ident">M</span>: <span class="ident">DataMarker</span>,
             <span class="comment">// Actual bound:</span>
@@ -380,7 +372,7 @@
         {
             <span class="kw">fn</span> <span class="ident">load_payload</span>(
                 <span class="kw-2">&amp;</span><span class="self">self</span>,
-                <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+                <span class="ident">key</span>: <span class="ident">DataKey</span>,
                 <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
             ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
                 <span class="self">self</span>.<span class="ident">as_deserializing</span>().<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>)

@@ -371,20 +371,6 @@
 <span id="366">366</span>
 <span id="367">367</span>
 <span id="368">368</span>
-<span id="369">369</span>
-<span id="370">370</span>
-<span id="371">371</span>
-<span id="372">372</span>
-<span id="373">373</span>
-<span id="374">374</span>
-<span id="375">375</span>
-<span id="376">376</span>
-<span id="377">377</span>
-<span id="378">378</span>
-<span id="379">379</span>
-<span id="380">380</span>
-<span id="381">381</span>
-<span id="382">382</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -396,17 +382,17 @@
 <span class="kw">use</span> <span class="ident">icu_provider::datagen</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers::result_is_err_missing_resource_key</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers::result_is_err_missing_data_key</span>;
 
 <span class="doccomment">/// A provider that returns data from one of two child providers based on the key.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The result of the first provider that supports a particular [`ResourceKey`] will be returned,</span>
+<span class="doccomment">/// The result of the first provider that supports a particular [`DataKey`] will be returned,</span>
 <span class="doccomment">/// even if the request failed for other reasons (such as an unsupported language). Therefore,</span>
 <span class="doccomment">/// you should add child providers that support disjoint sets of keys.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Note: A forking [`ResourceProvider`] does not make sense, since there is only one key that</span>
+<span class="doccomment">/// Note: A forking [`DataProvider`] does not make sense, since there is only one key that</span>
 <span class="doccomment">/// type can support. Instead, you can create a forking [`AnyProvider`], [`BufferProvider`],</span>
-<span class="doccomment">/// or [`DynProvider`].</span>
+<span class="doccomment">/// or [`DynamicDataProvider`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -423,10 +409,10 @@
 <span class="doccomment">/// impl BufferProvider for DummyBufferProvider {</span>
 <span class="doccomment">///     fn load_buffer(</span>
 <span class="doccomment">///         &amp;self,</span>
-<span class="doccomment">///         key: ResourceKey,</span>
+<span class="doccomment">///         key: DataKey,</span>
 <span class="doccomment">///         req: &amp;DataRequest,</span>
 <span class="doccomment">///     ) -&gt; Result&lt;DataResponse&lt;BufferMarker&gt;, DataError&gt; {</span>
-<span class="doccomment">///         Err(DataErrorKind::MissingResourceKey.with_req(key, req))</span>
+<span class="doccomment">///         Err(DataErrorKind::MissingDataKey.with_req(key, req))</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
@@ -471,7 +457,7 @@
 <span class="doccomment">///         .filter_by_langid(|langid| langid.language == language!(&quot;de&quot;)),</span>
 <span class="doccomment">/// );</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let data_provider: &amp;dyn ResourceProvider&lt;HelloWorldV1Marker&gt; =</span>
+<span class="doccomment">/// let data_provider: &amp;dyn DataProvider&lt;HelloWorldV1Marker&gt; =</span>
 <span class="doccomment">///     &amp;forking_provider.as_deserializing();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Chinese is the first provider, so this succeeds</span>
@@ -506,11 +492,11 @@
 {
     <span class="kw">fn</span> <span class="ident">load_buffer</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_buffer</span>(<span class="ident">key</span>, <span class="ident">req</span>);
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
             <span class="kw">return</span> <span class="ident">result</span>;
         }
         <span class="self">self</span>.<span class="number">1</span>.<span class="ident">load_buffer</span>(<span class="ident">key</span>, <span class="ident">req</span>)
@@ -522,28 +508,24 @@
     <span class="ident">P0</span>: <span class="ident">AnyProvider</span>,
     <span class="ident">P1</span>: <span class="ident">AnyProvider</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_any</span>(<span class="ident">key</span>, <span class="ident">req</span>);
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
             <span class="kw">return</span> <span class="ident">result</span>;
         }
         <span class="self">self</span>.<span class="number">1</span>.<span class="ident">load_any</span>(<span class="ident">key</span>, <span class="ident">req</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span> <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span> <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
-    <span class="ident">P0</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
-    <span class="ident">P1</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+    <span class="ident">P0</span>: <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+    <span class="ident">P1</span>: <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>);
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
             <span class="kw">return</span> <span class="ident">result</span>;
         }
         <span class="self">self</span>.<span class="number">1</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>)
@@ -551,18 +533,15 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span> <span class="ident">datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span> <span class="ident">datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P0</span>, <span class="ident">P1</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
-    <span class="ident">P0</span>: <span class="ident">datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
-    <span class="ident">P1</span>: <span class="ident">datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+    <span class="ident">P0</span>: <span class="ident">datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+    <span class="ident">P1</span>: <span class="ident">datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>);
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
             <span class="kw">return</span> <span class="ident">result</span>;
         }
         <span class="self">self</span>.<span class="number">1</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>)
@@ -571,13 +550,13 @@
 
 <span class="doccomment">/// A provider that returns data from the first child provider supporting the key.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The result of the first provider that supports a particular [`ResourceKey`] will be returned,</span>
+<span class="doccomment">/// The result of the first provider that supports a particular [`DataKey`] will be returned,</span>
 <span class="doccomment">/// even if the request failed for other reasons (such as an unsupported language). Therefore,</span>
 <span class="doccomment">/// you should add child providers that support disjoint sets of keys.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Note: A forking [`ResourceProvider`] does not make sense, since there is only one key that</span>
+<span class="doccomment">/// Note: A forking [`DataProvider`] does not make sense, since there is only one key that</span>
 <span class="doccomment">/// type can support. Instead, you can create a forking [`AnyProvider`], [`BufferProvider`],</span>
-<span class="doccomment">/// or [`DynProvider`].</span>
+<span class="doccomment">/// or [`DynamicDataProvider`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
@@ -602,7 +581,7 @@
 <span class="doccomment">///     ],</span>
 <span class="doccomment">/// };</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let data_provider: &amp;dyn ResourceProvider&lt;HelloWorldV1Marker&gt; =</span>
+<span class="doccomment">/// let data_provider: &amp;dyn DataProvider&lt;HelloWorldV1Marker&gt; =</span>
 <span class="doccomment">///     &amp;forking_provider.as_deserializing();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Chinese is the first provider, so this succeeds</span>
@@ -637,16 +616,16 @@
 {
     <span class="kw">fn</span> <span class="ident">load_buffer</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">provider</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">providers</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load_buffer</span>(<span class="ident">key</span>, <span class="ident">req</span>);
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
                 <span class="kw">return</span> <span class="ident">result</span>;
             }
         }
-        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
     }
 }
 
@@ -654,54 +633,47 @@
 <span class="kw">where</span>
     <span class="ident">P</span>: <span class="ident">AnyProvider</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">provider</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">providers</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load_any</span>(<span class="ident">key</span>, <span class="ident">req</span>);
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
                 <span class="kw">return</span> <span class="ident">result</span>;
             }
         }
-        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
-    <span class="ident">P</span>: <span class="ident">DynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+    <span class="ident">P</span>: <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">provider</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">providers</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>);
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
                 <span class="kw">return</span> <span class="ident">result</span>;
             }
         }
-        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">P</span><span class="op">&gt;</span> <span class="ident">datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiForkByKeyProvider</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">DataMarker</span>,
-    <span class="ident">P</span>: <span class="ident">datagen::IterableDynProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
+    <span class="ident">P</span>: <span class="ident">datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
-    <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ResourceOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataOptions</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">provider</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">providers</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">supported_options_for_key</span>(<span class="ident">key</span>);
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_resource_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">result_is_err_missing_data_key</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
                 <span class="kw">return</span> <span class="ident">result</span>;
             }
         }
-        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
+        <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))
     }
 }
 
@@ -714,7 +686,7 @@
 {
     <span class="kw">fn</span> <span class="ident">convert</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="kw-2">mut</span> <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MTo</span><span class="op">&gt;</span>, <span class="ident">datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">datagen::ReturnedPayloadError</span>;
@@ -725,7 +697,7 @@
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">result</span>,
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">error</span>) <span class="op">=</span> <span class="ident">e</span>;
-                    <span class="kw">if</span> <span class="ident">error</span>.<span class="ident">kind</span> <span class="op">!</span><span class="op">=</span> <span class="ident">DataErrorKind::MissingResourceKey</span> {
+                    <span class="kw">if</span> <span class="ident">error</span>.<span class="ident">kind</span> <span class="op">!</span><span class="op">=</span> <span class="ident">DataErrorKind::MissingDataKey</span> {
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">error</span>));
                     }
                     <span class="ident">from</span> <span class="op">=</span> <span class="ident">returned</span>;
@@ -734,7 +706,7 @@
         }
         <span class="prelude-val">Err</span>(<span class="ident">ReturnedPayloadError</span>(
             <span class="ident">from</span>,
-            <span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>),
+            <span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>),
         ))
     }
 }
@@ -749,7 +721,7 @@
 {
     <span class="kw">fn</span> <span class="ident">convert</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+        <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="kw-2">mut</span> <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MTo</span><span class="op">&gt;</span>, <span class="ident">datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">datagen::ReturnedPayloadError</span>;
@@ -758,7 +730,7 @@
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">result</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">error</span>) <span class="op">=</span> <span class="ident">e</span>;
-                <span class="kw">if</span> <span class="ident">error</span>.<span class="ident">kind</span> <span class="op">!</span><span class="op">=</span> <span class="ident">DataErrorKind::MissingResourceKey</span> {
+                <span class="kw">if</span> <span class="ident">error</span>.<span class="ident">kind</span> <span class="op">!</span><span class="op">=</span> <span class="ident">DataErrorKind::MissingDataKey</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">error</span>));
                 }
                 <span class="ident">from</span> <span class="op">=</span> <span class="ident">returned</span>;

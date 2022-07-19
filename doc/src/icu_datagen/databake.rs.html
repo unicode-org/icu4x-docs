@@ -456,11 +456,11 @@
     <span class="ident">pretty</span>: <span class="ident">bool</span>,
     <span class="ident">insert_feature_gates</span>: <span class="ident">bool</span>,
     <span class="comment">// Temporary storage for put_payload: key -&gt; (marker path, bake -&gt; [options])</span>
-    <span class="ident">data</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ResourceKey</span>, (<span class="ident">SyncTokenStream</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">SyncTokenStream</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">data</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">DataKey</span>, (<span class="ident">SyncTokenStream</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">SyncTokenStream</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="comment">// All mod.rs files in the module tree. Because generation is parallel,</span>
     <span class="comment">// this will be non-deterministic and have to be sorted later.</span>
     <span class="ident">mod_files</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Triples of the ResourceMarker, the path to the DATA slice, and the feature that includes it.</span>
+    <span class="doccomment">/// Triples of the KeyedDataMarker, the path to the DATA slice, and the feature that includes it.</span>
     <span class="doccomment">/// This is populated by `put_payload` and consumed by `flush` which writes the implementations.</span>
     <span class="ident">marker_data_feature</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SyncTokenStream</span>, <span class="ident">SyncTokenStream</span>, <span class="ident">SyncTokenStream</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="comment">// List of dependencies used by baking.</span>
@@ -536,8 +536,8 @@
 <span class="kw">impl</span> <span class="ident">DataExporter</span> <span class="kw">for</span> <span class="ident">BakedDataExporter</span> {
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
-        <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">ResourceOptions</span>,
+        <span class="ident">key</span>: <span class="ident">DataKey</span>,
+        <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">DataOptions</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">payload</span>, <span class="ident">marker_type</span>) <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">tokenize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dependencies</span>);
@@ -553,7 +553,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">marker</span>, <span class="ident">raw</span>) <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">data</span>
             .<span class="ident">lock</span>()
@@ -725,7 +725,7 @@
         <span class="kw">let</span> <span class="ident">resource_impls</span> <span class="op">=</span> <span class="ident">marker_data_feature_ident</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="ident">data</span>, <span class="ident">feature</span>, <span class="kw">_</span>)<span class="op">|</span> {
             <span class="macro">quote!</span> {
                 #<span class="ident">feature</span>
-                <span class="kw">impl</span> <span class="ident">ResourceProvider</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BakedDataProvider</span> {
+                <span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BakedDataProvider</span> {
                     <span class="kw">fn</span> <span class="ident">load_resource</span>(
                         <span class="kw-2">&amp;</span><span class="self">self</span>,
                         <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
@@ -733,7 +733,7 @@
                         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
                             <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>(
-                                <span class="ident">litemap_slice_get</span>(#<span class="ident">data::DATA</span>, <span class="op">&lt;</span>#<span class="ident">marker</span> <span class="kw">as</span> <span class="ident">ResourceMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>)<span class="question-mark">?</span>,
+                                <span class="ident">litemap_slice_get</span>(#<span class="ident">data::DATA</span>, <span class="op">&lt;</span>#<span class="ident">marker</span> <span class="kw">as</span> <span class="ident">KeyedDataMarker</span><span class="op">&gt;</span><span class="ident">::KEY</span>, <span class="ident">req</span>)<span class="question-mark">?</span>,
                             ))),
                         })
                     }
@@ -758,14 +758,14 @@
 
                 <span class="kw">fn</span> <span class="ident">litemap_slice_get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
                     <span class="ident">values</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">T</span>)],
-                    <span class="ident">key</span>: <span class="ident">ResourceKey</span>,
+                    <span class="ident">key</span>: <span class="ident">DataKey</span>,
                     <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
                 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">T</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
                     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
                     <span class="ident">values</span>
                         .<span class="ident">binary_search_by</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">req</span>.<span class="ident">options</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
                         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">values</span>.<span class="ident">get</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>().<span class="number">1</span>)
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingResourceOptions</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingDataOptions</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
                 }
             },
         )
@@ -776,7 +776,7 @@
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="kw">_</span>, <span class="ident">feature</span>, <span class="ident">ident</span>)<span class="op">|</span> {
                 <span class="macro">quote!</span> {
                     #<span class="ident">feature</span>
-                    <span class="kw">const</span> #<span class="ident">ident</span>: <span class="ident">::icu_provider::ResourceKeyHash</span> <span class="op">=</span> #<span class="ident">marker::KEY</span>.<span class="ident">get_hash</span>();
+                    <span class="kw">const</span> #<span class="ident">ident</span>: <span class="ident">::icu_provider::DataKeyHash</span> <span class="op">=</span> #<span class="ident">marker::KEY</span>.<span class="ident">get_hash</span>();
                 }
             });
 
@@ -808,12 +808,12 @@
             <span class="ident">PathBuf::from</span>(<span class="string">&quot;any&quot;</span>),
             <span class="macro">quote!</span> {
                 <span class="kw">impl</span> <span class="ident">AnyProvider</span> <span class="kw">for</span> <span class="ident">BakedDataProvider</span> {
-                    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">ResourceKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+                    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
                         #(#<span class="ident">any_consts</span>)<span class="op">*</span>
                         <span class="prelude-val">Ok</span>(<span class="ident">AnyResponse</span> {
                             <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">key</span>.<span class="ident">get_hash</span>() {
                                 #(#<span class="ident">any_cases</span>)<span class="op">*</span>
-                                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingResourceKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>)),
+                                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>)),
                             }),
                             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
                         })

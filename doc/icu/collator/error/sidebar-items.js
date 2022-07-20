@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["CollatorError","Error returned by the constructor of `Collator`"]]});

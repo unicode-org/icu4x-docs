@@ -258,7 +258,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// // The provider does not have data for &quot;ja-JP&quot;:</span>
 <span class="doccomment">/// let result: Result&lt;DataResponse&lt;HelloWorldV1Marker&gt;, DataError&gt; =</span>
-<span class="doccomment">///     provider.load_resource(&amp;req);</span>
+<span class="doccomment">///     provider.load(&amp;req);</span>
 <span class="doccomment">/// assert!(matches!(result, Err(_)));</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // But if we wrap the provider in a fallback provider...</span>
@@ -267,7 +267,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// // ...then we can load &quot;ja-JP&quot; based on &quot;ja&quot; data</span>
 <span class="doccomment">/// let response: DataResponse&lt;HelloWorldV1Marker&gt; =</span>
-<span class="doccomment">///     provider.load_resource(&amp;req).expect(&quot;successful with vertical fallback&quot;);</span>
+<span class="doccomment">///     provider.load(&amp;req).expect(&quot;successful with vertical fallback&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(</span>
 <span class="doccomment">///     &quot;ja&quot;,</span>
@@ -323,7 +323,7 @@
     <span class="doccomment">/// };</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // There is no &quot;de-CH&quot; data in the `HelloWorldProvider`</span>
-    <span class="doccomment">/// DataProvider::&lt;HelloWorldV1Marker&gt;::load_resource(&amp;provider, &amp;req)</span>
+    <span class="doccomment">/// DataProvider::&lt;HelloWorldV1Marker&gt;::load(&amp;provider, &amp;req)</span>
     <span class="doccomment">///     .expect_err(&quot;No data for de-CH&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // `HelloWorldProvider` does not contain fallback data,</span>
@@ -335,7 +335,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Now we can load the &quot;de-CH&quot; data via fallback to &quot;de&quot;.</span>
     <span class="doccomment">/// let german_hello_world: DataPayload&lt;HelloWorldV1Marker&gt; = provider</span>
-    <span class="doccomment">///     .load_resource(&amp;req)</span>
+    <span class="doccomment">///     .load(&amp;req)</span>
     <span class="doccomment">///     .expect(&quot;Loading should succeed&quot;)</span>
     <span class="doccomment">///     .take_payload()</span>
     <span class="doccomment">///     .expect(&quot;Data should be present&quot;);</span>
@@ -427,7 +427,7 @@
     <span class="ident">P</span>: <span class="ident">DynamicDataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
     <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_payload</span>(
+    <span class="kw">fn</span> <span class="ident">load_data</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>,
@@ -435,7 +435,7 @@
         <span class="self">self</span>.<span class="ident">run_fallback</span>(
             <span class="ident">key</span>,
             <span class="ident">base_req</span>,
-            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_payload</span>(<span class="ident">key</span>, <span class="ident">req</span>),
+            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_data</span>(<span class="ident">key</span>, <span class="ident">req</span>),
             <span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="kw-2">&amp;mut</span> <span class="ident">res</span>.<span class="ident">metadata</span>,
         )
     }
@@ -446,11 +446,11 @@
     <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
     <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load_resource</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">base_req</span>: <span class="kw-2">&amp;</span><span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">run_fallback</span>(
             <span class="ident">M::KEY</span>,
             <span class="ident">base_req</span>,
-            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load_resource</span>(<span class="ident">req</span>),
+            <span class="op">|</span><span class="ident">req</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">load</span>(<span class="ident">req</span>),
             <span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="kw-2">&amp;mut</span> <span class="ident">res</span>.<span class="ident">metadata</span>,
         )
     }

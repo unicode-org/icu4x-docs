@@ -856,31 +856,6 @@
 <span id="851">851</span>
 <span id="852">852</span>
 <span id="853">853</span>
-<span id="854">854</span>
-<span id="855">855</span>
-<span id="856">856</span>
-<span id="857">857</span>
-<span id="858">858</span>
-<span id="859">859</span>
-<span id="860">860</span>
-<span id="861">861</span>
-<span id="862">862</span>
-<span id="863">863</span>
-<span id="864">864</span>
-<span id="865">865</span>
-<span id="866">866</span>
-<span id="867">867</span>
-<span id="868">868</span>
-<span id="869">869</span>
-<span id="870">870</span>
-<span id="871">871</span>
-<span id="872">872</span>
-<span id="873">873</span>
-<span id="874">874</span>
-<span id="875">875</span>
-<span id="876">876</span>
-<span id="877">877</span>
-<span id="878">878</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -914,10 +889,7 @@
 <span class="kw">use</span> <span class="ident">icu_properties::maps::CodePointMapData</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::provider::CanonicalCombiningClassV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::CanonicalCombiningClass</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::DataLocale</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::DataPayload</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::DataProvider</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::DataRequest</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
 <span class="kw">use</span> <span class="ident">utf16_iter::Utf16CharsEx</span>;
 <span class="kw">use</span> <span class="ident">utf8_iter::Utf8CharsEx</span>;
@@ -1009,42 +981,27 @@
             }
             <span class="ident">filtered_locale</span>
         };
-        <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">DataLocale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
+        <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
+        <span class="kw">let</span> <span class="ident">req</span> <span class="op">=</span> <span class="ident">DataRequest</span> {
+            <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">locale</span>,
+            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+        };
 
         <span class="kw">let</span> <span class="ident">metadata_payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::provider::CollationMetadataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">data_provider</span>
-                .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                    <span class="ident">locale</span>: <span class="ident">locale</span>.<span class="ident">clone</span>(),
-                    <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                })<span class="question-mark">?</span>
-                .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+            <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">metadata_payload</span>.<span class="ident">get</span>();
 
         <span class="kw">let</span> <span class="ident">tailoring</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::provider::CollationDataV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="kw">if</span> <span class="ident">metadata</span>.<span class="ident">tailored</span>() {
-                <span class="prelude-val">Some</span>(
-                    <span class="ident">data_provider</span>
-                        .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                            <span class="ident">locale</span>: <span class="ident">locale</span>.<span class="ident">clone</span>(),
-                            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                        })<span class="question-mark">?</span>
-                        .<span class="ident">take_payload</span>()<span class="question-mark">?</span>,
-                )
+                <span class="prelude-val">Some</span>(<span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>)
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
             };
 
         <span class="kw">let</span> <span class="ident">reordering</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::provider::CollationReorderingV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="kw">if</span> <span class="ident">metadata</span>.<span class="ident">reordering</span>() {
-                <span class="prelude-val">Some</span>(
-                    <span class="ident">data_provider</span>
-                        .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                            <span class="ident">locale</span>: <span class="ident">locale</span>.<span class="ident">clone</span>(),
-                            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                        })<span class="question-mark">?</span>
-                        .<span class="ident">take_payload</span>()<span class="question-mark">?</span>,
-                )
+                <span class="prelude-val">Some</span>(<span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">req</span>)<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>)
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
             };
@@ -1055,19 +1012,15 @@
             }
         }
 
-        <span class="kw">let</span> <span class="ident">root</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
-            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">root</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">tailored_diacritics</span> <span class="op">=</span> <span class="ident">metadata</span>.<span class="ident">tailored_diacritics</span>();
         <span class="kw">let</span> <span class="ident">diacritics</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationDiacriticsV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest</span> {
-                <span class="ident">locale</span>: <span class="kw">if</span> <span class="ident">tailored_diacritics</span> {
-                    <span class="ident">locale</span>
-                } <span class="kw">else</span> {
-                    <span class="ident">DataLocale::default</span>()
-                },
-                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+            .<span class="ident">load</span>(<span class="kw">if</span> <span class="ident">tailored_diacritics</span> {
+                <span class="ident">req</span>
+            } <span class="kw">else</span> {
+                <span class="ident">Default::default</span>()
             })<span class="question-mark">?</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
@@ -1085,20 +1038,18 @@
         }
 
         <span class="kw">let</span> <span class="ident">jamo</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationJamoV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span> <span class="comment">// TODO: redesign Korean search collation handling</span>
+            .<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span> <span class="comment">// TODO: redesign Korean search collation handling</span>
             .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="ident">jamo</span>.<span class="ident">get</span>().<span class="ident">ce32s</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">JAMO_COUNT</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CollatorError::MalformedData</span>);
         }
 
-        <span class="kw">let</span> <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
-            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">decompositions</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">tables</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
-            .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
-            .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">tables</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CanonicalDecompositionTablesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="ident">icu_properties::maps::get_canonical_combining_class</span>(<span class="ident">data_provider</span>)<span class="question-mark">?</span>;
 
@@ -1120,9 +1071,8 @@
         <span class="kw">let</span> <span class="ident">special_primaries</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">merged_options</span>.<span class="ident">alternate_handling</span>() <span class="op">==</span> <span class="ident">AlternateHandling::Shifted</span>
             <span class="op">|</span><span class="op">|</span> <span class="ident">merged_options</span>.<span class="ident">numeric</span>()
         {
-            <span class="kw">let</span> <span class="ident">special_primaries</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationSpecialPrimariesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">data_provider</span>
-                .<span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="ident">DataRequest::default</span>())<span class="question-mark">?</span>
-                .<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">special_primaries</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">CollationSpecialPrimariesV1Marker</span><span class="op">&gt;</span> <span class="op">=</span>
+                <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
             <span class="comment">// `variant_count` isn&#39;t stable yet:</span>
             <span class="comment">// https://github.com/rust-lang/rust/issues/73662</span>
             <span class="kw">if</span> <span class="ident">special_primaries</span>.<span class="ident">get</span>().<span class="ident">last_primaries</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> (<span class="ident">MaxVariable::Currency</span> <span class="kw">as</span> <span class="ident">usize</span>) {

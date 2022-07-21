@@ -411,8 +411,6 @@
 <span id="406">406</span>
 <span id="407">407</span>
 <span id="408">408</span>
-<span id="409">409</span>
-<span id="410">410</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -430,26 +428,20 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doc</span>)]</span>
 <span class="kw">use</span> <span class="ident">icu_locid::subtags::Variant</span>;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type is stable</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataRequest</span> {
-    <span class="kw">pub</span> <span class="ident">locale</span>: <span class="ident">DataLocale</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataRequest</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DataLocale</span>,
     <span class="kw">pub</span> <span class="ident">metadata</span>: <span class="ident">DataRequestMetadata</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">DataRequest</span> {
+<span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">DataRequest</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">fmt::Display::fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">locale</span>, <span class="ident">f</span>)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">DataLocale</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DataRequest</span> {
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span> {
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">locale</span>
-    }
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataRequestMetadata</span>;
 
@@ -462,6 +454,16 @@
     <span class="ident">keywords</span>: <span class="ident">unicode_ext::Keywords</span>,
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DataLocale</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="kw">static</span> <span class="ident">DEFAULT</span>: <span class="ident">DataLocale</span> <span class="op">=</span> <span class="ident">DataLocale</span> {
+            <span class="ident">langid</span>: <span class="ident">LanguageIdentifier::UND</span>,
+            <span class="ident">keywords</span>: <span class="ident">unicode_ext::Keywords::new</span>(),
+        };
+        <span class="kw-2">&amp;</span><span class="ident">DEFAULT</span>
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">DataLocale</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;DataLocale{{{}}}&quot;</span>, <span class="self">self</span>)
@@ -471,12 +473,6 @@
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">DataLocale</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">writeable::Writeable::write_to</span>(<span class="self">self</span>, <span class="ident">f</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">AsMut</span><span class="op">&lt;</span><span class="ident">DataLocale</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DataLocale</span> {
-    <span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span> {
-        <span class="self">self</span>
     }
 }
 
@@ -591,7 +587,7 @@
 <span class="kw">impl</span> <span class="ident">DataLocale</span> {
     <span class="doccomment">/// Returns whether this [`DataLocale`] has all empty fields (no components).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::default</span>()
+        <span class="self">self</span> <span class="op">==</span> <span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">DataLocale</span><span class="op">&gt;</span><span class="ident">::default</span>()
     }
 
     <span class="doccomment">/// Returns whether the [`LanguageIdentifier`] associated with this request is `und`.</span>
@@ -623,12 +619,12 @@
     <span class="doccomment">/// const FOO_BAR: DataKey = icu_provider::data_key!(&quot;foo/bar@1&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let req_no_langid = DataRequest {</span>
-    <span class="doccomment">///     locale: DataLocale::default(),</span>
+    <span class="doccomment">///     locale: &amp;Default::default(),</span>
     <span class="doccomment">///     metadata: Default::default(),</span>
     <span class="doccomment">/// };</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let req_with_langid = DataRequest {</span>
-    <span class="doccomment">///     locale: langid!(&quot;ar-EG&quot;).into(),</span>
+    <span class="doccomment">///     locale: &amp;langid!(&quot;ar-EG&quot;).into(),</span>
     <span class="doccomment">///     metadata: Default::default(),</span>
     <span class="doccomment">/// };</span>
     <span class="doccomment">///</span>

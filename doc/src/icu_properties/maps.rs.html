@@ -536,7 +536,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">ErasedMaplikeMarker</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> <span class="ident">DataMarker</span> <span class="kw">for</span> <span class="ident">ErasedMaplikeMarker</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">PropertyCodePointMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> <span class="ident">CodePointMapData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
@@ -630,7 +630,7 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointSetData</span> {
         <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">get_set_for_value</span>(<span class="ident">value</span>);
-        <span class="ident">CodePointSetData::from_unicode_set</span>(<span class="ident">set</span>)
+        <span class="ident">CodePointSetData::from_code_point_set</span>(<span class="ident">set</span>)
     }
 
     <span class="doccomment">/// Construct a new one from loaded data</span>
@@ -638,14 +638,14 @@
     <span class="doccomment">/// Typically it is preferable to use getters like [`get_general_category()`] instead</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_data</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">M</span>: <span class="ident">DataMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">PropertyCodePointMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     {
         <span class="self">Self</span> { <span class="ident">data</span>: <span class="ident">data</span>.<span class="ident">cast</span>() }
     }
 
     <span class="doccomment">/// Construct a new one an owned [`CodePointTrie`]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_code_point_trie</span>(<span class="ident">trie</span>: <span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">UnicodePropertyMapV1::from_code_point_trie</span>(<span class="ident">trie</span>);
+        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">PropertyCodePointMapV1::from_code_point_trie</span>(<span class="ident">trie</span>);
         <span class="ident">CodePointMapData::from_data</span>(<span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">ErasedMaplikeMarker</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">set</span>))
     }
     <span class="doccomment">/// Convert this type to a [`CodePointTrie`], borrowing if possible,</span>
@@ -667,7 +667,7 @@
 <span class="doccomment">/// [`CodePointSetData::as_borrowed()`]. More efficient to query.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> {
-    <span class="ident">map</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">UnicodePropertyMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">map</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">PropertyCodePointMapV1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">TrieValue</span><span class="op">&gt;</span> <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
@@ -737,7 +737,7 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointSetData</span> {
         <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">map</span>.<span class="ident">get_set_for_value</span>(<span class="ident">value</span>);
-        <span class="ident">CodePointSetData::from_unicode_set</span>(<span class="ident">set</span>)
+        <span class="ident">CodePointSetData::from_code_point_set</span>(<span class="ident">set</span>)
     }
 }
 

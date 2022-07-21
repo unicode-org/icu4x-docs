@@ -945,28 +945,28 @@
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core</span>::{<span class="ident">char</span>, <span class="ident">cmp::Ordering</span>, <span class="ident">ops::RangeBounds</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">uniset::UnicodeSet</span>, <span class="ident">utils::deconstruct_range</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">uniset::CodePointSet</span>, <span class="ident">utils::deconstruct_range</span>};
 <span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ule::AsULE</span>, <span class="ident">ZeroVec</span>};
 
-<span class="doccomment">/// A builder for [`UnicodeSet`].</span>
+<span class="doccomment">/// A builder for [`CodePointSet`].</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Provides exposure to builder functions and conversion to [`UnicodeSet`]</span>
+<span class="doccomment">/// Provides exposure to builder functions and conversion to [`CodePointSet`]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">UnicodeSetBuilder</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CodePointSetBuilder</span> {
     <span class="ident">intervals</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">UnicodeSetBuilder</span> {
-    <span class="doccomment">/// Returns empty [`UnicodeSetBuilder`]</span>
+<span class="kw">impl</span> <span class="ident">CodePointSetBuilder</span> {
+    <span class="doccomment">/// Returns empty [`CodePointSetBuilder`]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">intervals</span>: <span class="macro">vec!</span>[] }
     }
 
-    <span class="doccomment">/// Returns a [`UnicodeSet`] and consumes the [`UnicodeSetBuilder`]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) -&gt; <span class="ident">UnicodeSet</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Returns a [`CodePointSet`] and consumes the [`CodePointSetBuilder`]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) -&gt; <span class="ident">CodePointSet</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inv_list</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ZeroVec::alloc_from_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">intervals</span>);
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="ident">UnicodeSet::from_inversion_list</span>(<span class="ident">inv_list</span>).<span class="ident">unwrap</span>()
+        <span class="ident">CodePointSet::from_inversion_list</span>(<span class="ident">inv_list</span>).<span class="ident">unwrap</span>()
     }
 
     <span class="doccomment">/// Abstraction for adding/removing a range from start..end</span>
@@ -1008,7 +1008,7 @@
         }
     }
 
-    <span class="doccomment">/// Add the range to the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Add the range to the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Accomplishes this through binary search for the start and end indices and merges intervals</span>
     <span class="doccomment">/// in between with inplace memory. Performs `O(1)` operation if adding to end of list, and `O(N)` otherwise,</span>
@@ -1024,13 +1024,13 @@
         <span class="self">self</span>.<span class="ident">add_remove_middle</span>(<span class="ident">start</span>, <span class="ident">end</span>, <span class="bool-val">true</span>);
     }
 
-    <span class="doccomment">/// Add the character to the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Add the character to the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_char(&#39;a&#39;);</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert_eq!(check.iter_chars().next(), Some(&#39;a&#39;));</span>
@@ -1040,7 +1040,7 @@
         <span class="self">self</span>.<span class="ident">add</span>(<span class="ident">to_add</span>, <span class="ident">to_add</span> <span class="op">+</span> <span class="number">1</span>);
     }
 
-    <span class="doccomment">/// Add the code point value to the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Add the code point value to the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note: Even though [`u32`] and [`prim@char`] in Rust are non-negative 4-byte</span>
     <span class="doccomment">/// values, there is an important difference. A [`u32`] can take values up to</span>
@@ -1050,8 +1050,8 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_u32(0x41);</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert_eq!(check.contains_u32(0x41), true);</span>
@@ -1063,13 +1063,13 @@
         }
     }
 
-    <span class="doccomment">/// Add the range of characters to the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Add the range of characters to the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert_eq!(check.iter_chars().next(), Some(&#39;A&#39;));</span>
@@ -1079,13 +1079,13 @@
         <span class="self">self</span>.<span class="ident">add</span>(<span class="ident">start</span>, <span class="ident">end</span>);
     }
 
-    <span class="doccomment">/// Add the range of characters, represented as u32, to the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Add the range of characters, represented as u32, to the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range_u32(&amp;(0xd800..=0xdfff));</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert_eq!(check.contains_u32(0xd900), true);</span>
@@ -1097,20 +1097,20 @@
         }
     }
 
-    <span class="doccomment">/// Add the [`UnicodeSet`] reference to the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Add the [`CodePointSet`] reference to the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::{UnicodeSet, UnicodeSetBuilder};</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
-    <span class="doccomment">/// let set = UnicodeSet::from_inversion_list_slice(&amp;[0x41, 0x4C]).unwrap();</span>
+    <span class="doccomment">/// use icu_uniset::{CodePointSet, CodePointSetBuilder};</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
+    <span class="doccomment">/// let set = CodePointSet::from_inversion_list_slice(&amp;[0x41, 0x4C]).unwrap();</span>
     <span class="doccomment">/// builder.add_set(&amp;set);</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert_eq!(check.iter_chars().next(), Some(&#39;A&#39;));</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_assignments</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">UnicodeSet</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointSet</span>) {
         <span class="ident">set</span>.<span class="ident">as_inversion_list</span>()
             .<span class="ident">as_ule_slice</span>()
             .<span class="ident">chunks</span>(<span class="number">2</span>)
@@ -1126,7 +1126,7 @@
             });
     }
 
-    <span class="doccomment">/// Removes the range from the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Removes the range from the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Performs binary search to find start and end affected intervals, then removes in an `O(N)` fashion</span>
     <span class="doccomment">/// where `N` is the number of endpoints, with in-place memory.</span>
@@ -1144,13 +1144,13 @@
         }
     }
 
-    <span class="doccomment">/// Remove the character from the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Remove the character from the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// builder.remove_char(&#39;A&#39;);</span>
     <span class="doccomment">/// let check = builder.build();</span>
@@ -1160,13 +1160,13 @@
         <span class="self">self</span>.<span class="ident">remove</span>(<span class="ident">to_remove</span>, <span class="ident">to_remove</span> <span class="op">+</span> <span class="number">1</span>);
     }
 
-    <span class="doccomment">/// Remove the range of characters from the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Remove the range of characters from the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// builder.remove_range(&amp;(&#39;A&#39;..=&#39;C&#39;));</span>
     <span class="doccomment">/// let check = builder.build();</span>
@@ -1176,20 +1176,20 @@
         <span class="self">self</span>.<span class="ident">remove</span>(<span class="ident">start</span>, <span class="ident">end</span>);
     }
 
-    <span class="doccomment">/// Remove the [`UnicodeSet`] from the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Remove the [`CodePointSet`] from the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::{UnicodeSet, UnicodeSetBuilder};</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
-    <span class="doccomment">/// let set = UnicodeSet::from_inversion_list_slice(&amp;[0x41, 0x46]).unwrap();</span>
+    <span class="doccomment">/// use icu_uniset::{CodePointSet, CodePointSetBuilder};</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
+    <span class="doccomment">/// let set = CodePointSet::from_inversion_list_slice(&amp;[0x41, 0x46]).unwrap();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// builder.remove_set(&amp;set); // removes &#39;A&#39;..=&#39;E&#39;</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert_eq!(check.iter_chars().next(), Some(&#39;F&#39;));</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_assignments</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">UnicodeSet</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointSet</span>) {
         <span class="ident">set</span>.<span class="ident">as_inversion_list</span>()
             .<span class="ident">as_ule_slice</span>()
             .<span class="ident">chunks</span>(<span class="number">2</span>)
@@ -1205,13 +1205,13 @@
             });
     }
 
-    <span class="doccomment">/// Retain the specified character in the [`UnicodeSetBuilder`] if it exists</span>
+    <span class="doccomment">/// Retain the specified character in the [`CodePointSetBuilder`] if it exists</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// builder.retain_char(&#39;A&#39;);</span>
     <span class="doccomment">/// let set = builder.build();</span>
@@ -1225,13 +1225,13 @@
         <span class="self">self</span>.<span class="ident">remove</span>(<span class="ident">code_point</span> <span class="op">+</span> <span class="number">1</span>, (<span class="ident">char::MAX</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">+</span> <span class="number">1</span>);
     }
 
-    <span class="doccomment">/// Retain the range of characters located within the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Retain the range of characters located within the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// builder.retain_range(&amp;(&#39;A&#39;..=&#39;B&#39;));</span>
     <span class="doccomment">/// let set = builder.build();</span>
@@ -1246,14 +1246,14 @@
         <span class="self">self</span>.<span class="ident">remove</span>(<span class="ident">end</span>, (<span class="ident">char::MAX</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">+</span> <span class="number">1</span>);
     }
 
-    <span class="doccomment">/// Retain the elements in the specified set within the [`UnicodeSetBuilder`]</span>
+    <span class="doccomment">/// Retain the elements in the specified set within the [`CodePointSetBuilder`]</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::{UnicodeSet, UnicodeSetBuilder};</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
-    <span class="doccomment">/// let set = UnicodeSet::from_inversion_list_slice(&amp;[65, 70]).unwrap();</span>
+    <span class="doccomment">/// use icu_uniset::{CodePointSet, CodePointSetBuilder};</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
+    <span class="doccomment">/// let set = CodePointSet::from_inversion_list_slice(&amp;[65, 70]).unwrap();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;Z&#39;));</span>
     <span class="doccomment">/// builder.retain_set(&amp;set); // retains &#39;A&#39;..=&#39;E&#39;</span>
     <span class="doccomment">/// let check = builder.build();</span>
@@ -1261,7 +1261,7 @@
     <span class="doccomment">/// assert!(!check.contains(&#39;G&#39;));</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_assignments</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">retain_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">UnicodeSet</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">retain_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointSet</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prev</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">for</span> <span class="ident">pair</span> <span class="kw">in</span> <span class="ident">set</span>.<span class="ident">as_inversion_list</span>().<span class="ident">as_ule_slice</span>().<span class="ident">chunks</span>(<span class="number">2</span>) {
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
@@ -1318,10 +1318,10 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::{UnicodeSet, UnicodeSetBuilder};</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::{CodePointSet, CodePointSetBuilder};</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// let set =</span>
-    <span class="doccomment">///     UnicodeSet::from_inversion_list_slice(&amp;[0x0, 0x41, 0x46, (std::char::MAX as u32) + 1])</span>
+    <span class="doccomment">///     CodePointSet::from_inversion_list_slice(&amp;[0x0, 0x41, 0x46, (std::char::MAX as u32) + 1])</span>
     <span class="doccomment">///         .unwrap();</span>
     <span class="doccomment">/// builder.add_set(&amp;set);</span>
     <span class="doccomment">/// builder.complement();</span>
@@ -1352,8 +1352,8 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;D&#39;));</span>
     <span class="doccomment">/// builder.complement_char(&#39;A&#39;);</span>
     <span class="doccomment">/// builder.complement_char(&#39;E&#39;);</span>
@@ -1373,8 +1373,8 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::UnicodeSetBuilder;</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::CodePointSetBuilder;</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;A&#39;..=&#39;D&#39;));</span>
     <span class="doccomment">/// builder.complement_range(&amp;(&#39;C&#39;..=&#39;F&#39;));</span>
     <span class="doccomment">/// let check = builder.build();</span>
@@ -1393,16 +1393,16 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::{UnicodeSet, UnicodeSetBuilder};</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
-    <span class="doccomment">/// let set = UnicodeSet::from_inversion_list_slice(&amp;[0x41, 0x46, 0x4B, 0x5A]).unwrap();</span>
+    <span class="doccomment">/// use icu_uniset::{CodePointSet, CodePointSetBuilder};</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
+    <span class="doccomment">/// let set = CodePointSet::from_inversion_list_slice(&amp;[0x41, 0x46, 0x4B, 0x5A]).unwrap();</span>
     <span class="doccomment">/// builder.add_range(&amp;(&#39;C&#39;..=&#39;N&#39;)); // 67 - 78</span>
     <span class="doccomment">/// builder.complement_set(&amp;set);</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert!(check.contains(&#39;Q&#39;)); // 81</span>
     <span class="doccomment">/// assert!(!check.contains(&#39;N&#39;)); // 78</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complement_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">UnicodeSet</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complement_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointSet</span>) {
         <span class="kw">let</span> <span class="ident">inv_list_iter_owned</span> <span class="op">=</span> <span class="ident">set</span>.<span class="ident">as_inversion_list</span>().<span class="ident">iter</span>();
         <span class="self">self</span>.<span class="ident">complement_list</span>(<span class="ident">inv_list_iter_owned</span>);
     }
@@ -1412,8 +1412,8 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu_uniset::{UnicodeSet, UnicodeSetBuilder};</span>
-    <span class="doccomment">/// let mut builder = UnicodeSetBuilder::new();</span>
+    <span class="doccomment">/// use icu_uniset::{CodePointSet, CodePointSetBuilder};</span>
+    <span class="doccomment">/// let mut builder = CodePointSetBuilder::new();</span>
     <span class="doccomment">/// let check = builder.build();</span>
     <span class="doccomment">/// assert!(check.is_empty());</span>
     <span class="doccomment">/// ```</span>
@@ -1424,49 +1424,49 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">UnicodeSet</span>, <span class="ident">UnicodeSetBuilder</span>};
+    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">CodePointSet</span>, <span class="ident">CodePointSetBuilder</span>};
     <span class="kw">use</span> <span class="ident">core::char</span>;
     <span class="kw">use</span> <span class="ident">zerovec::ZeroVec</span>;
 
-    <span class="kw">fn</span> <span class="ident">generate_tester</span>(<span class="ident">ex</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="ident">UnicodeSetBuilder</span> {
+    <span class="kw">fn</span> <span class="ident">generate_tester</span>(<span class="ident">ex</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="ident">CodePointSetBuilder</span> {
         <span class="kw">let</span> <span class="ident">inv_list</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ZeroVec::alloc_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>);
-        <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="ident">UnicodeSet::from_inversion_list</span>(<span class="ident">inv_list</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span> <span class="ident">CodePointSet::from_inversion_list</span>(<span class="ident">inv_list</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add_set</span>(<span class="kw-2">&amp;</span><span class="ident">check</span>);
         <span class="ident">builder</span>
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_new</span>() {
-        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="macro">assert!</span>(<span class="ident">ex</span>.<span class="ident">intervals</span>.<span class="ident">is_empty</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_build</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add</span>(<span class="number">0x41</span>, <span class="number">0x42</span>);
-        <span class="kw">let</span> <span class="ident">check</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
+        <span class="kw">let</span> <span class="ident">check</span>: <span class="ident">CodePointSet</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">check</span>.<span class="ident">iter_chars</span>().<span class="ident">next</span>(), <span class="prelude-val">Some</span>(<span class="string">&#39;A&#39;</span>));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_empty_build</span>() {
-        <span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
-        <span class="kw">let</span> <span class="ident">check</span>: <span class="ident">UnicodeSet</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
+        <span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="ident">check</span>: <span class="ident">CodePointSet</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
         <span class="macro">assert!</span>(<span class="ident">check</span>.<span class="ident">is_empty</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_add_to_empty</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add</span>(<span class="number">0x0</span>, <span class="number">0xA</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="macro">vec!</span>[<span class="number">0x0</span>, <span class="number">0xA</span>]);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_add_invalid</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add</span>(<span class="number">0x0</span>, <span class="number">0x0</span>);
         <span class="ident">builder</span>.<span class="ident">add</span>(<span class="number">0x5</span>, <span class="number">0x0</span>);
         <span class="macro">assert!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>.<span class="ident">is_empty</span>());
@@ -1611,17 +1611,17 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_add_unicodeset</span>() {
+    <span class="kw">fn</span> <span class="ident">test_add_codepointset</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">generate_tester</span>(<span class="macro">vec!</span>[<span class="number">0xA</span>, <span class="number">0x14</span>, <span class="number">0x28</span>, <span class="number">0x32</span>]);
         <span class="kw">let</span> <span class="ident">check</span> <span class="op">=</span>
-            <span class="ident">UnicodeSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0x5</span>, <span class="number">0xA</span>, <span class="number">0x16</span>, <span class="number">0x21</span>, <span class="number">0x2C</span>, <span class="number">0x33</span>]).<span class="ident">unwrap</span>();
+            <span class="ident">CodePointSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0x5</span>, <span class="number">0xA</span>, <span class="number">0x16</span>, <span class="number">0x21</span>, <span class="number">0x2C</span>, <span class="number">0x33</span>]).<span class="ident">unwrap</span>();
         <span class="ident">builder</span>.<span class="ident">add_set</span>(<span class="kw-2">&amp;</span><span class="ident">check</span>);
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x5</span>, <span class="number">0x14</span>, <span class="number">0x16</span>, <span class="number">0x21</span>, <span class="number">0x28</span>, <span class="number">0x33</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
     }
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_add_char</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add_char</span>(<span class="string">&#39;a&#39;</span>);
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x61</span>, <span class="number">0x62</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
@@ -1629,7 +1629,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_add_range</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;A&#39;</span>..<span class="op">=</span><span class="string">&#39;Z&#39;</span>));
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x41</span>, <span class="number">0x5B</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
@@ -1637,7 +1637,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_add_range_u32</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add_range_u32</span>(<span class="kw-2">&amp;</span>(<span class="number">0xd800</span>..<span class="op">=</span><span class="number">0xdfff</span>));
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0xd800</span>, <span class="number">0xe000</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
@@ -1645,14 +1645,14 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_add_invalid_range</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">add_range</span>(<span class="kw-2">&amp;</span>(<span class="string">&#39;Z&#39;</span>..<span class="op">=</span><span class="string">&#39;A&#39;</span>));
         <span class="macro">assert!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>.<span class="ident">is_empty</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_remove_empty</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="ident">builder</span>.<span class="ident">remove</span>(<span class="number">0x0</span>, <span class="number">0xA</span>);
         <span class="macro">assert!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>.<span class="ident">is_empty</span>());
     }
@@ -1748,7 +1748,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_remove_set</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">generate_tester</span>(<span class="macro">vec!</span>[<span class="number">0xA</span>, <span class="number">0x14</span>, <span class="number">0x28</span>, <span class="number">0x32</span>, <span class="number">70</span>, <span class="number">80</span>]);
-        <span class="kw">let</span> <span class="ident">remove</span> <span class="op">=</span> <span class="ident">UnicodeSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0xA</span>, <span class="number">0x14</span>, <span class="number">0x2D</span>, <span class="number">0x4B</span>]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">remove</span> <span class="op">=</span> <span class="ident">CodePointSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0xA</span>, <span class="number">0x14</span>, <span class="number">0x2D</span>, <span class="number">0x4B</span>]).<span class="ident">unwrap</span>();
         <span class="ident">builder</span>.<span class="ident">remove_set</span>(<span class="kw-2">&amp;</span><span class="ident">remove</span>);
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x28</span>, <span class="number">0x2D</span>, <span class="number">0x4B</span>, <span class="number">0x50</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
@@ -1781,7 +1781,7 @@
     <span class="kw">fn</span> <span class="ident">test_retain_set</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">generate_tester</span>(<span class="macro">vec!</span>[<span class="number">0xA</span>, <span class="number">0x14</span>, <span class="number">0x28</span>, <span class="number">0x32</span>, <span class="number">70</span>, <span class="number">80</span>]);
         <span class="kw">let</span> <span class="ident">retain</span> <span class="op">=</span>
-            <span class="ident">UnicodeSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0xE</span>, <span class="number">0x14</span>, <span class="number">0x19</span>, <span class="number">0x37</span>, <span class="number">0x4D</span>, <span class="number">0x51</span>]).<span class="ident">unwrap</span>();
+            <span class="ident">CodePointSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0xE</span>, <span class="number">0x14</span>, <span class="number">0x19</span>, <span class="number">0x37</span>, <span class="number">0x4D</span>, <span class="number">0x51</span>]).<span class="ident">unwrap</span>();
         <span class="ident">builder</span>.<span class="ident">retain_set</span>(<span class="kw-2">&amp;</span><span class="ident">retain</span>);
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0xE</span>, <span class="number">0x14</span>, <span class="number">0x28</span>, <span class="number">0x32</span>, <span class="number">0x4D</span>, <span class="number">0x50</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
@@ -1859,7 +1859,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_complement_set</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">generate_tester</span>(<span class="macro">vec!</span>[<span class="number">0x43</span>, <span class="number">0x4E</span>]);
-        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">UnicodeSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0x41</span>, <span class="number">0x46</span>, <span class="number">0x4B</span>, <span class="number">0x5A</span>]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">CodePointSet::from_inversion_list_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0x41</span>, <span class="number">0x46</span>, <span class="number">0x4B</span>, <span class="number">0x5A</span>]).<span class="ident">unwrap</span>();
         <span class="ident">builder</span>.<span class="ident">complement_set</span>(<span class="kw-2">&amp;</span><span class="ident">set</span>);
         <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x41</span>, <span class="number">0x43</span>, <span class="number">0x46</span>, <span class="number">0x4B</span>, <span class="number">0x4E</span>, <span class="number">0x5A</span>];
         <span class="macro">assert_eq!</span>(<span class="ident">builder</span>.<span class="ident">intervals</span>, <span class="ident">expected</span>);
@@ -1867,7 +1867,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_is_empty</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">UnicodeSetBuilder::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
         <span class="macro">assert!</span>(<span class="ident">builder</span>.<span class="ident">is_empty</span>());
     }
 }

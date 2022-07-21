@@ -369,7 +369,6 @@
 <span id="364">364</span>
 <span id="365">365</span>
 <span id="366">366</span>
-<span id="367">367</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -385,13 +384,13 @@
 <span class="kw">const</span> <span class="ident">SUBDIVISION_KEY</span>: <span class="ident">Key</span> <span class="op">=</span> <span class="macro">key!</span>(<span class="string">&quot;sd&quot;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LocaleFallbackerWithConfig</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">normalize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ro</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataOptions</span>) {
-        <span class="kw">let</span> <span class="ident">language</span> <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">language</span>();
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">normalize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span>) {
+        <span class="kw">let</span> <span class="ident">language</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">language</span>();
         <span class="comment">// 1. Populate the region (required for region fallback only)</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">priority</span> <span class="op">==</span> <span class="ident">FallbackPriority::Region</span> <span class="op">&amp;&amp;</span> <span class="ident">ro</span>.<span class="ident">region</span>().<span class="ident">is_none</span>() {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">priority</span> <span class="op">==</span> <span class="ident">FallbackPriority::Region</span> <span class="op">&amp;&amp;</span> <span class="ident">locale</span>.<span class="ident">region</span>().<span class="ident">is_none</span>() {
             <span class="comment">// 1a. First look for region based on language+script</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">script</span>() {
-                <span class="ident">ro</span>.<span class="ident">set_region</span>(
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">script</span>() {
+                <span class="ident">locale</span>.<span class="ident">set_region</span>(
                     <span class="self">self</span>.<span class="ident">likely_subtags</span>
                         .<span class="ident">ls2r</span>
                         .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">language</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">script</span>.<span class="ident">into</span>())
@@ -400,18 +399,18 @@
                 );
             }
             <span class="comment">// 1b. If that fails, try language only</span>
-            <span class="kw">if</span> <span class="ident">ro</span>.<span class="ident">region</span>().<span class="ident">is_none</span>() {
-                <span class="ident">ro</span>.<span class="ident">set_region</span>(<span class="self">self</span>.<span class="ident">likely_subtags</span>.<span class="ident">l2r</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">language</span>.<span class="ident">into</span>()).<span class="ident">copied</span>());
+            <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">region</span>().<span class="ident">is_none</span>() {
+                <span class="ident">locale</span>.<span class="ident">set_region</span>(<span class="self">self</span>.<span class="ident">likely_subtags</span>.<span class="ident">l2r</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">language</span>.<span class="ident">into</span>()).<span class="ident">copied</span>());
             }
         }
         <span class="comment">// 2. Remove the script if it is implied by the other subtags</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">script</span>() {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">script</span>() {
             <span class="kw">let</span> <span class="ident">default_script</span> <span class="op">=</span> <span class="self">self</span>
                 .<span class="ident">likely_subtags</span>
                 .<span class="ident">l2s</span>
                 .<span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="ident">language</span>.<span class="ident">into</span>())
                 .<span class="ident">unwrap_or</span>(<span class="ident">DEFAULT_SCRIPT</span>);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">region</span>() {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">region</span>() {
                 <span class="kw">if</span> <span class="ident">script</span>
                     <span class="op">==</span> <span class="self">self</span>
                         .<span class="ident">likely_subtags</span>
@@ -419,14 +418,14 @@
                         .<span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="ident">language</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">region</span>.<span class="ident">into</span>())
                         .<span class="ident">unwrap_or</span>(<span class="ident">default_script</span>)
                 {
-                    <span class="ident">ro</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
+                    <span class="ident">locale</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
                 }
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">script</span> <span class="op">==</span> <span class="ident">default_script</span> {
-                <span class="ident">ro</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
+                <span class="ident">locale</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
             }
         }
         <span class="comment">// 3. Remove irrelevant extension subtags</span>
-        <span class="ident">ro</span>.<span class="ident">retain_unicode_ext</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> {
+        <span class="ident">locale</span>.<span class="ident">retain_unicode_ext</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> {
             <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">key</span> {
                 <span class="comment">// Always retain -u-sd</span>
                 <span class="ident">SUBDIVISION_KEY</span> =&gt; <span class="bool-val">true</span>,
@@ -442,115 +441,115 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> <span class="ident">LocaleFallbackIteratorInner</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ro</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataOptions</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span>) {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">priority</span> {
-            <span class="ident">FallbackPriority::Language</span> =&gt; <span class="self">self</span>.<span class="ident">step_language</span>(<span class="ident">ro</span>),
-            <span class="ident">FallbackPriority::Region</span> =&gt; <span class="self">self</span>.<span class="ident">step_region</span>(<span class="ident">ro</span>),
+            <span class="ident">FallbackPriority::Language</span> =&gt; <span class="self">self</span>.<span class="ident">step_language</span>(<span class="ident">locale</span>),
+            <span class="ident">FallbackPriority::Region</span> =&gt; <span class="self">self</span>.<span class="ident">step_region</span>(<span class="ident">locale</span>),
             <span class="comment">// This case should not normally happen, but `FallbackPriority` is non_exhaustive.</span>
             <span class="comment">// Make it go directly to `und`.</span>
-            <span class="kw">_</span> =&gt; <span class="kw-2">*</span><span class="ident">ro</span> <span class="op">=</span> <span class="ident">Default::default</span>(),
+            <span class="kw">_</span> =&gt; <span class="kw-2">*</span><span class="ident">locale</span> <span class="op">=</span> <span class="ident">Default::default</span>(),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">step_language</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ro</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataOptions</span>) {
+    <span class="kw">fn</span> <span class="ident">step_language</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span>) {
         <span class="comment">// 1. Remove the extension fallback keyword</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">extension_key</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">extension_key</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">extension_key</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">extension_key</span>) {
                 <span class="self">self</span>.<span class="ident">backup_extension</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>);
                 <span class="kw">return</span>;
             }
         }
         <span class="comment">// 2. Remove the subdivision keyword</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">SUBDIVISION_KEY</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">SUBDIVISION_KEY</span>) {
             <span class="self">self</span>.<span class="ident">backup_subdivision</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>);
             <span class="kw">return</span>;
         }
         <span class="comment">// 3. Assert that the locale is a language identifier</span>
-        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">ro</span>.<span class="ident">has_unicode_ext</span>());
+        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">locale</span>.<span class="ident">has_unicode_ext</span>());
         <span class="comment">// 4. Remove variants</span>
-        <span class="kw">if</span> <span class="ident">ro</span>.<span class="ident">has_variants</span>() {
-            <span class="self">self</span>.<span class="ident">backup_variants</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">ro</span>.<span class="ident">clear_variants</span>());
+        <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">has_variants</span>() {
+            <span class="self">self</span>.<span class="ident">backup_variants</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">locale</span>.<span class="ident">clear_variants</span>());
             <span class="kw">return</span>;
         }
         <span class="comment">// 5. Check for parent override</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">parent</span>) <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">parents</span>
             .<span class="ident">parents</span>
-            .<span class="ident">get_copied_by</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="ident">ro</span>.<span class="ident">strict_cmp</span>(<span class="ident">bytes</span>).<span class="ident">reverse</span>())
+            .<span class="ident">get_copied_by</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">bytes</span>).<span class="ident">reverse</span>())
         {
             <span class="kw">let</span> <span class="ident">lid</span> <span class="op">=</span> <span class="ident">LanguageIdentifier::from</span>(<span class="ident">parent</span>);
-            <span class="ident">ro</span>.<span class="ident">set_langid</span>(<span class="ident">lid</span>);
-            <span class="self">self</span>.<span class="ident">restore_extensions_variants</span>(<span class="ident">ro</span>);
+            <span class="ident">locale</span>.<span class="ident">set_langid</span>(<span class="ident">lid</span>);
+            <span class="self">self</span>.<span class="ident">restore_extensions_variants</span>(<span class="ident">locale</span>);
             <span class="kw">return</span>;
         }
         <span class="comment">// 6. Add the script subtag if necessary</span>
-        <span class="kw">if</span> <span class="ident">ro</span>.<span class="ident">script</span>().<span class="ident">is_none</span>() {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">region</span>() {
-                <span class="kw">let</span> <span class="ident">language</span> <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">language</span>();
+        <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">script</span>().<span class="ident">is_none</span>() {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">region</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">region</span>() {
+                <span class="kw">let</span> <span class="ident">language</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">language</span>();
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">script</span>) <span class="op">=</span> <span class="self">self</span>
                     .<span class="ident">likely_subtags</span>
                     .<span class="ident">lr2s</span>
                     .<span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="ident">language</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">region</span>.<span class="ident">into</span>())
                 {
-                    <span class="ident">ro</span>.<span class="ident">set_script</span>(<span class="prelude-val">Some</span>(<span class="ident">script</span>));
-                    <span class="self">self</span>.<span class="ident">restore_extensions_variants</span>(<span class="ident">ro</span>);
+                    <span class="ident">locale</span>.<span class="ident">set_script</span>(<span class="prelude-val">Some</span>(<span class="ident">script</span>));
+                    <span class="self">self</span>.<span class="ident">restore_extensions_variants</span>(<span class="ident">locale</span>);
                     <span class="kw">return</span>;
                 }
             }
         }
         <span class="comment">// 7. Remove region</span>
-        <span class="kw">if</span> <span class="ident">ro</span>.<span class="ident">region</span>().<span class="ident">is_some</span>() {
-            <span class="ident">ro</span>.<span class="ident">set_region</span>(<span class="prelude-val">None</span>);
+        <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">region</span>().<span class="ident">is_some</span>() {
+            <span class="ident">locale</span>.<span class="ident">set_region</span>(<span class="prelude-val">None</span>);
             <span class="kw">return</span>;
         }
         <span class="comment">// 8. Remove language+script</span>
-        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">ro</span>.<span class="ident">language</span>().<span class="ident">is_empty</span>()); <span class="comment">// don&#39;t call .step() on und</span>
-        <span class="ident">ro</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
-        <span class="ident">ro</span>.<span class="ident">set_language</span>(<span class="ident">Language::UND</span>);
+        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">locale</span>.<span class="ident">language</span>().<span class="ident">is_empty</span>()); <span class="comment">// don&#39;t call .step() on und</span>
+        <span class="ident">locale</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
+        <span class="ident">locale</span>.<span class="ident">set_language</span>(<span class="ident">Language::UND</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">step_region</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ro</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataOptions</span>) {
+    <span class="kw">fn</span> <span class="ident">step_region</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span>) {
         <span class="comment">// 1. Remove the extension fallback keyword</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">extension_key</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">extension_key</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">extension_key</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">extension_key</span>) {
                 <span class="self">self</span>.<span class="ident">backup_extension</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>);
                 <span class="kw">return</span>;
             }
         }
         <span class="comment">// 2. Remove the subdivision keyword</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">ro</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">SUBDIVISION_KEY</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">remove_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">SUBDIVISION_KEY</span>) {
             <span class="self">self</span>.<span class="ident">backup_subdivision</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>);
             <span class="kw">return</span>;
         }
         <span class="comment">// 3. Assert that the locale is a language identifier</span>
-        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">ro</span>.<span class="ident">has_unicode_ext</span>());
+        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">locale</span>.<span class="ident">has_unicode_ext</span>());
         <span class="comment">// 4. Remove variants</span>
-        <span class="kw">if</span> <span class="ident">ro</span>.<span class="ident">has_variants</span>() {
-            <span class="self">self</span>.<span class="ident">backup_variants</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">ro</span>.<span class="ident">clear_variants</span>());
+        <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">has_variants</span>() {
+            <span class="self">self</span>.<span class="ident">backup_variants</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">locale</span>.<span class="ident">clear_variants</span>());
             <span class="kw">return</span>;
         }
         <span class="comment">// 5. Remove language+script</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">ro</span>.<span class="ident">language</span>().<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">ro</span>.<span class="ident">script</span>().<span class="ident">is_some</span>() {
-            <span class="ident">ro</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
-            <span class="ident">ro</span>.<span class="ident">set_language</span>(<span class="ident">Language::UND</span>);
-            <span class="self">self</span>.<span class="ident">restore_extensions_variants</span>(<span class="ident">ro</span>);
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">locale</span>.<span class="ident">language</span>().<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">locale</span>.<span class="ident">script</span>().<span class="ident">is_some</span>() {
+            <span class="ident">locale</span>.<span class="ident">set_script</span>(<span class="prelude-val">None</span>);
+            <span class="ident">locale</span>.<span class="ident">set_language</span>(<span class="ident">Language::UND</span>);
+            <span class="self">self</span>.<span class="ident">restore_extensions_variants</span>(<span class="ident">locale</span>);
             <span class="kw">return</span>;
         }
         <span class="comment">// 6. Remove region</span>
-        <span class="macro">debug_assert!</span>(<span class="ident">ro</span>.<span class="ident">region</span>().<span class="ident">is_some</span>()); <span class="comment">// don&#39;t call .step() on und</span>
-        <span class="ident">ro</span>.<span class="ident">set_region</span>(<span class="prelude-val">None</span>);
+        <span class="macro">debug_assert!</span>(<span class="ident">locale</span>.<span class="ident">region</span>().<span class="ident">is_some</span>()); <span class="comment">// don&#39;t call .step() on und</span>
+        <span class="ident">locale</span>.<span class="ident">set_region</span>(<span class="prelude-val">None</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">restore_extensions_variants</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ro</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataOptions</span>) {
+    <span class="kw">fn</span> <span class="ident">restore_extensions_variants</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">backup_extension</span>.<span class="ident">take</span>() {
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// not reachable unless extension_key is present</span>
-            <span class="ident">ro</span>.<span class="ident">set_unicode_ext</span>(<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">extension_key</span>.<span class="ident">unwrap</span>(), <span class="ident">value</span>);
+            <span class="ident">locale</span>.<span class="ident">set_unicode_ext</span>(<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">extension_key</span>.<span class="ident">unwrap</span>(), <span class="ident">value</span>);
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">backup_subdivision</span>.<span class="ident">take</span>() {
-            <span class="ident">ro</span>.<span class="ident">set_unicode_ext</span>(<span class="ident">SUBDIVISION_KEY</span>, <span class="ident">value</span>);
+            <span class="ident">locale</span>.<span class="ident">set_unicode_ext</span>(<span class="ident">SUBDIVISION_KEY</span>, <span class="ident">value</span>);
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">variants</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">backup_variants</span>.<span class="ident">take</span>() {
-            <span class="ident">ro</span>.<span class="ident">set_variants</span>(<span class="ident">variants</span>);
+            <span class="ident">locale</span>.<span class="ident">set_variants</span>(<span class="ident">variants</span>);
         }
     }
 }
@@ -713,9 +712,8 @@
                 } <span class="kw">else</span> {
                     <span class="ident">fallbacker_no_data</span>.<span class="ident">for_config</span>(<span class="ident">config</span>)
                 };
-                <span class="kw">let</span> <span class="ident">loc</span> <span class="op">=</span> <span class="ident">Locale::from_str</span>(<span class="ident">cas</span>.<span class="ident">input</span>).<span class="ident">unwrap</span>();
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ro</span> <span class="op">=</span> <span class="ident">DataOptions::from</span>(<span class="ident">loc</span>);
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">key_fallbacker</span>.<span class="ident">fallback_for</span>(<span class="kw-2">&amp;mut</span> <span class="ident">ro</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">DataLocale::from</span>(<span class="ident">Locale::from_str</span>(<span class="ident">cas</span>.<span class="ident">input</span>).<span class="ident">unwrap</span>());
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">key_fallbacker</span>.<span class="ident">fallback_for</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale</span>);
                 <span class="kw">for</span> <span class="ident">expected</span> <span class="kw">in</span> <span class="ident">expected_chain</span> {
                     <span class="macro">assert_eq!</span>(
                         <span class="ident">expected</span>,

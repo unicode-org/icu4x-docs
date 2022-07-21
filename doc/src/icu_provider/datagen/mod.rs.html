@@ -145,12 +145,12 @@
 
 <span class="doccomment">/// An object capable of exporting data payloads in some form.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DataExporter</span>: <span class="ident">Sync</span> {
-    <span class="doccomment">/// Save a `payload` corresponding to the given key and options.</span>
+    <span class="doccomment">/// Save a `payload` corresponding to the given key and locale.</span>
     <span class="doccomment">/// Takes non-mut self as it can be called concurrently.</span>
     <span class="kw">fn</span> <span class="ident">put_payload</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">DataKey</span>,
-        <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">DataOptions</span>,
+        <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span>;
 
@@ -182,7 +182,7 @@
 <span class="doccomment">/// for `make_exportable_provider` are:</span>
 <span class="doccomment">/// * The data struct has to implement [`serde::Serialize`](::serde::Serialize) and [`databake::Bake`]</span>
 <span class="doccomment">/// * The provider needs to implement [`IterableDataProvider`] for all specified [`KeyedDataMarker`]s.</span>
-<span class="doccomment">///   This allows the generating code to know which [`DataOptions`] to collect.</span>
+<span class="doccomment">///   This allows the generating code to know which [`DataLocale`] to collect.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`BlobDataProvider`]: ../../icu_provider_blob/struct.BlobDataProvider.html</span>
 <span class="doccomment">/// [`BakedDataProvider`]: ../../icu_datagen/index.html</span>
@@ -196,7 +196,7 @@
         );
 
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDynamicDataProvider</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::ExportMarker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
-            <span class="kw">fn</span> <span class="ident">supported_options_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataOptions</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">supported_locales_for_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataLocale</span><span class="op">&gt;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataError</span><span class="op">&gt;</span> {
                 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_upper_case_globals</span>)]</span>
                 <span class="comment">// Reusing the struct names as identifiers</span>
                 $(
@@ -205,7 +205,7 @@
                 <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">get_hash</span>() {
                     $(
                         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span> =&gt; {
-                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDataProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_options</span>(<span class="self">self</span>)
+                            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::datagen::IterableDataProvider</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">struct_m</span><span class="op">&gt;</span><span class="ident">::supported_locales</span>(<span class="self">self</span>)
                         }
                     )<span class="op">+</span>,
                     <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>))

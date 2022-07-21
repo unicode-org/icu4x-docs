@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658355897641,
+  "lastUpdate": 1658419228089,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -37768,6 +37768,114 @@ window.BENCHMARK_DATA = {
           {
             "name": "uniset/contains_range/worst",
             "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "m_kato@ga2.so-net.ne.jp",
+            "name": "Makoto Kato",
+            "username": "makotokato"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bc35e65dbdb6df8fd685ee9960a3c2b4613bab94",
+          "message": "Add LSTM data to datagen (#2169)\n\n* Add LSTM data to datagen\r\n\r\n* Move lstm data directory and split lstm datagen from mod.rs.\r\n\r\n* Add cfg condition in fixed array instead of duplicated defines.\r\n\r\n* Remove unnecessary clone\r\n\r\n* Replace JsonCache with CldrCache for segmeneter lstm.\r\n\r\n* Update fix per comment.\r\n\r\n* Fix comment.\r\n\r\n* Fix build error after renaming load_resource.",
+          "timestamp": "2022-07-21T13:40:07+09:00",
+          "tree_id": "ae8ef2d14272219c9784a273f069c90bda9a7d8b",
+          "url": "https://github.com/unicode-org/icu4x/commit/bc35e65dbdb6df8fd685ee9960a3c2b4613bab94"
+        },
+        "date": 1658379037063,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 45148928,
+            "range": "± 1330355",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a4f28462cbde85c58f4f12a2476cc1756394630c",
+          "message": "Renaming `DataOptions` to `DataLocale` (#2223)",
+          "timestamp": "2022-07-21T17:44:41+02:00",
+          "tree_id": "65246c51bd6a8b05e9555848c92ab810e4afda66",
+          "url": "https://github.com/unicode-org/icu4x/commit/a4f28462cbde85c58f4f12a2476cc1756394630c"
+        },
+        "date": 1658419186493,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 53775553,
+            "range": "± 285961",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
             "range": "± 0",
             "unit": "ns/iter"
           }

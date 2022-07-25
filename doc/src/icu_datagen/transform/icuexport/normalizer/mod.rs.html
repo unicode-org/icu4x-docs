@@ -286,7 +286,6 @@
 <span class="kw">use</span> <span class="ident">icu_normalizer::u24::U24</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDataProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">icu_uniset::CodePointSetBuilder</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ZeroVec</span>;
 
@@ -337,21 +336,12 @@
             <span class="ident">DecompositionData</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">file_name</span>,
             {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
-                <span class="kw">for</span> <span class="ident">range</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">ranges</span> {
-                    <span class="ident">builder</span>.<span class="ident">add_range_u32</span>(<span class="kw-2">&amp;</span>(<span class="ident">range</span>.<span class="number">0</span>..<span class="op">=</span><span class="ident">range</span>.<span class="number">1</span>));
-                }
-                <span class="kw">let</span> <span class="ident">uniset</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
-
                 <span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">CodePointTrie</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">trie</span>)
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;trie conversion&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                     <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata::default</span>(),
-                    <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">DecompositionDataV1</span> {
-                        <span class="ident">trie</span>,
-                        <span class="ident">decomposition_starts_with_non_starter</span>: <span class="ident">uniset</span>,
-                    })),
+                    <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">DecompositionDataV1</span> { <span class="ident">trie</span> })),
                 })
             },
             <span class="ident">toml_data</span> <span class="comment">// simply matches the identifier in the above block</span>
@@ -416,16 +406,14 @@
             <span class="ident">CompositionPassthrough</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">file_name</span>,
             {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">CodePointSetBuilder::new</span>();
-                <span class="kw">for</span> <span class="ident">range</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">ranges</span> {
-                    <span class="ident">builder</span>.<span class="ident">add_range_u32</span>(<span class="kw-2">&amp;</span>(<span class="ident">range</span>.<span class="number">0</span>..<span class="op">=</span><span class="ident">range</span>.<span class="number">1</span>));
-                }
-                <span class="kw">let</span> <span class="ident">uniset</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">build</span>();
+                <span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">CodePointTrie</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">toml_data</span>.<span class="ident">trie</span>)
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;trie conversion&quot;</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>))<span class="question-mark">?</span>;
 
                 <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
                     <span class="ident">metadata</span>: <span class="ident">DataResponseMetadata::default</span>(),
                     <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">CompositionPassthroughV1</span> {
-                        <span class="ident">potential_passthrough_and_not_backward_combining</span>: <span class="ident">uniset</span>,
+                        <span class="ident">first</span>: <span class="ident">toml_data</span>.<span class="ident">first</span>,
+                        <span class="ident">trie</span>,
                     })),
                 })
             },
@@ -515,9 +503,21 @@
     <span class="string">&quot;nfc&quot;</span>
 );
 
-<span class="macro">normalization_passthrough_provider!</span>(<span class="ident">CompatibilityCompositionPassthroughV1Marker</span>, <span class="string">&quot;nfkc&quot;</span>);
+<span class="macro">normalization_passthrough_provider!</span>(
+    <span class="ident">CompatibilityCompositionPassthroughV1Marker</span>,
+    <span class="comment">// To get a smaller size at the expense of performance,</span>
+    <span class="comment">// we could provide an option to pass &quot;passthroughnop&quot;</span>
+    <span class="comment">// here.</span>
+    <span class="string">&quot;nfkc&quot;</span>
+);
 
-<span class="macro">normalization_passthrough_provider!</span>(<span class="ident">Uts46CompositionPassthroughV1Marker</span>, <span class="string">&quot;uts46&quot;</span>);
+<span class="macro">normalization_passthrough_provider!</span>(
+    <span class="ident">Uts46CompositionPassthroughV1Marker</span>,
+    <span class="comment">// To get a smaller size at the expense of performance,</span>
+    <span class="comment">// we could provide an option to pass &quot;passthroughnop&quot;</span>
+    <span class="comment">// here.</span>
+    <span class="string">&quot;uts46&quot;</span>
+);
 
 <span class="macro">normalization_canonical_compositions_provider!</span>(<span class="ident">CanonicalCompositionsV1Marker</span>, <span class="string">&quot;compositions&quot;</span>);
 

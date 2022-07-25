@@ -1272,7 +1272,6 @@
 <span id="1267">1267</span>
 <span id="1268">1268</span>
 <span id="1269">1269</span>
-<span id="1270">1270</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1385,14 +1384,13 @@
 <span class="kw">impl</span> <span class="ident">TimeZoneFormatter</span> {
     <span class="doccomment">/// Constructor that selectively loads data based on what is required to</span>
     <span class="doccomment">/// format the given pattern into the given locale.</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">ZP</span><span class="op">&gt;</span>(
-        <span class="ident">locale</span>: <span class="ident">L</span>,
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">ZP</span><span class="op">&gt;</span>(
+        <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
         <span class="ident">patterns</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">PatternPluralsFromPatternsV1Marker</span><span class="op">&gt;</span>,
         <span class="ident">zone_provider</span>: <span class="kw-2">&amp;</span><span class="ident">ZP</span>,
         <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="ident">TimeZoneFormatterOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">L</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>,
         <span class="ident">ZP</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">provider::time_zones::TimeZoneFormatsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">provider::time_zones::ExemplarCitiesV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">provider::time_zones::MetaZoneGenericNamesLongV1Marker</span><span class="op">&gt;</span>
@@ -1401,12 +1399,11 @@
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">provider::time_zones::MetaZoneSpecificNamesShortV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">DataLocale::from</span>(<span class="ident">locale</span>.<span class="ident">into</span>());
         <span class="kw">let</span> <span class="ident">format_units</span> <span class="op">=</span> <span class="ident">SmallVec</span>::<span class="op">&lt;</span>[<span class="ident">TimeZoneFormatterUnit</span>; <span class="number">3</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
         <span class="kw">let</span> <span class="ident">data_payloads</span> <span class="op">=</span> <span class="ident">TimeZoneDataPayloads</span> {
             <span class="ident">zone_formats</span>: <span class="ident">zone_provider</span>
                 .<span class="ident">load</span>(<span class="ident">DataRequest</span> {
-                    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">locale</span>,
+                    <span class="ident">locale</span>,
                     <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
                 })<span class="question-mark">?</span>
                 .<span class="ident">take_payload</span>()<span class="question-mark">?</span>,
@@ -1433,7 +1430,8 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tz_format</span>: <span class="ident">TimeZoneFormatter</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">data_payloads</span>,
-            <span class="ident">locale</span>,
+            <span class="comment">// TODO(#2237): Determine whether we need to save the locale in the formatter</span>
+            <span class="ident">locale</span>: <span class="ident">locale</span>.<span class="ident">clone</span>(),
             <span class="ident">format_units</span>,
             <span class="ident">fallback_unit</span>: <span class="ident">TimeZoneFormatter::get_fallback_unit</span>(<span class="ident">options</span>.<span class="ident">fallback_format</span>),
         };

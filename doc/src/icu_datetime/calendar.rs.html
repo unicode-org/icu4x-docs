@@ -89,9 +89,6 @@
 <span id="84">84</span>
 <span id="85">85</span>
 <span id="86">86</span>
-<span id="87">87</span>
-<span id="88">88</span>
-<span id="89">89</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -106,8 +103,9 @@
 <span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode::Value</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_value</span> <span class="kw">as</span> <span class="ident">value</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::DataLocale</span>;
 <span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr</span>, <span class="ident">TinyStr16</span>};
+
 <span class="doccomment">/// A calendar that can be found in CLDR</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// New implementors of this trait will likely also wish to modify `get_era_code_map()`</span>
@@ -157,12 +155,12 @@
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">potentially_fixup_calendar</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">CldrCalendar</span><span class="op">&gt;</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Locale</span>,
+    <span class="ident">locale</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DataLocale</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">cal</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">keywords</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>));
+    <span class="kw">let</span> <span class="ident">cal</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">get_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>));
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cal</span>) <span class="op">=</span> <span class="ident">cal</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">C::is_identifier_allowed_for_calendar</span>(<span class="ident">cal</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">C::is_identifier_allowed_for_calendar</span>(<span class="kw-2">&amp;</span><span class="ident">cal</span>) {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">cal</span>.<span class="ident">to_string</span>();
             <span class="ident">string</span>.<span class="ident">truncate</span>(<span class="number">16</span>);
             <span class="kw">let</span> <span class="ident">tiny</span> <span class="op">=</span> <span class="ident">TinyStr16::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">string</span>).<span class="ident">unwrap_or</span>(<span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;unknown&quot;</span>));
@@ -172,11 +170,7 @@
             ));
         }
     } <span class="kw">else</span> {
-        <span class="ident">locale</span>
-            .<span class="ident">extensions</span>
-            .<span class="ident">unicode</span>
-            .<span class="ident">keywords</span>
-            .<span class="ident">set</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">C::DEFAULT_BCP_47_IDENTIFIER</span>);
+        <span class="ident">locale</span>.<span class="ident">set_unicode_ext</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">C::DEFAULT_BCP_47_IDENTIFIER</span>);
     }
 
     <span class="prelude-val">Ok</span>(())

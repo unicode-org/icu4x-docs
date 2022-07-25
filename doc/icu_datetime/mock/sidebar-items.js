@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["parse_gregorian_from_str","Temporary function for parsing a `DateTime<Gregorian>`"]],"mod":[["time_zone","Temporary time zone input utilities."],["zoned_datetime","Temporary zoned DateTime input utilities."]]});
+initSidebarItems({"fn":[["parse_gregorian_from_str","Temporary function for parsing a `DateTime<Gregorian>`"],["parse_zoned_gregorian_from_str","Parse a [`DateTime`] and [`MockTimeZone`] from a string."]],"mod":[["time_zone","Temporary time zone input utilities."]]});

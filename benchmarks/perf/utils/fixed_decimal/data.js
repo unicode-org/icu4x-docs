@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658787873032,
+  "lastUpdate": 1658795792459,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -39149,6 +39149,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 87,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cc8645eb0bf3c0c1725c193d88c7fd01a389ce5b",
+          "message": "Update ICU tag for icuexportdata (#2247)",
+          "timestamp": "2022-07-25T17:15:27-07:00",
+          "tree_id": "268ad2cdef70c181d318e8ff1e731c118e8c4aba",
+          "url": "https://github.com/unicode-org/icu4x/commit/cc8645eb0bf3c0c1725c193d88c7fd01a389ce5b"
+        },
+        "date": 1658795215762,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 105417,
+            "range": "± 1138",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21288,
+            "range": "± 94",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 64379,
+            "range": "± 425",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 171,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "354fe3b899217384eb861be7fea7f9b1606a9032",
+          "message": "Rename CodePointSet to CodePointInversionList (#2230)",
+          "timestamp": "2022-07-26T00:23:53Z",
+          "tree_id": "04ce151a08e694f043aa16ce1982efbdb82b248b",
+          "url": "https://github.com/unicode-org/icu4x/commit/354fe3b899217384eb861be7fea7f9b1606a9032"
+        },
+        "date": 1658795750375,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 123903,
+            "range": "± 8824",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25570,
+            "range": "± 2571",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 69971,
+            "range": "± 5061",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 204,
+            "range": "± 13",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 77,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 89,
+            "range": "± 8",
             "unit": "ns/iter"
           }
         ]

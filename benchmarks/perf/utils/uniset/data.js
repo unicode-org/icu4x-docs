@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658863054853,
+  "lastUpdate": 1658875660157,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -38825,6 +38825,114 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 53405635,
             "range": "± 832556",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "m_kato@ga2.so-net.ne.jp",
+            "name": "Makoto Kato",
+            "username": "makotokato"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7215608a0984a33439e43835de17a729a521bd51",
+          "message": "Add Han and Hiragana script mapping to use dictionary for word segmenter (#2251)",
+          "timestamp": "2022-07-26T21:38:31Z",
+          "tree_id": "67640b29186b82f1e3b5f2bee46fbe5fc0f89c85",
+          "url": "https://github.com/unicode-org/icu4x/commit/7215608a0984a33439e43835de17a729a521bd51"
+        },
+        "date": 1658872042778,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 44608911,
+            "range": "± 66089",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ce89081565377100cf87be54556eaa853c8d30f8",
+          "message": "Fix error docs (#2199)\n\n* Fix error docs",
+          "timestamp": "2022-07-26T22:37:30Z",
+          "tree_id": "4d9696b40661d4a72c4df73508c1a96544dd8c13",
+          "url": "https://github.com/unicode-org/icu4x/commit/ce89081565377100cf87be54556eaa853c8d30f8"
+        },
+        "date": 1658875618963,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 53303377,
+            "range": "± 142347",
             "unit": "ns/iter"
           },
           {

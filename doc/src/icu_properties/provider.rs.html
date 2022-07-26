@@ -307,7 +307,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::script::ScriptWithExtensions</span>;
 <span class="kw">use</span> <span class="ident">icu_codepointtrie</span>::{<span class="ident">CodePointTrie</span>, <span class="ident">TrieValue</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">icu_uniset::CodePointSet</span>;
+<span class="kw">use</span> <span class="ident">icu_uniset::CodePointInversionList</span>;
 <span class="kw">use</span> <span class="ident">zerofrom::ZeroFrom</span>;
 
 <span class="doccomment">/// A set of characters with a particular property.</span>
@@ -324,7 +324,7 @@
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PropertyCodePointSetV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The set of characters, represented as an inversion list</span>
-    <span class="ident">InversionList</span>(<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span> <span class="ident">CodePointSet</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>),
+    <span class="ident">InversionList</span>(<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span> <span class="ident">CodePointInversionList</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>),
     <span class="comment">// new variants should go BELOW existing ones</span>
     <span class="comment">// Serde serializes based on variant name and index in the enum</span>
     <span class="comment">// https://docs.rs/serde/latest/serde/trait.Serializer.html#tymethod.serialize_unit_variant</span>
@@ -381,12 +381,12 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_code_point_set</span>(<span class="ident">l</span>: <span class="ident">CodePointSet</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_code_point_inversion_list</span>(<span class="ident">l</span>: <span class="ident">CodePointInversionList</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::InversionList</span>(<span class="ident">l</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">to_code_point_set</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="self">self</span>) -&gt; <span class="ident">CodePointSet</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">to_code_point_inversion_list</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="self">self</span>) -&gt; <span class="ident">CodePointInversionList</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::InversionList</span>(<span class="kw-2">ref</span> <span class="ident">l</span>) =&gt; <span class="ident">ZeroFrom::zero_from</span>(<span class="ident">l</span>),
         }
@@ -403,7 +403,7 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointSet</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointInversionList</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::CodePointTrie</span>(<span class="kw-2">ref</span> <span class="ident">t</span>) =&gt; <span class="ident">t</span>.<span class="ident">get_set_for_value</span>(<span class="ident">value</span>),
         }

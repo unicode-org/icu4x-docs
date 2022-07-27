@@ -364,9 +364,26 @@
 <span id="359">359</span>
 <span id="360">360</span>
 <span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
+
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::source::CldrCache</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::source::LocaleSubset</span> <span class="kw">as</span> <span class="ident">CldrLocaleSubset</span>;
@@ -388,27 +405,24 @@
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SourceData</span> {
     <span class="ident">cldr_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">CldrCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">icuexport_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TomlCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">segmenter_paths</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">TomlCache</span><span class="op">&gt;</span>,
-    <span class="ident">segmenter_lstm_paths</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">CldrCache</span><span class="op">&gt;</span>,
+    <span class="ident">icuexport_paths</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SerdeCache</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">segmenter_paths</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SerdeCache</span><span class="op">&gt;</span>,
+    <span class="ident">segmenter_lstm_paths</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SerdeCache</span><span class="op">&gt;</span>,
     <span class="ident">trie_type</span>: <span class="ident">IcuTrieType</span>,
     <span class="ident">collation_han_database</span>: <span class="ident">CollationHanDatabase</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">SourceData</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">segmenter_path</span> <span class="op">=</span>
+            <span class="ident">PathBuf::from</span>(<span class="macro">concat!</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>), <span class="string">&quot;/data/segmenter&quot;</span>));
         <span class="self">Self</span> {
             <span class="ident">cldr_paths</span>: <span class="prelude-val">None</span>,
             <span class="ident">icuexport_paths</span>: <span class="prelude-val">None</span>,
-            <span class="ident">segmenter_paths</span>: <span class="ident">Arc::new</span>(<span class="ident">TomlCache::new</span>(
-                <span class="ident">AbstractFs::new</span>(<span class="ident">PathBuf::from</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>)).<span class="ident">join</span>(<span class="string">&quot;data&quot;</span>))
-                    .<span class="ident">expect</span>(<span class="string">&quot;valid dir&quot;</span>),
-            )),
-            <span class="ident">segmenter_lstm_paths</span>: <span class="ident">Arc::new</span>(<span class="ident">CldrCache::new</span>(
-                <span class="ident">AbstractFs::new</span>(<span class="ident">PathBuf::from</span>(<span class="macro">std::env!</span>(<span class="string">&quot;CARGO_MANIFEST_DIR&quot;</span>)).<span class="ident">join</span>(<span class="string">&quot;data&quot;</span>))
-                    .<span class="ident">expect</span>(<span class="string">&quot;valid dir&quot;</span>),
-                <span class="ident">CldrLocaleSubset::Full</span>,
-            )),
+            <span class="ident">segmenter_paths</span>: <span class="ident">Arc::new</span>(<span class="ident">SerdeCache::new</span>(<span class="kw-2">&amp;</span><span class="ident">segmenter_path</span>).<span class="ident">expect</span>(<span class="string">&quot;valid dir&quot;</span>)),
+            <span class="ident">segmenter_lstm_paths</span>: <span class="ident">Arc::new</span>(
+                <span class="ident">SerdeCache::new</span>(<span class="ident">segmenter_path</span>.<span class="ident">join</span>(<span class="string">&quot;lstm&quot;</span>)).<span class="ident">expect</span>(<span class="string">&quot;valid dir&quot;</span>),
+            ),
             <span class="ident">trie_type</span>: <span class="ident">IcuTrieType::Small</span>,
             <span class="ident">collation_han_database</span>: <span class="ident">CollationHanDatabase::Implicit</span>,
         }
@@ -425,10 +439,7 @@
         <span class="ident">locale_subset</span>: <span class="ident">CldrLocaleSubset</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">CldrCache::new</span>(
-                <span class="ident">AbstractFs::new</span>(<span class="ident">root</span>)<span class="question-mark">?</span>,
-                <span class="ident">locale_subset</span>,
-            ))),
+            <span class="ident">cldr_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">CldrCache::new</span>(<span class="ident">root</span>, <span class="ident">locale_subset</span>)<span class="question-mark">?</span>)),
             ..<span class="self">self</span>
         })
     }
@@ -438,7 +449,7 @@
     <span class="doccomment">/// https://github.com/unicode-org/icu/releases)).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_icuexport</span>(<span class="self">self</span>, <span class="ident">root</span>: <span class="ident">PathBuf</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">icuexport_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">TomlCache::new</span>(<span class="ident">AbstractFs::new</span>(<span class="ident">root</span>)<span class="question-mark">?</span>))),
+            <span class="ident">icuexport_paths</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">SerdeCache::new</span>(<span class="ident">root</span>)<span class="question-mark">?</span>)),
             ..<span class="self">self</span>
         })
     }
@@ -543,28 +554,25 @@
     }
 
     <span class="doccomment">/// Path to Unicode Properties source data.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">icuexport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">icuexport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SerdeCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">icuexport_paths</span>
             .<span class="ident">as_deref</span>()
             .<span class="ident">ok_or</span>(<span class="ident"><span class="kw">crate</span>::error::MISSING_ICUEXPORT_ERROR</span>)
     }
 
     <span class="doccomment">/// Path to segmenter data.</span>
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">segmenter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TomlCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">segmenter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SerdeCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">segmenter_paths</span>)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">segmenter_lstm</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">segmenter_lstm</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SerdeCache</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">segmenter_lstm_paths</span>)
     }
 
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">trie_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">IcuTrieType</span> {
         <span class="self">self</span>.<span class="ident">trie_type</span>
     }
 
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">collation_han_database</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CollationHanDatabase</span> {
         <span class="self">self</span>.<span class="ident">collation_han_database</span>
     }
@@ -577,7 +585,6 @@
 }
 
 <span class="kw">impl</span> <span class="ident">IcuTrieType</span> {
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">to_internal</span>(<span class="self">self</span>) -&gt; <span class="ident">icu_codepointtrie::TrieType</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">IcuTrieType::Fast</span> =&gt; <span class="ident">icu_codepointtrie::TrieType::Fast</span>,
@@ -595,8 +602,10 @@
     }
 }
 
-<span class="doccomment">/// Specifies the collation Han database to use. Unihan is more precise but significantly increases data size.</span>
-<span class="doccomment">/// See &lt;https://github.com/unicode-org/icu/blob/main/docs/userguide/icu_data/buildtool.md#collation-ucadata&gt;</span>
+<span class="doccomment">/// Specifies the collation Han database to use.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Unihan is more precise but significantly increases data size. See</span>
+<span class="doccomment">/// &lt;https://github.com/unicode-org/icu/blob/main/docs/userguide/icu_data/buildtool.md#collation-ucadata&gt;</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CollationHanDatabase</span> {
@@ -615,60 +624,81 @@
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">TomlCache</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">SerdeCache</span> {
     <span class="ident">root</span>: <span class="ident">AbstractFs</span>,
-    <span class="ident">cache</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">FrozenMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">cache</span>: <span class="ident">FrozenMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">TomlCache</span> {
+<span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">SerdeCache</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
-        <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;TomlCache&quot;</span>)
+        <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;SerdeCache&quot;</span>)
             .<span class="ident">field</span>(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">root</span>)
             <span class="comment">// skip formatting the cache</span>
             .<span class="ident">finish</span>()
     }
 }
 
-<span class="kw">impl</span> <span class="ident">TomlCache</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">root</span>: <span class="ident">AbstractFs</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">root</span>,
-            <span class="ident">cache</span>: <span class="ident">Arc::new</span>(<span class="ident">FrozenMap::new</span>()),
+<span class="kw">impl</span> <span class="ident">SerdeCache</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">root</span>: <span class="ident">AbstractFs::new</span>(<span class="ident">root</span>)<span class="question-mark">?</span>,
+            <span class="ident">cache</span>: <span class="ident">FrozenMap::new</span>(),
+        })
+    }
+
+    <span class="kw">fn</span> <span class="ident">read_and_parse</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+        <span class="ident">parser</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">DataError</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">S</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">S</span>: <span class="ident">serde::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">cache</span>.<span class="ident">get</span>(<span class="ident">path</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="self">self</span>.<span class="ident">cache</span>.<span class="ident">insert</span>(
+                <span class="ident">path</span>.<span class="ident">to_string</span>(),
+                <span class="ident">Box::new</span>(
+                    <span class="ident">parser</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">root</span>.<span class="ident">read_to_buf</span>(<span class="ident">path</span>)<span class="question-mark">?</span>)
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>,
+                ),
+            ),
         }
+        .<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>()
+        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Cache error&quot;</span>).<span class="ident">with_type_context</span>::<span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>())
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_and_parse_json</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">S</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">S</span>: <span class="ident">serde::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    {
+        <span class="self">self</span>.<span class="ident">read_and_parse</span>(<span class="ident">path</span>, <span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
+            <span class="ident">serde_json::from_slice</span>(<span class="ident">bytes</span>).<span class="ident">map_err</span>(<span class="ident">DataError::from</span>)
+        })
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_and_parse_toml</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">S</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="ident">S</span>: <span class="ident">serde::Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
     {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">cache</span>.<span class="ident">get</span>(<span class="ident">path</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
-            <span class="prelude-val">None</span> =&gt; {
-                <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">read_to_buf</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="ident">file</span>: <span class="ident">S</span> <span class="op">=</span> <span class="ident">toml::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">file</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-                    <span class="ident"><span class="kw">crate</span>::error::data_error_from_toml</span>(<span class="ident">e</span>).<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
-                })<span class="question-mark">?</span>;
-                <span class="self">self</span>.<span class="ident">cache</span>.<span class="ident">insert</span>(<span class="ident">path</span>.<span class="ident">to_string</span>(), <span class="ident">Box::new</span>(<span class="ident">file</span>))
-            }
-        }
-        .<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>()
-        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Uprops TOML error&quot;</span>).<span class="ident">with_type_context</span>::<span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>())
+        <span class="self">self</span>.<span class="ident">read_and_parse</span>(<span class="ident">path</span>, <span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
+            <span class="ident">toml::from_slice</span>(<span class="ident">bytes</span>).<span class="ident">map_err</span>(<span class="ident"><span class="kw">crate</span>::error::data_error_from_toml</span>)
+        })
     }
 
-    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>), <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">root</span>.<span class="ident">list</span>(<span class="ident">path</span>)
     }
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">AbstractFs</span> {
+<span class="kw">enum</span> <span class="ident">AbstractFs</span> {
     <span class="ident">Fs</span>(<span class="ident">PathBuf</span>),
     <span class="ident">Zip</span>(<span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ZipArchive</span><span class="op">&lt;</span><span class="ident">Cursor</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>),
 }
 
 <span class="kw">impl</span> <span class="ident">AbstractFs</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">std::fs::metadata</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>())
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="ident">root</span>.<span class="ident">as_ref</span>()))<span class="question-mark">?</span>
             .<span class="ident">is_dir</span>()
@@ -682,7 +712,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_to_buf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_to_buf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>) =&gt; {
                 <span class="macro">log::trace!</span>(<span class="string">&quot;Reading: {}/{}&quot;</span>, <span class="ident">root</span>.<span class="ident">display</span>(), <span class="ident">path</span>);
@@ -706,7 +736,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PathBuf</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Fs</span>(<span class="ident">root</span>) =&gt; <span class="ident">std::fs::read_dir</span>(<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">join</span>(<span class="ident">path</span>))
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_display_context</span>(<span class="ident">path</span>))<span class="question-mark">?</span>

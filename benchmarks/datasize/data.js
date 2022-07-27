@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658893905235,
+  "lastUpdate": 1658938139820,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -21538,6 +21538,96 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 4036998,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "00b3498e9b5e89600d7f90c1d53e40a97c4baecf",
+          "message": "SourceData cleanup (#2262)",
+          "timestamp": "2022-07-27T17:48:37+02:00",
+          "tree_id": "4ab08454fb27ca3152b211a8571531b87252d7b2",
+          "url": "https://github.com/unicode-org/icu4x/commit/00b3498e9b5e89600d7f90c1d53e40a97c4baecf"
+        },
+        "date": 1658936986855,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4036998,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "516def57711468639a9eb4ab2f3129107811fa59",
+          "message": "`LiteMap` of `&'a [(K, V)]` (#2242)",
+          "timestamp": "2022-07-27T18:00:41+02:00",
+          "tree_id": "289045e9b67cd3a040194267bc46d4803e0dc2c3",
+          "url": "https://github.com/unicode-org/icu4x/commit/516def57711468639a9eb4ab2f3129107811fa59"
+        },
+        "date": 1658937915321,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4036998,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1a3b41f8048b58ed33340e177163bd7d6c88a9a7",
+          "message": "Produce only \"und\" data for metazone periods (#2260)",
+          "timestamp": "2022-07-27T09:03:58-07:00",
+          "tree_id": "840afb47ec75eed92f1e1c18d7ddd9fb5339b186",
+          "url": "https://github.com/unicode-org/icu4x/commit/1a3b41f8048b58ed33340e177163bd7d6c88a9a7"
+        },
+        "date": 1658938105253,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4036829,
             "unit": "bytes",
             "biggerIsBetter": false
           }

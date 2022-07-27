@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658875805215,
+  "lastUpdate": 1658894663898,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -52391,6 +52391,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 5311,
             "range": "± 8",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "samchen61661@gmail.com",
+            "name": "samchen",
+            "username": "samchen61661"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1602d46878fa471d1e79dfcf5af5fbc2134d0fcf",
+          "message": "Add an offset_fallback field in TimeZoneFormatV1 (#2253)\n\n* Add an offset_fallback field in TimeZoneFormatV1\r\n\r\n* add TODO",
+          "timestamp": "2022-07-26T16:48:55-07:00",
+          "tree_id": "90f3aae64dcd3606da3b2f7c79d39f362ea190da",
+          "url": "https://github.com/unicode-org/icu4x/commit/1602d46878fa471d1e79dfcf5af5fbc2134d0fcf"
+        },
+        "date": 1658880043322,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 97319,
+            "range": "± 569",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 810272,
+            "range": "± 2307",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 172581,
+            "range": "± 4193",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_write",
+            "value": 88249,
+            "range": "± 526",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_string",
+            "value": 84940,
+            "range": "± 988",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 86066,
+            "range": "± 386",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 92208,
+            "range": "± 735",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_write",
+            "value": 162628,
+            "range": "± 983",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_string",
+            "value": 174300,
+            "range": "± 755",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 172813,
+            "range": "± 517",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 181578,
+            "range": "± 1782",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 4634,
+            "range": "± 32",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "318a73f3927d9edd2313e2f0333d7935d3401b49",
+          "message": "Add Date::new_from_codes, also document and fix up per-calendar constructor functions (#2255)\n\n* Add Copy/Clone for Ref\r\n\r\n* More general ZeroVec iterators\r\n\r\n* Better ethiopic constructors\r\n\r\n* Better docs for remaining ctors\r\n\r\n* Add Japanese date ctors\r\n\r\n* Add tests for japanese eras\r\n\r\n* Add new_from_codes\r\n\r\n* Any roundtrip tests\r\n\r\n* Fix amete alem offset",
+          "timestamp": "2022-07-27T03:49:56Z",
+          "tree_id": "5db500057f358dec6a8dbfacf1f03cb7abde37ff",
+          "url": "https://github.com/unicode-org/icu4x/commit/318a73f3927d9edd2313e2f0333d7935d3401b49"
+        },
+        "date": 1658894620332,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 129592,
+            "range": "± 5741",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1161906,
+            "range": "± 38880",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 244512,
+            "range": "± 13921",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_write",
+            "value": 118664,
+            "range": "± 5779",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_string",
+            "value": 130191,
+            "range": "± 3430",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 131313,
+            "range": "± 11395",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 141050,
+            "range": "± 6306",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_write",
+            "value": 230551,
+            "range": "± 8248",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_string",
+            "value": 248680,
+            "range": "± 10836",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 245151,
+            "range": "± 16085",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 264415,
+            "range": "± 10419",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6411,
+            "range": "± 228",
             "unit": "ns/iter"
           }
         ]

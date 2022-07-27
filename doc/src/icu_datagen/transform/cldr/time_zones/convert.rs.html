@@ -507,10 +507,45 @@
 <span id="502">502</span>
 <span id="503">503</span>
 <span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::CldrTimeZonesData</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::cldr_serde</span>;
+<span class="kw">use</span> <span class="ident">cldr_serde::time_zones::bcp47_tzid::Bcp47TzidAliasData</span>;
+<span class="kw">use</span> <span class="ident">cldr_serde::time_zones::meta_zones::MetaLocationOrSubRegion</span>;
+<span class="kw">use</span> <span class="ident">cldr_serde::time_zones::meta_zones::MetaZoneAliasData</span>;
+<span class="kw">use</span> <span class="ident">cldr_serde::time_zones::meta_zones::MetaZoneForPeriod</span>;
+<span class="kw">use</span> <span class="ident">cldr_serde::time_zones::meta_zones::ZonePeriod</span>;
+<span class="kw">use</span> <span class="ident">cldr_serde::time_zones::time_zone_names</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_calendar::DateTime</span>;
 <span class="kw">use</span> <span class="ident">icu_datetime::provider::time_zones</span>::{
     <span class="ident">ExemplarCitiesV1</span>, <span class="ident">MetaZoneGenericNamesLongV1</span>, <span class="ident">MetaZoneGenericNamesShortV1</span>, <span class="ident">MetaZoneId</span>,
@@ -521,13 +556,6 @@
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
 <span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroMap</span>, <span class="ident">ZeroMap2d</span>};
-
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::cldr_serde::time_zones::meta_zones</span>::{
-    <span class="ident">MetaLocationOrSubRegion</span>, <span class="ident">MetaZoneForPeriod</span>, <span class="ident">ZonePeriod</span>,
-};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transform::cldr::cldr_serde</span>::{
-    <span class="ident">time_zones::time_zone_names</span>::<span class="kw-2">*</span>, <span class="ident">time_zones::CldrTimeZonesData</span>,
-};
 
 <span class="doccomment">/// Performs part 1 of type fallback as specified in the UTS-35 spec for TimeZone Goals:</span>
 <span class="doccomment">/// https://unicode.org/reports/tr35/tr35-dates.html#Time_Zone_Goals</span>
@@ -552,9 +580,33 @@
     (<span class="ident">Cow::Owned</span>(<span class="ident">positive</span>), <span class="ident">Cow::Owned</span>(<span class="ident">negative</span>))
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZoneFormatsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">time_zone_names</span>;
+<span class="kw">fn</span> <span class="ident">compute_bcp47_tzids_hashmap</span>(
+    <span class="ident">bcp47_tzids_resource</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">TimeZoneBcp47Id</span>, <span class="ident">Bcp47TzidAliasData</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">TimeZoneBcp47Id</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bcp47_tzids</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+    <span class="kw">for</span> (<span class="ident">bcp47_tzid</span>, <span class="ident">bcp47_tzid_data</span>) <span class="kw">in</span> <span class="ident">bcp47_tzids_resource</span>.<span class="ident">iter</span>() {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">alias</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">bcp47_tzid_data</span>.<span class="ident">alias</span> {
+            <span class="kw">for</span> <span class="ident">data_value</span> <span class="kw">in</span> <span class="ident">alias</span>.<span class="ident">split</span>(<span class="string">&#39; &#39;</span>) {
+                <span class="ident">bcp47_tzids</span>.<span class="ident">insert</span>(<span class="ident">data_value</span>.<span class="ident">to_string</span>(), <span class="kw-2">*</span><span class="ident">bcp47_tzid</span>);
+            }
+        }
+    }
+    <span class="ident">bcp47_tzids</span>
+}
+
+<span class="kw">fn</span> <span class="ident">compute_meta_zone_ids_hashmap</span>(
+    <span class="ident">meta_zone_ids_resource</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">MetaZoneId</span>, <span class="ident">MetaZoneAliasData</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">MetaZoneId</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">meta_zone_ids</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
+    <span class="kw">for</span> (<span class="ident">meta_zone_id</span>, <span class="ident">meta_zone_id_data</span>) <span class="kw">in</span> <span class="ident">meta_zone_ids_resource</span>.<span class="ident">iter</span>() {
+        <span class="ident">meta_zone_ids</span>.<span class="ident">insert</span>(<span class="ident">meta_zone_id_data</span>.<span class="ident">long_id</span>.<span class="ident">to_string</span>(), <span class="kw-2">*</span><span class="ident">meta_zone_id</span>);
+    }
+    <span class="ident">meta_zone_ids</span>
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TimeZoneFormatsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">time_zone_names_resource</span>;
         <span class="self">Self</span> {
             <span class="ident">hour_format</span>: <span class="ident">parse_hour_format</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">hour_format</span>),
             <span class="ident">gmt_format</span>: <span class="ident">data</span>.<span class="ident">gmt_format</span>.<span class="ident">clone</span>().<span class="ident">into</span>(),
@@ -606,10 +658,10 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ExemplarCitiesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">time_zone_names_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">time_zone_names</span>;
-        <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">bcp47_tzids</span>;
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ExemplarCitiesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">time_zone_names_data</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">time_zone_names_resource</span>;
+        <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">compute_bcp47_tzids_hashmap</span>(<span class="ident">other</span>.<span class="ident">bcp47_tzids_resource</span>);
         <span class="self">Self</span>(
             <span class="ident">time_zone_names_data</span>
                 .<span class="ident">zone</span>
@@ -655,11 +707,11 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MetaZonePeriodV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">meta_zone_periods</span>;
-        <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">bcp47_tzids</span>;
-        <span class="kw">let</span> <span class="ident">meta_zone_id_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">meta_zone_ids</span>;
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MetaZonePeriodV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">meta_zone_periods_resource</span>;
+        <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">compute_bcp47_tzids_hashmap</span>(<span class="ident">other</span>.<span class="ident">bcp47_tzids_resource</span>);
+        <span class="kw">let</span> <span class="ident">meta_zone_id_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">compute_meta_zone_ids_hashmap</span>(<span class="ident">other</span>.<span class="ident">meta_zone_ids_resource</span>);
         <span class="self">Self</span>(
             <span class="ident">data</span>.<span class="ident">iter</span>()
                 .<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="ident">zone</span>)<span class="op">|</span> {
@@ -721,11 +773,12 @@
 
 <span class="macro">macro_rules!</span> <span class="ident">long_short_impls</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">generic</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">specific</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">metazones_name</span>:<span class="ident">ident</span>) =&gt; {
-        <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">generic</span> {
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span>) -&gt; <span class="self">Self</span> {
-                <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">time_zone_names</span>;
-                <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">bcp47_tzids</span>;
-                <span class="kw">let</span> <span class="ident">meta_zone_id_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">meta_zone_ids</span>;
+        <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">generic</span> {
+            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+                <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">time_zone_names_resource</span>;
+                <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">compute_bcp47_tzids_hashmap</span>(<span class="ident">other</span>.<span class="ident">bcp47_tzids_resource</span>);
+                <span class="kw">let</span> <span class="ident">meta_zone_id_data</span> <span class="op">=</span>
+                    <span class="kw-2">&amp;</span><span class="ident">compute_meta_zone_ids_hashmap</span>(<span class="ident">other</span>.<span class="ident">meta_zone_ids_resource</span>);
                 <span class="self">Self</span> {
                     <span class="ident">defaults</span>: <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">metazone</span> {
                         <span class="prelude-val">None</span> =&gt; <span class="ident">ZeroMap::new</span>(),
@@ -808,11 +861,12 @@
             }
         }
 
-        <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">specific</span> {
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">CldrTimeZonesData</span>) -&gt; <span class="self">Self</span> {
-                <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">time_zone_names</span>;
-                <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">bcp47_tzids</span>;
-                <span class="kw">let</span> <span class="ident">meta_zone_id_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">meta_zone_ids</span>;
+        <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">specific</span> {
+            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">other</span>: <span class="ident">CldrTimeZonesData</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+                <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">time_zone_names_resource</span>;
+                <span class="kw">let</span> <span class="ident">bcp47_tzid_data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">compute_bcp47_tzids_hashmap</span>(<span class="ident">other</span>.<span class="ident">bcp47_tzids_resource</span>);
+                <span class="kw">let</span> <span class="ident">meta_zone_id_data</span> <span class="op">=</span>
+                    <span class="kw-2">&amp;</span><span class="ident">compute_meta_zone_ids_hashmap</span>(<span class="ident">other</span>.<span class="ident">meta_zone_ids_resource</span>);
                 <span class="self">Self</span> {
                     <span class="ident">defaults</span>: <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">metazone</span> {
                         <span class="prelude-val">None</span> =&gt; <span class="ident">ZeroMap2d::new</span>(),

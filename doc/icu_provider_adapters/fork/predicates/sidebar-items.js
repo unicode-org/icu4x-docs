@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ForkByKeyPredicate","A predicate that allows forking providers to search for a provider that supports a particular data key."]],"trait":[["ForkByErrorPredicate","The predicate trait used by `ForkByErrorProvider`."]]});

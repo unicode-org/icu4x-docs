@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["cldr","This module contains provider implementations backed by the JSON files shipped by CLDR."],["icuexport","This module contains provider implementations backed by TOML files exported from ICU."],["segmenter","This module contains provider implementations backed by built-in segmentation data."]]});

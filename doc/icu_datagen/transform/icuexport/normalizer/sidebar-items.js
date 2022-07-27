@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["NormalizationProvider","A provider for normalization data reading from icuexportdata TOML files."]]});

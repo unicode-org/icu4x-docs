@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["ALL_KEYS","Collection of all the key for easy reference from the datagen registry."]],"struct":[["CollationProvider","A data provider reading from .toml files produced by the ICU4C genrb tool."]]});

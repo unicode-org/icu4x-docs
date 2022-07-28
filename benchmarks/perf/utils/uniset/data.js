@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658976895374,
+  "lastUpdate": 1659026717945,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -39473,6 +39473,114 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 58146482,
             "range": "± 817268",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "aethanyc@gmail.com",
+            "name": "Ting-Yu Lin",
+            "username": "aethanyc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2342f275328440524d7415b1ae8689b91a878c08",
+          "message": "Remove two char types in line segmenter and polish utf8 iterator naming (#2269)\n\n* Remove Latin1Char and Utf16Char in line.rs\r\n\r\nWe don't use these two char types to store data. It's sufficient to use\r\nunit-like struct similar to what we do for UAX29 iterators.\r\n\r\n* Append 'Utf8' to UAX29 iterators iterating over str\r\n\r\nMake these iterators' name more explicit, matching their counterpart types in\r\nFFI.",
+          "timestamp": "2022-07-28T14:14:27Z",
+          "tree_id": "90030f8af6fac3f49590c4b630dc23fa0213bb05",
+          "url": "https://github.com/unicode-org/icu4x/commit/2342f275328440524d7415b1ae8689b91a878c08"
+        },
+        "date": 1659018219812,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 53389500,
+            "range": "± 313263",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7ec6bf8ec1bb21ece4c6f7dcb33cf29d038a5f7f",
+          "message": "Fixing ecma402 (#2267)",
+          "timestamp": "2022-07-28T18:35:04+02:00",
+          "tree_id": "046d2beef836eaed9752a0931570de3c0a927538",
+          "url": "https://github.com/unicode-org/icu4x/commit/7ec6bf8ec1bb21ece4c6f7dcb33cf29d038a5f7f"
+        },
+        "date": 1659026680628,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 58071130,
+            "range": "± 839977",
             "unit": "ns/iter"
           },
           {

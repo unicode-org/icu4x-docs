@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658977010385,
+  "lastUpdate": 1659026849346,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -40168,6 +40168,126 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 87,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "aethanyc@gmail.com",
+            "name": "Ting-Yu Lin",
+            "username": "aethanyc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2342f275328440524d7415b1ae8689b91a878c08",
+          "message": "Remove two char types in line segmenter and polish utf8 iterator naming (#2269)\n\n* Remove Latin1Char and Utf16Char in line.rs\r\n\r\nWe don't use these two char types to store data. It's sufficient to use\r\nunit-like struct similar to what we do for UAX29 iterators.\r\n\r\n* Append 'Utf8' to UAX29 iterators iterating over str\r\n\r\nMake these iterators' name more explicit, matching their counterpart types in\r\nFFI.",
+          "timestamp": "2022-07-28T14:14:27Z",
+          "tree_id": "90030f8af6fac3f49590c4b630dc23fa0213bb05",
+          "url": "https://github.com/unicode-org/icu4x/commit/2342f275328440524d7415b1ae8689b91a878c08"
+        },
+        "date": 1659018312232,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 123470,
+            "range": "± 345",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25056,
+            "range": "± 35",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71669,
+            "range": "± 545",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 200,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 86,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7ec6bf8ec1bb21ece4c6f7dcb33cf29d038a5f7f",
+          "message": "Fixing ecma402 (#2267)",
+          "timestamp": "2022-07-28T18:35:04+02:00",
+          "tree_id": "046d2beef836eaed9752a0931570de3c0a927538",
+          "url": "https://github.com/unicode-org/icu4x/commit/7ec6bf8ec1bb21ece4c6f7dcb33cf29d038a5f7f"
+        },
+        "date": 1659026812649,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 105179,
+            "range": "± 1260",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21283,
+            "range": "± 83",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 64241,
+            "range": "± 272",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 176,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
             "range": "± 0",
             "unit": "ns/iter"
           }

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1658977087751,
+  "lastUpdate": 1659026955173,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -53351,6 +53351,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 4602,
             "range": "± 9",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "aethanyc@gmail.com",
+            "name": "Ting-Yu Lin",
+            "username": "aethanyc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2342f275328440524d7415b1ae8689b91a878c08",
+          "message": "Remove two char types in line segmenter and polish utf8 iterator naming (#2269)\n\n* Remove Latin1Char and Utf16Char in line.rs\r\n\r\nWe don't use these two char types to store data. It's sufficient to use\r\nunit-like struct similar to what we do for UAX29 iterators.\r\n\r\n* Append 'Utf8' to UAX29 iterators iterating over str\r\n\r\nMake these iterators' name more explicit, matching their counterpart types in\r\nFFI.",
+          "timestamp": "2022-07-28T14:14:27Z",
+          "tree_id": "90030f8af6fac3f49590c4b630dc23fa0213bb05",
+          "url": "https://github.com/unicode-org/icu4x/commit/2342f275328440524d7415b1ae8689b91a878c08"
+        },
+        "date": 1659018407781,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 106660,
+            "range": "± 3281",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1109758,
+            "range": "± 15302",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 223673,
+            "range": "± 6165",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_write",
+            "value": 101892,
+            "range": "± 1722",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_string",
+            "value": 112891,
+            "range": "± 708",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 110000,
+            "range": "± 1839",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 118622,
+            "range": "± 2043",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_write",
+            "value": 210410,
+            "range": "± 2851",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_string",
+            "value": 226788,
+            "range": "± 3502",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 227959,
+            "range": "± 2973",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 242009,
+            "range": "± 3511",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6108,
+            "range": "± 80",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7ec6bf8ec1bb21ece4c6f7dcb33cf29d038a5f7f",
+          "message": "Fixing ecma402 (#2267)",
+          "timestamp": "2022-07-28T18:35:04+02:00",
+          "tree_id": "046d2beef836eaed9752a0931570de3c0a927538",
+          "url": "https://github.com/unicode-org/icu4x/commit/7ec6bf8ec1bb21ece4c6f7dcb33cf29d038a5f7f"
+        },
+        "date": 1659026912805,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 114742,
+            "range": "± 663",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1138075,
+            "range": "± 66543",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 233374,
+            "range": "± 5510",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_write",
+            "value": 103427,
+            "range": "± 407",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_string",
+            "value": 112967,
+            "range": "± 695",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 114100,
+            "range": "± 4809",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 122958,
+            "range": "± 878",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_write",
+            "value": 215949,
+            "range": "± 1743",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_string",
+            "value": 230759,
+            "range": "± 1875",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 229103,
+            "range": "± 1555",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 245271,
+            "range": "± 1575",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6137,
+            "range": "± 57",
             "unit": "ns/iter"
           }
         ]

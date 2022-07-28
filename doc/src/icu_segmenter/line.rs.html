@@ -1052,6 +1052,38 @@
 <span id="1047">1047</span>
 <span id="1048">1048</span>
 <span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
+<span id="1070">1070</span>
+<span id="1071">1071</span>
+<span id="1072">1072</span>
+<span id="1073">1073</span>
+<span id="1074">1074</span>
+<span id="1075">1075</span>
+<span id="1076">1076</span>
+<span id="1077">1077</span>
+<span id="1078">1078</span>
+<span id="1079">1079</span>
+<span id="1080">1080</span>
+<span id="1081">1081</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1061,13 +1093,14 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::language</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::symbols</span>::<span class="kw-2">*</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LstmDataV1Marker</span>;
 
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">core::char</span>;
 <span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
@@ -1155,13 +1188,14 @@
     <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
     <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>,
     <span class="ident">dictionary</span>: <span class="ident">Dictionary</span>,
+    <span class="ident">lstm</span>: <span class="ident">LstmPayloads</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">LineBreakSegmenter</span> {
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="ident"><span class="self">Self</span>::try_new_with_options</span>(<span class="ident">provider</span>, <span class="ident">Default::default</span>())
     }
@@ -1182,13 +1216,25 @@
         <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">burmese</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_lstm</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;my&quot;</span>)).<span class="ident">ok</span>();
+        <span class="kw">let</span> <span class="ident">khmer</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_lstm</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;km&quot;</span>)).<span class="ident">ok</span>();
+        <span class="kw">let</span> <span class="ident">lao</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_lstm</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;lo&quot;</span>)).<span class="ident">ok</span>();
+        <span class="kw">let</span> <span class="ident">thai</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_lstm</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;th&quot;</span>)).<span class="ident">ok</span>();
+
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">options</span>,
             <span class="ident">payload</span>,
             <span class="ident">dictionary</span>: <span class="ident">Dictionary::default</span>(),
+            <span class="ident">lstm</span>: <span class="ident">LstmPayloads</span> {
+                <span class="ident">burmese</span>,
+                <span class="ident">khmer</span>,
+                <span class="ident">lao</span>,
+                <span class="ident">thai</span>,
+            },
         })
     }
 
@@ -1219,6 +1265,7 @@
                 <span class="ident">thai</span>,
                 <span class="ident">cj</span>: <span class="prelude-val">None</span>,
             },
+            <span class="ident">lstm</span>: <span class="ident">LstmPayloads::default</span>(),
         })
     }
 
@@ -1227,6 +1274,19 @@
         <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
         <span class="ident">locale</span>: <span class="ident">Locale</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="ident">provider</span>
+            .<span class="ident">load</span>(<span class="ident">DataRequest</span> {
+                <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale::from</span>(<span class="ident">locale</span>),
+                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+            })<span class="question-mark">?</span>
+            .<span class="ident">take_payload</span>()
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">load_lstm</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
+        <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
+        <span class="ident">locale</span>: <span class="ident">Locale</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="ident">provider</span>
             .<span class="ident">load</span>(<span class="ident">DataRequest</span> {
                 <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale::from</span>(<span class="ident">locale</span>),
@@ -1245,6 +1305,7 @@
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
+            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
         }
     }
 
@@ -1261,6 +1322,7 @@
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
+            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
         }
     }
 
@@ -1277,6 +1339,7 @@
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
+            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
         }
     }
 }
@@ -1517,6 +1580,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>,
     <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakOptions</span>,
     <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">Dictionary</span>,
+    <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LstmPayloads</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
@@ -1743,7 +1807,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="comment">// Restore iterator to move to head of complex string</span>
         <span class="ident">iter</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
         <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="ident">iter</span>.<span class="ident">dictionary</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
+        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="ident">iter</span>.<span class="ident">dictionary</span>, <span class="ident">iter</span>.<span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
         <span class="ident">iter</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len_utf8</span>();
         <span class="kw">loop</span> {
@@ -1842,7 +1906,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="comment">// Restore iterator to move to head of complex string</span>
         <span class="ident">iterator</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
         <span class="ident">iterator</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_utf16</span>(<span class="ident">iterator</span>.<span class="ident">dictionary</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
+        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_utf16</span>(<span class="ident">iterator</span>.<span class="ident">dictionary</span>, <span class="ident">iterator</span>.<span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="ident">iterator</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
         <span class="comment">// result_cache vector is utf-16 index that is in BMP.</span>

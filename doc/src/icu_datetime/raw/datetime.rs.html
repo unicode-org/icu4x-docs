@@ -528,6 +528,7 @@
 <span id="523">523</span>
 <span id="524">524</span>
 <span id="525">525</span>
+<span id="526">526</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -536,16 +537,16 @@
 <span class="doccomment">//! Central to this is the [`DateTimeFormatter`].</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">date</span>::{<span class="ident">DateTimeInput</span>, <span class="ident">ExtractedDateTimeInput</span>},
     <span class="ident">format::datetime</span>,
+    <span class="ident">input</span>::{<span class="ident">DateTimeInput</span>, <span class="ident">ExtractedDateTimeInput</span>, <span class="ident">IsoTimeInput</span>},
     <span class="ident">options::components</span>,
     <span class="ident">options</span>::{<span class="ident">length</span>, <span class="ident">preferences</span>, <span class="ident">DateTimeFormatterOptions</span>},
     <span class="ident">pattern::runtime::PatternPlurals</span>,
     <span class="ident">provider</span>,
     <span class="ident">provider::calendar::patterns::PatternPluralsFromPatternsV1Marker</span>,
     <span class="ident">provider::calendar</span>::{
-        <span class="ident">patterns::GenericPatternV1Marker</span>, <span class="ident">DatePatternsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>,
-        <span class="ident">DateSymbolsV1Marker</span>, <span class="ident">TimePatternsV1Marker</span>, <span class="ident">TimeSymbolsV1Marker</span>,
+        <span class="ident">patterns::GenericPatternV1Marker</span>, <span class="ident">DateLengthsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>,
+        <span class="ident">DateSymbolsV1Marker</span>, <span class="ident">TimeLengthsV1Marker</span>, <span class="ident">TimeSymbolsV1Marker</span>,
     },
     <span class="ident">provider::week_data::WeekDataV1Marker</span>,
     <span class="ident">DateTimeFormatterError</span>, <span class="ident">FormattedDateTime</span>,
@@ -580,7 +581,7 @@
         <span class="ident">preferences</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">preferences::Bag</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimePatternsV1Marker</span><span class="op">&gt;</span>
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
@@ -638,18 +639,18 @@
         }
     }
 
-    <span class="doccomment">/// Takes a [`DateTimeInput`] implementer and returns an instance of a [`FormattedDateTime`]</span>
+    <span class="doccomment">/// Takes a [`IsoTimeInput`] implementer and returns an instance of a [`FormattedDateTime`]</span>
     <span class="doccomment">/// that contains all information necessary to display a formatted date and operate on it.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">T</span>) -&gt; <span class="ident">FormattedDateTime</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">DateTimeInput</span>,
+        <span class="ident">T</span>: <span class="ident">IsoTimeInput</span>,
     {
         <span class="ident">FormattedDateTime</span> {
             <span class="ident">patterns</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">patterns</span>,
             <span class="ident">date_symbols</span>: <span class="prelude-val">None</span>,
             <span class="ident">time_symbols</span>: <span class="self">self</span>.<span class="ident">symbols</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
-            <span class="ident">datetime</span>: <span class="ident">ExtractedDateTimeInput::extract_from</span>(<span class="ident">value</span>),
+            <span class="ident">datetime</span>: <span class="ident">ExtractedDateTimeInput::extract_from_time</span>(<span class="ident">value</span>),
             <span class="ident">week_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">locale</span>,
             <span class="ident">ordinal_rules</span>: <span class="prelude-val">None</span>,
@@ -658,18 +659,19 @@
     }
 
     <span class="doccomment">/// Takes a mutable reference to anything that implements [`Write`](std::fmt::Write) trait</span>
-    <span class="doccomment">/// and a [`DateTimeInput`] implementer and populates the buffer with a formatted value.</span>
+    <span class="doccomment">/// and a [`IsoTimeInput`] implementer and populates the buffer with a formatted value.</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_write</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">core::fmt::Write</span>,
-        <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span>,
+        <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">IsoTimeInput</span>,
     ) -&gt; <span class="ident">core::fmt::Result</span> {
+        <span class="kw">let</span> <span class="ident">extracted</span> <span class="op">=</span> <span class="ident">ExtractedDateTimeInput::extract_from_time</span>(<span class="ident">value</span>);
         <span class="ident">datetime::write_pattern_plurals</span>(
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">patterns</span>.<span class="ident">get</span>().<span class="number">0</span>,
             <span class="prelude-val">None</span>,
             <span class="self">self</span>.<span class="ident">symbols</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">get</span>()),
-            <span class="ident">value</span>,
+            <span class="kw-2">&amp;</span><span class="ident">extracted</span>,
             <span class="prelude-val">None</span>,
             <span class="prelude-val">None</span>,
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">fixed_decimal_format</span>,
@@ -679,9 +681,9 @@
         .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">core::fmt::Error</span>)
     }
 
-    <span class="doccomment">/// Takes a [`DateTimeInput`] implementer and returns it formatted as a string.</span>
+    <span class="doccomment">/// Takes a [`IsoTimeInput`] implementer and returns it formatted as a string.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span>) -&gt; <span class="ident">String</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">IsoTimeInput</span>) -&gt; <span class="ident">String</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String::new</span>();
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="self">self</span>.<span class="ident">format_to_write</span>(<span class="kw-2">&amp;mut</span> <span class="ident">s</span>, <span class="ident">value</span>)
@@ -711,7 +713,7 @@
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span>
@@ -909,8 +911,8 @@
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeSymbolsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimePatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateLengthsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>

@@ -624,7 +624,6 @@
 <span id="619">619</span>
 <span id="620">620</span>
 <span id="621">621</span>
-<span id="622">622</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -635,8 +634,8 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">options</span>::{<span class="ident">components</span>, <span class="ident">length</span>, <span class="ident">preferences</span>, <span class="ident">DateTimeFormatterOptions</span>},
     <span class="ident">provider::calendar</span>::{
-        <span class="ident">DatePatternsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>, <span class="ident">DateSymbolsV1Marker</span>,
-        <span class="ident">TimePatternsV1Marker</span>, <span class="ident">TimeSymbolsV1Marker</span>,
+        <span class="ident">DateLengthsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>, <span class="ident">DateSymbolsV1Marker</span>,
+        <span class="ident">TimeLengthsV1Marker</span>, <span class="ident">TimeSymbolsV1Marker</span>,
     },
     <span class="ident">provider::week_data::WeekDataV1Marker</span>,
     <span class="ident">raw</span>,
@@ -648,7 +647,8 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">calendar</span>, <span class="ident">date::DateTimeInput</span>, <span class="ident">CldrCalendar</span>, <span class="ident">DateTimeFormatterError</span>, <span class="ident">FormattedDateTime</span>,
+    <span class="ident">calendar</span>, <span class="ident">input::DateTimeInput</span>, <span class="ident">input::IsoTimeInput</span>, <span class="ident">CldrCalendar</span>, <span class="ident">DateTimeFormatterError</span>,
+    <span class="ident">FormattedDateTime</span>,
 };
 
 <span class="doccomment">/// [`TimeFormatter`] is a structure of the [`icu_datetime`] component that provides time formatting only.</span>
@@ -664,14 +664,14 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
+<span class="doccomment">/// use icu::calendar::DateTime;</span>
 <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
 <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+<span class="doccomment">/// let tf = TimeFormatter::try_new(</span>
 <span class="doccomment">///     &amp;locale!(&quot;en&quot;).into(),</span>
 <span class="doccomment">///     &amp;provider,</span>
 <span class="doccomment">///     Time::Short,</span>
@@ -688,9 +688,9 @@
 <span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [data provider]: icu_provider</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeFormatter</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">raw::TimeFormatter</span>, <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeFormatter</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">raw::TimeFormatter</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">CldrCalendar</span><span class="op">&gt;</span> <span class="ident">TimeFormatter</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">TimeFormatter</span> {
     <span class="doccomment">/// Constructor that takes a selected locale, reference to a [data provider] and</span>
     <span class="doccomment">/// a list of preferences, then collects all data necessary to format date and time values into the given locale,</span>
     <span class="doccomment">/// using the short style.</span>
@@ -698,13 +698,12 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::calendar::Gregorian;</span>
     <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// use icu::locid::locale;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// TimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">/// TimeFormatter::try_new(</span>
     <span class="doccomment">///     &amp;locale!(&quot;en&quot;).into(),</span>
     <span class="doccomment">///     &amp;provider,</span>
     <span class="doccomment">///     Time::Short,</span>
@@ -722,35 +721,34 @@
         <span class="ident">preferences</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">preferences::Bag</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimePatternsV1Marker</span><span class="op">&gt;</span>
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="comment">// TODO(#2188): Avoid cloning the DataLocale by passing the calendar</span>
-        <span class="comment">// separately into the raw formatter.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
 
-        <span class="ident">calendar::potentially_fixup_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
-            <span class="ident">raw::TimeFormatter::try_new</span>(<span class="ident">locale</span>, <span class="ident">data_provider</span>, <span class="ident">length</span>, <span class="ident">preferences</span>)<span class="question-mark">?</span>,
-            <span class="ident">PhantomData</span>,
-        ))
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="ident">raw::TimeFormatter::try_new</span>(
+            <span class="ident">locale</span>,
+            <span class="ident">data_provider</span>,
+            <span class="ident">length</span>,
+            <span class="ident">preferences</span>,
+        )<span class="question-mark">?</span>))
     }
 
-    <span class="doccomment">/// Takes a [`DateTimeInput`] implementer and returns an instance of a [`FormattedDateTime`]</span>
+    <span class="doccomment">/// Takes a [`IsoTimeInput`] implementer and returns an instance of a [`FormattedDateTime`]</span>
     <span class="doccomment">/// that contains all information necessary to display a formatted date and operate on it.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
+    <span class="doccomment">/// use icu::calendar::DateTime;</span>
     <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
     <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let tf =</span>
-    <span class="doccomment">///     TimeFormatter::&lt;Gregorian&gt;::try_new(&amp;locale.into(), &amp;provider, Time::Short, None)</span>
+    <span class="doccomment">///     TimeFormatter::try_new(&amp;locale.into(), &amp;provider, Time::Short, None)</span>
     <span class="doccomment">///         .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
@@ -765,23 +763,23 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">T</span>) -&gt; <span class="ident">FormattedDateTime</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">DateTimeInput</span>,
+        <span class="ident">T</span>: <span class="ident">IsoTimeInput</span>,
     {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">format</span>(<span class="ident">value</span>)
     }
 
     <span class="doccomment">/// Takes a mutable reference to anything that implements [`Write`](std::fmt::Write) trait</span>
-    <span class="doccomment">/// and a [`DateTimeInput`] implementer and populates the buffer with a formatted value.</span>
+    <span class="doccomment">/// and a [`IsoTimeInput`] implementer and populates the buffer with a formatted value.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
+    <span class="doccomment">/// use icu::calendar::DateTime;</span>
     <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
     <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let tf =</span>
-    <span class="doccomment">///     TimeFormatter::&lt;Gregorian&gt;::try_new(&amp;locale.into(), &amp;provider, Time::Short, None)</span>
+    <span class="doccomment">///     TimeFormatter::try_new(&amp;locale.into(), &amp;provider, Time::Short, None)</span>
     <span class="doccomment">///         .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
@@ -797,22 +795,22 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_write</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">core::fmt::Write</span>,
-        <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span>,
+        <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">IsoTimeInput</span>,
     ) -&gt; <span class="ident">core::fmt::Result</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">format_to_write</span>(<span class="ident">w</span>, <span class="ident">value</span>)
     }
 
-    <span class="doccomment">/// Takes a [`DateTimeInput`] implementer and returns it formatted as a string.</span>
+    <span class="doccomment">/// Takes a [`IsoTimeInput`] implementer and returns it formatted as a string.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
+    <span class="doccomment">/// use icu::calendar::DateTime;</span>
     <span class="doccomment">/// use icu::datetime::{options::length::Time, TimeFormatter};</span>
     <span class="doccomment">/// # let locale = icu::locid::locale!(&quot;en&quot;);</span>
     <span class="doccomment">/// # let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let tf =</span>
-    <span class="doccomment">///     TimeFormatter::&lt;Gregorian&gt;::try_new(&amp;locale.into(), &amp;provider, Time::Short, None)</span>
+    <span class="doccomment">///     TimeFormatter::try_new(&amp;locale.into(), &amp;provider, Time::Short, None)</span>
     <span class="doccomment">///         .expect(&quot;Failed to create TimeFormatter instance.&quot;);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let datetime = DateTime::new_gregorian_datetime(2020, 9, 1, 12, 34, 28)</span>
@@ -821,7 +819,7 @@
     <span class="doccomment">/// assert_eq!(tf.format_to_string(&amp;datetime), &quot;12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span>) -&gt; <span class="ident">String</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">IsoTimeInput</span>) -&gt; <span class="ident">String</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">format_to_string</span>(<span class="ident">value</span>)
     }
 }
@@ -885,7 +883,7 @@
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span>
@@ -1043,7 +1041,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let tf = TimeFormatter::&lt;Gregorian&gt;::try_new(</span>
+    <span class="doccomment">/// let tf = TimeFormatter::try_new(</span>
     <span class="doccomment">///     &amp;locale!(&quot;en&quot;).into(),</span>
     <span class="doccomment">///     &amp;provider,</span>
     <span class="doccomment">///     length::Time::Short,</span>
@@ -1064,7 +1062,7 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_date_and_time</span>(
         <span class="ident">date</span>: <span class="ident">DateFormatter</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-        <span class="ident">time</span>: <span class="ident">TimeFormatter</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+        <span class="ident">time</span>: <span class="ident">TimeFormatter</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
 <span class="kw">where</span> {
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
@@ -1105,8 +1103,8 @@
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeSymbolsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DatePatternsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimePatternsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateLengthsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">OrdinalV1Marker</span><span class="op">&gt;</span>

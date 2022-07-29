@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["MetaZoneCalculator","[`MetaZoneCalculator`] uses data from the [data provider], the selected [`Locale`] to calculate metazone id."]]});
+initSidebarItems({"struct":[["MetaZoneCalculator","[`MetaZoneCalculator`] uses data from the data provider to calculate metazone id."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MetaZoneCalculator","[`MetaZoneCalculator`] uses data from the data provider to calculate metazone id."]]});

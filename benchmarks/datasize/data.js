@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659086284576,
+  "lastUpdate": 1659114705619,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -22013,6 +22013,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/7216d0ad92b9ff248f1f37619825901be4c4f0dc"
         },
         "date": 1659086248580,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4036829,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd04bf486f71004c2a20a0b9f6e39ef5d12f2600",
+          "message": "Add MissingLocalePredicate and language pack example (#2276)",
+          "timestamp": "2022-07-29T10:03:41-07:00",
+          "tree_id": "08724eceffcd51a59625af575f25725ba152566c",
+          "url": "https://github.com/unicode-org/icu4x/commit/cd04bf486f71004c2a20a0b9f6e39ef5d12f2600"
+        },
+        "date": 1659114302904,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4036829,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "169ee04162b875fa7039278b4f0b5fcd02418a41",
+          "message": "Add icu_timezone crate (#2265)\n\n* Add timezones crate\r\n\r\n* Move MockTimeZone and timezone provider types\r\n\r\n* Move over GmtOffset and add error type\r\n\r\n* Move MetaZonePeriodV1 over to icu_timezone\r\n\r\n* rename to CustomTimeZone\r\n\r\n* Move metazone calculator",
+          "timestamp": "2022-07-29T17:09:54Z",
+          "tree_id": "0df0dd06ba38e7c0938614a56bcaff655e8668a7",
+          "url": "https://github.com/unicode-org/icu4x/commit/169ee04162b875fa7039278b4f0b5fcd02418a41"
+        },
+        "date": 1659114667503,
         "tool": "ndjson",
         "benches": [
           {

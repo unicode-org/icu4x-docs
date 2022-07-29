@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659086942299,
+  "lastUpdate": 1659115352215,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -40649,6 +40649,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 85,
             "range": "± 5",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd04bf486f71004c2a20a0b9f6e39ef5d12f2600",
+          "message": "Add MissingLocalePredicate and language pack example (#2276)",
+          "timestamp": "2022-07-29T10:03:41-07:00",
+          "tree_id": "08724eceffcd51a59625af575f25725ba152566c",
+          "url": "https://github.com/unicode-org/icu4x/commit/cd04bf486f71004c2a20a0b9f6e39ef5d12f2600"
+        },
+        "date": 1659115005101,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 132549,
+            "range": "± 6412",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26230,
+            "range": "± 995",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 75056,
+            "range": "± 6016",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 234,
+            "range": "± 14",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 84,
+            "range": "± 9",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 101,
+            "range": "± 7",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "169ee04162b875fa7039278b4f0b5fcd02418a41",
+          "message": "Add icu_timezone crate (#2265)\n\n* Add timezones crate\r\n\r\n* Move MockTimeZone and timezone provider types\r\n\r\n* Move over GmtOffset and add error type\r\n\r\n* Move MetaZonePeriodV1 over to icu_timezone\r\n\r\n* rename to CustomTimeZone\r\n\r\n* Move metazone calculator",
+          "timestamp": "2022-07-29T17:09:54Z",
+          "tree_id": "0df0dd06ba38e7c0938614a56bcaff655e8668a7",
+          "url": "https://github.com/unicode-org/icu4x/commit/169ee04162b875fa7039278b4f0b5fcd02418a41"
+        },
+        "date": 1659115307472,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 126031,
+            "range": "± 11291",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26050,
+            "range": "± 1165",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71901,
+            "range": "± 6344",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 213,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 80,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 93,
+            "range": "± 4",
             "unit": "ns/iter"
           }
         ]

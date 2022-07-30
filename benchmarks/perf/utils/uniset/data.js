@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659136752180,
+  "lastUpdate": 1659140004216,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -40229,6 +40229,114 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 38973280,
             "range": "± 2378961",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c32c54eefcd948e0901f6085134b1db5f687baf3",
+          "message": "Fix and run datetime cpp CI (#2290)",
+          "timestamp": "2022-07-29T23:48:27Z",
+          "tree_id": "5a191d68e489d224f0f506a11b04a6cd898497fd",
+          "url": "https://github.com/unicode-org/icu4x/commit/c32c54eefcd948e0901f6085134b1db5f687baf3"
+        },
+        "date": 1659139050157,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 44584405,
+            "range": "± 151757",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "27cf90ed62ace148e8007f2a967b1a39586035e2",
+          "message": "Rename select() to category_for() for PluralRules (#2287)",
+          "timestamp": "2022-07-30T00:03:12Z",
+          "tree_id": "6a2661af6a60a47c0a0e128b0933a8861a03a71e",
+          "url": "https://github.com/unicode-org/icu4x/commit/27cf90ed62ace148e8007f2a967b1a39586035e2"
+        },
+        "date": 1659139968111,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "uniset/overview",
+            "value": 44508671,
+            "range": "± 178220",
             "unit": "ns/iter"
           },
           {

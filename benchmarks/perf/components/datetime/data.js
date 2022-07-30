@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659136914185,
+  "lastUpdate": 1659140229634,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -54695,6 +54695,198 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 4703,
             "range": "± 4",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c32c54eefcd948e0901f6085134b1db5f687baf3",
+          "message": "Fix and run datetime cpp CI (#2290)",
+          "timestamp": "2022-07-29T23:48:27Z",
+          "tree_id": "5a191d68e489d224f0f506a11b04a6cd898497fd",
+          "url": "https://github.com/unicode-org/icu4x/commit/c32c54eefcd948e0901f6085134b1db5f687baf3"
+        },
+        "date": 1659139262255,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 109277,
+            "range": "± 8735",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 960773,
+            "range": "± 50437",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 220151,
+            "range": "± 17812",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_write",
+            "value": 102468,
+            "range": "± 10349",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_string",
+            "value": 111700,
+            "range": "± 9735",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 108001,
+            "range": "± 5501",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 117486,
+            "range": "± 9326",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_write",
+            "value": 206723,
+            "range": "± 27763",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_string",
+            "value": 215486,
+            "range": "± 20447",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 217444,
+            "range": "± 15989",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 247529,
+            "range": "± 15563",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5212,
+            "range": "± 302",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "27cf90ed62ace148e8007f2a967b1a39586035e2",
+          "message": "Rename select() to category_for() for PluralRules (#2287)",
+          "timestamp": "2022-07-30T00:03:12Z",
+          "tree_id": "6a2661af6a60a47c0a0e128b0933a8861a03a71e",
+          "url": "https://github.com/unicode-org/icu4x/commit/27cf90ed62ace148e8007f2a967b1a39586035e2"
+        },
+        "date": 1659140184939,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 113492,
+            "range": "± 641",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/datetime_components",
+            "value": 1094389,
+            "range": "± 6792",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 229999,
+            "range": "± 4204",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_write",
+            "value": 102878,
+            "range": "± 964",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/DateTimeFormatter/format_to_string",
+            "value": 112360,
+            "range": "± 659",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 114318,
+            "range": "± 382",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 123595,
+            "range": "± 316",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_write",
+            "value": 222012,
+            "range": "± 886",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/ZonedDateTimeFormatter/format_to_string",
+            "value": 237835,
+            "range": "± 1017",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 229568,
+            "range": "± 1095",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 247054,
+            "range": "± 1144",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6194,
+            "range": "± 32",
             "unit": "ns/iter"
           }
         ]

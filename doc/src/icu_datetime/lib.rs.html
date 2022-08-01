@@ -121,6 +121,17 @@
 <span id="116">116</span>
 <span id="117">117</span>
 <span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -130,7 +141,7 @@
 <span class="doccomment">//! This module is published as its own crate ([`icu_datetime`](https://docs.rs/icu_datetime/latest/icu_datetime/))</span>
 <span class="doccomment">//! and as part of the [`icu`](https://docs.rs/icu/latest/icu/) crate. See the latter for more details on the ICU4X project.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! [`DateTimeFormatter`] is the main structure of the component. It accepts a set of arguments which</span>
+<span class="doccomment">//! [`TypedDateTimeFormatter`] and [`DateTimeFormatter`] are the main types of the component. They accepts a set of arguments which</span>
 <span class="doccomment">//! allow it to collect necessary data from the [data provider], and once instantiated, can be</span>
 <span class="doccomment">//! used to quickly format any date and time provided.</span>
 <span class="doccomment">//!</span>
@@ -139,9 +150,10 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use icu::calendar::Gregorian;</span>
 <span class="doccomment">//! use icu::datetime::{</span>
-<span class="doccomment">//!     mock::parse_gregorian_from_str, options::length, DateTimeFormatter, DateTimeFormatterOptions,</span>
+<span class="doccomment">//!     mock::parse_gregorian_from_str, options::length, DateTimeFormatter, TypedDateTimeFormatter, DateTimeFormatterOptions,</span>
 <span class="doccomment">//! };</span>
-<span class="doccomment">//! use icu::locid::locale;</span>
+<span class="doccomment">//! use icu::locid::{Locale, locale};</span>
+<span class="doccomment">//! use std::str::FromStr;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">//!</span>
@@ -151,13 +163,23 @@
 <span class="doccomment">//!     length::Time::Short,</span>
 <span class="doccomment">//! ));</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(&amp;provider, &amp;locale!(&quot;en&quot;).into(), &amp;options)</span>
+<span class="doccomment">//! // You can work with a formatter that can select the calendar at runtime:</span>
+<span class="doccomment">//! let locale = Locale::from_str(&quot;en-u-ca-gregory&quot;).unwrap();</span>
+<span class="doccomment">//! let dtf = DateTimeFormatter::try_new_with_buffer_provider(&amp;provider, &amp;locale.into(), &amp;options)</span>
 <span class="doccomment">//!     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let date = parse_gregorian_from_str(&quot;2020-09-12T12:35:00&quot;).expect(&quot;Failed to parse date.&quot;);</span>
+<span class="doccomment">//! // Or one that selects a calendar at compile time:</span>
+<span class="doccomment">//! let typed_dtf = TypedDateTimeFormatter::&lt;Gregorian&gt;::try_new(&amp;provider, &amp;locale!(&quot;en&quot;).into(), &amp;options)</span>
+<span class="doccomment">//!     .expect(&quot;Failed to create TypedDateTimeFormatter instance.&quot;);</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let formatted_date = dtf.format(&amp;date);</span>
+<span class="doccomment">//! let typed_date = parse_gregorian_from_str(&quot;2020-09-12T12:35:00&quot;).expect(&quot;Failed to parse date.&quot;);</span>
+<span class="doccomment">//! let date = typed_date.to_any();</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! let formatted_date = dtf.format(&amp;date).expect(&quot;Formatting should succeed&quot;);</span>
+<span class="doccomment">//! let typed_formatted_date = typed_dtf.format(&amp;typed_date);</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! assert_eq!(formatted_date.to_string(), &quot;Sep 12, 2020, 12:35 PM&quot;);</span>
+<span class="doccomment">//! assert_eq!(typed_formatted_date.to_string(), &quot;Sep 12, 2020, 12:35 PM&quot;);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The options can be created more ergonomically using the `Into` trait to automatically</span>
@@ -165,20 +187,20 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use icu::calendar::Gregorian;</span>
-<span class="doccomment">//! use icu::datetime::{options::length, DateTimeFormatter, DateTimeFormatterOptions};</span>
+<span class="doccomment">//! use icu::datetime::{options::length, TypedDateTimeFormatter, DateTimeFormatterOptions};</span>
 <span class="doccomment">//! # let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">//! # let locale = icu::locid::locale!(&quot;en&quot;);</span>
 <span class="doccomment">//! let options =</span>
 <span class="doccomment">//!     length::Bag::from_date_time_style(length::Date::Medium, length::Time::Short).into();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let dtf = DateTimeFormatter::&lt;Gregorian&gt;::try_new(&amp;provider, &amp;locale.into(), &amp;options);</span>
+<span class="doccomment">//! let dtf = TypedDateTimeFormatter::&lt;Gregorian&gt;::try_new(&amp;provider, &amp;locale.into(), &amp;options);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! At the moment, the crate provides only options using the [`Length`] bag, but in the future,</span>
 <span class="doccomment">//! we expect to add more ways to customize the output, like skeletons, and components.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! *Notice:* Rust at the moment does not have a canonical way to represent date and time. We use</span>
-<span class="doccomment">//! [`DateTime`] as an example of the data necessary for ICU [`DateTimeFormatter`] to work, and</span>
+<span class="doccomment">//! [`DateTime`] as an example of the data necessary for ICU [`TypedDateTimeFormatter`] to work, and</span>
 <span class="doccomment">//! [we hope to work with the community](https://github.com/unicode-org/icu4x/blob/main/docs/research/datetime.md)</span>
 <span class="doccomment">//! to develop core date and time APIs that will work as an input for this component. [`DateTime`] additionally</span>
 <span class="doccomment">//! has support for non-Gregorian calendars, which this module will eventually be able to format.</span>
@@ -207,7 +229,7 @@
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>;
 
 <span class="kw">mod</span> <span class="ident">calendar</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">datetime</span>;
+<span class="kw">mod</span> <span class="ident">datetime</span>;
 <span class="kw">mod</span> <span class="ident">error</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fields</span>;
 <span class="kw">mod</span> <span class="ident">format</span>;
@@ -223,13 +245,13 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">skeleton</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">time_zone</span>;
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span> <span class="comment">// TODO(#686) - Add missing docs.</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">zoned_datetime</span>;
+<span class="kw">mod</span> <span class="ident">zoned_datetime</span>;
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">any</span>;
+<span class="kw">mod</span> <span class="ident">any</span>;
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">any</span>::{<span class="ident">DateTimeFormatter</span>, <span class="ident">ZonedDateTimeFormatter</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">calendar::CldrCalendar</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">datetime</span>::{<span class="ident">DateFormatter</span>, <span class="ident">DateTimeFormatter</span>, <span class="ident">TimeFormatter</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">datetime</span>::{<span class="ident">TimeFormatter</span>, <span class="ident">TypedDateFormatter</span>, <span class="ident">TypedDateTimeFormatter</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error::DateTimeFormatterError</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">format::datetime::FormattedDateTime</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">format::time_zone::FormattedTimeZone</span>;
@@ -238,7 +260,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">time_zone::TimeZoneFormatter</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">time_zone::TimeZoneFormatterConfig</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">time_zone::TimeZoneFormatterOptions</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">zoned_datetime::ZonedDateTimeFormatter</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">zoned_datetime::TypedZonedDateTimeFormatter</span>;
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_datetime" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
 </body></html>

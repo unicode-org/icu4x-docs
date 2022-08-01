@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["AnyDateTimeFormatter","[`AnyDateTimeFormatter`] is a `DateTimeFormatter` capable of formatting dates from any calendar, selected at runtime."],["ZonedAnyDateTimeFormatter","[`ZonedAnyDateTimeFormatter`] is a `ZonedDateTimeFormatter` capable of formatting dates from any calendar, selected at runtime."]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["EraStartDate","The date at which an era started"],["EraStartDateULE","`ULE` type for [`EraStartDate`]"],["JapaneseErasV1",""],["JapaneseErasV1Marker","Marker type for [`JapaneseErasV1`]: “calendar/japanese@1”"]]});
+initSidebarItems({"struct":[["EraStartDate","The date at which an era started"],["EraStartDateULE","`ULE` type for [`EraStartDate`]"],["JapaneseErasV1",""],["JapaneseErasV1Marker","Marker type for [`JapaneseErasV1`]: “calendar/japanese@1”"],["JapanextErasV1Marker","Marker type for [`JapaneseErasV1`]: “calendar/japanext@1”"]]});

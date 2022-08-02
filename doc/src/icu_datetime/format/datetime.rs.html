@@ -608,9 +608,6 @@
 <span id="603">603</span>
 <span id="604">604</span>
 <span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1122,28 +1119,25 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">test_mixed_calendar_eras</span>() {
-        <span class="kw">use</span> <span class="ident">icu::calendar::japanese</span>::{<span class="ident">Japanese</span>, <span class="ident">JapaneseEraStyle</span>};
-        <span class="kw">use</span> <span class="ident">icu::calendar::DateTime</span>;
+        <span class="kw">use</span> <span class="ident">icu::calendar::japanese::Japanext</span>;
+        <span class="kw">use</span> <span class="ident">icu::calendar::Date</span>;
         <span class="kw">use</span> <span class="ident">icu::datetime::options::length</span>;
-        <span class="kw">use</span> <span class="ident">icu::datetime::TypedDateTimeFormatter</span>;
+        <span class="kw">use</span> <span class="ident">icu::datetime::DateFormatter</span>;
 
         <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
         <span class="kw">let</span> <span class="ident">locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;en-u-ca-japanese&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span>
-            <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Medium</span>, <span class="ident">length::Time::Short</span>).<span class="ident">into</span>();
-        <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">TypedDateTimeFormatter</span>::<span class="op">&lt;</span><span class="ident">Japanese</span><span class="op">&gt;</span><span class="ident">::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="kw-2">&amp;</span><span class="ident">locale</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">options</span>)
+        <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">DateFormatter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="kw-2">&amp;</span><span class="ident">locale</span>.<span class="ident">into</span>(), <span class="ident">length::Date::Medium</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;DateTimeFormat construction succeeds&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">japanext</span> <span class="op">=</span>
-            <span class="ident">Japanese::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="ident">JapaneseEraStyle::All</span>).<span class="ident">expect</span>(<span class="string">&quot;Cannot load japanese data&quot;</span>);
-        <span class="kw">let</span> <span class="ident">datetime</span> <span class="op">=</span> <span class="ident">DateTime::new_gregorian_datetime</span>(<span class="number">1800</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">12</span>, <span class="number">34</span>, <span class="number">28</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;Failed to construct DateTime.&quot;</span>);
-        <span class="kw">let</span> <span class="ident">datetime</span> <span class="op">=</span> <span class="ident">datetime</span>.<span class="ident">to_calendar</span>(<span class="ident">japanext</span>);
+        <span class="kw">let</span> <span class="ident">japanext</span> <span class="op">=</span> <span class="ident">Japanext::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>).<span class="ident">expect</span>(<span class="string">&quot;Cannot load japanext data&quot;</span>);
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Date::new_gregorian_date</span>(<span class="number">1800</span>, <span class="number">9</span>, <span class="number">1</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to construct Date.&quot;</span>);
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">date</span>.<span class="ident">to_calendar</span>(<span class="ident">japanext</span>).<span class="ident">into_japanese_date</span>().<span class="ident">to_any</span>();
 
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>);
+        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>).<span class="ident">unwrap</span>();
 
-        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="string">&quot;Sep 1, 12 kansei-1789, 12:34 PM&quot;</span>)
+        <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="string">&quot;Sep 1, 12 kansei-1789&quot;</span>)
     }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">test_basic</span>() {

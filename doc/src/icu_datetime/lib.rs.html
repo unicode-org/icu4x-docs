@@ -132,6 +132,18 @@
 <span id="127">127</span>
 <span id="128">128</span>
 <span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -143,7 +155,23 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`TypedDateTimeFormatter`] and [`DateTimeFormatter`] are the main types of the component. They accepts a set of arguments which</span>
 <span class="doccomment">//! allow it to collect necessary data from the [data provider], and once instantiated, can be</span>
-<span class="doccomment">//! used to quickly format any date and time provided.</span>
+<span class="doccomment">//! used to quickly format any date and time provided. There are variants of these types that can format greater or fewer components,</span>
+<span class="doccomment">//! including [`TypedDateFormatter`] &amp; [`DateFormatter`], [`TypedZonedDateTimeFormatter`] &amp; [`ZonedDateTimeFormatter`], [`TimeFormatter`],</span>
+<span class="doccomment">//! and [`TimeZoneFormatter`]</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! These formatters work with types from the [`icu_calendar`] crate, like [`Date`], [`DateTime`], and [`Time`],</span>
+<span class="doccomment">//! and [`icu_timezone::CustomTimeZone`], however other types may be used provided they implement the traits from the [`input`] module.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Each instance of a date-related formatter (i.e. not [`TimeFormatter`] or [`TimeZoneFormatter`]</span>
+<span class="doccomment">//! is associated with a particular [calendar](icu_calendar::Calendar).</span>
+<span class="doccomment">//! The &quot;Typed&quot; vs untyped formatter distinction is to help with this. For example, if you know at compile time that you</span>
+<span class="doccomment">//! will only be formatting Gregorian dates, you can use [`TypedDateTimeFormatter&lt;Gregorian&gt;`](TypedDateTimeFormatter) and the</span>
+<span class="doccomment">//! APIs will make sure that only Gregorian [`DateTime`]s are used with the calendar. On the other hand, if you want to be able to select</span>
+<span class="doccomment">//! the calendar at runtime, you can use [`DateTimeFormatter`] with the calendar specified in the locale, and use it with</span>
+<span class="doccomment">//! [`DateTime`](icu_calendar::DateTime)[`&lt;AnyCalendar&gt;`](icu_calendar::any_calendar::AnyCalendar). These formatters still require dates associated</span>
+<span class="doccomment">//! with the appropriate calendar (though they will convert ISO dates to the calendar if provided), they just do not force the</span>
+<span class="doccomment">//! programmer to pick the calendar at compile time.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
@@ -199,16 +227,12 @@
 <span class="doccomment">//! At the moment, the crate provides only options using the [`Length`] bag, but in the future,</span>
 <span class="doccomment">//! we expect to add more ways to customize the output, like skeletons, and components.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! *Notice:* Rust at the moment does not have a canonical way to represent date and time. We use</span>
-<span class="doccomment">//! [`DateTime`] as an example of the data necessary for ICU [`TypedDateTimeFormatter`] to work, and</span>
-<span class="doccomment">//! [we hope to work with the community](https://github.com/unicode-org/icu4x/blob/main/docs/research/datetime.md)</span>
-<span class="doccomment">//! to develop core date and time APIs that will work as an input for this component. [`DateTime`] additionally</span>
-<span class="doccomment">//! has support for non-Gregorian calendars, which this module will eventually be able to format.</span>
-<span class="doccomment">//!</span>
 <span class="doccomment">//! [data provider]: icu_provider</span>
 <span class="doccomment">//! [`ICU4X`]: ../icu/index.html</span>
 <span class="doccomment">//! [`Length`]: options::length</span>
 <span class="doccomment">//! [`DateTime`]: icu_calendar::DateTime</span>
+<span class="doccomment">//! [`Date`]: icu_calendar::Date</span>
+<span class="doccomment">//! [`Time`]: icu_calendar::types::Time</span>
 
 <span class="comment">// https://github.com/unicode-org/icu4x/blob/main/docs/process/boilerplate.md#library-annotations</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">test</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)), <span class="ident">no_std</span>)]</span>
@@ -249,7 +273,7 @@
 
 <span class="kw">mod</span> <span class="ident">any</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">any</span>::{<span class="ident">DateTimeFormatter</span>, <span class="ident">ZonedDateTimeFormatter</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">any</span>::{<span class="ident">DateFormatter</span>, <span class="ident">DateTimeFormatter</span>, <span class="ident">ZonedDateTimeFormatter</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">calendar::CldrCalendar</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">datetime</span>::{<span class="ident">TimeFormatter</span>, <span class="ident">TypedDateFormatter</span>, <span class="ident">TypedDateTimeFormatter</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error::DateTimeFormatterError</span>;

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659473633132,
+  "lastUpdate": 1659476399966,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -42029,6 +42029,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 85,
             "range": "± 4",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "45f380df3043abb9fd5a7ff9612ff3a66d24cec3",
+          "message": "Update constructors of ZonedDateTimeFormatter and TimeZoneFormatter (#2305)",
+          "timestamp": "2022-08-02T14:22:31-07:00",
+          "tree_id": "d3aeb6d416de9f8498ee6b8b6d222e7603dade8d",
+          "url": "https://github.com/unicode-org/icu4x/commit/45f380df3043abb9fd5a7ff9612ff3a66d24cec3"
+        },
+        "date": 1659475994985,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 108829,
+            "range": "± 371",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22763,
+            "range": "± 163",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66578,
+            "range": "± 454",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 167,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 73,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2cbf99153ff4642caa364170e5daea12c4ae7f9b",
+          "message": "Use DataLocale in Collator (#2296)",
+          "timestamp": "2022-08-02T14:26:58-07:00",
+          "tree_id": "399aab6871dbe329649cdf577641055a1b48ed83",
+          "url": "https://github.com/unicode-org/icu4x/commit/2cbf99153ff4642caa364170e5daea12c4ae7f9b"
+        },
+        "date": 1659476358275,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 110635,
+            "range": "± 2157",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 23066,
+            "range": "± 902",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 67963,
+            "range": "± 1385",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 170,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 66,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 76,
+            "range": "± 1",
             "unit": "ns/iter"
           }
         ]

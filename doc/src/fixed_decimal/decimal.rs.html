@@ -3408,6 +3408,14 @@
 <span id="3403">3403</span>
 <span id="3404">3404</span>
 <span id="3405">3405</span>
+<span id="3406">3406</span>
+<span id="3407">3407</span>
+<span id="3408">3408</span>
+<span id="3409">3409</span>
+<span id="3410">3410</span>
+<span id="3411">3411</span>
+<span id="3412">3412</span>
+<span id="3413">3413</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -3782,13 +3790,24 @@
         <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">is_empty</span>()
     }
 
+    <span class="doccomment">/// Clears all the fields and sets the number to zero.</span>
+    <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">magnitude</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="self">self</span>.<span class="ident">digits</span>.<span class="ident">clear</span>();
+        <span class="self">self</span>.<span class="ident">sign</span> <span class="op">=</span> <span class="ident">Sign::None</span>;
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
+        <span class="self">self</span>.<span class="ident">check_invariants</span>();
+    }
+
     <span class="doccomment">/// Shift the digits by a power of 10, modifying self.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Leading or trailing zeros may be added to keep the digit at magnitude 0 (the last digit</span>
     <span class="doccomment">/// before the decimal separator) visible.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Can fail if the change in magnitude pushes the digits out of bounds; the magnitudes of all</span>
-    <span class="doccomment">/// digits should fit in an i16.</span>
+    <span class="doccomment">/// NOTE: if the operation causes overflow, the number will be set to zero.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3798,28 +3817,40 @@
     <span class="doccomment">/// let mut dec = FixedDecimal::from(42);</span>
     <span class="doccomment">/// assert_eq!(&quot;42&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// dec.multiply_pow10(3).expect(&quot;Bounds are small&quot;);</span>
+    <span class="doccomment">/// dec.multiply_pow10(3);</span>
     <span class="doccomment">/// assert_eq!(&quot;42000&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiply_pow10</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">i16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiply_pow10</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">i16</span>) {
         <span class="kw">match</span> <span class="ident">delta</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="number">0</span>) {
             <span class="ident">Ordering::Greater</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="self">self</span>
-                    .<span class="ident">upper_magnitude</span>
-                    .<span class="ident">checked_add</span>(<span class="ident">delta</span>)
-                    .<span class="ident">ok_or</span>(<span class="ident">Error::Limit</span>)<span class="question-mark">?</span>;
-                <span class="comment">// If we get here, then the magnitude change is in-bounds.</span>
-                <span class="kw">let</span> <span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">+</span> <span class="ident">delta</span>;
-                <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="number">0</span>, <span class="ident">lower_magnitude</span>);
+                <span class="kw">let</span> <span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">upper_magnitude</span>.<span class="ident">checked_add</span>(<span class="ident">delta</span>);
+                <span class="kw">match</span> <span class="ident">upper_magnitude</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">upper_magnitude</span>) =&gt; {
+                        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">upper_magnitude</span>;
+                        <span class="comment">// If we get here, then the magnitude change is in-bounds.</span>
+                        <span class="kw">let</span> <span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">+</span> <span class="ident">delta</span>;
+                        <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="number">0</span>, <span class="ident">lower_magnitude</span>);
+                    }
+                    <span class="prelude-val">None</span> =&gt; {
+                        <span class="comment">// there is an overflow</span>
+                        <span class="self">self</span>.<span class="ident">clear</span>();
+                    }
+                }
             }
             <span class="ident">Ordering::Less</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="self">self</span>
-                    .<span class="ident">lower_magnitude</span>
-                    .<span class="ident">checked_add</span>(<span class="ident">delta</span>)
-                    .<span class="ident">ok_or</span>(<span class="ident">Error::Limit</span>)<span class="question-mark">?</span>;
-                <span class="comment">// If we get here, then the magnitude change is in-bounds.</span>
-                <span class="kw">let</span> <span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">+</span> <span class="ident">delta</span>;
-                <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="number">0</span>, <span class="ident">upper_magnitude</span>);
+                <span class="kw">let</span> <span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">lower_magnitude</span>.<span class="ident">checked_add</span>(<span class="ident">delta</span>);
+                <span class="kw">match</span> <span class="ident">lower_magnitude</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">lower_magnitude</span>) =&gt; {
+                        <span class="self">self</span>.<span class="ident">lower_magnitude</span> <span class="op">=</span> <span class="ident">lower_magnitude</span>;
+                        <span class="comment">// If we get here, then the magnitude change is in-bounds.</span>
+                        <span class="kw">let</span> <span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">+</span> <span class="ident">delta</span>;
+                        <span class="self">self</span>.<span class="ident">upper_magnitude</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="number">0</span>, <span class="ident">upper_magnitude</span>);
+                    }
+                    <span class="prelude-val">None</span> =&gt; {
+                        <span class="comment">// there is an overflow</span>
+                        <span class="self">self</span>.<span class="ident">clear</span>();
+                    }
+                }
             }
             <span class="ident">Ordering::Equal</span> =&gt; {}
         };
@@ -3828,7 +3859,6 @@
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="self">self</span>.<span class="ident">check_invariants</span>();
-        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Shift the digits by a power of 10, consuming self and returning a new object if successful.</span>
@@ -3836,8 +3866,7 @@
     <span class="doccomment">/// Leading or trailing zeros may be added to keep the digit at magnitude 0 (the last digit</span>
     <span class="doccomment">/// before the decimal separator) visible.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Can fail if the change in magnitude pushes the digits out of bounds; the magnitudes of all</span>
-    <span class="doccomment">/// digits should fit in an i16.</span>
+    <span class="doccomment">/// NOTE: if the operation causes overflow, the returned number will be zero.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -3845,15 +3874,12 @@
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let dec = FixedDecimal::from(42)</span>
-    <span class="doccomment">///     .multiplied_pow10(3)</span>
-    <span class="doccomment">///     .expect(&quot;Bounds are small&quot;);</span>
+    <span class="doccomment">///     .multiplied_pow10(3);</span>
     <span class="doccomment">/// assert_eq!(&quot;42000&quot;, dec.to_string());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiplied_pow10</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">i16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">multiply_pow10</span>(<span class="ident">delta</span>) {
-            <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="self">self</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">err</span>),
-        }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multiplied_pow10</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">delta</span>: <span class="ident">i16</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">multiply_pow10</span>(<span class="ident">delta</span>);
+        <span class="self">self</span>
     }
 
     <span class="doccomment">/// Returns the sign.</span>
@@ -3977,7 +4003,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let dec = FixedDecimal::from(123400)</span>
     <span class="doccomment">///     .multiplied_pow10(-4)</span>
-    <span class="doccomment">///     .expect(&quot;in-bounds&quot;)</span>
     <span class="doccomment">///     .padded_start(4);</span>
     <span class="doccomment">/// assert_eq!(&quot;0012.3400&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
@@ -3997,7 +4022,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from(123400)</span>
     <span class="doccomment">///     .multiplied_pow10(-4)</span>
-    <span class="doccomment">///     .expect(&quot;in-bounds&quot;)</span>
     <span class="doccomment">///     .padded_start(4);</span>
     <span class="doccomment">/// assert_eq!(&quot;0012.3400&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
@@ -4010,8 +4034,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// # use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from(22)</span>
-    <span class="doccomment">///     .multiplied_pow10(-4)</span>
-    <span class="doccomment">///     .expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">///     .multiplied_pow10(-4);</span>
     <span class="doccomment">/// assert_eq!(&quot;0.0022&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.trim_start();</span>
@@ -4032,7 +4055,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let dec = FixedDecimal::from(123400)</span>
     <span class="doccomment">///     .multiplied_pow10(-4)</span>
-    <span class="doccomment">///     .expect(&quot;in-bounds&quot;)</span>
     <span class="doccomment">///     .padded_start(4);</span>
     <span class="doccomment">/// assert_eq!(&quot;0012.3400&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
@@ -4052,7 +4074,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut dec = FixedDecimal::from(123400)</span>
     <span class="doccomment">///     .multiplied_pow10(-4)</span>
-    <span class="doccomment">///     .expect(&quot;in-bounds&quot;)</span>
     <span class="doccomment">///     .padded_start(4);</span>
     <span class="doccomment">/// assert_eq!(&quot;0012.3400&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
@@ -4153,7 +4174,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3).expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3);</span>
     <span class="doccomment">/// assert_eq!(&quot;4235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(&quot;04235.970&quot;, dec.clone().with_max_position(5).to_string());</span>
@@ -4185,7 +4206,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use fixed_decimal::FixedDecimal;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3).expect(&quot;in-bounds&quot;);</span>
+    <span class="doccomment">/// let mut dec = FixedDecimal::from(4235970).multiplied_pow10(-3);</span>
     <span class="doccomment">/// assert_eq!(&quot;4235.970&quot;, dec.to_string());</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// dec.set_max_position(5);</span>
@@ -4965,8 +4986,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let integer = FixedDecimal::from(123);</span>
     <span class="doccomment">/// let fraction = FixedDecimal::from(456)</span>
-    <span class="doccomment">///     .multiplied_pow10(-3)</span>
-    <span class="doccomment">///     .expect(&quot;in-range&quot;);</span>
+    <span class="doccomment">///     .multiplied_pow10(-3);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let result =  integer.concatenated_right(fraction).expect(&quot;nonoverlapping&quot;);</span>
     <span class="doccomment">///</span>
@@ -4994,8 +5014,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut integer = FixedDecimal::from(123);</span>
     <span class="doccomment">/// let fraction = FixedDecimal::from(456)</span>
-    <span class="doccomment">///     .multiplied_pow10(-3)</span>
-    <span class="doccomment">///     .expect(&quot;nonoverlapping&quot;);</span>
+    <span class="doccomment">///     .multiplied_pow10(-3);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// integer.concatenate_right(fraction);</span>
     <span class="doccomment">///</span>
@@ -5122,8 +5141,7 @@
     <span class="doccomment">/// use writeable::Writeable;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let dec = FixedDecimal::from(-5000)</span>
-    <span class="doccomment">///     .multiplied_pow10(-2)</span>
-    <span class="doccomment">///     .expect(&quot;Bounds are small&quot;);</span>
+    <span class="doccomment">///     .multiplied_pow10(-2);</span>
     <span class="doccomment">/// let result = dec.write_to_string();</span>
     <span class="doccomment">/// assert_eq!(LengthHint::exact(6), dec.write_len());</span>
     <span class="doccomment">/// ```</span>
@@ -5322,7 +5340,7 @@
                 <span class="ident">pow</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">digit</span> <span class="op">-</span> <span class="string">b&#39;0&#39;</span>) <span class="kw">as</span> <span class="ident">i16</span>;
             }
 
-            <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="ident">pos_neg</span> <span class="op">*</span> <span class="ident">pow</span>)<span class="question-mark">?</span>;
+            <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="ident">pos_neg</span> <span class="op">*</span> <span class="ident">pow</span>);
 
             <span class="comment">// Clean up magnitude after multiplication</span>
             <span class="kw">if</span> <span class="ident">dec</span>.<span class="ident">magnitude</span> <span class="op">&gt;</span> <span class="number">0</span> {
@@ -5749,7 +5767,7 @@
     <span class="kw">for</span> <span class="ident">cas</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">cases</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span>: <span class="ident">FixedDecimal</span> <span class="op">=</span> <span class="ident">cas</span>.<span class="ident">input</span>.<span class="ident">into</span>();
         <span class="comment">// println!(&quot;{}&quot;, cas.input + 0.01);</span>
-        <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="ident">cas</span>.<span class="ident">delta</span>).<span class="ident">unwrap</span>();
+        <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="ident">cas</span>.<span class="ident">delta</span>);
         <span class="macro">writeable::assert_writeable_eq!</span>(<span class="ident">dec</span>, <span class="ident">cas</span>.<span class="ident">expected</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="ident">cas</span>);
     }
 }
@@ -5931,12 +5949,13 @@
 <span class="kw">fn</span> <span class="ident">test_upper_magnitude_bounds</span>() {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span>: <span class="ident">FixedDecimal</span> <span class="op">=</span> <span class="number">98765</span>.<span class="ident">into</span>();
     <span class="macro">assert_eq!</span>(<span class="ident">dec</span>.<span class="ident">upper_magnitude</span>, <span class="number">4</span>);
-    <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="number">32763</span>).<span class="ident">unwrap</span>();
+    <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="number">32763</span>);
     <span class="macro">assert_eq!</span>(<span class="ident">dec</span>.<span class="ident">upper_magnitude</span>, <span class="ident">core::i16::MAX</span>);
     <span class="macro">assert_eq!</span>(<span class="ident">dec</span>.<span class="ident">nonzero_magnitude_left</span>(), <span class="ident">core::i16::MAX</span>);
     <span class="kw">let</span> <span class="ident">dec_backup</span> <span class="op">=</span> <span class="ident">dec</span>.<span class="ident">clone</span>();
-    <span class="macro">assert_eq!</span>(<span class="ident">Error::Limit</span>, <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="number">1</span>).<span class="ident">unwrap_err</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">dec</span>, <span class="ident">dec_backup</span>, <span class="string">&quot;Value should be unchanged on failure&quot;</span>);
+    <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="number">1</span>);
+    <span class="macro">assert!</span>(<span class="ident">dec</span>.<span class="ident">is_zero</span>());
+    <span class="macro">assert_ne!</span>(<span class="ident">dec</span>, <span class="ident">dec_backup</span>, <span class="string">&quot;Value should be unchanged on failure&quot;</span>);
 
     <span class="comment">// Checking from_str for dec (which is valid)</span>
     <span class="kw">let</span> <span class="ident">dec_roundtrip</span> <span class="op">=</span> <span class="ident">FixedDecimal::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">dec</span>.<span class="ident">to_string</span>()).<span class="ident">unwrap</span>();
@@ -5947,12 +5966,13 @@
 <span class="kw">fn</span> <span class="ident">test_lower_magnitude_bounds</span>() {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span>: <span class="ident">FixedDecimal</span> <span class="op">=</span> <span class="number">98765</span>.<span class="ident">into</span>();
     <span class="macro">assert_eq!</span>(<span class="ident">dec</span>.<span class="ident">lower_magnitude</span>, <span class="number">0</span>);
-    <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="op">-</span><span class="number">32768</span>).<span class="ident">unwrap</span>();
+    <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="op">-</span><span class="number">32768</span>);
     <span class="macro">assert_eq!</span>(<span class="ident">dec</span>.<span class="ident">lower_magnitude</span>, <span class="ident">core::i16::MIN</span>);
     <span class="macro">assert_eq!</span>(<span class="ident">dec</span>.<span class="ident">nonzero_magnitude_right</span>(), <span class="ident">core::i16::MIN</span>);
     <span class="kw">let</span> <span class="ident">dec_backup</span> <span class="op">=</span> <span class="ident">dec</span>.<span class="ident">clone</span>();
-    <span class="macro">assert_eq!</span>(<span class="ident">Error::Limit</span>, <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="op">-</span><span class="number">1</span>).<span class="ident">unwrap_err</span>());
-    <span class="macro">assert_eq!</span>(<span class="ident">dec</span>, <span class="ident">dec_backup</span>, <span class="string">&quot;Value should be unchanged on failure&quot;</span>);
+    <span class="ident">dec</span>.<span class="ident">multiply_pow10</span>(<span class="op">-</span><span class="number">1</span>);
+    <span class="macro">assert!</span>(<span class="ident">dec</span>.<span class="ident">is_zero</span>());
+    <span class="macro">assert_ne!</span>(<span class="ident">dec</span>, <span class="ident">dec_backup</span>);
 
     <span class="comment">// Checking from_str for dec (which is valid)</span>
     <span class="kw">let</span> <span class="ident">dec_roundtrip</span> <span class="op">=</span> <span class="ident">FixedDecimal::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">dec</span>.<span class="ident">to_string</span>()).<span class="ident">unwrap</span>();
@@ -6532,9 +6552,7 @@
     <span class="macro">assert_eq!</span>(<span class="string">&quot;-0.0&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="comment">// Test Truncate Right</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from</span>(<span class="number">4235970</span>)
-        .<span class="ident">multiplied_pow10</span>(<span class="op">-</span><span class="number">3</span>)
-        .<span class="ident">expect</span>(<span class="string">&quot;in-bounds&quot;</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from</span>(<span class="number">4235970</span>).<span class="ident">multiplied_pow10</span>(<span class="op">-</span><span class="number">3</span>);
     <span class="macro">assert_eq!</span>(<span class="string">&quot;4235.970&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="ident">dec</span>.<span class="ident">trunc</span>(<span class="op">-</span><span class="number">5</span>);
@@ -6568,9 +6586,7 @@
     <span class="macro">assert_eq!</span>(<span class="string">&quot;0.0&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="comment">// Test trunced</span>
-    <span class="kw">let</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from</span>(<span class="number">4235970</span>)
-        .<span class="ident">multiplied_pow10</span>(<span class="op">-</span><span class="number">3</span>)
-        .<span class="ident">expect</span>(<span class="string">&quot;in-bounds&quot;</span>);
+    <span class="kw">let</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident">FixedDecimal::from</span>(<span class="number">4235970</span>).<span class="ident">multiplied_pow10</span>(<span class="op">-</span><span class="number">3</span>);
     <span class="macro">assert_eq!</span>(<span class="string">&quot;4235.970&quot;</span>, <span class="ident">dec</span>.<span class="ident">to_string</span>());
 
     <span class="macro">assert_eq!</span>(<span class="string">&quot;4235.97000&quot;</span>, <span class="ident">dec</span>.<span class="ident">clone</span>().<span class="ident">trunced</span>(<span class="op">-</span><span class="number">5</span>).<span class="ident">to_string</span>());

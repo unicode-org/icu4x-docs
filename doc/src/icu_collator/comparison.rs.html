@@ -848,14 +848,6 @@
 <span id="843">843</span>
 <span id="844">844</span>
 <span id="845">845</span>
-<span id="846">846</span>
-<span id="847">847</span>
-<span id="848">848</span>
-<span id="849">849</span>
-<span id="850">850</span>
-<span id="851">851</span>
-<span id="852">852</span>
-<span id="853">853</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -879,10 +871,9 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CollationReorderingV1Marker</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CollationSpecialPrimariesV1Marker</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AlternateHandling</span>, <span class="ident">CollatorOptions</span>, <span class="ident">MaxVariable</span>, <span class="ident">Strength</span>};
-<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::Locale</span>;
+<span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_value</span> <span class="kw">as</span> <span class="ident">value</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::provider::CanonicalDecompositionDataV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::provider::CanonicalDecompositionTablesV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::Decomposition</span>;
@@ -931,9 +922,9 @@
 
 <span class="kw">impl</span> <span class="ident">Collator</span> {
     <span class="doccomment">/// Instantiates a collator for a given locale with the given options</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
-        <span class="ident">locale</span>: <span class="ident">T</span>,
+        <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
         <span class="ident">options</span>: <span class="ident">CollatorOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">CollatorError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
@@ -948,7 +939,6 @@
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClassV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
-        <span class="comment">// let locale: Locale = locale.into();</span>
         <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> {
             <span class="comment">// Remove irrelevant extensions, i.e. everything but -u-co-.</span>
             <span class="comment">//</span>
@@ -958,30 +948,24 @@
             <span class="comment">// the default, the code here that omits the explicit</span>
             <span class="comment">// variant if it matches the default should become</span>
             <span class="comment">// unnecessary.</span>
-            <span class="kw">let</span> <span class="ident">original_locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">filtered_locale</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="ident">original_locale</span>.<span class="ident">id</span>.<span class="ident">into</span>();
+            <span class="kw">let</span> <span class="ident">original_locale</span> <span class="op">=</span> <span class="ident">locale</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">filtered_locale</span> <span class="op">=</span> <span class="ident">alloc::borrow::Cow::Borrowed</span>(<span class="ident">locale</span>);
 
             <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="macro">icu_locid::extensions_unicode_key!</span>(<span class="string">&quot;co&quot;</span>);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">variant</span>) <span class="op">=</span> <span class="ident">original_locale</span>.<span class="ident">extensions</span>.<span class="ident">unicode</span>.<span class="ident">keywords</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
-                <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">variant</span>.<span class="ident">to_string</span>();
-                <span class="kw">let</span> <span class="ident">zh</span> <span class="op">=</span> <span class="ident">filtered_locale</span>.<span class="ident">id</span>.<span class="ident">language</span> <span class="op">==</span> <span class="macro">icu_locid::subtags_language!</span>(<span class="string">&quot;zh&quot;</span>);
-                <span class="kw">let</span> <span class="ident">sv</span> <span class="op">=</span> <span class="ident">filtered_locale</span>.<span class="ident">id</span>.<span class="ident">language</span> <span class="op">==</span> <span class="macro">icu_locid::subtags_language!</span>(<span class="string">&quot;sv&quot;</span>);
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">variant</span>) <span class="op">=</span> <span class="ident">original_locale</span>.<span class="ident">get_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
+                <span class="kw">let</span> <span class="ident">zh</span> <span class="op">=</span> <span class="ident">filtered_locale</span>.<span class="ident">language</span>() <span class="op">==</span> <span class="macro">icu_locid::subtags_language!</span>(<span class="string">&quot;zh&quot;</span>);
+                <span class="kw">let</span> <span class="ident">sv</span> <span class="op">=</span> <span class="ident">filtered_locale</span>.<span class="ident">language</span>() <span class="op">==</span> <span class="macro">icu_locid::subtags_language!</span>(<span class="string">&quot;sv&quot;</span>);
                 <span class="comment">// Omit the explicit collation variant if it is the default.</span>
                 <span class="comment">// &quot;standard&quot; is the default for all languages except zh and sv.</span>
-                <span class="kw">if</span> <span class="op">!</span>((<span class="op">!</span><span class="ident">zh</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">sv</span> <span class="op">&amp;&amp;</span> <span class="ident">s</span> <span class="op">==</span> <span class="string">&quot;standard&quot;</span>)
-                    <span class="op">|</span><span class="op">|</span> (<span class="ident">zh</span> <span class="op">&amp;&amp;</span> <span class="ident">s</span> <span class="op">==</span> <span class="string">&quot;pinyin&quot;</span>)
-                    <span class="op">|</span><span class="op">|</span> (<span class="ident">sv</span> <span class="op">&amp;&amp;</span> <span class="ident">s</span> <span class="op">==</span> <span class="string">&quot;reformed&quot;</span>))
+                <span class="kw">if</span> <span class="op">!</span>((<span class="op">!</span><span class="ident">zh</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">sv</span> <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;standard&quot;</span>))
+                    <span class="op">|</span><span class="op">|</span> (<span class="ident">zh</span> <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;pinyin&quot;</span>))
+                    <span class="op">|</span><span class="op">|</span> (<span class="ident">sv</span> <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;reformed&quot;</span>)))
                 {
-                    <span class="ident">filtered_locale</span>
-                        .<span class="ident">extensions</span>
-                        .<span class="ident">unicode</span>
-                        .<span class="ident">keywords</span>
-                        .<span class="ident">set</span>(<span class="ident">key</span>, <span class="ident">variant</span>.<span class="ident">clone</span>());
+                    <span class="ident">filtered_locale</span>.<span class="ident">to_mut</span>().<span class="ident">set_unicode_ext</span>(<span class="ident">key</span>, <span class="ident">variant</span>);
                 }
             }
             <span class="ident">filtered_locale</span>
         };
-        <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">req</span> <span class="op">=</span> <span class="ident">DataRequest</span> {
             <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">locale</span>,
             <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),

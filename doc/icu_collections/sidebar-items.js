@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["codepointtrie","This module provides a data structure for an time-efficient lookup of values associated to code points."]]});
+initSidebarItems({"mod":[["codepointinvlist","This module provides necessary functionality for highly efficient querying of sets of Unicode characters."],["codepointtrie","This module provides a data structure for an time-efficient lookup of values associated to code points."]]});

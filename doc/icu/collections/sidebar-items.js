@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["codepointtrie","This module provides a data structure for an time-efficient lookup of values associated to code points."]]});

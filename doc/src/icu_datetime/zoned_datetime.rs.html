@@ -259,7 +259,6 @@
 <span id="254">254</span>
 <span id="255">255</span>
 <span id="256">256</span>
-<span id="257">257</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -278,10 +277,7 @@
     <span class="ident">options::DateTimeFormatterOptions</span>,
     <span class="ident">provider</span>::{
         <span class="self">self</span>,
-        <span class="ident">calendar</span>::{
-            <span class="ident">DateLengthsV1Marker</span>, <span class="ident">DateSkeletonPatternsV1Marker</span>, <span class="ident">DateSymbolsV1Marker</span>,
-            <span class="ident">TimeLengthsV1Marker</span>, <span class="ident">TimeSymbolsV1Marker</span>,
-        },
+        <span class="ident">calendar</span>::{<span class="ident">DateSkeletonPatternsV1Marker</span>, <span class="ident">TimeLengthsV1Marker</span>, <span class="ident">TimeSymbolsV1Marker</span>},
         <span class="ident">week_data::WeekDataV1Marker</span>,
     },
     <span class="ident">raw</span>,
@@ -369,9 +365,9 @@
         <span class="ident">time_zone_format_options</span>: <span class="ident">TimeZoneFormatterOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSymbolsV1Marker</span><span class="op">&gt;</span>
+        <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">CldrCalendar</span><span class="op">&gt;</span><span class="ident">::DateSymbolsV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span> <span class="kw">as</span> <span class="ident">CldrCalendar</span><span class="op">&gt;</span><span class="ident">::DateLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeSymbolsV1Marker</span><span class="op">&gt;</span>
-            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">WeekDataV1Marker</span><span class="op">&gt;</span>
@@ -388,13 +384,15 @@
     {
         <span class="comment">// TODO(#2188): Avoid cloning the DataLocale by passing the calendar</span>
         <span class="comment">// separately into the raw formatter.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale_with_cal</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
 
-        <span class="ident">calendar::potentially_fixup_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale</span>)<span class="question-mark">?</span>;
+        <span class="ident">calendar::potentially_fixup_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">locale_with_cal</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(
             <span class="ident">raw::ZonedDateTimeFormatter::try_new</span>(
                 <span class="ident">provider</span>,
-                <span class="ident">locale</span>,
+                <span class="ident">calendar::load_lengths_for_cldr_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">provider</span>, <span class="ident">locale</span>)<span class="question-mark">?</span>,
+                <span class="op">|</span><span class="op">|</span> <span class="ident">calendar::load_symbols_for_cldr_calendar</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">provider</span>, <span class="ident">locale</span>),
+                <span class="ident">locale_with_cal</span>,
                 <span class="ident">date_time_format_options</span>,
                 <span class="ident">time_zone_format_options</span>,
             )<span class="question-mark">?</span>,

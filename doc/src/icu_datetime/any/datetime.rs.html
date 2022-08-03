@@ -411,6 +411,53 @@
 <span id="406">406</span>
 <span id="407">407</span>
 <span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -468,6 +515,53 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// let value = dtf.format_to_string(&amp;any_datetime).expect(&quot;calendars should match&quot;);</span>
 <span class="doccomment">/// assert_eq!(value, &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Since this works with [`AnyCalendar`], you can use [`DateTime`](icu_calendar::DateTime) with [`AnyCalendar`]</span>
+<span class="doccomment">/// to have a date in a runtime-selected calendar:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu::calendar::{AnyCalendar, AnyCalendarKind, DateTime, types::Time};</span>
+<span class="doccomment">/// use icu::datetime::{options::length, DateTimeFormatter};</span>
+<span class="doccomment">/// use icu::locid::Locale;</span>
+<span class="doccomment">/// # use std::str::FromStr;</span>
+<span class="doccomment">/// # use std::rc::Rc;</span>
+<span class="doccomment">/// # use std::convert::TryInto;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let locale = Locale::from_str(&quot;en-u-ca-japanese&quot;).unwrap(); // English with the Japanese calendar</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let calendar = AnyCalendar::try_new_with_buffer_provider(&amp;provider, (&amp;locale).try_into().unwrap())</span>
+<span class="doccomment">///                    .expect(&quot;constructing AnyCalendar failed&quot;);</span>
+<span class="doccomment">/// let calendar = Rc::new(calendar); // Avoid cloning it</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // manually construct a datetime in this calendar</span>
+<span class="doccomment">/// let manual_time = Time::try_new(12, 33, 12, 0).expect(&quot;failed to construct Time&quot;);</span>
+<span class="doccomment">/// // construct from era code, year, month code, day, time, and a calendar</span>
+<span class="doccomment">/// // This is March 28, 15 Heisei</span>
+<span class="doccomment">/// let manual_datetime = DateTime::new_from_codes(&quot;heisei&quot;.parse().unwrap(), 15, &quot;M03&quot;.parse().unwrap(), 28,</span>
+<span class="doccomment">///                                                manual_time, calendar.clone())</span>
+<span class="doccomment">///                     .expect(&quot;Failed to construct DateTime manually&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // construct another datetime by converting from ISO</span>
+<span class="doccomment">/// let iso_datetime = DateTime::new_iso_datetime(2020, 9, 1, 12, 34, 28)</span>
+<span class="doccomment">///     .expect(&quot;Failed to construct ISO DateTime.&quot;);</span>
+<span class="doccomment">/// let iso_converted = iso_datetime.to_calendar(calendar);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let mut options = length::Bag::from_date_time_style(length::Date::Medium, length::Time::Short);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let dtf = DateTimeFormatter::try_new_with_buffer_provider(&amp;provider, &amp;locale.into(), &amp;options.into())</span>
+<span class="doccomment">///     .expect(&quot;Failed to create TypedDateTimeFormatter instance.&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let manual_value = dtf.format_to_string(&amp;manual_datetime).expect(&quot;calendars should match&quot;);</span>
+<span class="doccomment">/// assert_eq!(manual_value, &quot;Mar 28, 15 Heisei, 12:33 PM&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let converted_value = dtf.format_to_string(&amp;iso_converted).expect(&quot;calendars should match&quot;);</span>
+<span class="doccomment">/// assert_eq!(converted_value, &quot;Sep 1, 2 Reiwa, 12:34 PM&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
@@ -614,7 +708,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale_with_cal</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">clone</span>();
 
         <span class="comment">// TODO (#2038), DO NOT SHIP 1.0 without fixing this</span>
-        <span class="kw">let</span> <span class="ident">kind</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">kind</span>) <span class="op">=</span> <span class="ident">AnyCalendarKind::from_data_locale</span>(<span class="kw-2">&amp;</span><span class="ident">locale_with_cal</span>) {
+        <span class="kw">let</span> <span class="ident">kind</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">kind</span>) <span class="op">=</span> <span class="ident">AnyCalendarKind::from_data_locale</span>(<span class="kw-2">&amp;</span><span class="ident">locale_with_cal</span>) {
             <span class="ident">kind</span>
         } <span class="kw">else</span> {
             <span class="ident">locale_with_cal</span>.<span class="ident">set_unicode_ext</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="macro">value!</span>(<span class="string">&quot;gregory&quot;</span>));

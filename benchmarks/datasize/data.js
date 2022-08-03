@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659542552210,
+  "lastUpdate": 1659551453063,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -23033,6 +23033,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/08b8eb0257e99867a2f649c633cb6418e079df03"
         },
         "date": 1659542511968,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3946612,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c21dbde686b3c84c7affddd332f372ba04c2439e",
+          "message": "Fix up icu_calendar constructors (#2326)",
+          "timestamp": "2022-08-03T11:00:54-07:00",
+          "tree_id": "20e772a210779e3dcb93ba3ddcdb1ae6bbed97a0",
+          "url": "https://github.com/unicode-org/icu4x/commit/c21dbde686b3c84c7affddd332f372ba04c2439e"
+        },
+        "date": 1659549729604,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3946612,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "415beb501f6eeeaedc90ea620905256a5a876413",
+          "message": "Fix up icu_collator constructors (#2327)",
+          "timestamp": "2022-08-03T11:28:59-07:00",
+          "tree_id": "fc3a62fc40b13b9e2bbe9bf21aa3eaa6573977de",
+          "url": "https://github.com/unicode-org/icu4x/commit/415beb501f6eeeaedc90ea620905256a5a876413"
+        },
+        "date": 1659551414716,
         "tool": "ndjson",
         "benches": [
           {

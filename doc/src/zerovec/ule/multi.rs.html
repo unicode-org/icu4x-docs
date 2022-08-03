@@ -152,11 +152,15 @@
 <span id="147">147</span>
 <span id="148">148</span>
 <span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::varzerovec::Index32</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::VarZeroSlice</span>;
 <span class="kw">use</span> <span class="ident">core::mem</span>;
 
@@ -170,7 +174,7 @@
 <span class="doccomment">/// Internally, it is represented by a VarZeroSlice.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MultiFieldsULE</span>(<span class="ident">VarZeroSlice</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MultiFieldsULE</span>(<span class="ident">VarZeroSlice</span><span class="op">&lt;</span>[<span class="ident">u8</span>], <span class="ident">Index32</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">MultiFieldsULE</span> {
     <span class="doccomment">/// Compute the amount of bytes needed to support elements with lengths `lengths`</span>
@@ -180,7 +184,7 @@
         <span class="kw">unsafe</span> {
             <span class="comment">// safe since BlankSliceEncoder is transparent over usize</span>
             <span class="kw">let</span> <span class="ident">lengths</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="ident">lengths</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">usize</span>] <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">BlankSliceEncoder</span>]);
-            <span class="ident"><span class="kw">crate</span>::varzerovec::components::compute_serializable_len</span>(<span class="ident">lengths</span>)
+            <span class="ident"><span class="kw">crate</span>::varzerovec::components::compute_serializable_len</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">Index32</span><span class="op">&gt;</span>(<span class="ident">lengths</span>)
                 .<span class="ident">expect</span>(<span class="string">&quot;Too many bytes to encode&quot;</span>) <span class="kw">as</span> <span class="ident">usize</span>
         }
     }
@@ -193,15 +197,17 @@
         <span class="kw">unsafe</span> {
             <span class="comment">// safe since BlankSliceEncoder is transparent over usize</span>
             <span class="kw">let</span> <span class="ident">lengths</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="ident">lengths</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">usize</span>] <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">BlankSliceEncoder</span>]);
-            <span class="ident"><span class="kw">crate</span>::varzerovec::components::write_serializable_bytes</span>(<span class="ident">lengths</span>, <span class="ident">output</span>);
+            <span class="ident"><span class="kw">crate</span>::varzerovec::components::write_serializable_bytes</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">Index32</span><span class="op">&gt;</span>(
+                <span class="ident">lengths</span>, <span class="ident">output</span>,
+            );
             <span class="macro">debug_assert!</span>(
                 <span class="op">&lt;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validate_byte_slice</span>(<span class="ident">output</span>).<span class="ident">is_ok</span>(),
                 <span class="string">&quot;Encoded slice must be valid VarZeroSlice&quot;</span>
             );
             <span class="comment">// Safe since write_serializable_bytes produces a valid VarZeroSlice buffer</span>
-            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked_mut</span>(<span class="ident">output</span>);
+            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">VarZeroSlice</span><span class="op">&lt;</span>[<span class="ident">u8</span>], <span class="ident">Index32</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from_byte_slice_unchecked_mut</span>(<span class="ident">output</span>);
             <span class="comment">// safe since `Self` is transparent over VarZeroSlice</span>
-            <span class="ident">mem::transmute</span>::<span class="op">&lt;</span><span class="kw-2">&amp;mut</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="kw-2">&amp;mut</span> <span class="self">Self</span><span class="op">&gt;</span>(<span class="ident">slice</span>)
+            <span class="ident">mem::transmute</span>::<span class="op">&lt;</span><span class="kw-2">&amp;mut</span> <span class="ident">VarZeroSlice</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Index32</span><span class="op">&gt;</span>, <span class="kw-2">&amp;mut</span> <span class="self">Self</span><span class="op">&gt;</span>(<span class="ident">slice</span>)
         }
     }
 

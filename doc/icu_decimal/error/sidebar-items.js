@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","A list of possible error outcomes for operations in this crate."]]});

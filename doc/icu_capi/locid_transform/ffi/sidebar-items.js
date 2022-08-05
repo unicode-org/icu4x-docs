@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ICU4XTransformResult","FFI version of `TransformResult`."]],"struct":[["ICU4XLocaleCanonicalizer","A locale canonicalizer."],["ICU4XLocaleExpander","A locale expander."]]});

@@ -523,9 +523,6 @@
 <span id="518">518</span>
 <span id="519">519</span>
 <span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -954,20 +951,24 @@
     <span class="ident">short_metazone_names</span>
 );
 
+<span class="kw">fn</span> <span class="ident">convert_cldr_time_variant</span>(<span class="ident">cldr_time_variant</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">TimeVariant</span> {
+    <span class="kw">match</span> <span class="ident">cldr_time_variant</span> {
+        <span class="string">&quot;standard&quot;</span> =&gt; <span class="ident">TimeVariant::standard</span>(),
+        <span class="string">&quot;daylight&quot;</span> =&gt; <span class="ident">TimeVariant::daylight</span>(),
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(
+            <span class="string">&quot;Time-zone variant was not compatible with TimeVariant: {}&quot;</span>,
+            <span class="ident">cldr_time_variant</span>
+        ),
+    }
+}
+
 <span class="kw">fn</span> <span class="ident">iterate_zone_format_for_meta_zone_id</span>(
     <span class="ident">pair</span>: (<span class="ident">MetaZoneId</span>, <span class="ident">ZoneFormat</span>),
 ) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">MetaZoneId</span>, <span class="ident">TimeVariant</span>, <span class="ident">String</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> (<span class="ident">key1</span>, <span class="ident">zf</span>) <span class="op">=</span> <span class="ident">pair</span>;
     <span class="ident">zf</span>.<span class="number">0</span>.<span class="ident">into_iter</span>()
         .<span class="ident">filter</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="op">!</span><span class="ident">key</span>.<span class="ident">eq</span>(<span class="string">&quot;generic&quot;</span>))
-        .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">key</span>, <span class="ident">value</span>)<span class="op">|</span> {
-            (
-                <span class="ident">key1</span>,
-                <span class="ident">key</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TimeVariant</span><span class="op">&gt;</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;Time-zone variant was not compatible with TimeVariant&quot;</span>),
-                <span class="ident">value</span>,
-            )
-        })
+        .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">key</span>, <span class="ident">value</span>)<span class="op">|</span> (<span class="ident">key1</span>, <span class="ident">convert_cldr_time_variant</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>), <span class="ident">value</span>))
 }
 
 <span class="kw">fn</span> <span class="ident">iterate_zone_format_for_time_zone_id</span>(
@@ -976,14 +977,7 @@
     <span class="kw">let</span> (<span class="ident">key1</span>, <span class="ident">zf</span>) <span class="op">=</span> <span class="ident">pair</span>;
     <span class="ident">zf</span>.<span class="number">0</span>.<span class="ident">into_iter</span>()
         .<span class="ident">filter</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="op">!</span><span class="ident">key</span>.<span class="ident">eq</span>(<span class="string">&quot;generic&quot;</span>))
-        .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">key</span>, <span class="ident">value</span>)<span class="op">|</span> {
-            (
-                <span class="ident">key1</span>,
-                <span class="ident">key</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TimeVariant</span><span class="op">&gt;</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;Time-zone variant was not compatible with TimeVariant&quot;</span>),
-                <span class="ident">value</span>,
-            )
-        })
+        .<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">key</span>, <span class="ident">value</span>)<span class="op">|</span> (<span class="ident">key1</span>, <span class="ident">convert_cldr_time_variant</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>), <span class="ident">value</span>))
 }
 
 <span class="kw">fn</span> <span class="ident">metazone_periods_iter</span>(

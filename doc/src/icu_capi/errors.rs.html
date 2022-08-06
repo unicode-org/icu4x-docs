@@ -219,6 +219,20 @@
 <span id="214">214</span>
 <span id="215">215</span>
 <span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -229,6 +243,7 @@
 <span class="kw">use</span> <span class="ident">icu_calendar::DateTimeError</span>;
 <span class="kw">use</span> <span class="ident">icu_datetime::DateTimeFormatterError</span>;
 <span class="kw">use</span> <span class="ident">icu_decimal::FixedDecimalFormatterError</span>;
+<span class="kw">use</span> <span class="ident">icu_locid::ParserError</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::PluralRulesError</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::PropertiesError</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">DataError</span>, <span class="ident">DataErrorKind</span>};
@@ -274,7 +289,9 @@
         <span class="doccomment">/// The subtag being requested was not set</span>
         <span class="ident">LocaleUndefinedSubtagError</span> <span class="op">=</span> <span class="number">0x2_00</span>,
         <span class="doccomment">/// The locale or subtag string failed to parse</span>
-        <span class="ident">LocaleParserError</span> <span class="op">=</span> <span class="number">0x2_01</span>,
+        <span class="ident">LocaleParserLanguageError</span> <span class="op">=</span> <span class="number">0x2_01</span>,
+        <span class="ident">LocaleParserSubtagError</span> <span class="op">=</span> <span class="number">0x2_02</span>,
+        <span class="ident">LocaleParserExtensionError</span> <span class="op">=</span> <span class="number">0x2_03</span>,
 
         <span class="comment">// data struct errors</span>
         <span class="doccomment">/// Attempted to construct an invalid data struct</span>
@@ -431,6 +448,17 @@
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">FixedDecimalFormatterError</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">FixedDecimalFormatterError::Data</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+            <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ParserError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">ParserError</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">match</span> <span class="ident">e</span> {
+            <span class="ident">ParserError::InvalidLanguage</span> =&gt; <span class="ident">ICU4XError::LocaleParserLanguageError</span>,
+            <span class="ident">ParserError::InvalidSubtag</span> =&gt; <span class="ident">ICU4XError::LocaleParserSubtagError</span>,
+            <span class="ident">ParserError::InvalidExtension</span> =&gt; <span class="ident">ICU4XError::LocaleParserExtensionError</span>,
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
         }
     }

@@ -1,5 +1,6 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["bies"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["completeness"] = {"name":"","files":["completeness.rs"]};
 sourcesIndex["crlify"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["databake"] = {"name":"","files":["alloc.rs","lib.rs","primitives.rs"]};
 sourcesIndex["databake_derive"] = {"name":"","files":["lib.rs"]};

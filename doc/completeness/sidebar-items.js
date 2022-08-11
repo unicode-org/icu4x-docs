@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["collect_public_types",""],["main",""]],"struct":[["IGNORED_TRAITS",""]]});

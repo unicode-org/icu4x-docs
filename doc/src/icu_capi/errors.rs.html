@@ -241,6 +241,40 @@
 <span id="236">236</span>
 <span id="237">237</span>
 <span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -260,6 +294,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ffi</span> {
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
     <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
     <span class="doccomment">/// A common enum for errors that ICU4X may return, organized by API</span>
     <span class="doccomment">///</span>
@@ -340,15 +375,32 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;logging&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">log_conversion</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">core::fmt::Display</span><span class="op">&gt;</span>(<span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">ffi_error</span>: <span class="ident">ICU4XError</span>) {
+    <span class="kw">use</span> <span class="ident">core::any</span>;
+    <span class="macro">log::warn!</span>(
+        <span class="string">&quot;Returning ICU4XError::{:?} based on original {}: {}&quot;</span>,
+        <span class="ident">ffi_error</span>,
+        <span class="ident">any::type_name</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(),
+        <span class="ident">e</span>
+    );
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;logging&quot;</span>))]</span>
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">log_conversion</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">core::fmt::Display</span><span class="op">&gt;</span>(<span class="ident">_e</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">_ffi_error</span>: <span class="ident">ICU4XError</span>) {}
+
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">fmt::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="kw">_</span>: <span class="ident">fmt::Error</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">fmt::Error</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ICU4XError::WriteableError</span>);
         <span class="ident">ICU4XError::WriteableError</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">DataError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">DataError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span>.<span class="ident">kind</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span>.<span class="ident">kind</span> {
             <span class="ident">DataErrorKind::MissingDataKey</span> =&gt; <span class="ident">ICU4XError::DataMissingDataKeyError</span>,
             <span class="ident">DataErrorKind::MissingLocale</span> =&gt; <span class="ident">ICU4XError::DataMissingLocaleError</span>,
             <span class="ident">DataErrorKind::NeedsLocale</span> =&gt; <span class="ident">ICU4XError::DataNeedsLocaleError</span>,
@@ -369,26 +421,30 @@
                 <span class="ident">ICU4XError::DataUnavailableBufferFormatError</span>
             }
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PropertiesError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">PropertiesError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">PropertiesError::PropDataLoad</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
             <span class="ident">PropertiesError::UnknownScriptId</span>(..) =&gt; <span class="ident">ICU4XError::PropertyUnknownScriptIdError</span>,
             <span class="ident">PropertiesError::UnknownGeneralCategoryGroup</span>(..) =&gt; {
                 <span class="ident">ICU4XError::PropertyUnknownGeneralCategoryGroupError</span>
             }
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">DateTimeError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">DateTimeError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">DateTimeError::Parse</span> =&gt; <span class="ident">ICU4XError::DateTimeParseError</span>,
             <span class="ident">DateTimeError::Overflow</span> { <span class="ident">field</span>: <span class="kw">_</span>, <span class="ident">max</span>: <span class="kw">_</span> } =&gt; <span class="ident">ICU4XError::DateTimeOverflowError</span>,
             <span class="ident">DateTimeError::Underflow</span> { <span class="ident">field</span>: <span class="kw">_</span>, <span class="ident">min</span>: <span class="kw">_</span> } =&gt; <span class="ident">ICU4XError::DateTimeUnderflowError</span>,
@@ -400,13 +456,15 @@
                 <span class="ident">ICU4XError::DateTimeUnknownAnyCalendarKindError</span>
             }
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">DateTimeFormatterError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">DateTimeFormatterError::Pattern</span>(<span class="kw">_</span>) =&gt; <span class="ident">ICU4XError::DateTimeFormatPatternError</span>,
             <span class="ident">DateTimeFormatterError::Format</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>.<span class="ident">into</span>(),
             <span class="ident">DateTimeFormatterError::DataProvider</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>.<span class="ident">into</span>(),
@@ -437,46 +495,56 @@
                 <span class="ident">ICU4XError::DateTimeFormatMismatchedCalendarLocaleError</span>
             }
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">DecimalError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">DecimalError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">DecimalError::Limit</span> =&gt; <span class="ident">ICU4XError::DecimalLimitError</span>,
             <span class="ident">DecimalError::Syntax</span> =&gt; <span class="ident">ICU4XError::DecimalSyntaxError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PluralRulesError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">PluralRulesError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">PluralRulesError::DataProvider</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
             <span class="ident">PluralRulesError::Parser</span>(..) =&gt; <span class="ident">ICU4XError::PluralParserError</span>,
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">FixedDecimalFormatterError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">FixedDecimalFormatterError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">FixedDecimalFormatterError::Data</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ParserError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">ParserError</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
             <span class="ident">ParserError::InvalidLanguage</span> =&gt; <span class="ident">ICU4XError::LocaleParserLanguageError</span>,
             <span class="ident">ParserError::InvalidSubtag</span> =&gt; <span class="ident">ICU4XError::LocaleParserSubtagError</span>,
             <span class="ident">ParserError::InvalidExtension</span> =&gt; <span class="ident">ICU4XError::LocaleParserExtensionError</span>,
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
-        }
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
     }
 }
 </code></pre></div>

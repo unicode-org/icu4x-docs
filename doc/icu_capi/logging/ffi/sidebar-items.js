@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XLogger","An object allowing control over the logging used"]]});

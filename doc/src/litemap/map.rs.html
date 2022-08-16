@@ -670,6 +670,20 @@
 <span id="665">665</span>
 <span id="666">666</span>
 <span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -697,8 +711,8 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Construct a new [`LiteMap`]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
+    <span class="doccomment">/// Construct a new [`LiteMap`] backed by Vec</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_vec</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">values</span>: <span class="ident">alloc::vec::Vec::new</span>(),
             <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
@@ -745,6 +759,20 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
 <span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">StoreConstEmpty</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
+{
+    <span class="doccomment">/// Create a new empty [`LiteMap`]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">values</span>: <span class="ident">S::EMPTY</span>,
+            <span class="ident">_key_type</span>: <span class="ident">PhantomData</span>,
+            <span class="ident">_value_type</span>: <span class="ident">PhantomData</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LiteMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
     <span class="ident">S</span>: <span class="ident">Store</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// The number of elements in the [`LiteMap`]</span>
@@ -776,7 +804,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">/// assert_eq!(map.get(&amp;1), Some(&amp;&quot;one&quot;));</span>
@@ -805,7 +833,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">/// assert_eq!(map.contains_key(&amp;1), true);</span>
@@ -826,7 +854,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// assert!(map.try_append(1, &quot;uno&quot;).is_none());</span>
     <span class="doccomment">/// assert!(map.try_append(3, &quot;tres&quot;).is_none());</span>
     <span class="doccomment">///</span>
@@ -844,7 +872,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// assert!(map.try_append(1, &quot;uno&quot;).is_none());</span>
     <span class="doccomment">/// assert!(map.try_append(3, &quot;tres&quot;).is_none());</span>
     <span class="doccomment">///</span>
@@ -911,7 +939,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">/// if let Some(mut v) = map.get_mut(&amp;1) {</span>
@@ -937,7 +965,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// assert!(map.try_append(1, &quot;uno&quot;).is_none());</span>
     <span class="doccomment">/// assert!(map.try_append(3, &quot;tres&quot;).is_none());</span>
     <span class="doccomment">///</span>
@@ -976,7 +1004,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">/// assert_eq!(map.get(&amp;1), Some(&amp;&quot;one&quot;));</span>
@@ -1012,7 +1040,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(3, &quot;three&quot;);</span>
     <span class="doccomment">///</span>
@@ -1039,7 +1067,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">/// assert_eq!(map.remove(&amp;1), Some(&quot;one&quot;));</span>
@@ -1075,11 +1103,11 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map1 = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map1 = LiteMap::new_vec();</span>
     <span class="doccomment">/// map1.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map1.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map2 = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map2 = LiteMap::new_vec();</span>
     <span class="doccomment">/// map2.insert(2, &quot;TWO&quot;);</span>
     <span class="doccomment">/// map2.insert(4, &quot;FOUR&quot;);</span>
     <span class="doccomment">///</span>
@@ -1231,7 +1259,7 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use litemap::LiteMap;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let mut map = LiteMap::new();</span>
+    <span class="doccomment">/// let mut map = LiteMap::new_vec();</span>
     <span class="doccomment">/// map.insert(1, &quot;one&quot;);</span>
     <span class="doccomment">/// map.insert(2, &quot;two&quot;);</span>
     <span class="doccomment">/// map.insert(3, &quot;three&quot;);</span>

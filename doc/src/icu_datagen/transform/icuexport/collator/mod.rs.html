@@ -211,6 +211,38 @@
 <span id="206">206</span>
 <span id="207">207</span>
 <span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -237,7 +269,26 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span>;
 
-<span class="kw">fn</span> <span class="ident">locale_to_file_name</span>(<span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>) -&gt; <span class="ident">String</span> {
+<span class="doccomment">/// Forward compatibility with https://unicode-org.atlassian.net/browse/CLDR-15603</span>
+<span class="doccomment">/// See https://github.com/unicode-org/cldr/commit/aca740fb9c59efa1f1717bee682d98bded5d0428</span>
+<span class="doccomment">/// and https://github.com/unicode-org/cldr/commit/5b1423acc49c6b539e0cfbc69ae38c9cf044b1ca</span>
+<span class="kw">fn</span> <span class="ident">reformed_swedish_exists</span>(
+    <span class="ident">icuexport</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::SerdeCache</span>,
+    <span class="ident">collation_han_database</span>: <span class="ident"><span class="kw">crate</span>::CollationHanDatabase</span>,
+) -&gt; <span class="ident">bool</span> {
+    <span class="ident">icuexport</span>
+        .<span class="ident">read_and_parse_toml</span>::<span class="op">&lt;</span><span class="ident">collator_serde::CollationMetadata</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+            <span class="string">&quot;collation/{}/sv_reformed_meta.toml&quot;</span>,
+            <span class="ident">collation_han_database</span>
+        ))
+        .<span class="ident">is_ok</span>()
+}
+
+<span class="kw">fn</span> <span class="ident">locale_to_file_name</span>(
+    <span class="ident">icuexport</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::SerdeCache</span>,
+    <span class="ident">collation_han_database</span>: <span class="ident"><span class="kw">crate</span>::CollationHanDatabase</span>,
+    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
+) -&gt; <span class="ident">String</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">get_langid</span>() <span class="op">==</span> <span class="ident">LanguageIdentifier::UND</span> {
         <span class="ident">String::from</span>(<span class="string">&quot;root&quot;</span>)
     } <span class="kw">else</span> {
@@ -265,7 +316,9 @@
 
         <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">get_langid</span>().<span class="ident">language</span> <span class="op">==</span> <span class="macro">language!</span>(<span class="string">&quot;zh&quot;</span>) {
             <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="string">&quot;_pinyin&quot;</span>);
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">get_langid</span>().<span class="ident">language</span> <span class="op">==</span> <span class="macro">language!</span>(<span class="string">&quot;sv&quot;</span>) {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">locale</span>.<span class="ident">get_langid</span>().<span class="ident">language</span> <span class="op">==</span> <span class="macro">language!</span>(<span class="string">&quot;sv&quot;</span>)
+            <span class="op">&amp;&amp;</span> <span class="ident">reformed_swedish_exists</span>(<span class="ident">icuexport</span>, <span class="ident">collation_han_database</span>)
+        {
             <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="string">&quot;_reformed&quot;</span>);
         } <span class="kw">else</span> {
             <span class="ident">s</span>.<span class="ident">push_str</span>(<span class="string">&quot;_standard&quot;</span>);
@@ -274,7 +327,11 @@
     <span class="ident">s</span>
 }
 
-<span class="kw">fn</span> <span class="ident">file_name_to_locale</span>(<span class="ident">file_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">file_name_to_locale</span>(
+    <span class="ident">icuexport</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::SerdeCache</span>,
+    <span class="ident">collation_han_database</span>: <span class="ident"><span class="kw">crate</span>::CollationHanDatabase</span>,
+    <span class="ident">file_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span> {
     <span class="kw">let</span> (<span class="ident">language</span>, <span class="ident">variant</span>) <span class="op">=</span> <span class="ident">file_name</span>.<span class="ident">rsplit_once</span>(<span class="string">&#39;_&#39;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">langid</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">language</span> <span class="op">==</span> <span class="string">&quot;root&quot;</span> {
         <span class="ident">LanguageIdentifier::UND</span>
@@ -283,9 +340,10 @@
     };
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident">Locale::from</span>(<span class="ident">langid</span>);
     <span class="comment">// See above for the two special cases.</span>
+    <span class="kw">let</span> <span class="ident">reformed_exists</span> <span class="op">=</span> <span class="ident">reformed_swedish_exists</span>(<span class="ident">icuexport</span>, <span class="ident">collation_han_database</span>);
     <span class="kw">if</span> <span class="op">!</span>((<span class="ident">language</span> <span class="op">==</span> <span class="string">&quot;zh&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="string">&quot;pinyin&quot;</span>)
-        <span class="op">|</span><span class="op">|</span> (<span class="ident">language</span> <span class="op">==</span> <span class="string">&quot;sv&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="string">&quot;reformed&quot;</span>)
-        <span class="op">|</span><span class="op">|</span> ((<span class="ident">language</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;zh&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">language</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;sv&quot;</span>) <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="string">&quot;standard&quot;</span>))
+        <span class="op">|</span><span class="op">|</span> (<span class="ident">language</span> <span class="op">==</span> <span class="string">&quot;sv&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">reformed_exists</span> <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="string">&quot;reformed&quot;</span>)
+        <span class="op">|</span><span class="op">|</span> ((<span class="ident">language</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;zh&quot;</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="ident">language</span> <span class="op">==</span> <span class="string">&quot;sv&quot;</span> <span class="op">&amp;&amp;</span> <span class="ident">reformed_exists</span>)) <span class="op">&amp;&amp;</span> <span class="ident">variant</span> <span class="op">==</span> <span class="string">&quot;standard&quot;</span>))
     {
         <span class="kw">let</span> <span class="ident">shortened</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span> {
             <span class="string">&quot;traditional&quot;</span> =&gt; <span class="string">&quot;trad&quot;</span>,
@@ -314,7 +372,10 @@
                             <span class="kw-2">&amp;</span><span class="macro">format!</span>(
                                 <span class="string">&quot;collation/{}/{}{}.toml&quot;</span>,
                                 <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">collation_han_database</span>(),
-                                <span class="ident">locale_to_file_name</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">locale</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">suffix</span>)
+                                <span class="ident">locale_to_file_name</span>(<span class="self">self</span>
+                                    .<span class="ident">source</span>
+                                    <span class="comment">// `unwrap` OK due to the `?` earlier</span>
+                                    .<span class="ident">icuexport</span>().<span class="ident">unwrap</span>(), <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">collation_han_database</span>(), <span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">locale</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">suffix</span>)
                         )
                         .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">e</span>.<span class="ident">kind</span> {
                             <span class="ident">DataErrorKind::Io</span>(
@@ -351,7 +412,10 @@
                                 .<span class="ident">strip_suffix</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">suffix</span>)
                                 .<span class="ident">map</span>(<span class="ident">ToString::to_string</span>)
                         )
-                        .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span><span class="ident">file_name_to_locale</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>))
+                        .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span><span class="ident">file_name_to_locale</span>(<span class="self">self</span>
+                            .<span class="ident">source</span>
+                            <span class="comment">// `unwrap` OK due to the `?` earlier</span>
+                            .<span class="ident">icuexport</span>().<span class="ident">unwrap</span>(), <span class="self">self</span>.<span class="ident">source</span>.<span class="ident">collation_han_database</span>(), <span class="kw-2">&amp;</span><span class="ident">s</span>))
                         .<span class="ident">map</span>(<span class="ident">DataLocale::from</span>)
                         .<span class="ident">collect</span>()
                     )

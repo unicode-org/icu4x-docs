@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["RequestFilterDataProvider","A data provider that selectively filters out data requests."]],"trait":[["Filterable",""]]});
+initSidebarItems({"struct":[["RequestFilterDataProvider","A data provider that selectively filters out data requests."]],"trait":[["Filterable","A blanket-implemented trait exposing the [`Self::filterable()`] function."]]});

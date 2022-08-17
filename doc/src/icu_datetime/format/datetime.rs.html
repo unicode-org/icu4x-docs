@@ -607,10 +607,6 @@
 <span id="602">602</span>
 <span id="603">603</span>
 <span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -618,7 +614,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DateTimeFormatterError</span> <span class="kw">as</span> <span class="ident">Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::fields</span>::{<span class="self">self</span>, <span class="ident">Field</span>, <span class="ident">FieldLength</span>, <span class="ident">FieldSymbol</span>, <span class="ident">Second</span>, <span class="ident">Week</span>, <span class="ident">Year</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::input</span>::{
-    <span class="ident">DateTimeInput</span>, <span class="ident">DateTimeInputWithLocale</span>, <span class="ident">ExtractedDateTimeInput</span>, <span class="ident">LocalizedDateTimeInput</span>,
+    <span class="ident">DateTimeInput</span>, <span class="ident">DateTimeInputWithCalendar</span>, <span class="ident">ExtractedDateTimeInput</span>, <span class="ident">LocalizedDateTimeInput</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pattern</span>::{
     <span class="ident">runtime</span>::{<span class="ident">Pattern</span>, <span class="ident">PatternPlurals</span>},
@@ -633,7 +629,6 @@
 <span class="kw">use</span> <span class="ident">fixed_decimal::FixedDecimal</span>;
 <span class="kw">use</span> <span class="ident">icu_decimal::FixedDecimalFormatter</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::PluralRules</span>;
-<span class="kw">use</span> <span class="ident">icu_provider::DataLocale</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataPayload</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
@@ -668,7 +663,6 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">time_symbols</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">provider::calendar::TimeSymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">datetime</span>: <span class="ident">ExtractedDateTimeInput</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">WeekDataV1</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">DataLocale</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">PluralRules</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">FixedDecimalFormatter</span>,
 }
@@ -683,7 +677,6 @@
             <span class="self">self</span>.<span class="ident">week_data</span>,
             <span class="self">self</span>.<span class="ident">ordinal_rules</span>,
             <span class="self">self</span>.<span class="ident">fixed_decimal_format</span>,
-            <span class="self">self</span>.<span class="ident">locale</span>,
             <span class="ident">sink</span>,
         )
         .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">core::fmt::Error</span>)
@@ -777,14 +770,13 @@
     <span class="ident">week_data</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">WeekDataV1</span><span class="op">&gt;</span>,
     <span class="ident">ordinal_rules</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PluralRules</span><span class="op">&gt;</span>,
     <span class="ident">fixed_decimal_format</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimalFormatter</span>,
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
     <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">DateTimeInput</span>,
     <span class="ident">W</span>: <span class="ident">fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
-    <span class="kw">let</span> <span class="ident">loc_datetime</span> <span class="op">=</span> <span class="ident">DateTimeInputWithLocale::new</span>(<span class="ident">datetime</span>, <span class="ident">week_data</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">d</span>.<span class="number">0</span>), <span class="ident">locale</span>);
+    <span class="kw">let</span> <span class="ident">loc_datetime</span> <span class="op">=</span> <span class="ident">DateTimeInputWithCalendar::new</span>(<span class="ident">datetime</span>, <span class="ident">week_data</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">d</span>.<span class="number">0</span>));
     <span class="kw">let</span> <span class="ident">pattern</span> <span class="op">=</span> <span class="ident">patterns</span>.<span class="ident">select</span>(<span class="kw-2">&amp;</span><span class="ident">loc_datetime</span>, <span class="ident">ordinal_rules</span>)<span class="question-mark">?</span>;
     <span class="ident">write_pattern</span>(
         <span class="ident">pattern</span>,
@@ -1167,7 +1159,7 @@
                 .<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sink</span> <span class="op">=</span> <span class="ident">String::new</span>();
-        <span class="kw">let</span> <span class="ident">loc_datetime</span> <span class="op">=</span> <span class="ident">DateTimeInputWithLocale::new</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span><span class="ident">Locale::UND</span>.<span class="ident">into</span>());
+        <span class="kw">let</span> <span class="ident">loc_datetime</span> <span class="op">=</span> <span class="ident">DateTimeInputWithCalendar::new</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="prelude-val">None</span>);
         <span class="ident">write_pattern</span>(
             <span class="kw-2">&amp;</span><span class="ident">pattern</span>,
             <span class="prelude-val">Some</span>(<span class="ident">date_data</span>.<span class="ident">get</span>()),

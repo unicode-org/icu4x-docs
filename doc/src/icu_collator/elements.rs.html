@@ -2246,6 +2246,53 @@
 <span id="2241">2241</span>
 <span id="2242">2242</span>
 <span id="2243">2243</span>
+<span id="2244">2244</span>
+<span id="2245">2245</span>
+<span id="2246">2246</span>
+<span id="2247">2247</span>
+<span id="2248">2248</span>
+<span id="2249">2249</span>
+<span id="2250">2250</span>
+<span id="2251">2251</span>
+<span id="2252">2252</span>
+<span id="2253">2253</span>
+<span id="2254">2254</span>
+<span id="2255">2255</span>
+<span id="2256">2256</span>
+<span id="2257">2257</span>
+<span id="2258">2258</span>
+<span id="2259">2259</span>
+<span id="2260">2260</span>
+<span id="2261">2261</span>
+<span id="2262">2262</span>
+<span id="2263">2263</span>
+<span id="2264">2264</span>
+<span id="2265">2265</span>
+<span id="2266">2266</span>
+<span id="2267">2267</span>
+<span id="2268">2268</span>
+<span id="2269">2269</span>
+<span id="2270">2270</span>
+<span id="2271">2271</span>
+<span id="2272">2272</span>
+<span id="2273">2273</span>
+<span id="2274">2274</span>
+<span id="2275">2275</span>
+<span id="2276">2276</span>
+<span id="2277">2277</span>
+<span id="2278">2278</span>
+<span id="2279">2279</span>
+<span id="2280">2280</span>
+<span id="2281">2281</span>
+<span id="2282">2282</span>
+<span id="2283">2283</span>
+<span id="2284">2284</span>
+<span id="2285">2285</span>
+<span id="2286">2286</span>
+<span id="2287">2287</span>
+<span id="2288">2288</span>
+<span id="2289">2289</span>
+<span id="2290">2290</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -2273,7 +2320,6 @@
 <span class="kw">use</span> <span class="ident">icu_normalizer::provider::DecompositionTablesV1</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::u24::EMPTY_U24</span>;
 <span class="kw">use</span> <span class="ident">icu_normalizer::u24::U24</span>;
-<span class="kw">use</span> <span class="ident">icu_properties::maps::CodePointMapDataBorrowed</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::CanonicalCombiningClass</span>;
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
 <span class="kw">use</span> <span class="ident">zerovec::ule::AsULE</span>;
@@ -2282,10 +2328,58 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::CollationDataV1</span>;
 
+<span class="doccomment">/// Marker that a complex decomposition isn&#39;t round-trippable</span>
+<span class="doccomment">/// under re-composition.</span>
+<span class="kw">const</span> <span class="ident">NON_ROUND_TRIP_MARKER</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1</span>;
+
+<span class="doccomment">/// Marker value for U+FDFA in NFKD</span>
+<span class="kw">const</span> <span class="ident">FDFA_MARKER</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">3</span>;
+
+<span class="doccomment">/// Marker for starters that decompose to themselves but may</span>
+<span class="doccomment">/// combine backwards under canonical composition.</span>
+<span class="doccomment">/// (Main trie only; not used in the supplementary trie.)</span>
+<span class="kw">const</span> <span class="ident">BACKWARD_COMBINING_STARTER_MARKER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span>;
+
 <span class="comment">// Magic marker trie value for characters whose decomposition</span>
 <span class="comment">// starts with a non-starter. The actual decompostion is</span>
 <span class="comment">// hard-coded.</span>
-<span class="kw">const</span> <span class="ident">DECOMPOSITION_STARTS_WITH_NON_STARTER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>;
+<span class="kw">const</span> <span class="ident">SPECIAL_NON_STARTER_DECOMPOSITION_MARKER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span>;
+
+<span class="doccomment">/// `u16` version of the previous marker value.</span>
+<span class="kw">const</span> <span class="ident">SPECIAL_NON_STARTER_DECOMPOSITION_MARKER_U16</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">2</span>;
+
+<span class="doccomment">/// Checks if a trie value carries a (non-zero) canonical</span>
+<span class="doccomment">/// combining class.</span>
+<span class="kw">fn</span> <span class="ident">trie_value_has_ccc</span>(<span class="ident">trie_value</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
+    (<span class="ident">trie_value</span> <span class="op">&amp;</span> <span class="number">0xFFFFFF00</span>) <span class="op">==</span> <span class="number">0xD800</span>
+}
+
+<span class="doccomment">/// Checks if the trie signifies a special non-starter decomposition.</span>
+<span class="kw">fn</span> <span class="ident">trie_value_indicates_special_non_starter_decomposition</span>(<span class="ident">trie_value</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
+    <span class="ident">trie_value</span> <span class="op">==</span> <span class="ident">SPECIAL_NON_STARTER_DECOMPOSITION_MARKER</span>
+}
+
+<span class="doccomment">/// Checks if a trie value signifies a character whose decomposition</span>
+<span class="doccomment">/// starts with a non-starter.</span>
+<span class="kw">fn</span> <span class="ident">decomposition_starts_with_non_starter</span>(<span class="ident">trie_value</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
+    <span class="ident">trie_value_has_ccc</span>(<span class="ident">trie_value</span>)
+        <span class="op">|</span><span class="op">|</span> <span class="ident">trie_value_indicates_special_non_starter_decomposition</span>(<span class="ident">trie_value</span>)
+}
+
+<span class="doccomment">/// Extracts a canonical combining class (possibly zero) from a trie value.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Panics</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The trie value must not be one that signifies a special non-starter</span>
+<span class="doccomment">/// decomposition. (Debug-only)</span>
+<span class="kw">fn</span> <span class="ident">ccc_from_trie_value</span>(<span class="ident">trie_value</span>: <span class="ident">u32</span>) -&gt; <span class="ident">CanonicalCombiningClass</span> {
+    <span class="kw">if</span> <span class="ident">trie_value_has_ccc</span>(<span class="ident">trie_value</span>) {
+        <span class="ident">CanonicalCombiningClass</span>(<span class="ident">trie_value</span> <span class="kw">as</span> <span class="ident">u8</span>)
+    } <span class="kw">else</span> {
+        <span class="macro">debug_assert_ne!</span>(<span class="ident">trie_value</span>, <span class="ident">SPECIAL_NON_STARTER_DECOMPOSITION_MARKER</span>);
+        <span class="ident">CanonicalCombiningClass::NotReordered</span>
+    }
+}
 
 <span class="comment">// These constants originate from page 143 of Unicode 14.0</span>
 <span class="kw">const</span> <span class="ident">HANGUL_S_BASE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xAC00</span>;
@@ -2871,8 +2965,13 @@
 <span class="doccomment">/// when `upcoming[0]` is an undecomposed starter, we don&#39;t</span>
 <span class="doccomment">/// need the ccc yet, and when lookahead has already done the</span>
 <span class="doccomment">/// trie lookups, we don&#39;t need `trie_value`, as it is implied</span>
-<span class="doccomment">/// by ccc. Optimizing size by this observation seems</span>
-<span class="doccomment">/// unnecessary, since `upcoming` is typically very short.</span>
+<span class="doccomment">/// by ccc.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// TODO(#2386): This struct carries redundant information, and</span>
+<span class="doccomment">/// `upcoming` should be split into a buffer of `CharacterAndClass`</span>
+<span class="doccomment">///  and an `Option&lt;CharacterAndTrieValue&gt;`, but that refactoring</span>
+<span class="doccomment">/// isn&#39;t 100% necessary, so focusing on data format stability</span>
+<span class="doccomment">/// for 1.0.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// (Deliberately non-`Copy`, because `CharacterAndClass` is</span>
 <span class="doccomment">/// non-`Copy`.)</span>
@@ -2892,17 +2991,33 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_non_zero_ccc</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">ccc</span>: <span class="ident">CanonicalCombiningClass</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CharacterAndClassAndTrieValue</span> {
             <span class="ident">c_and_c</span>: <span class="ident">CharacterAndClass::new</span>(<span class="ident">c</span>, <span class="ident">ccc</span>),
-            <span class="ident">trie_val</span>: <span class="ident">DECOMPOSITION_STARTS_WITH_NON_STARTER</span>,
+            <span class="ident">trie_val</span>: <span class="number">0xD800</span> <span class="op">|</span> <span class="ident">u32::from</span>(<span class="ident">ccc</span>.<span class="number">0</span>),
         }
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_trie_val_and_placeholder_ccc</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">trie_val</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_non_special_decomposition_trie_val</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">trie_val</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
+        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">trie_value_indicates_special_non_starter_decomposition</span>(
+            <span class="ident">trie_val</span>
+        ));
         <span class="ident">CharacterAndClassAndTrieValue</span> {
-            <span class="ident">c_and_c</span>: <span class="ident">CharacterAndClass::new</span>(<span class="ident">c</span>, <span class="ident">CanonicalCombiningClass</span>(<span class="number">0xFF</span>)),
+            <span class="ident">c_and_c</span>: <span class="ident">CharacterAndClass::new_with_trie_value</span>(<span class="ident">c</span>, <span class="ident">trie_val</span>),
             <span class="ident">trie_val</span>,
         }
     }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_trie_val</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">trie_val</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">trie_value_indicates_special_non_starter_decomposition</span>(<span class="ident">trie_val</span>) {
+            <span class="ident">CharacterAndClassAndTrieValue</span> {
+                <span class="ident">c_and_c</span>: <span class="ident">CharacterAndClass::new_with_trie_value</span>(<span class="ident">c</span>, <span class="ident">trie_val</span>),
+                <span class="ident">trie_val</span>,
+            }
+        } <span class="kw">else</span> {
+            <span class="ident">CharacterAndClassAndTrieValue</span> {
+                <span class="ident">c_and_c</span>: <span class="ident">CharacterAndClass::new</span>(<span class="ident">c</span>, <span class="ident">CanonicalCombiningClass</span>(<span class="number">0xFF</span>)),
+                <span class="ident">trie_val</span>,
+            }
+        }
+    }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decomposition_starts_with_non_starter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">trie_val</span> <span class="op">==</span> <span class="ident">DECOMPOSITION_STARTS_WITH_NON_STARTER</span>
+        <span class="ident">decomposition_starts_with_non_starter</span>(<span class="self">self</span>.<span class="ident">trie_val</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">character</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">char</span> {
@@ -2943,6 +3058,9 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_placeholder</span>(<span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CharacterAndClass</span>(<span class="ident">u32::from</span>(<span class="ident">c</span>) <span class="op">|</span> ((<span class="number">0xFF</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>))
     }
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_trie_value</span>(<span class="ident">c</span>: <span class="ident">char</span>, <span class="ident">trie_value</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">c</span>, <span class="ident">ccc_from_trie_value</span>(<span class="ident">trie_value</span>))
+    }
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">character</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">char</span> {
         <span class="comment">// Safe, because the low 24 bits came from a `char`</span>
         <span class="comment">// originally.</span>
@@ -2954,25 +3072,13 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">character_and_ccc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">char</span>, <span class="ident">CanonicalCombiningClass</span>) {
         (<span class="self">self</span>.<span class="ident">character</span>(), <span class="self">self</span>.<span class="ident">ccc</span>())
     }
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_ccc_from_trie_if_not_already_set</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
-    ) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_ccc_from_trie_if_not_already_set</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="ident">CodePointTrie</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) {
         <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">24</span> <span class="op">!</span><span class="op">=</span> <span class="number">0xFF</span> {
             <span class="kw">return</span>;
         }
         <span class="kw">let</span> <span class="ident">scalar</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">&amp;</span> <span class="number">0xFFFFFF</span>;
-        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> ((<span class="ident">ccc</span>.<span class="ident">get_u32</span>(<span class="ident">scalar</span>).<span class="number">0</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>) <span class="op">|</span> <span class="ident">scalar</span>;
+        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> ((<span class="ident">ccc_from_trie_value</span>(<span class="ident">trie</span>.<span class="ident">get_u32</span>(<span class="ident">scalar</span>)).<span class="number">0</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">24</span>) <span class="op">|</span> <span class="ident">scalar</span>;
     }
-}
-
-<span class="comment">// This trivial function exists as a borrow check helper.</span>
-<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">fn</span> <span class="ident">sort_slice_by_ccc</span>(
-    <span class="ident">slice</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">CharacterAndClassAndTrieValue</span>],
-    <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
-) {
-    <span class="ident">slice</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">cc</span>.<span class="ident">character</span>()));
 }
 
 <span class="doccomment">/// Iterator that transforms an iterator over `char` into an iterator</span>
@@ -3029,8 +3135,6 @@
     <span class="ident">scalars16</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="doccomment">/// NFD complex decompositions on supplementary planes</span>
     <span class="ident">scalars32</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">U24</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Canonical Combining Class data.</span>
-    <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
     <span class="doccomment">/// If numeric mode is enabled, the 8 high bits of the numeric primary.</span>
     <span class="doccomment">/// `None` if disabled.</span>
     <span class="ident">numeric_primary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
@@ -3054,7 +3158,6 @@
         <span class="ident">diacritics</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
         <span class="ident">decompositions</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionDataV1</span>,
         <span class="ident">tables</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">DecompositionTablesV1</span>,
-        <span class="ident">ccc</span>: <span class="ident">CodePointMapDataBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">CanonicalCombiningClass</span><span class="op">&gt;</span>,
         <span class="ident">numeric_primary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
         <span class="ident">lithuanian_dot_above</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="self">Self</span> {
@@ -3073,7 +3176,6 @@
             <span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="ident">decompositions</span>.<span class="ident">trie</span>,
             <span class="ident">scalars16</span>: <span class="kw-2">&amp;</span><span class="ident">tables</span>.<span class="ident">scalars16</span>,
             <span class="ident">scalars32</span>: <span class="kw-2">&amp;</span><span class="ident">tables</span>.<span class="ident">scalars24</span>,
-            <span class="ident">ccc</span>,
             <span class="ident">numeric_primary</span>,
             <span class="ident">lithuanian_dot_above</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
@@ -3086,7 +3188,9 @@
     <span class="kw">fn</span> <span class="ident">iter_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CharacterAndClassAndTrieValue</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">trie_val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">c</span>));
-        <span class="prelude-val">Some</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_trie_val_and_placeholder_ccc</span>(<span class="ident">c</span>, <span class="ident">trie_val</span>))
+        <span class="prelude-val">Some</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_trie_val</span>(
+            <span class="ident">c</span>, <span class="ident">trie_val</span>,
+        ))
     }
 
     <span class="kw">fn</span> <span class="ident">next_internal</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CharacterAndClassAndTrieValue</span><span class="op">&gt;</span> {
@@ -3120,12 +3224,12 @@
         <span class="comment">// We now have a single character that decomposes to start with</span>
         <span class="comment">// a non-starter. Decompose it and assign the real canonical combining class.</span>
         <span class="kw">let</span> <span class="ident">first</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">remove</span>(<span class="number">0</span>);
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">push_decomposed_combining</span>(<span class="ident">first</span>.<span class="ident">character</span>());
+        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">push_decomposed_combining</span>(<span class="ident">first</span>);
         <span class="comment">// Not using `while let` to be able to set `iter_exhausted`</span>
         <span class="kw">loop</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter_next</span>() {
                 <span class="kw">if</span> <span class="ident">ch</span>.<span class="ident">decomposition_starts_with_non_starter</span>() {
-                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">push_decomposed_combining</span>(<span class="ident">ch</span>.<span class="ident">character</span>());
+                    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">push_decomposed_combining</span>(<span class="ident">ch</span>);
                 } <span class="kw">else</span> {
                     <span class="comment">// Got a new starter</span>
                     <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">ch</span>);
@@ -3141,102 +3245,104 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">push_decomposed_combining</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">if</span> <span class="ident">in_inclusive_range</span>(<span class="ident">c</span>, <span class="string">&#39;\u{0340}&#39;</span>, <span class="string">&#39;\u{0F81}&#39;</span>) {
-            <span class="comment">// The Tibetan special cases are starters that decompose into non-starters.</span>
-            <span class="kw">match</span> <span class="ident">c</span> {
-                <span class="string">&#39;\u{0340}&#39;</span> =&gt; {
-                    <span class="comment">// COMBINING GRAVE TONE MARK</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0300}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::Above</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">1</span>;
-                }
-                <span class="string">&#39;\u{0341}&#39;</span> =&gt; {
-                    <span class="comment">// COMBINING ACUTE TONE MARK</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0301}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::Above</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">1</span>;
-                }
-                <span class="string">&#39;\u{0343}&#39;</span> =&gt; {
-                    <span class="comment">// COMBINING GREEK KORONIS</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0313}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::Above</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">1</span>;
-                }
-                <span class="string">&#39;\u{0344}&#39;</span> =&gt; {
-                    <span class="comment">// COMBINING GREEK DIALYTIKA TONOS</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0308}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::Above</span>,
-                        ));
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0301}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::Above</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">2</span>;
-                }
-                <span class="string">&#39;\u{0F73}&#39;</span> =&gt; {
-                    <span class="comment">// TIBETAN VOWEL SIGN II</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0F71}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::CCC129</span>,
-                        ));
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0F72}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::CCC130</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">2</span>;
-                }
-                <span class="string">&#39;\u{0F75}&#39;</span> =&gt; {
-                    <span class="comment">// TIBETAN VOWEL SIGN UU</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0F71}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::CCC129</span>,
-                        ));
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0F74}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::CCC132</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">2</span>;
-                }
-                <span class="string">&#39;\u{0F81}&#39;</span> =&gt; {
-                    <span class="comment">// TIBETAN VOWEL SIGN REVERSED II</span>
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0F71}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::CCC129</span>,
-                        ));
-                    <span class="self">self</span>.<span class="ident">upcoming</span>
-                        .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                            <span class="string">&#39;\u{0F80}&#39;</span>,
-                            <span class="ident">CanonicalCombiningClass::CCC130</span>,
-                        ));
-                    <span class="kw">return</span> <span class="number">2</span>;
-                }
-                <span class="kw">_</span> =&gt; {}
-            };
+    <span class="kw">fn</span> <span class="ident">push_decomposed_combining</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">CharacterAndClassAndTrieValue</span>) -&gt; <span class="ident">usize</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">trie_value_indicates_special_non_starter_decomposition</span>(<span class="ident">c</span>.<span class="ident">trie_val</span>) {
+            <span class="macro">debug_assert!</span>(<span class="ident">trie_value_has_ccc</span>(<span class="ident">c</span>.<span class="ident">trie_val</span>));
+            <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">c</span>);
+            <span class="kw">return</span> <span class="number">1</span>;
         }
-        <span class="self">self</span>.<span class="ident">upcoming</span>
-            .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                <span class="ident">c</span>,
-                <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">c</span>),
-            ));
-        <span class="number">1</span>
+
+        <span class="comment">// The Tibetan special cases are starters that decompose into non-starters.</span>
+        <span class="kw">match</span> <span class="ident">c</span>.<span class="ident">character</span>() {
+            <span class="string">&#39;\u{0340}&#39;</span> =&gt; {
+                <span class="comment">// COMBINING GRAVE TONE MARK</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0300}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::Above</span>,
+                    ));
+                <span class="number">1</span>
+            }
+            <span class="string">&#39;\u{0341}&#39;</span> =&gt; {
+                <span class="comment">// COMBINING ACUTE TONE MARK</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0301}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::Above</span>,
+                    ));
+                <span class="number">1</span>
+            }
+            <span class="string">&#39;\u{0343}&#39;</span> =&gt; {
+                <span class="comment">// COMBINING GREEK KORONIS</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0313}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::Above</span>,
+                    ));
+                <span class="number">1</span>
+            }
+            <span class="string">&#39;\u{0344}&#39;</span> =&gt; {
+                <span class="comment">// COMBINING GREEK DIALYTIKA TONOS</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0308}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::Above</span>,
+                    ));
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0301}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::Above</span>,
+                    ));
+                <span class="number">2</span>
+            }
+            <span class="string">&#39;\u{0F73}&#39;</span> =&gt; {
+                <span class="comment">// TIBETAN VOWEL SIGN II</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0F71}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::CCC129</span>,
+                    ));
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0F72}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::CCC130</span>,
+                    ));
+                <span class="number">2</span>
+            }
+            <span class="string">&#39;\u{0F75}&#39;</span> =&gt; {
+                <span class="comment">// TIBETAN VOWEL SIGN UU</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0F71}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::CCC129</span>,
+                    ));
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0F74}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::CCC132</span>,
+                    ));
+                <span class="number">2</span>
+            }
+            <span class="string">&#39;\u{0F81}&#39;</span> =&gt; {
+                <span class="comment">// TIBETAN VOWEL SIGN REVERSED II</span>
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0F71}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::CCC129</span>,
+                    ));
+                <span class="self">self</span>.<span class="ident">upcoming</span>
+                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
+                        <span class="string">&#39;\u{0F80}&#39;</span>,
+                        <span class="ident">CanonicalCombiningClass::CCC130</span>,
+                    ));
+                <span class="number">2</span>
+            }
+            <span class="kw">_</span> =&gt; {
+                <span class="comment">// GIGO case</span>
+                <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+                <span class="number">0</span>
+            }
+        }
     }
 
     <span class="comment">// Decomposes `c`, pushes it to `self.upcoming` (unless the character is</span>
@@ -3256,31 +3362,35 @@
         <span class="comment">// participate in contractions, and the trie default is that a character</span>
         <span class="comment">// is its own decomposition.</span>
         <span class="kw">let</span> <span class="ident">decomposition</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">trie_val</span>;
-        <span class="kw">if</span> <span class="ident">decomposition</span> <span class="op">==</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">decomposition</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">BACKWARD_COMBINING_STARTER_MARKER</span> {
             <span class="comment">// The character is its own decomposition (or Hangul syllable)</span>
             <span class="comment">// Set the Canonical Combining Class to zero</span>
             <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(
                 <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">c</span>.<span class="ident">character</span>()),
             );
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> (<span class="ident">decomposition</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">u16</span>;
-            <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">decomposition</span> <span class="kw">as</span> <span class="ident">u16</span>;
-            <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">low</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">let</span> <span class="ident">trail_or_complex</span> <span class="op">=</span> (<span class="ident">decomposition</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">u16</span>;
+            <span class="kw">let</span> <span class="ident">lead</span> <span class="op">=</span> <span class="ident">decomposition</span> <span class="kw">as</span> <span class="ident">u16</span>;
+            <span class="kw">if</span> <span class="ident">lead</span> <span class="op">&gt;</span> <span class="ident">NON_ROUND_TRIP_MARKER</span> <span class="op">&amp;&amp;</span> <span class="ident">trail_or_complex</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="comment">// Decomposition into two BMP characters: starter and non-starter</span>
                 <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(
                     <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">char_from_u16</span>(
-                        <span class="ident">high</span>,
+                        <span class="ident">lead</span>,
                     )),
                 );
-                <span class="kw">let</span> <span class="ident">low_c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">low</span>);
-                <span class="self">self</span>.<span class="ident">upcoming</span>
-                    .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(
-                        <span class="ident">low_c</span>,
-                        <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">low_c</span>),
-                    ));
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="macro">debug_assert_ne!</span>(<span class="ident">high</span>, <span class="number">1</span>, <span class="string">&quot;How come U+FDFA NFKD marker seen in NFD?&quot;</span>);
-                <span class="kw">if</span> <span class="ident">high</span> <span class="op">==</span> <span class="number">2</span> {
+                <span class="kw">let</span> <span class="ident">low_c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">trail_or_complex</span>);
+                <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">low_c</span>));
+                <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(
+                    <span class="ident">CharacterAndClassAndTrieValue::new_with_non_special_decomposition_trie_val</span>(
+                        <span class="ident">low_c</span>, <span class="ident">trie_value</span>,
+                    ),
+                );
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">lead</span> <span class="op">&gt;</span> <span class="ident">NON_ROUND_TRIP_MARKER</span> {
+                <span class="macro">debug_assert_ne!</span>(
+                    <span class="ident">lead</span>, <span class="ident">FDFA_MARKER</span>,
+                    <span class="string">&quot;How come U+FDFA NFKD marker seen in NFD?&quot;</span>
+                );
+                <span class="kw">if</span> (<span class="ident">lead</span> <span class="op">&amp;</span> <span class="number">0xFF00</span>) <span class="op">==</span> <span class="number">0xD800</span> {
                     <span class="comment">// We&#39;re at the end of the stream, so we aren&#39;t dealing with the</span>
                     <span class="comment">// next undecomposed starter but are dealing with an</span>
                     <span class="comment">// already-decomposed non-starter. Just put it back.</span>
@@ -3289,10 +3399,11 @@
                     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
                     <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">iter_exhausted</span>);
                 } <span class="kw">else</span> {
+                    <span class="macro">debug_assert_ne!</span>(<span class="ident">lead</span>, <span class="ident">SPECIAL_NON_STARTER_DECOMPOSITION_MARKER_U16</span>);
                     <span class="comment">// Decomposition into one BMP character</span>
                     <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(
                         <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(
-                            <span class="ident">char_from_u16</span>(<span class="ident">high</span>),
+                            <span class="ident">char_from_u16</span>(<span class="ident">lead</span>),
                         ),
                     );
                 }
@@ -3314,9 +3425,9 @@
                 <span class="comment">//         scalars16, the offset is into scalars16. Otherwise,</span>
                 <span class="comment">//         the offset minus the length of scalars16 is an offset</span>
                 <span class="comment">//         into scalars32.</span>
-                <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0xFFF</span>);
+                <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">trail_or_complex</span> <span class="op">&amp;</span> <span class="number">0xFFF</span>);
                 <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">scalars16</span>.<span class="ident">len</span>() {
-                    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">2</span>;
+                    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">trail_or_complex</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">2</span>;
                     <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">unwrap_or_gigo</span>(
                         <span class="self">self</span>.<span class="ident">scalars16</span>.<span class="ident">get_subslice</span>(<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>),
                         <span class="ident">SINGLE_U16</span>, <span class="comment">// single instead of empty for consistency with the other code path</span>
@@ -3324,16 +3435,12 @@
                     .<span class="ident">iter</span>()
                     {
                         <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>);
-                        <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">ch</span>);
+                        <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">ch</span>));
                         <span class="self">self</span>.<span class="ident">upcoming</span>
-                            .<span class="ident">push</span>(<span class="kw">if</span> <span class="ident">ccc</span> <span class="op">==</span> <span class="ident">CanonicalCombiningClass::NotReordered</span> {
-                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">ch</span>)
-                            } <span class="kw">else</span> {
-                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(<span class="ident">ch</span>, <span class="ident">ccc</span>)
-                            });
+                            .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_special_decomposition_trie_val</span>(<span class="ident">ch</span>, <span class="ident">trie_value</span>));
                     }
                 } <span class="kw">else</span> {
-                    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">1</span>;
+                    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">trail_or_complex</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">1</span>;
                     <span class="kw">let</span> <span class="ident">offset32</span> <span class="op">=</span> <span class="ident">offset</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">scalars16</span>.<span class="ident">len</span>();
                     <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">unwrap_or_gigo</span>(
                         <span class="self">self</span>.<span class="ident">scalars32</span>.<span class="ident">get_subslice</span>(<span class="ident">offset32</span>..<span class="ident">offset32</span> <span class="op">+</span> <span class="ident">len</span>),
@@ -3342,16 +3449,12 @@
                     .<span class="ident">iter</span>()
                     {
                         <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u24</span>(<span class="ident">u</span>);
-                        <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">ch</span>);
+                        <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">ch</span>));
                         <span class="self">self</span>.<span class="ident">upcoming</span>
-                            .<span class="ident">push</span>(<span class="kw">if</span> <span class="ident">ccc</span> <span class="op">==</span> <span class="ident">CanonicalCombiningClass::NotReordered</span> {
-                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">ch</span>)
-                            } <span class="kw">else</span> {
-                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(<span class="ident">ch</span>, <span class="ident">ccc</span>)
-                            });
+                            .<span class="ident">push</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_special_decomposition_trie_val</span>(<span class="ident">ch</span>, <span class="ident">trie_value</span>));
                     }
                 }
-                <span class="ident">search_start_combining</span> <span class="op">=</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">==</span> <span class="number">0</span>;
+                <span class="ident">search_start_combining</span> <span class="op">=</span> <span class="ident">trail_or_complex</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">==</span> <span class="number">0</span>;
             }
         }
         <span class="kw">let</span> <span class="ident">start_combining</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">search_start_combining</span> {
@@ -3385,7 +3488,7 @@
         <span class="kw">loop</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter_next</span>() {
                 <span class="kw">if</span> <span class="ident">ch</span>.<span class="ident">decomposition_starts_with_non_starter</span>() {
-                    <span class="ident">end_combining</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">push_decomposed_combining</span>(<span class="ident">ch</span>.<span class="ident">character</span>());
+                    <span class="ident">end_combining</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">push_decomposed_combining</span>(<span class="ident">ch</span>);
                 } <span class="kw">else</span> {
                     <span class="comment">// Got a new starter</span>
                     <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">push</span>(<span class="ident">ch</span>);
@@ -3470,7 +3573,10 @@
         <span class="self">self</span>.<span class="ident">upcoming</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">c</span>);
         <span class="comment">// Indices in range by construction</span>
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-        <span class="ident">sort_slice_by_ccc</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">upcoming</span>[<span class="ident">start</span>..<span class="ident">end</span>], <span class="self">self</span>.<span class="ident">ccc</span>);
+        {
+            <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">CharacterAndClassAndTrieValue</span>] <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">upcoming</span>[<span class="ident">start</span>..<span class="ident">end</span>];
+            <span class="ident">slice</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">cc</span>.<span class="ident">ccc</span>());
+        };
     }
 
     <span class="kw">fn</span> <span class="ident">prefix_push</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">c</span>: <span class="ident">char</span>) {
@@ -3510,7 +3616,7 @@
             <span class="kw">let</span> <span class="ident">hangul_offset</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">c</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_S_BASE</span>); <span class="comment">// SIndex in the spec</span>
             <span class="kw">if</span> <span class="ident">hangul_offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">HANGUL_S_COUNT</span> {
                 <span class="kw">let</span> <span class="ident">decomposition</span> <span class="op">=</span> <span class="ident">c_c_tv</span>.<span class="ident">trie_val</span>;
-                <span class="kw">if</span> <span class="ident">decomposition</span> <span class="op">==</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="ident">decomposition</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">BACKWARD_COMBINING_STARTER_MARKER</span> {
                     <span class="comment">// The character is its own decomposition</span>
                     <span class="kw">let</span> <span class="ident">jamo_index</span> <span class="op">=</span> (<span class="ident">c</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">wrapping_sub</span>(<span class="ident">HANGUL_L_BASE</span> <span class="kw">as</span> <span class="ident">usize</span>);
                     <span class="comment">// Attribute belongs on an inner expression, but</span>
@@ -3564,22 +3670,22 @@
                         <span class="comment">// handle `Implicit` and `Offset` tags here.</span>
                     }
                 } <span class="kw">else</span> {
-                    <span class="kw">let</span> <span class="ident">high</span> <span class="op">=</span> (<span class="ident">decomposition</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">u16</span>;
-                    <span class="kw">let</span> <span class="ident">low</span> <span class="op">=</span> <span class="ident">decomposition</span> <span class="kw">as</span> <span class="ident">u16</span>;
-                    <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">low</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                    <span class="kw">let</span> <span class="ident">trail_or_complex</span> <span class="op">=</span> (<span class="ident">decomposition</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">u16</span>;
+                    <span class="kw">let</span> <span class="ident">lead</span> <span class="op">=</span> <span class="ident">decomposition</span> <span class="kw">as</span> <span class="ident">u16</span>;
+                    <span class="kw">if</span> <span class="ident">lead</span> <span class="op">&gt;</span> <span class="ident">NON_ROUND_TRIP_MARKER</span> <span class="op">&amp;&amp;</span> <span class="ident">trail_or_complex</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                         <span class="comment">// Decomposition into two BMP characters: starter and non-starter</span>
-                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">high</span>);
+                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">lead</span>);
                         <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ce32_for_char</span>(<span class="ident">c</span>);
                         <span class="kw">if</span> <span class="ident">ce32</span> <span class="op">==</span> <span class="ident">FALLBACK_CE32</span> {
                             <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>;
                             <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ce32_for_char</span>(<span class="ident">c</span>);
                         }
-                        <span class="kw">let</span> <span class="ident">combining</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">low</span>);
+                        <span class="kw">let</span> <span class="ident">combining</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">trail_or_complex</span>);
                         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_next_decomposition_starts_with_starter</span>() {
                             <span class="kw">let</span> <span class="ident">diacritic_index</span> <span class="op">=</span>
-                                (<span class="ident">low</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">wrapping_sub</span>(<span class="ident">COMBINING_DIACRITICS_BASE</span>);
+                                (<span class="ident">trail_or_complex</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">wrapping_sub</span>(<span class="ident">COMBINING_DIACRITICS_BASE</span>);
                             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">secondary</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">diacritics</span>.<span class="ident">get</span>(<span class="ident">diacritic_index</span>) {
-                                <span class="macro">debug_assert!</span>(<span class="ident">low</span> <span class="op">!</span><span class="op">=</span> <span class="number">0x0344</span>, <span class="string">&quot;Should never have COMBINING GREEK DIALYTIKA TONOS here, since it should have decomposed further.&quot;</span>);
+                                <span class="macro">debug_assert!</span>(<span class="ident">trail_or_complex</span> <span class="op">!</span><span class="op">=</span> <span class="number">0x0344</span>, <span class="string">&quot;Should never have COMBINING GREEK DIALYTIKA TONOS here, since it should have decomposed further.&quot;</span>);
                                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ce</span>) <span class="op">=</span> <span class="ident">ce32</span>.<span class="ident">to_ce_simple_or_long_primary</span>() {
                                     <span class="kw">let</span> <span class="ident">ce_for_combining</span> <span class="op">=</span>
                                         <span class="ident">CollationElement::new_from_secondary</span>(<span class="ident">secondary</span>);
@@ -3629,11 +3735,11 @@
                         }
                         <span class="ident">combining_characters</span>
                             .<span class="ident">push</span>(<span class="ident">CharacterAndClass::new_with_placeholder</span>(<span class="ident">combining</span>));
-                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">high</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                        <span class="macro">debug_assert_ne!</span>(<span class="ident">high</span>, <span class="number">1</span>, <span class="string">&quot;How come U+FDFA NFKD marker seen in NFD?&quot;</span>);
-                        <span class="macro">debug_assert_ne!</span>(<span class="ident">high</span>, <span class="number">2</span>, <span class="string">&quot;How come non-starter marker seen here?&quot;</span>);
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">lead</span> <span class="op">&gt;</span> <span class="ident">NON_ROUND_TRIP_MARKER</span> {
+                        <span class="macro">debug_assert_ne!</span>(<span class="ident">lead</span>, <span class="number">1</span>, <span class="string">&quot;How come U+FDFA NFKD marker seen in NFD?&quot;</span>);
+                        <span class="macro">debug_assert_ne!</span>(<span class="ident">lead</span>, <span class="number">2</span>, <span class="string">&quot;How come non-starter marker seen here?&quot;</span>);
                         <span class="comment">// Decomposition into one BMP character</span>
-                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">high</span>);
+                        <span class="ident">c</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">lead</span>);
                         <span class="ident">ce32</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ce32_for_char</span>(<span class="ident">c</span>);
                         <span class="kw">if</span> <span class="ident">ce32</span> <span class="op">==</span> <span class="ident">FALLBACK_CE32</span> {
                             <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root</span>;
@@ -3663,25 +3769,25 @@
                         <span class="comment">//         scalars16, the offset is into scalars16. Otherwise,</span>
                         <span class="comment">//         the offset minus the length of scalars16 is an offset</span>
                         <span class="comment">//         into scalars32.</span>
-                        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0xFFF</span>);
+                        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">trail_or_complex</span> <span class="op">&amp;</span> <span class="number">0xFFF</span>);
                         <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">scalars16</span>.<span class="ident">len</span>() {
-                            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">2</span>;
+                            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">trail_or_complex</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">2</span>;
                             <span class="kw">let</span> (<span class="ident">starter</span>, <span class="ident">tail</span>) <span class="op">=</span>
                                 <span class="ident">split_first_u16</span>(<span class="self">self</span>.<span class="ident">scalars16</span>.<span class="ident">get_subslice</span>(<span class="ident">offset</span>..<span class="ident">offset</span> <span class="op">+</span> <span class="ident">len</span>));
                             <span class="ident">c</span> <span class="op">=</span> <span class="ident">starter</span>;
-                            <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                            <span class="kw">if</span> <span class="ident">trail_or_complex</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                                 <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">tail</span>.<span class="ident">iter</span>() {
                                     <span class="kw">let</span> <span class="ident">char_from_u</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>);
-                                    <span class="ident">combining_characters</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(
-                                        <span class="ident">char_from_u</span>,
-                                        <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">char_from_u</span>),
-                                    ));
+                                    <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">char_from_u</span>));
+                                    <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="ident">ccc_from_trie_value</span>(<span class="ident">trie_value</span>);
+                                    <span class="ident">combining_characters</span>
+                                        .<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">char_from_u</span>, <span class="ident">ccc</span>));
                                 }
                             } <span class="kw">else</span> {
                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">iter</span>();
                                 <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
                                     <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>);
-                                    <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">ch</span>);
+                                    <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="ident">ccc_from_trie_value</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">ch</span>)));
                                     <span class="kw">if</span> <span class="ident">ccc</span> <span class="op">!</span><span class="op">=</span> <span class="ident">CanonicalCombiningClass::NotReordered</span> {
                                         <span class="comment">// As of Unicode 14, this branch is never taken.</span>
                                         <span class="comment">// It exist for forward compatibility.</span>
@@ -3698,39 +3804,33 @@
 
                                     <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next_back</span>() {
                                         <span class="kw">let</span> <span class="ident">tail_char</span> <span class="op">=</span> <span class="ident">char_from_u16</span>(<span class="ident">u</span>);
-                                        <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">tail_char</span>);
-                                        <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(
-                                            <span class="kw">if</span> <span class="ident">ccc</span> <span class="op">==</span> <span class="ident">CanonicalCombiningClass::NotReordered</span> {
-                                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">tail_char</span>)
-                                            } <span class="kw">else</span> {
-                                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(<span class="ident">tail_char</span>, <span class="ident">ccc</span>)
-                                            }
-                                        );
+                                        <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">tail_char</span>));
+                                        <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_special_decomposition_trie_val</span>(<span class="ident">tail_char</span>, <span class="ident">trie_value</span>));
                                     }
                                     <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">ch</span>));
                                     <span class="kw">break</span>;
                                 }
                             }
                         } <span class="kw">else</span> {
-                            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">low</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">1</span>;
+                            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">trail_or_complex</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">13</span>) <span class="op">+</span> <span class="number">1</span>;
                             <span class="kw">let</span> <span class="ident">offset32</span> <span class="op">=</span> <span class="ident">offset</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">scalars16</span>.<span class="ident">len</span>();
                             <span class="kw">let</span> (<span class="ident">starter</span>, <span class="ident">tail</span>) <span class="op">=</span> <span class="ident">split_first_u32</span>(
                                 <span class="self">self</span>.<span class="ident">scalars32</span>.<span class="ident">get_subslice</span>(<span class="ident">offset32</span>..<span class="ident">offset32</span> <span class="op">+</span> <span class="ident">len</span>),
                             );
                             <span class="ident">c</span> <span class="op">=</span> <span class="ident">starter</span>;
-                            <span class="kw">if</span> <span class="ident">low</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                            <span class="kw">if</span> <span class="ident">trail_or_complex</span> <span class="op">&amp;</span> <span class="number">0x1000</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                                 <span class="kw">for</span> <span class="ident">u</span> <span class="kw">in</span> <span class="ident">tail</span>.<span class="ident">iter</span>() {
                                     <span class="kw">let</span> <span class="ident">char_from_u</span> <span class="op">=</span> <span class="ident">char_from_u24</span>(<span class="ident">u</span>);
-                                    <span class="ident">combining_characters</span>.<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(
-                                        <span class="ident">char_from_u</span>,
-                                        <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">char_from_u</span>),
-                                    ));
+                                    <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">char_from_u</span>));
+                                    <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="ident">ccc_from_trie_value</span>(<span class="ident">trie_value</span>);
+                                    <span class="ident">combining_characters</span>
+                                        .<span class="ident">push</span>(<span class="ident">CharacterAndClass::new</span>(<span class="ident">char_from_u</span>, <span class="ident">ccc</span>));
                                 }
                             } <span class="kw">else</span> {
                                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">it</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">iter</span>();
                                 <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next</span>() {
                                     <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">char_from_u24</span>(<span class="ident">u</span>);
-                                    <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">ch</span>);
+                                    <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="ident">ccc_from_trie_value</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">ch</span>)));
                                     <span class="kw">if</span> <span class="ident">ccc</span> <span class="op">!</span><span class="op">=</span> <span class="ident">CanonicalCombiningClass::NotReordered</span> {
                                         <span class="comment">// As of Unicode 14, this branch is never taken.</span>
                                         <span class="comment">// It exist for forward compatibility.</span>
@@ -3746,14 +3846,8 @@
 
                                     <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span> <span class="ident">it</span>.<span class="ident">next_back</span>() {
                                         <span class="kw">let</span> <span class="ident">tail_char</span> <span class="op">=</span> <span class="ident">char_from_u24</span>(<span class="ident">u</span>);
-                                        <span class="kw">let</span> <span class="ident">ccc</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ccc</span>.<span class="ident">get</span>(<span class="ident">tail_char</span>);
-                                        <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(
-                                            <span class="kw">if</span> <span class="ident">ccc</span> <span class="op">==</span> <span class="ident">CanonicalCombiningClass::NotReordered</span> {
-                                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">tail_char</span>)
-                                            } <span class="kw">else</span> {
-                                                <span class="ident">CharacterAndClassAndTrieValue::new_with_non_zero_ccc</span>(<span class="ident">tail_char</span>, <span class="ident">ccc</span>)
-                                            }
-                                        );
+                                        <span class="kw">let</span> <span class="ident">trie_value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">u32::from</span>(<span class="ident">tail_char</span>));
+                                        <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_special_decomposition_trie_val</span>(<span class="ident">tail_char</span>, <span class="ident">trie_value</span>));
                                     }
                                     <span class="self">self</span>.<span class="ident">prepend_and_sort_non_starter_prefix_of_suffix</span>(<span class="ident">CharacterAndClassAndTrieValue::new_with_non_decomposing_starter</span>(<span class="ident">ch</span>));
                                     <span class="kw">break</span>;
@@ -4484,7 +4578,7 @@
             <span class="comment">// an item more than once.</span>
             <span class="ident">combining_characters</span>
                 .<span class="ident">iter_mut</span>()
-                .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">cc</span>.<span class="ident">set_ccc_from_trie_if_not_already_set</span>(<span class="self">self</span>.<span class="ident">ccc</span>));
+                .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">cc</span>.<span class="ident">set_ccc_from_trie_if_not_already_set</span>(<span class="self">self</span>.<span class="ident">trie</span>));
             <span class="ident">combining_characters</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">cc</span><span class="op">|</span> <span class="ident">cc</span>.<span class="ident">ccc</span>());
         }
     }

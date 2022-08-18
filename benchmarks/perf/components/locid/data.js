@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1660774438659,
+  "lastUpdate": 1660782134020,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -87203,6 +87203,582 @@ window.BENCHMARK_DATA = {
             "name": "subtags/variant/parse",
             "value": 196,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5e65593a7eb69490c98254b63f7943ccb9605319",
+          "message": "Apply missing_docs to icu_provider_blob (#2393)",
+          "timestamp": "2022-08-17T16:55:13-07:00",
+          "tree_id": "680c9cae5b222f4d730b6b5d8bb7e04be8fa464c",
+          "url": "https://github.com/unicode-org/icu4x/commit/5e65593a7eb69490c98254b63f7943ccb9605319"
+        },
+        "date": 1660781567715,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 3336,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/construct/langid",
+            "value": 834,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid",
+            "value": 888,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid/writeable",
+            "value": 465,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/struct/langid",
+            "value": 79,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/str/langid",
+            "value": 776,
+            "range": "± 20",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/strict_cmp/langid",
+            "value": 326,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/canonicalize/langid",
+            "value": 2181,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 4138,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/construct/locale",
+            "value": 1748,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale",
+            "value": 1194,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale/writeable",
+            "value": 808,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/struct/locale",
+            "value": 213,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/str/locale",
+            "value": 1685,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/strict_cmp/locale",
+            "value": 539,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/canonicalize/locale",
+            "value": 3504,
+            "range": "± 15",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/language/parse",
+            "value": 208,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/script/parse",
+            "value": 138,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/region/parse",
+            "value": 211,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/variant/parse",
+            "value": 174,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b48b05e066e538f08b6859a450bac78e1e61f8e0",
+          "message": "Update boilerplate.md (#2390)",
+          "timestamp": "2022-08-17T16:55:03-07:00",
+          "tree_id": "bcfd3c44d49a005e675f746022844e925d59a983",
+          "url": "https://github.com/unicode-org/icu4x/commit/b48b05e066e538f08b6859a450bac78e1e61f8e0"
+        },
+        "date": 1660781680408,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 3419,
+            "range": "± 89",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/construct/langid",
+            "value": 808,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid",
+            "value": 1018,
+            "range": "± 11",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid/writeable",
+            "value": 537,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/struct/langid",
+            "value": 72,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/str/langid",
+            "value": 737,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/strict_cmp/langid",
+            "value": 390,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/canonicalize/langid",
+            "value": 2272,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 3879,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/construct/locale",
+            "value": 1651,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale",
+            "value": 1263,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale/writeable",
+            "value": 897,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/struct/locale",
+            "value": 222,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/str/locale",
+            "value": 1652,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/strict_cmp/locale",
+            "value": 554,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/canonicalize/locale",
+            "value": 3347,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/language/parse",
+            "value": 168,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/script/parse",
+            "value": 115,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/region/parse",
+            "value": 177,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/variant/parse",
+            "value": 164,
+            "range": "± 3",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "598899c2c9236505ae337c885b9b7a33c2505357",
+          "message": "Apply missing_docs to icu_provider_macros (#2394)",
+          "timestamp": "2022-08-17T16:59:41-07:00",
+          "tree_id": "93e3fba4791043f1ca62baab7c913c5cff0a2197",
+          "url": "https://github.com/unicode-org/icu4x/commit/598899c2c9236505ae337c885b9b7a33c2505357"
+        },
+        "date": 1660782079926,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 3408,
+            "range": "± 44",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/construct/langid",
+            "value": 808,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid",
+            "value": 1016,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid/writeable",
+            "value": 537,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/struct/langid",
+            "value": 70,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/str/langid",
+            "value": 737,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/strict_cmp/langid",
+            "value": 390,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/canonicalize/langid",
+            "value": 2265,
+            "range": "± 52",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 3899,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/construct/locale",
+            "value": 1662,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale",
+            "value": 1355,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale/writeable",
+            "value": 897,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/struct/locale",
+            "value": 221,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/str/locale",
+            "value": 1652,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/strict_cmp/locale",
+            "value": 554,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/canonicalize/locale",
+            "value": 3404,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/language/parse",
+            "value": 168,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/script/parse",
+            "value": 115,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/region/parse",
+            "value": 177,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/variant/parse",
+            "value": 163,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cac7266c7c72386f747eb647fa9769d78d7f41d0",
+          "message": "Apply missing_docs to icu_provider_fs (#2395)",
+          "timestamp": "2022-08-17T16:58:20-07:00",
+          "tree_id": "2fcde2e8b162cde51fd17186f427ea2d2128c0dd",
+          "url": "https://github.com/unicode-org/icu4x/commit/cac7266c7c72386f747eb647fa9769d78d7f41d0"
+        },
+        "date": 1660782079885,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "langid/overview",
+            "value": 4370,
+            "range": "± 467",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/construct/langid",
+            "value": 1005,
+            "range": "± 76",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid",
+            "value": 1291,
+            "range": "± 99",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/to_string/langid/writeable",
+            "value": 592,
+            "range": "± 38",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/struct/langid",
+            "value": 97,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/str/langid",
+            "value": 891,
+            "range": "± 71",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/compare/strict_cmp/langid",
+            "value": 435,
+            "range": "± 31",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "langid/canonicalize/langid",
+            "value": 2919,
+            "range": "± 321",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/overview",
+            "value": 5281,
+            "range": "± 435",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/construct/locale",
+            "value": 2125,
+            "range": "± 137",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale",
+            "value": 1624,
+            "range": "± 100",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/to_string/locale/writeable",
+            "value": 1131,
+            "range": "± 84",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/struct/locale",
+            "value": 268,
+            "range": "± 51",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/str/locale",
+            "value": 2231,
+            "range": "± 169",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/compare/strict_cmp/locale",
+            "value": 690,
+            "range": "± 40",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "locale/canonicalize/locale",
+            "value": 4495,
+            "range": "± 294",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/language/parse",
+            "value": 213,
+            "range": "± 15",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/script/parse",
+            "value": 150,
+            "range": "± 11",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/region/parse",
+            "value": 205,
+            "range": "± 17",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "subtags/variant/parse",
+            "value": 203,
+            "range": "± 16",
             "unit": "ns/iter"
           }
         ]

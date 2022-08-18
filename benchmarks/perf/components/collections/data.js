@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1660774298726,
+  "lastUpdate": 1660782026645,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -4655,6 +4655,486 @@ window.BENCHMARK_DATA = {
             "name": "uniset/overview",
             "value": 42057543,
             "range": "± 1816510",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5e65593a7eb69490c98254b63f7943ccb9605319",
+          "message": "Apply missing_docs to icu_provider_blob (#2393)",
+          "timestamp": "2022-08-17T16:55:13-07:00",
+          "tree_id": "680c9cae5b222f4d730b6b5d8bb7e04be8fa464c",
+          "url": "https://github.com/unicode-org/icu4x/commit/5e65593a7eb69490c98254b63f7943ccb9605319"
+        },
+        "date": 1660781442050,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "cpt/overview",
+            "value": 814,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/eng",
+            "value": 586,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/pcd",
+            "value": 712,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ukr",
+            "value": 749,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/yue",
+            "value": 1051,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ccp",
+            "value": 1151,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/eng",
+            "value": 586,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/pcd",
+            "value": 717,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ukr",
+            "value": 761,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/yue",
+            "value": 689,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ccp",
+            "value": 1151,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/overview",
+            "value": 46998865,
+            "range": "± 88972",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b48b05e066e538f08b6859a450bac78e1e61f8e0",
+          "message": "Update boilerplate.md (#2390)",
+          "timestamp": "2022-08-17T16:55:03-07:00",
+          "tree_id": "bcfd3c44d49a005e675f746022844e925d59a983",
+          "url": "https://github.com/unicode-org/icu4x/commit/b48b05e066e538f08b6859a450bac78e1e61f8e0"
+        },
+        "date": 1660781625828,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "cpt/overview",
+            "value": 996,
+            "range": "± 88",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/eng",
+            "value": 794,
+            "range": "± 53",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/pcd",
+            "value": 943,
+            "range": "± 98",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ukr",
+            "value": 959,
+            "range": "± 235",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/yue",
+            "value": 1269,
+            "range": "± 78",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ccp",
+            "value": 1382,
+            "range": "± 79",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/eng",
+            "value": 787,
+            "range": "± 51",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/pcd",
+            "value": 927,
+            "range": "± 49",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ukr",
+            "value": 950,
+            "range": "± 64",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/yue",
+            "value": 959,
+            "range": "± 38",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ccp",
+            "value": 1398,
+            "range": "± 95",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/overview",
+            "value": 45715500,
+            "range": "± 2641788",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 2,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cac7266c7c72386f747eb647fa9769d78d7f41d0",
+          "message": "Apply missing_docs to icu_provider_fs (#2395)",
+          "timestamp": "2022-08-17T16:58:20-07:00",
+          "tree_id": "2fcde2e8b162cde51fd17186f427ea2d2128c0dd",
+          "url": "https://github.com/unicode-org/icu4x/commit/cac7266c7c72386f747eb647fa9769d78d7f41d0"
+        },
+        "date": 1660781868508,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "cpt/overview",
+            "value": 980,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/eng",
+            "value": 703,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/pcd",
+            "value": 867,
+            "range": "± 13",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ukr",
+            "value": 899,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/yue",
+            "value": 1263,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ccp",
+            "value": 1383,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/eng",
+            "value": 704,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/pcd",
+            "value": 866,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ukr",
+            "value": 900,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/yue",
+            "value": 830,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ccp",
+            "value": 1383,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/overview",
+            "value": 56451834,
+            "range": "± 135162",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/best",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/contains_range/worst",
+            "value": 3,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "598899c2c9236505ae337c885b9b7a33c2505357",
+          "message": "Apply missing_docs to icu_provider_macros (#2394)",
+          "timestamp": "2022-08-17T16:59:41-07:00",
+          "tree_id": "93e3fba4791043f1ca62baab7c913c5cff0a2197",
+          "url": "https://github.com/unicode-org/icu4x/commit/598899c2c9236505ae337c885b9b7a33c2505357"
+        },
+        "date": 1660781981977,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "cpt/overview",
+            "value": 739,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/eng",
+            "value": 607,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/pcd",
+            "value": 587,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ukr",
+            "value": 617,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/yue",
+            "value": 937,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/small/ccp",
+            "value": 1012,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/eng",
+            "value": 608,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/pcd",
+            "value": 587,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ukr",
+            "value": 617,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/yue",
+            "value": 681,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "cpt/get/fast/ccp",
+            "value": 1011,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "uniset/overview",
+            "value": 54083325,
+            "range": "± 844755",
             "unit": "ns/iter"
           },
           {

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1660774231122,
+  "lastUpdate": 1660782146053,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -45268,6 +45268,246 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 89,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5e65593a7eb69490c98254b63f7943ccb9605319",
+          "message": "Apply missing_docs to icu_provider_blob (#2393)",
+          "timestamp": "2022-08-17T16:55:13-07:00",
+          "tree_id": "680c9cae5b222f4d730b6b5d8bb7e04be8fa464c",
+          "url": "https://github.com/unicode-org/icu4x/commit/5e65593a7eb69490c98254b63f7943ccb9605319"
+        },
+        "date": 1660781434941,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 108901,
+            "range": "± 410",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21388,
+            "range": "± 143",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66402,
+            "range": "± 697",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 173,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 69,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 73,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b48b05e066e538f08b6859a450bac78e1e61f8e0",
+          "message": "Update boilerplate.md (#2390)",
+          "timestamp": "2022-08-17T16:55:03-07:00",
+          "tree_id": "bcfd3c44d49a005e675f746022844e925d59a983",
+          "url": "https://github.com/unicode-org/icu4x/commit/b48b05e066e538f08b6859a450bac78e1e61f8e0"
+        },
+        "date": 1660781590101,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 122540,
+            "range": "± 977",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25109,
+            "range": "± 65",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 72161,
+            "range": "± 109",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 202,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 89,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cac7266c7c72386f747eb647fa9769d78d7f41d0",
+          "message": "Apply missing_docs to icu_provider_fs (#2395)",
+          "timestamp": "2022-08-17T16:58:20-07:00",
+          "tree_id": "2fcde2e8b162cde51fd17186f427ea2d2128c0dd",
+          "url": "https://github.com/unicode-org/icu4x/commit/cac7266c7c72386f747eb647fa9769d78d7f41d0"
+        },
+        "date": 1660781936925,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 119303,
+            "range": "± 5555",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24997,
+            "range": "± 1057",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71910,
+            "range": "± 4855",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 198,
+            "range": "± 8",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 80,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 86,
+            "range": "± 3",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "598899c2c9236505ae337c885b9b7a33c2505357",
+          "message": "Apply missing_docs to icu_provider_macros (#2394)",
+          "timestamp": "2022-08-17T16:59:41-07:00",
+          "tree_id": "93e3fba4791043f1ca62baab7c913c5cff0a2197",
+          "url": "https://github.com/unicode-org/icu4x/commit/598899c2c9236505ae337c885b9b7a33c2505357"
+        },
+        "date": 1660782100188,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 105449,
+            "range": "± 1238",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21422,
+            "range": "± 273",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66545,
+            "range": "± 836",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 171,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 69,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 73,
             "range": "± 0",
             "unit": "ns/iter"
           }

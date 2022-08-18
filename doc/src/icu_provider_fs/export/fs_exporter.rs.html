@@ -182,6 +182,28 @@
 <span id="177">177</span>
 <span id="178">178</span>
 <span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -197,6 +219,7 @@
 <span class="kw">use</span> <span class="ident">std::sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
+<span class="doccomment">/// Choices of what to do if [`FilesystemExporter`] tries to write to a pre-existing directory.</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">OverwriteOption</span> {
@@ -206,6 +229,12 @@
     <span class="doccomment">/// If the directory doesn&#39;t exist, create it.</span>
     <span class="doccomment">/// If it does exist, remove it aggressively (rm -rf) and re-create it.</span>
     <span class="ident">RemoveAndReplace</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">OverwriteOption</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::CheckEmpty</span>
+    }
 }
 
 <span class="doccomment">/// Options bag for initializing a [`FilesystemExporter`].</span>
@@ -224,8 +253,17 @@
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">root</span>: <span class="ident">PathBuf::from</span>(<span class="string">&quot;icu4x_data&quot;</span>),
-            <span class="ident">overwrite</span>: <span class="ident">OverwriteOption::CheckEmpty</span>,
+            <span class="ident">overwrite</span>: <span class="ident">Default::default</span>(),
             <span class="ident">fingerprint</span>: <span class="bool-val">false</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ExporterOptions</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">root</span>: <span class="ident">PathBuf</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">ExporterOptions</span> {
+            <span class="ident">root</span>,
+            ..<span class="ident">Default::default</span>()
         }
     }
 }
@@ -240,6 +278,12 @@
 }
 
 <span class="kw">impl</span> <span class="ident">FilesystemExporter</span> {
+    <span class="doccomment">/// Creates a new [`FilesystemExporter`] with a [serializer] and [options].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See the module-level docs for an example.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [serializer]: crate::export::serializers</span>
+    <span class="doccomment">/// [options]: ExporterOptions</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(
         <span class="ident">serializer</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">AbstractSerializer</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
         <span class="ident">options</span>: <span class="ident">ExporterOptions</span>,

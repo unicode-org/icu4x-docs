@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["OverwriteOption",""]],"struct":[["ExporterOptions","Options bag for initializing a [`FilesystemExporter`]."],["FilesystemExporter","A data exporter that writes data to a filesystem hierarchy. See the module-level docs for an example."]]});

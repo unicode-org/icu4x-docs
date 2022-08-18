@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["bincode",""],["json",""],["postcard",""]],"trait":[["AbstractSerializer","A simple serializer trait that works on whole objects."]]});
+initSidebarItems({"mod":[["bincode","Serializer configurations for [`bincode`]."],["json","Serializer configurations for [`serde_json`]."],["postcard","Serializer configurations for [`postcard`]."]],"trait":[["AbstractSerializer","A simple serializer trait that works on whole objects."]]});

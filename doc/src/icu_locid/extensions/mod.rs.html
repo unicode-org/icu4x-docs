@@ -290,6 +290,30 @@
 <span id="285">285</span>
 <span id="286">286</span>
 <span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -365,7 +389,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ExtensionType</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_byte</span>(<span class="ident">key</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_byte</span>(<span class="ident">key</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_ascii_lowercase</span>();
         <span class="kw">match</span> <span class="ident">key</span> {
             <span class="string">b&#39;u&#39;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Unicode</span>),
@@ -374,6 +398,18 @@
             <span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Other</span>(<span class="ident">key</span>)),
             <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidExtension</span>),
         }
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_bytes_manual_slice</span>(
+        <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+        <span class="ident">start</span>: <span class="ident">usize</span>,
+        <span class="ident">end</span>: <span class="ident">usize</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">end</span> <span class="op">-</span> <span class="ident">start</span> <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidExtension</span>);
+        }
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
+        <span class="ident"><span class="self">Self</span>::from_byte</span>(<span class="ident">bytes</span>[<span class="ident">start</span>])
     }
 }
 
@@ -407,6 +443,18 @@
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">unicode</span>: <span class="ident">Unicode::new</span>(),
+            <span class="ident">transform</span>: <span class="ident">Transform::new</span>(),
+            <span class="ident">private</span>: <span class="ident">Private::new</span>(),
+            <span class="ident">other</span>: <span class="ident">Vec::new</span>(),
+        }
+    }
+
+    <span class="doccomment">/// Function to create a new map of extensions containing exactly one unicode extension, callable in `const`</span>
+    <span class="doccomment">/// context.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_unicode</span>(<span class="ident">unicode</span>: <span class="ident">Unicode</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">unicode</span>,
             <span class="ident">transform</span>: <span class="ident">Transform::new</span>(),
             <span class="ident">private</span>: <span class="ident">Private::new</span>(),
             <span class="ident">other</span>: <span class="ident">Vec::new</span>(),

@@ -415,6 +415,30 @@
 <span id="410">410</span>
 <span id="411">411</span>
 <span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -424,6 +448,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">rayon::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::collections::BTreeSet</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::io::Write</span>;
@@ -447,6 +472,7 @@
     <span class="ident">mod_directory</span>: <span class="ident">PathBuf</span>,
     <span class="ident">pretty</span>: <span class="ident">bool</span>,
     <span class="ident">insert_feature_gates</span>: <span class="ident">bool</span>,
+    <span class="ident">use_separate_crates</span>: <span class="ident">bool</span>,
     <span class="comment">// Temporary storage for put_payload: key -&gt; (marker path, bake -&gt; [locale])</span>
     <span class="ident">data</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">DataKey</span>, (<span class="ident">SyncTokenStream</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">SyncTokenStream</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="comment">// All mod.rs files in the module tree. Because generation is parallel,</span>
@@ -460,12 +486,18 @@
 }
 
 <span class="kw">impl</span> <span class="ident">BakedDataExporter</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mod_directory</span>: <span class="ident">PathBuf</span>, <span class="ident">pretty</span>: <span class="ident">bool</span>, <span class="ident">insert_feature_gates</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">mod_directory</span>: <span class="ident">PathBuf</span>,
+        <span class="ident">pretty</span>: <span class="ident">bool</span>,
+        <span class="ident">insert_feature_gates</span>: <span class="ident">bool</span>,
+        <span class="ident">use_separate_crates</span>: <span class="ident">bool</span>,
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">std::fs::remove_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">mod_directory</span>);
         <span class="self">Self</span> {
             <span class="ident">mod_directory</span>,
             <span class="ident">pretty</span>,
-            <span class="ident">insert_feature_gates</span>,
+            <span class="ident">insert_feature_gates</span>: <span class="ident">insert_feature_gates</span> <span class="op">&amp;&amp;</span> <span class="ident">use_separate_crates</span>,
+            <span class="ident">use_separate_crates</span>,
             <span class="ident">data</span>: <span class="ident">Default::default</span>(),
             <span class="ident">mod_files</span>: <span class="ident">Default::default</span>(),
             <span class="ident">marker_data_feature</span>: <span class="ident">Default::default</span>(),
@@ -484,7 +516,18 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">crlify::BufWriterWithLineEndingFix::new</span>(<span class="ident">File::create</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>);
             <span class="macro">writeln!</span>(<span class="ident">file</span>, <span class="string">&quot;// @generated&quot;</span>)<span class="question-mark">?</span>;
-            <span class="macro">writeln!</span>(<span class="ident">file</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">data</span>)<span class="question-mark">?</span>;
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">use_separate_crates</span> {
+                <span class="macro">writeln!</span>(<span class="ident">file</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">data</span>)<span class="question-mark">?</span>;
+            } <span class="kw">else</span> {
+                <span class="macro">writeln!</span>(
+                    <span class="ident">file</span>,
+                    <span class="string">&quot;{}&quot;</span>,
+                    <span class="ident">data</span>.<span class="ident">to_string</span>()
+                        .<span class="ident">replace</span>(<span class="string">&quot;icu_&quot;</span>, <span class="string">&quot;icu :: &quot;</span>)
+                        .<span class="ident">replace</span>(<span class="string">&quot;icu :: provider&quot;</span>, <span class="string">&quot;icu_provider&quot;</span>)
+                        .<span class="ident">replace</span>(<span class="string">&quot;icu :: datagen&quot;</span>, <span class="string">&quot;icu_datagen&quot;</span>)
+                )<span class="question-mark">?</span>;
+            }
         }
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pretty</span> {
@@ -675,8 +718,13 @@
 
     <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">dependencies</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_provider&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">deps</span> <span class="op">=</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">dependencies</span>).<span class="ident">into_iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-        <span class="ident">deps</span>.<span class="ident">sort_unstable</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">deps</span> <span class="op">=</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">dependencies</span>)
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">use_separate_crates</span> {
+            <span class="ident">deps</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">krate</span><span class="op">|</span> <span class="ident">krate</span> <span class="op">==</span> <span class="string">&quot;icu_provider&quot;</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">krate</span>.<span class="ident">starts_with</span>(<span class="string">&quot;icu_&quot;</span>));
+            <span class="ident">deps</span>.<span class="ident">insert</span>(<span class="string">&quot;icu&quot;</span>);
+        }
         <span class="macro">log::info!</span>(<span class="string">&quot;The generated module requires the following crates:&quot;</span>);
         <span class="kw">for</span> <span class="ident">crate_name</span> <span class="kw">in</span> <span class="ident">deps</span> {
             <span class="macro">log::info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">crate_name</span>);

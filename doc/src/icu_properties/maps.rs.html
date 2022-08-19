@@ -494,6 +494,43 @@
 <span id="489">489</span>
 <span id="490">490</span>
 <span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -515,6 +552,7 @@
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">icu_collections::codepointtrie</span>::{<span class="ident">CodePointMapRange</span>, <span class="ident">CodePointTrie</span>, <span class="ident">TrieValue</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">zerovec::ZeroVecError</span>;
 
 <span class="doccomment">/// A wrapper around code point map data. It is returned by APIs that return Unicode</span>
 <span class="doccomment">/// property data in a map-like form, ex: enumerated property value data keyed</span>
@@ -560,6 +598,42 @@
         <span class="ident">CodePointMapDataBorrowed</span> {
             <span class="ident">map</span>: <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>(),
         }
+    }
+
+    <span class="doccomment">/// Convert this map to a map around another type</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Typically useful for type-erasing maps into maps around integers.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Panics</span>
+    <span class="doccomment">/// Will panic if T and P are different sizes</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu::properties::{maps, GeneralCategory};</span>
+    <span class="doccomment">/// use icu_collections::codepointtrie::CodePointTrie;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let data =</span>
+    <span class="doccomment">///     maps::load_general_category(&amp;provider)</span>
+    <span class="doccomment">///         .expect(&quot;The data should be valid&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let gc = data.try_into_converted::&lt;u8&gt;().unwrap();</span>
+    <span class="doccomment">/// let gc = gc.as_borrowed();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;木&#39;), GeneralCategory::OtherLetter as u8);  // U+6728</span>
+    <span class="doccomment">/// assert_eq!(gc.get(&#39;🎃&#39;), GeneralCategory::OtherSymbol as u8);  // U+1F383 JACK-O-LANTERN</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_into_converted</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CodePointMapData</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">ZeroVecError</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">P</span>: <span class="ident">TrieValue</span>,
+    {
+        <span class="self">self</span>.<span class="ident">data</span>
+            .<span class="ident">try_map_project</span>::<span class="op">&lt;</span><span class="ident">ErasedMaplikeMarker</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">data</span>, <span class="kw">_</span><span class="op">|</span> {
+                <span class="ident">data</span>.<span class="ident">try_into_converted</span>()
+            })
+            .<span class="ident">map</span>(<span class="ident">CodePointMapData::from_data</span>)
     }
 
     <span class="doccomment">/// Construct a new one from loaded data</span>

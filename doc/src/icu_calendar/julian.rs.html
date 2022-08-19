@@ -390,6 +390,15 @@
 <span id="385">385</span>
 <span id="386">386</span>
 <span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -424,11 +433,9 @@
 <span class="doccomment">//! ```</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any_calendar::AnyCalendarKind</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::calendar_arithmetic</span>::{<span class="ident">ArithmeticDate</span>, <span class="ident">CalendarArithmetic</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso::Iso</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">types</span>, <span class="ident">ArithmeticDate</span>, <span class="ident">Calendar</span>, <span class="ident">CalendarArithmetic</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>,
-    <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>,
-};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>};
 <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">tinystr::tinystr</span>;
@@ -437,11 +444,22 @@
 <span class="comment">// 1st Jan of 1st year Julian is equivalent to December 30th of 0th year of ISO year</span>
 <span class="kw">const</span> <span class="ident">JULIAN_EPOCH</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="op">-</span><span class="number">1</span>;
 
-<span class="doccomment">/// The Julian calendar</span>
+<span class="doccomment">/// The [Julian Calendar]</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The [Julian calendar] is a solar calendar that was used commonly historically, with twelve months.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This type can be used with [`Date`] or [`DateTime`] to represent dates in this calendar.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [Julian calendar]: https://en.wikipedia.org/wiki/Julian_calendar</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Era codes</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This calendar supports two era codes: `&quot;bc&quot;`, and `&quot;ad&quot;`, corresponding to the BC and AD eras</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type is stable</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Julian</span>;
 
+<span class="doccomment">/// The inner date type used for representing [`Date`]s of [`Julian`]. See [`Date`] and [`Julian`] for more details.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="comment">// The inner date type used for representing Date&lt;Julian&gt;</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">JulianDateInner</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Julian</span><span class="op">&gt;</span>);
@@ -475,12 +493,12 @@
         <span class="ident">month_code</span>: <span class="ident">types::MonthCode</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">era</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;ce&quot;</span>) {
+        <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">era</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;ad&quot;</span>) {
             <span class="kw">if</span> <span class="ident">year</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
             }
             <span class="ident">year</span>
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">era</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;bce&quot;</span>) {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">era</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;bc&quot;</span>) {
             <span class="kw">if</span> <span class="ident">year</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
             }

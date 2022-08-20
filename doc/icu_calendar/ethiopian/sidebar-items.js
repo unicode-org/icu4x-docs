@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["EthiopianEraStyle","Which era style the ethiopian calendar uses"]],"struct":[["Ethiopian","The Ethiopian Calendar"],["EthiopianDateInner","The inner date type used for representing [`Date`]s of [`Ethiopian`]. See [`Date`] and [`Ethiopian`] for more details."]]});

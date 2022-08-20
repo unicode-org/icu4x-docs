@@ -420,6 +420,73 @@
 <span id="415">415</span>
 <span id="416">416</span>
 <span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -437,10 +504,16 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doc</span>)]</span>
 <span class="kw">use</span> <span class="ident">icu_locid::subtags::Variant</span>;
 
+<span class="doccomment">/// The request type passed into all data provider implementations.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type is stable</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataRequest</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// The locale for which to load data.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If locale fallback is enabled, the resulting data may be from a different locale</span>
+    <span class="doccomment">/// than the one requested here.</span>
     <span class="kw">pub</span> <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DataLocale</span>,
+    <span class="doccomment">/// Metadata that may affect the behavior of the data provider.</span>
     <span class="kw">pub</span> <span class="ident">metadata</span>: <span class="ident">DataRequestMetadata</span>,
 }
 
@@ -450,13 +523,73 @@
     }
 }
 
+<span class="doccomment">/// Metadata for data requests. This is currently empty, but it may be extended with options</span>
+<span class="doccomment">/// for tuning locale fallback, buffer layout, and so forth.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataRequestMetadata</span>;
 
-<span class="doccomment">/// A variant and language identifier, used for requesting data from a data provider.</span>
+<span class="doccomment">/// The main locale type used by the ICU4X data provider.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The fields in a [`DataLocale`] are not generally known until runtime.</span>
+<span class="doccomment">/// [`DataLocale`] contains less functionality than [`Locale`] but more than</span>
+<span class="doccomment">/// [`LanguageIdentifier`] for better size and performance while still meeting</span>
+<span class="doccomment">/// the needs of the ICU4X data pipeline.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Convert a [`Locale`] to a [`DataLocale`] and back:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locid::locale;</span>
+<span class="doccomment">/// use icu_provider::DataLocale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let locale1 = locale!(&quot;en-u-ca-buddhist&quot;);</span>
+<span class="doccomment">/// let data_locale = DataLocale::from(locale1);</span>
+<span class="doccomment">/// let locale2 = data_locale.into_locale();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(locale2.to_string(), &quot;en-u-ca-buddhist&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// You can alternatively create a [`DataLocale`] from a borrowed [`Locale`], which is more</span>
+<span class="doccomment">/// efficient than cloning the [`Locale`], but less efficient than converting an owned</span>
+<span class="doccomment">/// [`Locale`]:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locid::locale;</span>
+<span class="doccomment">/// use icu_provider::DataLocale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let locale1 = locale!(&quot;en-u-ca-buddhist&quot;);</span>
+<span class="doccomment">/// let data_locale = DataLocale::from(&amp;locale1);</span>
+<span class="doccomment">/// let locale2 = data_locale.into_locale();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(locale1, locale2);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If you are sure that you have no Unicode keywords, start with [`LanguageIdentifier`]:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locid::langid;</span>
+<span class="doccomment">/// use icu_provider::DataLocale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let langid1 = langid!(&quot;es-CA-valencia&quot;);</span>
+<span class="doccomment">/// let data_locale = DataLocale::from(langid1);</span>
+<span class="doccomment">/// let langid2 = data_locale.get_langid();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(langid2.to_string(), &quot;es-CA-valencia&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`DataLocale`] only supports `-u` keywords, to reflect the current state of CLDR data</span>
+<span class="doccomment">/// lookup and fallback. This may change in the future.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu_locid::Locale;</span>
+<span class="doccomment">/// use icu_provider::DataLocale;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let locale = &quot;hi-t-en-h0-hybrid-u-attr-ca-buddhist&quot;.parse::&lt;Locale&gt;().unwrap();</span>
+<span class="doccomment">/// let data_locale = DataLocale::from(locale);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(data_locale.to_string(), &quot;hi-u-ca-buddhist&quot;);</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataLocale</span> {
     <span class="ident">langid</span>: <span class="ident">LanguageIdentifier</span>,
@@ -732,6 +865,7 @@
         <span class="op">!</span><span class="self">self</span>.<span class="ident">langid</span>.<span class="ident">variants</span>.<span class="ident">is_empty</span>()
     }
 
+    <span class="doccomment">/// Sets all [`Variants`] on this [`DataLocale`], overwriting any that were there previously.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_variants</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">variants</span>: <span class="ident">Variants</span>) {
         <span class="self">self</span>.<span class="ident">langid</span>.<span class="ident">variants</span> <span class="op">=</span> <span class="ident">variants</span>;

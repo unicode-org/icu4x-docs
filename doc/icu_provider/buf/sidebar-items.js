@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["BufferFormat","An enum expressing all Serde formats known to ICU4X."]],"struct":[["BufferMarker",""]],"trait":[["BufferProvider","A data provider that returns opaque bytes."]]});
+initSidebarItems({"enum":[["BufferFormat","An enum expressing all Serde formats known to ICU4X."]],"struct":[["BufferMarker","[`DataMarker`] for raw buffers. Returned by [`BufferProvider`]."]],"trait":[["BufferProvider","A data provider that returns opaque bytes."]]});

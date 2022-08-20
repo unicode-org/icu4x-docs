@@ -290,12 +290,6 @@
 <span id="285">285</span>
 <span id="286">286</span>
 <span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -537,26 +531,21 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="kw-2">mut</span> <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MTo</span><span class="op">&gt;</span>, <span class="ident">datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">datagen::ReturnedPayloadError</span>;
-
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MTo</span><span class="op">&gt;</span>, (<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span>, <span class="ident">DataError</span>)<span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">provider</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">providers</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">convert</span>(<span class="ident">key</span>, <span class="ident">from</span>);
             <span class="kw">match</span> <span class="ident">result</span> {
                 <span class="prelude-val">Ok</span>(<span class="ident">ok</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ok</span>),
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                    <span class="kw">let</span> <span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">err</span>) <span class="op">=</span> <span class="ident">e</span>;
+                    <span class="kw">let</span> (<span class="ident">returned</span>, <span class="ident">err</span>) <span class="op">=</span> <span class="ident">e</span>;
                     <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">predicate</span>.<span class="ident">test</span>(<span class="ident">key</span>, <span class="prelude-val">None</span>, <span class="ident">err</span>) {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">err</span>));
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="ident">returned</span>, <span class="ident">err</span>));
                     }
                     <span class="ident">from</span> <span class="op">=</span> <span class="ident">returned</span>;
                 }
             };
         }
-        <span class="prelude-val">Err</span>(<span class="ident">ReturnedPayloadError</span>(
-            <span class="ident">from</span>,
-            <span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>),
-        ))
+        <span class="prelude-val">Err</span>((<span class="ident">from</span>, <span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_key</span>(<span class="ident">key</span>)))
     }
 }
 
@@ -573,15 +562,14 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">DataKey</span>,
         <span class="kw-2">mut</span> <span class="ident">from</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MTo</span><span class="op">&gt;</span>, <span class="ident">datagen::ReturnedPayloadError</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">datagen::ReturnedPayloadError</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MTo</span><span class="op">&gt;</span>, (<span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">MFrom</span><span class="op">&gt;</span>, <span class="ident">DataError</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">convert</span>(<span class="ident">key</span>, <span class="ident">from</span>);
         <span class="kw">match</span> <span class="ident">result</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">ok</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ok</span>),
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">err</span>) <span class="op">=</span> <span class="ident">e</span>;
+                <span class="kw">let</span> (<span class="ident">returned</span>, <span class="ident">err</span>) <span class="op">=</span> <span class="ident">e</span>;
                 <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="number">2</span>.<span class="ident">test</span>(<span class="ident">key</span>, <span class="prelude-val">None</span>, <span class="ident">err</span>) {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ReturnedPayloadError</span>(<span class="ident">returned</span>, <span class="ident">err</span>));
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="ident">returned</span>, <span class="ident">err</span>));
                 }
                 <span class="ident">from</span> <span class="op">=</span> <span class="ident">returned</span>;
             }

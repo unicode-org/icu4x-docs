@@ -202,6 +202,33 @@
 <span id="197">197</span>
 <span id="198">198</span>
 <span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -215,6 +242,8 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`BufferProvider`]: crate::buf::BufferProvider</span>
 
+<span class="comment">// Hidden for now, but could be made public-stable in the future.</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">borrow_de_utils</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::buf::BufferFormat</span>;
@@ -227,8 +256,9 @@
 <span class="doccomment">/// A [`BufferProvider`] that deserializes its data using Serde.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">P</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">P</span>);
 
-<span class="doccomment">/// Auto-implemented for all [`BufferProvider`] for easy wrapping in [`DeserializingBufferProvider`].</span>
+<span class="doccomment">/// Blanket-implemented trait adding the [`Self::as_deserializing()`] function.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsDeserializingBufferProvider</span> {
+    <span class="doccomment">/// Wrap this [`BufferProvider`] in a [`DeserializingBufferProvider`].</span>
     <span class="kw">fn</span> <span class="ident">as_deserializing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 }
 
@@ -287,6 +317,30 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">BufferMarker</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Deserialize a [`DataPayload`]`&lt;`[`BufferMarker`]`&gt;` into a [`DataPayload`] of a</span>
+    <span class="doccomment">/// specific concrete type.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function takes the buffer format as an argument. When a buffer payload is returned</span>
+    <span class="doccomment">/// from a data provider, the buffer format is stored in the [`DataResponseMetadata`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Requires the `deserialize_json` feature:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider::prelude::*;</span>
+    <span class="doccomment">/// use icu_provider::hello_world::*;</span>
+    <span class="doccomment">/// use icu_provider::buf::BufferFormat;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let buffer: &amp;[u8] = b&quot;{\&quot;message\&quot;:\&quot;Hallo Welt\&quot;}&quot;;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let buffer_payload = DataPayload::from_owned(buffer);</span>
+    <span class="doccomment">/// let payload: DataPayload&lt;HelloWorldV1Marker&gt; = buffer_payload</span>
+    <span class="doccomment">///     .into_deserialized(BufferFormat::Json)</span>
+    <span class="doccomment">///     .expect(&quot;Deserialization successful&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(payload.get().message, &quot;Hallo Welt&quot;);</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_deserialized</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(
         <span class="self">self</span>,
         <span class="ident">buffer_format</span>: <span class="ident">BufferFormat</span>,

@@ -233,6 +233,18 @@
 <span id="228">228</span>
 <span id="229">229</span>
 <span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -255,7 +267,7 @@
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CalendarArithmetic</span>: <span class="ident">Calendar</span> {
     <span class="kw">fn</span> <span class="ident">month_days</span>(<span class="ident">year</span>: <span class="ident">i32</span>, <span class="ident">month</span>: <span class="ident">u8</span>) -&gt; <span class="ident">u8</span>;
-    <span class="kw">fn</span> <span class="ident">months_for_every_year</span>() -&gt; <span class="ident">u8</span>;
+    <span class="kw">fn</span> <span class="ident">months_for_every_year</span>(<span class="ident">year</span>: <span class="ident">i32</span>) -&gt; <span class="ident">u8</span>;
     <span class="kw">fn</span> <span class="ident">is_leap_year</span>(<span class="ident">year</span>: <span class="ident">i32</span>) -&gt; <span class="ident">bool</span>;
 }
 
@@ -269,39 +281,51 @@
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
         }
     }
+
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">offset_date</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">offset</span>: <span class="ident">DateDuration</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">year</span> <span class="op">+</span><span class="op">=</span> <span class="ident">offset</span>.<span class="ident">years</span>;
-        <span class="self">self</span>.<span class="ident">month</span> <span class="op">+</span><span class="op">=</span> <span class="ident">offset</span>.<span class="ident">months</span> <span class="kw">as</span> <span class="ident">u8</span>;
-        <span class="ident">offset</span>.<span class="ident">months</span> <span class="op">=</span> <span class="number">0</span>;
-
-        <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">+</span><span class="op">=</span> <span class="ident">offset</span>.<span class="ident">weeks</span> <span class="op">*</span> <span class="number">7</span>;
-
-        <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span>;
-        <span class="self">self</span>.<span class="ident">day</span> <span class="op">=</span> <span class="number">1</span>;
-
-        <span class="kw">while</span> <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">if</span> <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">&lt;</span> <span class="number">0</span> {
-                <span class="self">self</span>.<span class="ident">month</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="kw">let</span> <span class="ident">month_days</span> <span class="op">=</span> <span class="ident">C::month_days</span>(<span class="self">self</span>.<span class="ident">year</span>, <span class="self">self</span>.<span class="ident">month</span>);
-                <span class="kw">if</span> (<span class="op">-</span><span class="ident">offset</span>.<span class="ident">days</span>) <span class="op">&gt;</span> <span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i32</span> {
-                    <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">+</span><span class="op">=</span> <span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i32</span>;
-                } <span class="kw">else</span> {
-                    <span class="self">self</span>.<span class="ident">day</span> <span class="op">=</span> <span class="number">1</span> <span class="op">+</span> (<span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i8</span> <span class="op">+</span> <span class="ident">offset</span>.<span class="ident">days</span> <span class="kw">as</span> <span class="ident">i8</span>) <span class="kw">as</span> <span class="ident">u8</span>;
-                    <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">=</span> <span class="number">0</span>;
-                }
+    <span class="kw">fn</span> <span class="ident">offset_days</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">day_offset</span>: <span class="ident">i32</span>) {
+        <span class="kw">while</span> <span class="ident">day_offset</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">let</span> <span class="ident">month_days</span> <span class="op">=</span> <span class="ident">C::month_days</span>(<span class="self">self</span>.<span class="ident">year</span>, <span class="self">self</span>.<span class="ident">month</span>);
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">day_offset</span> <span class="op">&gt;</span> <span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i32</span> {
+                <span class="self">self</span>.<span class="ident">offset_months</span>(<span class="number">1</span>);
+                <span class="ident">day_offset</span> <span class="op">-</span><span class="op">=</span> <span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i32</span>;
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">day_offset</span> <span class="op">&lt;</span> <span class="number">1</span> {
+                <span class="self">self</span>.<span class="ident">offset_months</span>(<span class="op">-</span><span class="number">1</span>);
+                <span class="ident">day_offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">C::month_days</span>(<span class="self">self</span>.<span class="ident">year</span>, <span class="self">self</span>.<span class="ident">month</span>) <span class="kw">as</span> <span class="ident">i32</span>;
             } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">month_days</span> <span class="op">=</span> <span class="ident">C::month_days</span>(<span class="self">self</span>.<span class="ident">year</span>, <span class="self">self</span>.<span class="ident">month</span>);
-
-                <span class="kw">if</span> <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i32</span> {
-                    <span class="self">self</span>.<span class="ident">month</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                    <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">-</span><span class="op">=</span> <span class="ident">month_days</span> <span class="kw">as</span> <span class="ident">i32</span>;
-                } <span class="kw">else</span> {
-                    <span class="self">self</span>.<span class="ident">day</span> <span class="op">+</span><span class="op">=</span> <span class="ident">offset</span>.<span class="ident">days</span> <span class="kw">as</span> <span class="ident">u8</span>;
-                    <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">=</span> <span class="number">0</span>;
-                }
+                <span class="self">self</span>.<span class="ident">day</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">day_offset</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+                <span class="ident">day_offset</span> <span class="op">=</span> <span class="number">0</span>;
             }
         }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">offset_months</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">month_offset</span>: <span class="ident">i32</span>) {
+        <span class="kw">while</span> <span class="ident">month_offset</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">let</span> <span class="ident">year_months</span> <span class="op">=</span> <span class="ident">C::months_for_every_year</span>(<span class="self">self</span>.<span class="ident">year</span>);
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">month_offset</span> <span class="op">&gt;</span> <span class="ident">year_months</span> <span class="kw">as</span> <span class="ident">i32</span> {
+                <span class="self">self</span>.<span class="ident">year</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="ident">month_offset</span> <span class="op">-</span><span class="op">=</span> <span class="ident">year_months</span> <span class="kw">as</span> <span class="ident">i32</span>;
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">month_offset</span> <span class="op">&lt;</span> <span class="number">1</span> {
+                <span class="self">self</span>.<span class="ident">year</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="ident">month_offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">C::months_for_every_year</span>(<span class="self">self</span>.<span class="ident">year</span>) <span class="kw">as</span> <span class="ident">i32</span>;
+            } <span class="kw">else</span> {
+                <span class="self">self</span>.<span class="ident">month</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">month_offset</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+                <span class="ident">month_offset</span> <span class="op">=</span> <span class="number">0</span>
+            }
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">offset_date</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">DateDuration</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>) {
+        <span class="comment">// For offset_date to work with lunar calendars, need to handle an edge case where the original month is not valid in the future year.</span>
+        <span class="self">self</span>.<span class="ident">year</span> <span class="op">+</span><span class="op">=</span> <span class="ident">offset</span>.<span class="ident">years</span>;
+
+        <span class="self">self</span>.<span class="ident">offset_months</span>(<span class="ident">offset</span>.<span class="ident">months</span>);
+
+        <span class="kw">let</span> <span class="ident">day_offset</span> <span class="op">=</span> <span class="ident">offset</span>.<span class="ident">days</span> <span class="op">+</span> <span class="ident">offset</span>.<span class="ident">weeks</span> <span class="op">*</span> <span class="number">7</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span>;
+        <span class="self">self</span>.<span class="ident">day</span> <span class="op">=</span> <span class="number">1</span>;
+        <span class="self">self</span>.<span class="ident">offset_days</span>(<span class="ident">day_offset</span>);
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -321,7 +345,7 @@
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">days_in_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
-        <span class="kw">let</span> <span class="ident">months_in_year</span> <span class="op">=</span> <span class="ident">C::months_for_every_year</span>();
+        <span class="kw">let</span> <span class="ident">months_in_year</span> <span class="op">=</span> <span class="ident">C::months_for_every_year</span>(<span class="self">self</span>.<span class="ident">year</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">days</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">for</span> <span class="ident">month</span> <span class="kw">in</span> <span class="number">1</span>..<span class="op">=</span><span class="ident">months_in_year</span> {
             <span class="ident">days</span> <span class="op">+</span><span class="op">=</span> <span class="ident">C::month_days</span>(<span class="self">self</span>.<span class="ident">year</span>, <span class="ident">month</span>) <span class="kw">as</span> <span class="ident">u32</span>;
@@ -331,7 +355,7 @@
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">months_in_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
-        <span class="ident">C::months_for_every_year</span>() <span class="kw">as</span> <span class="ident">u8</span>
+        <span class="ident">C::months_for_every_year</span>(<span class="self">self</span>.<span class="ident">year</span>) <span class="kw">as</span> <span class="ident">u8</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -352,7 +376,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">date_from_year_day</span>(<span class="ident">year</span>: <span class="ident">i32</span>, <span class="ident">year_day</span>: <span class="ident">u32</span>) -&gt; <span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">month</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">year_day</span> <span class="kw">as</span> <span class="ident">i32</span>;
-        <span class="kw">while</span> <span class="ident">month</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">C::months_for_every_year</span>() {
+        <span class="kw">while</span> <span class="ident">month</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">C::months_for_every_year</span>(<span class="ident">year</span>) {
             <span class="kw">let</span> <span class="ident">month_days</span> <span class="op">=</span> <span class="ident">C::month_days</span>(<span class="ident">year</span>, <span class="ident">month</span>) <span class="kw">as</span> <span class="ident">i32</span>;
             <span class="kw">if</span> <span class="ident">day</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">month_days</span> {
                 <span class="kw">break</span>;
@@ -387,7 +411,7 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">solar_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">types::FormattableMonth</span> {
         <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">month</span> {
-            <span class="ident">a</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">&gt;</span> <span class="ident">C::months_for_every_year</span>() =&gt; <span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;und&quot;</span>),
+            <span class="ident">a</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">&gt;</span> <span class="ident">C::months_for_every_year</span>(<span class="self">self</span>.<span class="ident">year</span>) =&gt; <span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;und&quot;</span>),
             <span class="number">1</span> =&gt; <span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;M01&quot;</span>),
             <span class="number">2</span> =&gt; <span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;M02&quot;</span>),
             <span class="number">3</span> =&gt; <span class="macro">tinystr!</span>(<span class="number">4</span>, <span class="string">&quot;M03&quot;</span>),
@@ -428,7 +452,7 @@
             ));
         };
 
-        <span class="kw">if</span> <span class="ident">month</span> <span class="op">&gt;</span> <span class="ident">C::months_for_every_year</span>() {
+        <span class="kw">if</span> <span class="ident">month</span> <span class="op">&gt;</span> <span class="ident">C::months_for_every_year</span>(<span class="ident">year</span>) {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::UnknownMonthCode</span>(
                 <span class="ident">month_code</span>.<span class="number">0</span>,
                 <span class="ident">cal</span>.<span class="ident">debug_name</span>(),

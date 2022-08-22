@@ -334,18 +334,6 @@
 <span id="329">329</span>
 <span id="330">330</span>
 <span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -568,10 +556,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMapBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="ident">K</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
     <span class="doccomment">/// Produce an ordered iterator over key-value pairs</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
@@ -582,19 +568,12 @@
             <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="op">&lt;</span><span class="ident">V</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span>,
         ),
     <span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
-        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> {
-            (
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>(),
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>(),
-            )
-        })
+        <span class="self">self</span>.<span class="ident">iter_keys</span>().<span class="ident">zip</span>(<span class="self">self</span>.<span class="ident">iter_values</span>())
     }
 
     <span class="doccomment">/// Produce an ordered iterator over keys</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_keys</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="op">&lt;</span><span class="ident">K</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// idx in 0..keys.zvl_len()</span>
         (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>())
     }
 
@@ -602,16 +581,15 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter_values</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>,
     ) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="op">&lt;</span><span class="ident">V</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// idx in 0..keys.zvl_len() == values.zvl_len()</span>
         (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>())
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMapBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Ord</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slice</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slice</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
     <span class="doccomment">/// For cases when `V` is fixed-size, obtain a direct copy of `V` instead of `V::ULE`</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_copied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span> {
@@ -626,9 +604,9 @@
     ) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="op">&lt;</span><span class="ident">K</span> <span class="kw">as</span> <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::GetType</span>, <span class="ident">V</span>)<span class="op">&gt;</span> {
         (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_len</span>()).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> {
             (
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// idx in 0..keys.zvl_len()</span>
                 <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>(),
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// idx in 0..keys.zvl_len() = values.zvl_len()</span>
                 <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">unwrap</span>(),
             )
         })
@@ -637,10 +615,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">ZeroMapBorrowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slice</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slice</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
-    <span class="ident">K</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">V</span>: <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">K</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slice</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">V</span>: <span class="ident">ZeroMapKV</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Slice</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsULE</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
     <span class="doccomment">/// Similar to [`Self::iter()`] except it returns a direct copy of the keys values instead of references</span>
     <span class="doccomment">/// to `K::ULE` and `V::ULE`, in cases when `K` and `V` are fixed-size</span>
@@ -651,9 +627,9 @@
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">zvl_len</span>();
         (<span class="number">0</span>..<span class="ident">len</span>).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">idx</span><span class="op">|</span> {
             (
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// idx in 0..keys.zvl_len()</span>
                 <span class="ident">ZeroSlice::get</span>(<span class="ident">keys</span>, <span class="ident">idx</span>).<span class="ident">unwrap</span>(),
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// idx in 0..keys.zvl_len() = values.zvl_len()</span>
                 <span class="ident">ZeroSlice::get</span>(<span class="ident">values</span>, <span class="ident">idx</span>).<span class="ident">unwrap</span>(),
             )
         })

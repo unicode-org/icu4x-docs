@@ -410,7 +410,6 @@
 <span id="405">405</span>
 <span id="406">406</span>
 <span id="407">407</span>
-<span id="408">408</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -623,6 +622,9 @@
     }
 }
 
+<span class="kw">const</span> <span class="ident">ETHIOPIC_TO_COPTIC_OFFSET</span>: <span class="ident">i32</span> <span class="op">=</span>
+    <span class="ident"><span class="kw">super</span>::coptic::COPTIC_EPOCH</span> <span class="op">-</span> <span class="ident">Julian::fixed_from_julian_integers</span>(<span class="number">8</span>, <span class="number">8</span>, <span class="number">29</span>);
+
 <span class="kw">impl</span> <span class="ident">Ethiopian</span> {
     <span class="doccomment">/// Construct a new Ethiopian Calendar for the Amete Mihret era naming scheme</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
@@ -652,17 +654,13 @@
     <span class="comment">//</span>
     <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L2017</span>
     <span class="kw">fn</span> <span class="ident">fixed_from_ethiopian</span>(<span class="ident">date</span>: <span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Ethiopian</span><span class="op">&gt;</span>) -&gt; <span class="ident">i32</span> {
-        <span class="kw">let</span> <span class="ident">coptic_epoch</span> <span class="op">=</span> <span class="ident">Julian::fixed_from_julian_integers</span>(<span class="number">284</span>, <span class="number">8</span>, <span class="number">29</span>);
-        <span class="kw">let</span> <span class="ident">ethiopian_epoch</span> <span class="op">=</span> <span class="ident">Julian::fixed_from_julian_integers</span>(<span class="number">8</span>, <span class="number">8</span>, <span class="number">29</span>);
-        <span class="ident">ethiopian_epoch</span> <span class="op">-</span> <span class="ident">coptic_epoch</span>
-            <span class="op">+</span> <span class="ident">Coptic::fixed_from_coptic_integers</span>(<span class="ident">date</span>.<span class="ident">year</span>, <span class="ident">date</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span>, <span class="ident">date</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span>)
+        <span class="ident">Coptic::fixed_from_coptic_integers</span>(<span class="ident">date</span>.<span class="ident">year</span>, <span class="ident">date</span>.<span class="ident">month</span>, <span class="ident">date</span>.<span class="ident">day</span>)
+            <span class="op">-</span> <span class="ident">ETHIOPIC_TO_COPTIC_OFFSET</span>
     }
 
     <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L2028</span>
     <span class="kw">fn</span> <span class="ident">ethiopian_from_fixed</span>(<span class="ident">date</span>: <span class="ident">i32</span>) -&gt; <span class="ident">EthiopianDateInner</span> {
-        <span class="kw">let</span> <span class="ident">coptic_epoch</span> <span class="op">=</span> <span class="ident">Julian::fixed_from_julian_integers</span>(<span class="number">284</span>, <span class="number">8</span>, <span class="number">29</span>);
-        <span class="kw">let</span> <span class="ident">ethiopian_epoch</span> <span class="op">=</span> <span class="ident">Julian::fixed_from_julian_integers</span>(<span class="number">8</span>, <span class="number">8</span>, <span class="number">29</span>);
-        <span class="kw">let</span> <span class="ident">coptic_date</span> <span class="op">=</span> <span class="ident">Coptic::coptic_from_fixed</span>(<span class="ident">date</span> <span class="op">+</span> <span class="ident">coptic_epoch</span> <span class="op">-</span> <span class="ident">ethiopian_epoch</span>);
+        <span class="kw">let</span> <span class="ident">coptic_date</span> <span class="op">=</span> <span class="ident">Coptic::coptic_from_fixed</span>(<span class="ident">date</span> <span class="op">+</span> <span class="ident">ETHIOPIC_TO_COPTIC_OFFSET</span>);
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
         <span class="kw-2">*</span><span class="ident">Date::new_ethiopian_date</span>(

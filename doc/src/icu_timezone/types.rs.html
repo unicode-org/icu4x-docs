@@ -183,6 +183,13 @@
 <span id="178">178</span>
 <span id="179">179</span>
 <span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -258,54 +265,61 @@
     <span class="doccomment">/// let offset3: GmtOffset = &quot;-09:30&quot;.parse().expect(&quot;Failed to parse a GMT offset.&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">offset_sign</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">input</span>.<span class="ident">chars</span>().<span class="ident">next</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">chars</span>();
+        <span class="kw">let</span> <span class="ident">offset_sign</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">chars</span>.<span class="ident">next</span>() {
             <span class="prelude-val">Some</span>(<span class="string">&#39;+&#39;</span>) =&gt; <span class="number">1</span>,
-            <span class="comment">/* ASCII */</span> <span class="prelude-val">Some</span>(<span class="string">&#39;-&#39;</span>) =&gt; <span class="op">-</span><span class="number">1</span>,
-            <span class="comment">/* U+2212 */</span> <span class="prelude-val">Some</span>(<span class="string">&#39;−&#39;</span>) =&gt; <span class="op">-</span><span class="number">1</span>,
+            <span class="prelude-val">Some</span>(<span class="string">&#39;-&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{2212}&#39;</span>) =&gt; <span class="op">-</span><span class="number">1</span>,
             <span class="prelude-val">Some</span>(<span class="string">&#39;Z&#39;</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="number">0</span>)),
             <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TimeZoneError::InvalidOffset</span>),
         };
 
-        <span class="kw">let</span> <span class="ident">seconds</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">input</span>.<span class="ident">chars</span>().<span class="ident">count</span>() {
+        <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">chars</span>.<span class="ident">as_str</span>();
+
+        <span class="kw">let</span> <span class="ident">seconds</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">input</span>.<span class="ident">len</span>() {
             <span class="comment">/* ±hh */</span>
-            <span class="number">3</span> =&gt; {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">hour</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">1</span>..<span class="number">3</span>]
-                    .<span class="ident">parse</span>()
+            <span class="number">2</span> =&gt; {
+                <span class="kw">let</span> <span class="ident">hour</span> <span class="op">=</span> <span class="ident">input</span>
+                    .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>()
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
+                <span class="kw">if</span> <span class="ident">hour</span> <span class="op">&gt;</span> <span class="number">24</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TimeZoneError::InvalidOffset</span>);
+                }
                 <span class="ident">offset_sign</span> <span class="op">*</span> (<span class="ident">hour</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span>)
             }
             <span class="comment">/* ±hhmm */</span>
-            <span class="number">5</span> =&gt; {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">hour</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">1</span>..<span class="number">3</span>]
-                    .<span class="ident">parse</span>()
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">minute</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">3</span>..<span class="number">5</span>]
-                    .<span class="ident">parse</span>()
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
-                <span class="ident">offset_sign</span> <span class="op">*</span> (<span class="ident">hour</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span> <span class="op">+</span> <span class="ident">minute</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span>)
+            <span class="number">4</span> <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">is_char_boundary</span>(<span class="number">2</span>) =&gt; {
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// validated</span>
+                {
+                    <span class="kw">let</span> <span class="ident">hour</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">0</span>..<span class="number">2</span>]
+                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
+                    <span class="kw">let</span> <span class="ident">minute</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">2</span>..<span class="number">4</span>]
+                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
+                    <span class="ident">offset_sign</span> <span class="op">*</span> (<span class="ident">hour</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span> <span class="op">+</span> <span class="ident">minute</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span>)
+                }
             }
             <span class="comment">/* ±hh:mm */</span>
-            <span class="number">6</span> =&gt; {
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">hour</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">1</span>..<span class="number">3</span>]
-                    .<span class="ident">parse</span>()
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
-                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-                <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-                <span class="kw">let</span> <span class="ident">minute</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">input</span>[<span class="number">4</span>..<span class="number">6</span>]
-                    .<span class="ident">parse</span>()
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
-                <span class="ident">offset_sign</span> <span class="op">*</span> (<span class="ident">hour</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span> <span class="op">+</span> <span class="ident">minute</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span>)
+            <span class="number">5</span> =&gt; {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">hour</span>, <span class="ident">minute</span>)) <span class="op">=</span> <span class="ident">input</span>.<span class="ident">split_once</span>(<span class="string">&#39;:&#39;</span>) {
+                    <span class="kw">let</span> <span class="ident">hour</span> <span class="op">=</span> <span class="ident">hour</span>
+                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
+                    <span class="kw">if</span> <span class="ident">hour</span> <span class="op">&gt;</span> <span class="number">24</span> {
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TimeZoneError::InvalidOffset</span>);
+                    }
+                    <span class="kw">let</span> <span class="ident">minute</span> <span class="op">=</span> <span class="ident">minute</span>
+                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">TimeZoneError::InvalidOffset</span>)<span class="question-mark">?</span>;
+                    <span class="kw">if</span> <span class="ident">minute</span> <span class="op">&gt;</span> <span class="number">60</span> {
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TimeZoneError::InvalidOffset</span>);
+                    }
+                    <span class="ident">offset_sign</span> <span class="op">*</span> (<span class="ident">hour</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span> <span class="op">*</span> <span class="number">60</span> <span class="op">+</span> <span class="ident">minute</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">*</span> <span class="number">60</span>)
+                } <span class="kw">else</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TimeZoneError::InvalidOffset</span>);
+                }
             }
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::panic</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid time-zone designator&quot;</span>),
+            <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TimeZoneError::InvalidOffset</span>),
         };
 
         <span class="ident"><span class="self">Self</span>::try_new</span>(<span class="ident">seconds</span>)

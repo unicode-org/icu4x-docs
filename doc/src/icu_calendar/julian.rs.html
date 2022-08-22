@@ -399,6 +399,7 @@
 <span id="394">394</span>
 <span id="395">395</span>
 <span id="396">396</span>
+<span id="397">397</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -436,7 +437,6 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::calendar_arithmetic</span>::{<span class="ident">ArithmeticDate</span>, <span class="ident">CalendarArithmetic</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso::Iso</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>};
-<span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
 <span class="kw">use</span> <span class="ident">tinystr::tinystr</span>;
 
@@ -480,7 +480,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">is_leap_year</span>(<span class="ident">year</span>: <span class="ident">i32</span>) -&gt; <span class="ident">bool</span> {
-        <span class="ident">year</span> <span class="op">%</span> <span class="number">4</span> <span class="op">==</span> <span class="number">0</span>
+        <span class="ident"><span class="self">Self</span>::is_leap_year_const</span>(<span class="ident">year</span>)
     }
 }
 
@@ -594,12 +594,17 @@
         <span class="self">Self</span>
     }
 
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_leap_year_const</span>(<span class="ident">year</span>: <span class="ident">i32</span>) -&gt; <span class="ident">bool</span> {
+        <span class="ident">year</span> <span class="op">%</span> <span class="number">4</span> <span class="op">==</span> <span class="number">0</span>
+    }
+
     <span class="comment">// &quot;Fixed&quot; is a day count representation of calendars staring from Jan 1st of year 1 of the Georgian Calendar.</span>
     <span class="comment">// The fixed date algorithms are from</span>
     <span class="comment">// Dershowitz, Nachum, and Edward M. Reingold. _Calendrical calculations_. Cambridge University Press, 2008.</span>
     <span class="comment">//</span>
     <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L1689-L1709</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">fixed_from_julian</span>(<span class="ident">date</span>: <span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Julian</span><span class="op">&gt;</span>) -&gt; <span class="ident">i32</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">fixed_from_julian</span>(<span class="ident">date</span>: <span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Julian</span><span class="op">&gt;</span>) -&gt; <span class="ident">i32</span> {
         <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">year</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="ident">date</span>.<span class="ident">year</span> <span class="op">+</span> <span class="number">1</span>
         } <span class="kw">else</span> {
@@ -609,7 +614,7 @@
         <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> (<span class="number">367</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">-</span> <span class="number">362</span>) <span class="op">/</span> <span class="number">12</span>;
         <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">month</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">2</span> {
             <span class="number">0</span>
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_leap_year</span>(<span class="ident">date</span>.<span class="ident">year</span>) {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_leap_year_const</span>(<span class="ident">date</span>.<span class="ident">year</span>) {
             <span class="op">-</span><span class="number">1</span>
         } <span class="kw">else</span> {
             <span class="op">-</span><span class="number">2</span>
@@ -618,12 +623,11 @@
         <span class="ident">fixed</span> <span class="op">+</span> (<span class="ident">date</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span>)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">fixed_from_julian_integers</span>(<span class="ident">year</span>: <span class="ident">i32</span>, <span class="ident">month</span>: <span class="ident">i32</span>, <span class="ident">day</span>: <span class="ident">i32</span>) -&gt; <span class="ident">i32</span> {
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">fixed_from_julian_integers</span>(<span class="ident">year</span>: <span class="ident">i32</span>, <span class="ident">month</span>: <span class="ident">u8</span>, <span class="ident">day</span>: <span class="ident">u8</span>) -&gt; <span class="ident">i32</span> {
         <span class="ident"><span class="self">Self</span>::fixed_from_julian</span>(<span class="ident">ArithmeticDate</span> {
             <span class="ident">year</span>,
-            <span class="ident">month</span>: <span class="ident">month</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>(),
-            <span class="ident">day</span>: <span class="ident">day</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">month</span>,
+            <span class="ident">day</span>,
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
         })
     }
@@ -650,13 +654,11 @@
         } <span class="kw">else</span> {
             <span class="number">2</span>
         };
-        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> (<span class="number">12</span> <span class="op">*</span> (<span class="ident">prior_days</span> <span class="op">+</span> <span class="ident">correction</span>) <span class="op">+</span> <span class="number">373</span>) <span class="op">/</span> <span class="number">367</span>;
-        <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_julian_integers</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="number">1</span>) <span class="op">+</span> <span class="number">1</span>;
+        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> ((<span class="number">12</span> <span class="op">*</span> (<span class="ident">prior_days</span> <span class="op">+</span> <span class="ident">correction</span>) <span class="op">+</span> <span class="number">373</span>) <span class="op">/</span> <span class="number">367</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// this expression is in 1..=12</span>
+        <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> (<span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_julian_integers</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="number">1</span>) <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// as days_in_month is &lt; u8::MAX</span>
 
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// TODO(#1668) Clippy exceptions need docs or fixing.</span>
-        <span class="kw-2">*</span><span class="ident">Date::new_julian_date</span>(<span class="ident">year</span>, <span class="ident">month</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">day</span> <span class="kw">as</span> <span class="ident">u8</span>)
-            .<span class="ident">unwrap</span>()
-            .<span class="ident">inner</span>()
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// day and month have the correct bounds</span>
+        <span class="kw-2">*</span><span class="ident">Date::new_julian_date</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>).<span class="ident">unwrap</span>().<span class="ident">inner</span>()
     }
 }
 

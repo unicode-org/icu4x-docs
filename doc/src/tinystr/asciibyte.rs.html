@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `utils/tinystr/src/asciibyte.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>asciibyte.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../tinystr/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../tinystr/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../tinystr/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+</pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
+<span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
+<span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
+
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AsciiByte</span> {
+    <span class="ident">B0</span> <span class="op">=</span> <span class="number">0</span>,
+    <span class="ident">B1</span> <span class="op">=</span> <span class="number">1</span>,
+    <span class="ident">B2</span> <span class="op">=</span> <span class="number">2</span>,
+    <span class="ident">B3</span> <span class="op">=</span> <span class="number">3</span>,
+    <span class="ident">B4</span> <span class="op">=</span> <span class="number">4</span>,
+    <span class="ident">B5</span> <span class="op">=</span> <span class="number">5</span>,
+    <span class="ident">B6</span> <span class="op">=</span> <span class="number">6</span>,
+    <span class="ident">B7</span> <span class="op">=</span> <span class="number">7</span>,
+    <span class="ident">B8</span> <span class="op">=</span> <span class="number">8</span>,
+    <span class="ident">B9</span> <span class="op">=</span> <span class="number">9</span>,
+    <span class="ident">B10</span> <span class="op">=</span> <span class="number">10</span>,
+    <span class="ident">B11</span> <span class="op">=</span> <span class="number">11</span>,
+    <span class="ident">B12</span> <span class="op">=</span> <span class="number">12</span>,
+    <span class="ident">B13</span> <span class="op">=</span> <span class="number">13</span>,
+    <span class="ident">B14</span> <span class="op">=</span> <span class="number">14</span>,
+    <span class="ident">B15</span> <span class="op">=</span> <span class="number">15</span>,
+    <span class="ident">B16</span> <span class="op">=</span> <span class="number">16</span>,
+    <span class="ident">B17</span> <span class="op">=</span> <span class="number">17</span>,
+    <span class="ident">B18</span> <span class="op">=</span> <span class="number">18</span>,
+    <span class="ident">B19</span> <span class="op">=</span> <span class="number">19</span>,
+    <span class="ident">B20</span> <span class="op">=</span> <span class="number">20</span>,
+    <span class="ident">B21</span> <span class="op">=</span> <span class="number">21</span>,
+    <span class="ident">B22</span> <span class="op">=</span> <span class="number">22</span>,
+    <span class="ident">B23</span> <span class="op">=</span> <span class="number">23</span>,
+    <span class="ident">B24</span> <span class="op">=</span> <span class="number">24</span>,
+    <span class="ident">B25</span> <span class="op">=</span> <span class="number">25</span>,
+    <span class="ident">B26</span> <span class="op">=</span> <span class="number">26</span>,
+    <span class="ident">B27</span> <span class="op">=</span> <span class="number">27</span>,
+    <span class="ident">B28</span> <span class="op">=</span> <span class="number">28</span>,
+    <span class="ident">B29</span> <span class="op">=</span> <span class="number">29</span>,
+    <span class="ident">B30</span> <span class="op">=</span> <span class="number">30</span>,
+    <span class="ident">B31</span> <span class="op">=</span> <span class="number">31</span>,
+    <span class="ident">B32</span> <span class="op">=</span> <span class="number">32</span>,
+    <span class="ident">B33</span> <span class="op">=</span> <span class="number">33</span>,
+    <span class="ident">B34</span> <span class="op">=</span> <span class="number">34</span>,
+    <span class="ident">B35</span> <span class="op">=</span> <span class="number">35</span>,
+    <span class="ident">B36</span> <span class="op">=</span> <span class="number">36</span>,
+    <span class="ident">B37</span> <span class="op">=</span> <span class="number">37</span>,
+    <span class="ident">B38</span> <span class="op">=</span> <span class="number">38</span>,
+    <span class="ident">B39</span> <span class="op">=</span> <span class="number">39</span>,
+    <span class="ident">B40</span> <span class="op">=</span> <span class="number">40</span>,
+    <span class="ident">B41</span> <span class="op">=</span> <span class="number">41</span>,
+    <span class="ident">B42</span> <span class="op">=</span> <span class="number">42</span>,
+    <span class="ident">B43</span> <span class="op">=</span> <span class="number">43</span>,
+    <span class="ident">B44</span> <span class="op">=</span> <span class="number">44</span>,
+    <span class="ident">B45</span> <span class="op">=</span> <span class="number">45</span>,
+    <span class="ident">B46</span> <span class="op">=</span> <span class="number">46</span>,
+    <span class="ident">B47</span> <span class="op">=</span> <span class="number">47</span>,
+    <span class="ident">B48</span> <span class="op">=</span> <span class="number">48</span>,
+    <span class="ident">B49</span> <span class="op">=</span> <span class="number">49</span>,
+    <span class="ident">B50</span> <span class="op">=</span> <span class="number">50</span>,
+    <span class="ident">B51</span> <span class="op">=</span> <span class="number">51</span>,
+    <span class="ident">B52</span> <span class="op">=</span> <span class="number">52</span>,
+    <span class="ident">B53</span> <span class="op">=</span> <span class="number">53</span>,
+    <span class="ident">B54</span> <span class="op">=</span> <span class="number">54</span>,
+    <span class="ident">B55</span> <span class="op">=</span> <span class="number">55</span>,
+    <span class="ident">B56</span> <span class="op">=</span> <span class="number">56</span>,
+    <span class="ident">B57</span> <span class="op">=</span> <span class="number">57</span>,
+    <span class="ident">B58</span> <span class="op">=</span> <span class="number">58</span>,
+    <span class="ident">B59</span> <span class="op">=</span> <span class="number">59</span>,
+    <span class="ident">B60</span> <span class="op">=</span> <span class="number">60</span>,
+    <span class="ident">B61</span> <span class="op">=</span> <span class="number">61</span>,
+    <span class="ident">B62</span> <span class="op">=</span> <span class="number">62</span>,
+    <span class="ident">B63</span> <span class="op">=</span> <span class="number">63</span>,
+    <span class="ident">B64</span> <span class="op">=</span> <span class="number">64</span>,
+    <span class="ident">B65</span> <span class="op">=</span> <span class="number">65</span>,
+    <span class="ident">B66</span> <span class="op">=</span> <span class="number">66</span>,
+    <span class="ident">B67</span> <span class="op">=</span> <span class="number">67</span>,
+    <span class="ident">B68</span> <span class="op">=</span> <span class="number">68</span>,
+    <span class="ident">B69</span> <span class="op">=</span> <span class="number">69</span>,
+    <span class="ident">B70</span> <span class="op">=</span> <span class="number">70</span>,
+    <span class="ident">B71</span> <span class="op">=</span> <span class="number">71</span>,
+    <span class="ident">B72</span> <span class="op">=</span> <span class="number">72</span>,
+    <span class="ident">B73</span> <span class="op">=</span> <span class="number">73</span>,
+    <span class="ident">B74</span> <span class="op">=</span> <span class="number">74</span>,
+    <span class="ident">B75</span> <span class="op">=</span> <span class="number">75</span>,
+    <span class="ident">B76</span> <span class="op">=</span> <span class="number">76</span>,
+    <span class="ident">B77</span> <span class="op">=</span> <span class="number">77</span>,
+    <span class="ident">B78</span> <span class="op">=</span> <span class="number">78</span>,
+    <span class="ident">B79</span> <span class="op">=</span> <span class="number">79</span>,
+    <span class="ident">B80</span> <span class="op">=</span> <span class="number">80</span>,
+    <span class="ident">B81</span> <span class="op">=</span> <span class="number">81</span>,
+    <span class="ident">B82</span> <span class="op">=</span> <span class="number">82</span>,
+    <span class="ident">B83</span> <span class="op">=</span> <span class="number">83</span>,
+    <span class="ident">B84</span> <span class="op">=</span> <span class="number">84</span>,
+    <span class="ident">B85</span> <span class="op">=</span> <span class="number">85</span>,
+    <span class="ident">B86</span> <span class="op">=</span> <span class="number">86</span>,
+    <span class="ident">B87</span> <span class="op">=</span> <span class="number">87</span>,
+    <span class="ident">B88</span> <span class="op">=</span> <span class="number">88</span>,
+    <span class="ident">B89</span> <span class="op">=</span> <span class="number">89</span>,
+    <span class="ident">B90</span> <span class="op">=</span> <span class="number">90</span>,
+    <span class="ident">B91</span> <span class="op">=</span> <span class="number">91</span>,
+    <span class="ident">B92</span> <span class="op">=</span> <span class="number">92</span>,
+    <span class="ident">B93</span> <span class="op">=</span> <span class="number">93</span>,
+    <span class="ident">B94</span> <span class="op">=</span> <span class="number">94</span>,
+    <span class="ident">B95</span> <span class="op">=</span> <span class="number">95</span>,
+    <span class="ident">B96</span> <span class="op">=</span> <span class="number">96</span>,
+    <span class="ident">B97</span> <span class="op">=</span> <span class="number">97</span>,
+    <span class="ident">B98</span> <span class="op">=</span> <span class="number">98</span>,
+    <span class="ident">B99</span> <span class="op">=</span> <span class="number">99</span>,
+    <span class="ident">B100</span> <span class="op">=</span> <span class="number">100</span>,
+    <span class="ident">B101</span> <span class="op">=</span> <span class="number">101</span>,
+    <span class="ident">B102</span> <span class="op">=</span> <span class="number">102</span>,
+    <span class="ident">B103</span> <span class="op">=</span> <span class="number">103</span>,
+    <span class="ident">B104</span> <span class="op">=</span> <span class="number">104</span>,
+    <span class="ident">B105</span> <span class="op">=</span> <span class="number">105</span>,
+    <span class="ident">B106</span> <span class="op">=</span> <span class="number">106</span>,
+    <span class="ident">B107</span> <span class="op">=</span> <span class="number">107</span>,
+    <span class="ident">B108</span> <span class="op">=</span> <span class="number">108</span>,
+    <span class="ident">B109</span> <span class="op">=</span> <span class="number">109</span>,
+    <span class="ident">B110</span> <span class="op">=</span> <span class="number">110</span>,
+    <span class="ident">B111</span> <span class="op">=</span> <span class="number">111</span>,
+    <span class="ident">B112</span> <span class="op">=</span> <span class="number">112</span>,
+    <span class="ident">B113</span> <span class="op">=</span> <span class="number">113</span>,
+    <span class="ident">B114</span> <span class="op">=</span> <span class="number">114</span>,
+    <span class="ident">B115</span> <span class="op">=</span> <span class="number">115</span>,
+    <span class="ident">B116</span> <span class="op">=</span> <span class="number">116</span>,
+    <span class="ident">B117</span> <span class="op">=</span> <span class="number">117</span>,
+    <span class="ident">B118</span> <span class="op">=</span> <span class="number">118</span>,
+    <span class="ident">B119</span> <span class="op">=</span> <span class="number">119</span>,
+    <span class="ident">B120</span> <span class="op">=</span> <span class="number">120</span>,
+    <span class="ident">B121</span> <span class="op">=</span> <span class="number">121</span>,
+    <span class="ident">B122</span> <span class="op">=</span> <span class="number">122</span>,
+    <span class="ident">B123</span> <span class="op">=</span> <span class="number">123</span>,
+    <span class="ident">B124</span> <span class="op">=</span> <span class="number">124</span>,
+    <span class="ident">B125</span> <span class="op">=</span> <span class="number">125</span>,
+    <span class="ident">B126</span> <span class="op">=</span> <span class="number">126</span>,
+    <span class="ident">B127</span> <span class="op">=</span> <span class="number">127</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">AsciiByte</span> {
+    <span class="comment">// Convert [u8; N] to [AsciiByte; N]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">to_ascii_byte_array</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="ident">N</span>]) -&gt; [<span class="ident">AsciiByte</span>; <span class="ident">N</span>] {
+        <span class="kw-2">*</span>(<span class="ident">bytes</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">u8</span>; <span class="ident">N</span>] <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="ident">AsciiByte</span>; <span class="ident">N</span>])
+    }
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="tinystr" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</body></html>

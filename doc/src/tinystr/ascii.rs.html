@@ -959,10 +959,32 @@
 <span id="954">954</span>
 <span id="955">955</span>
 <span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::asciibyte::AsciiByte</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::int_ops</span>::{<span class="ident">Aligned4</span>, <span class="ident">Aligned8</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::TinyStrError</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
@@ -972,7 +994,7 @@
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="ident">bytes</span>: [<span class="ident">u8</span>; <span class="ident">N</span>],
+    <span class="ident">bytes</span>: [<span class="ident">AsciiByte</span>; <span class="ident">N</span>],
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="kw">const</span> <span class="ident">N</span>: <span class="ident">usize</span><span class="op">&gt;</span> <span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
@@ -1054,7 +1076,10 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TinyStrError::ContainsNull</span>);
         }
 
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">bytes</span>: <span class="ident">out</span> })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="comment">// SAFETY: `out` only contains ASCII bytes and has same size as `self.bytes`</span>
+            <span class="ident">bytes</span>: <span class="kw">unsafe</span> { <span class="ident">AsciiByte::to_ascii_byte_array</span>(<span class="kw-2">&amp;</span><span class="ident">out</span>) },
+        })
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1071,30 +1096,35 @@
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">len</span>()
+            <span class="ident">Aligned4::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">len</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">len</span>()
+            <span class="ident">Aligned8::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">len</span>()
         } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="number">0</span>).<span class="ident">unwrap_or</span>(<span class="ident">N</span>)
+            <span class="self">self</span>.<span class="ident">bytes</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">position</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="ident">AsciiByte::B0</span>)
+                .<span class="ident">unwrap_or</span>(<span class="ident">N</span>)
         }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">==</span> <span class="number">0</span>
+        <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u8</span> <span class="op">==</span> <span class="ident">AsciiByte::B0</span> <span class="kw">as</span> <span class="ident">u8</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>..<span class="self">self</span>.<span class="ident">len</span>()]
+        <span class="comment">// SAFETY: `self.bytes` has same size as [u8; N]</span>
+        <span class="kw">unsafe</span> { <span class="ident">core::mem::transmute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>..<span class="self">self</span>.<span class="ident">len</span>()]) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">all_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="ident">N</span>] {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>
+        <span class="comment">// SAFETY: `self.bytes` has same size as [u8; N]</span>
+        <span class="kw">unsafe</span> { <span class="ident">core::mem::transmute</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>) }
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1109,7 +1139,7 @@
         <span class="comment">// Indexing is protected by the loop guard</span>
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
         <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">M</span> <span class="op">&amp;&amp;</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> {
-            <span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>];
+            <span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span>;
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
         <span class="comment">// `self.bytes` only contains ASCII bytes, with no null bytes between</span>
@@ -1122,22 +1152,24 @@
     <span class="doccomment">/// between ASCII characters</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_bytes_unchecked</span>(<span class="ident">bytes</span>: [<span class="ident">u8</span>; <span class="ident">N</span>]) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">bytes</span> }
+        <span class="self">Self</span> {
+            <span class="ident">bytes</span>: <span class="ident">AsciiByte::to_ascii_byte_array</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>),
+        }
     }
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">check_is</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8</span>:<span class="ident">ident</span>) =&gt; {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
+            <span class="ident">Aligned4::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
+            <span class="ident">Aligned8::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
             <span class="comment">// Won&#39;t panic because self.bytes has length N</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="kw">if</span> <span class="op">!</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8</span>() {
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span> <span class="op">!</span><span class="op">=</span> <span class="ident">AsciiByte::B0</span> <span class="kw">as</span> <span class="ident">u8</span> {
+                <span class="kw">if</span> <span class="op">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8</span>() {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -1147,19 +1179,19 @@
     };
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>:<span class="ident">ident</span>, <span class="op">!</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_0_inv</span>:<span class="ident">ident</span>, <span class="op">!</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_1_inv</span>:<span class="ident">ident</span>) =&gt; {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
+            <span class="ident">Aligned4::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
+            <span class="ident">Aligned8::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
         } <span class="kw">else</span> {
             <span class="comment">// Won&#39;t panic because N is &gt; 8</span>
-            <span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_0_inv</span>() {
+            <span class="kw">if</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_0_inv</span>() {
                 <span class="kw">return</span> <span class="bool-val">false</span>;
             }
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">1</span>;
             <span class="comment">// Won&#39;t panic because self.bytes has length N</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_1_inv</span>() {
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span> <span class="op">!</span><span class="op">=</span> <span class="ident">AsciiByte::B0</span> <span class="kw">as</span> <span class="ident">u8</span> {
+                <span class="kw">if</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_1_inv</span>() {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -1169,19 +1201,19 @@
     };
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_0_inv</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_1_inv</span>:<span class="ident">ident</span>) =&gt; {
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
+            <span class="ident">Aligned4::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
+            <span class="ident">Aligned8::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_int</span>()
         } <span class="kw">else</span> {
             <span class="comment">// Won&#39;t panic because N is &gt; 8</span>
-            <span class="kw">if</span> <span class="op">!</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_0_inv</span>() {
+            <span class="kw">if</span> <span class="op">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_0_inv</span>() {
                 <span class="kw">return</span> <span class="bool-val">false</span>;
             }
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">1</span>;
             <span class="comment">// Won&#39;t panic because self.bytes has length N</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="kw">if</span> <span class="op">!</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_1_inv</span>() {
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span> <span class="op">!</span><span class="op">=</span> <span class="ident">AsciiByte::B0</span> <span class="kw">as</span> <span class="ident">u8</span> {
+                <span class="kw">if</span> <span class="op">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">check_u8_1_inv</span>() {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -1442,7 +1474,7 @@
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">later_char_to</span>:<span class="ident">ident</span> $(,<span class="macro-nonterminal">$</span><span class="macro-nonterminal">first_char_to</span>:<span class="ident">ident</span>)<span class="question-mark">?</span>) =&gt; {{
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">4</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>().<span class="ident">to_bytes</span>();
+            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned4::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>().<span class="ident">to_ascii_bytes</span>();
             <span class="comment">// Won&#39;t panic because self.bytes has length N and aligned has length &gt;= N</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
             <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> {
@@ -1450,7 +1482,7 @@
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             }
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">N</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span> {
-            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned8::from_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>().<span class="ident">to_bytes</span>();
+            <span class="kw">let</span> <span class="ident">aligned</span> <span class="op">=</span> <span class="ident">Aligned8::from_ascii_bytes</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">to</span>().<span class="ident">to_ascii_bytes</span>();
             <span class="comment">// Won&#39;t panic because self.bytes has length N and aligned has length &gt;= N</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
             <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> {
@@ -1460,11 +1492,21 @@
         } <span class="kw">else</span> {
             <span class="comment">// Won&#39;t panic because self.bytes has length N</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">later_char_to</span>();
+            <span class="kw">while</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">N</span> <span class="op">&amp;&amp;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span> <span class="op">!</span><span class="op">=</span> <span class="ident">AsciiByte::B0</span> <span class="kw">as</span> <span class="ident">u8</span> {
+                <span class="comment">// SAFETY: AsciiByte is repr(u8) and has same size as u8</span>
+                <span class="kw">unsafe</span> {
+                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">core::mem::transmute</span>(
+                        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">later_char_to</span>()
+                    );
+                }
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             }
-            $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>].<span class="macro-nonterminal">$</span><span class="macro-nonterminal">first_char_to</span>())<span class="question-mark">?</span>
+            <span class="comment">// SAFETY: AsciiByte is repr(u8) and has same size as u8</span>
+            $(
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span> <span class="kw">unsafe</span> {
+                    <span class="ident">core::mem::transmute</span>((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">u8</span>).<span class="macro-nonterminal">$</span><span class="macro-nonterminal">first_char_to</span>())
+                };
+            )<span class="question-mark">?</span>
         }
         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>
     }};

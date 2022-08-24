@@ -24,9 +24,9 @@ the calendar at runtime, you can use <a href="struct.DateTimeFormatter.html" tit
 with the appropriate calendar (though they will convert ISO dates to the calendar if provided), they just do not force the
 programmer to pick the calendar at compile time.</p>
 <h2 id="examples"><a href="#examples">Examples</a></h2>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::calendar::Gregorian</span>;
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::calendar</span>::{<span class="ident">DateTime</span>, <span class="ident">Gregorian</span>};
 <span class="kw">use</span> <span class="ident">icu::datetime</span>::{
-    <span class="ident">mock::parse_gregorian_from_str</span>, <span class="ident">options::length</span>, <span class="ident">DateTimeFormatter</span>, <span class="ident">TypedDateTimeFormatter</span>, <span class="ident">DateTimeFormatterOptions</span>,
+    <span class="ident">options::length</span>, <span class="ident">DateTimeFormatter</span>, <span class="ident">TypedDateTimeFormatter</span>, <span class="ident">DateTimeFormatterOptions</span>,
 };
 <span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">Locale</span>, <span class="ident">locale</span>};
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
@@ -48,14 +48,15 @@ programmer to pick the calendar at compile time.</p>
 <span class="kw">let</span> <span class="ident">typed_dtf</span> <span class="op">=</span> <span class="ident">TypedDateTimeFormatter</span>::<span class="op">&lt;</span><span class="ident">Gregorian</span><span class="op">&gt;</span><span class="ident">::try_new_with_buffer_provider</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="kw-2">&amp;</span><span class="macro">locale!</span>(<span class="string">&quot;en&quot;</span>).<span class="ident">into</span>(), <span class="ident">options</span>)
     .<span class="ident">expect</span>(<span class="string">&quot;Failed to create TypedDateTimeFormatter instance.&quot;</span>);
 
-<span class="kw">let</span> <span class="ident">typed_date</span> <span class="op">=</span> <span class="ident">parse_gregorian_from_str</span>(<span class="string">&quot;2020-09-12T12:35:00&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to parse date.&quot;</span>);
-<span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">typed_date</span>.<span class="ident">to_any</span>();
+<span class="kw">let</span> <span class="ident">typed_date</span> <span class="op">=</span> <span class="ident">DateTime::new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">9</span>, <span class="number">12</span>, <span class="number">12</span>, <span class="number">34</span>, <span class="number">28</span>).<span class="ident">unwrap</span>();
+<span class="comment">// prefer using ISO dates with DateTimeFormatter</span>
+<span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">typed_date</span>.<span class="ident">to_iso</span>().<span class="ident">to_any</span>();
 
 <span class="kw">let</span> <span class="ident">formatted_date</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>).<span class="ident">expect</span>(<span class="string">&quot;Formatting should succeed&quot;</span>);
 <span class="kw">let</span> <span class="ident">typed_formatted_date</span> <span class="op">=</span> <span class="ident">typed_dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">typed_date</span>);
 
-<span class="macro">assert_eq!</span>(<span class="ident">formatted_date</span>.<span class="ident">to_string</span>(), <span class="string">&quot;Sep 12, 2020, 12:35 PM&quot;</span>);
-<span class="macro">assert_eq!</span>(<span class="ident">typed_formatted_date</span>.<span class="ident">to_string</span>(), <span class="string">&quot;Sep 12, 2020, 12:35 PM&quot;</span>);</code></pre></div>
+<span class="macro">assert_eq!</span>(<span class="ident">formatted_date</span>.<span class="ident">to_string</span>(), <span class="string">&quot;Sep 12, 2020, 12:34 PM&quot;</span>);
+<span class="macro">assert_eq!</span>(<span class="ident">typed_formatted_date</span>.<span class="ident">to_string</span>(), <span class="string">&quot;Sep 12, 2020, 12:34 PM&quot;</span>);</code></pre></div>
 <p>The options can be created more ergonomically using the <code>Into</code> trait to automatically
 convert a <a href="options/length/struct.Bag.html" title="options::length::Bag"><code>options::length::Bag</code></a> into a <a href="enum.DateTimeFormatterOptions.html#variant.Length" title="DateTimeFormatterOptions::Length"><code>DateTimeFormatterOptions::Length</code></a>.</p>
 
@@ -71,8 +72,6 @@ we expect to add more ways to customize the output, like skeletons, and componen
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="fields/index.html" title="icu::datetime::fields mod">fields</a></div><div class="item-right docblock-short"><p>Enums representing the fields in a date pattern, including the field’s type, length and symbol.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="input/index.html" title="icu::datetime::input mod">input</a></div><div class="item-right docblock-short"><p>A collection of utilities for representing and working with dates as an input to
 formatting operations.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="mock/index.html" title="icu::datetime::mock mod">mock</a></div><div class="item-right docblock-short"><p>A collection of temporary structs and utilities to input data for tests, benchmarks,
-and examples.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="options/index.html" title="icu::datetime::options mod">options</a></div><div class="item-right docblock-short"><p><a href="enum.DateTimeFormatterOptions.html" title="DateTimeFormatterOptions"><code>DateTimeFormatterOptions</code></a> is a bag of options which, together with <a href="../locid/struct.Locale.html"><code>Locale</code></a>,
 defines how dates will be formatted with a <a href="struct.TypedDateTimeFormatter.html"><code>TypedDateTimeFormatter</code></a> instance.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="provider/index.html" title="icu::datetime::provider mod">provider</a></div><div class="item-right docblock-short"><p>Data provider struct definitions for this ICU4X component.</p>

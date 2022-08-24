@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ContextsV1",""],["FormatWidthsV1",""],["StandAloneWidthsV1",""],["SymbolsV1",""]]});
+initSidebarItems({"struct":[["ContextsV1","The struct containing the symbol data for Weekday that contains the “format” style symbol data ([`FormatWidthsV1`]) and “stand-alone” style symbol data ([`StandAloneWidthsV1`])."],["FormatWidthsV1","Symbol data for the “format” style formatting of Weekday."],["StandAloneWidthsV1","Symbol data for the “stand-alone” style formatting of Weekday."],["SymbolsV1","Locale data for Weekday corresponding to the symbols."]]});

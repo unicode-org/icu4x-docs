@@ -429,6 +429,32 @@
 <span id="424">424</span>
 <span id="425">425</span>
 <span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -495,30 +521,25 @@
 
 <span class="macro">lazy_static::lazy_static!</span> {
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">IGNORED_TRAITS</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> [
+        <span class="comment">// Rust and Rust ecosystem types</span>
         <span class="string">&quot;Any&quot;</span>,
-        <span class="string">&quot;AsULE&quot;</span>,
         <span class="string">&quot;Bake&quot;</span>,
         <span class="string">&quot;Borrow&quot;</span>,
         <span class="string">&quot;BorrowMut&quot;</span>,
         <span class="string">&quot;Clone&quot;</span>,
         <span class="string">&quot;Copy&quot;</span>,
-        <span class="string">&quot;DataMarker&quot;</span>,
         <span class="string">&quot;Debug&quot;</span>,
         <span class="string">&quot;Default&quot;</span>, <span class="comment">// ???</span>
         <span class="string">&quot;Deserialize&quot;</span>,
         <span class="string">&quot;DeserializeOwned&quot;</span>,
         <span class="string">&quot;Display&quot;</span>,
-        <span class="string">&quot;EncodeAsULE&quot;</span>,
-        <span class="string">&quot;EncodeAsVarULE&quot;</span>,
         <span class="string">&quot;Eq&quot;</span>,
         <span class="string">&quot;ErasedDestructor&quot;</span>,
         <span class="string">&quot;Error&quot;</span>,
         <span class="string">&quot;From&quot;</span>,
         <span class="string">&quot;Hash&quot;</span>,
         <span class="string">&quot;Into&quot;</span>,
-        <span class="string">&quot;IsCovariant&quot;</span>,
         <span class="string">&quot;Iterator&quot;</span>, <span class="comment">// ???</span>
-        <span class="string">&quot;KeyedDataMarker&quot;</span>,
         <span class="string">&quot;Ord&quot;</span>,
         <span class="string">&quot;PartialEq&quot;</span>,
         <span class="string">&quot;PartialOrd&quot;</span>,
@@ -533,21 +554,52 @@
         <span class="string">&quot;ToString&quot;</span>, <span class="comment">// ???</span>
         <span class="string">&quot;TryFrom&quot;</span>, <span class="comment">// ???</span>
         <span class="string">&quot;TryInto&quot;</span>, <span class="comment">// ???</span>
-        <span class="string">&quot;ULE&quot;</span>,
         <span class="string">&quot;Unpin&quot;</span>,
         <span class="string">&quot;UnwindSafe&quot;</span>,
+
+        <span class="comment">// yoke/zerovec/etc internals</span>
+        <span class="string">&quot;ULE&quot;</span>,
+        <span class="string">&quot;AsULE&quot;</span>,
         <span class="string">&quot;VarULE&quot;</span>,
         <span class="string">&quot;Yokeable&quot;</span>,
         <span class="string">&quot;ZeroFrom&quot;</span>,
+        <span class="string">&quot;ZeroMapKV&quot;</span>,
+        <span class="string">&quot;EncodeAsULE&quot;</span>,
+        <span class="string">&quot;EncodeAsVarULE&quot;</span>,
+        <span class="string">&quot;IsCovariant&quot;</span>,
+
+        <span class="comment">// provider stuff</span>
+        <span class="string">&quot;DataMarker&quot;</span>,
+        <span class="string">&quot;KeyedDataMarker&quot;</span>,
+
+        <span class="comment">// internal trait , all methods replicated on Date</span>
+        <span class="string">&quot;Calendar&quot;</span>,
+        <span class="comment">// Rust-specific conversion trait</span>
+        <span class="string">&quot;AsCalendar&quot;</span>,
     ].<span class="ident">into_iter</span>().<span class="ident">collect</span>();
 
     <span class="comment">// Paths which are not checked for FFI coverage. Naming a type or module here</span>
     <span class="comment">// will include all type methods and module contents.</span>
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">IGNORED_PATHS</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> [
+        <span class="comment">// Stuff that we DO plan to expose for 1.0 but we&#39;re keeping in the ignorelist</span>
+        <span class="comment">// because we plan to solve it all at once.</span>
+        <span class="comment">// This section should go away before 1.0</span>
+        <span class="comment">// =========================</span>
+
+        <span class="comment">// constructor signatures: we need to make them uniform</span>
+        <span class="string">&quot;icu::calendar::AnyCalendar::try_new_for_locale_with_any_provider&quot;</span>,
+        <span class="string">&quot;icu::calendar::AnyCalendar::try_new_for_locale_with_buffer_provider&quot;</span>,
+        <span class="string">&quot;icu::calendar::AnyCalendar::try_new_with_any_provider&quot;</span>,
+        <span class="string">&quot;icu::calendar::AnyCalendar::try_new_with_buffer_provider&quot;</span>,
+
         <span class="comment">// Stuff that could be exposed over FFI but is not currently planned</span>
         <span class="comment">// =========================</span>
+
         <span class="comment">// Largely for use by datetimeformat, not super public (#2421)</span>
         <span class="string">&quot;icu::calendar::week_of&quot;</span>,
+        <span class="comment">// Largely for use by datetimeformat, not generally useful</span>
+        <span class="string">&quot;icu::calendar::AnyCalendar::convert_any_date&quot;</span>,
+        <span class="string">&quot;icu::calendar::AnyCalendar::convert_any_datetime&quot;</span>,
 
 
         <span class="comment">// Individual calendars: Currently the main entry point is AnyCalendar</span>

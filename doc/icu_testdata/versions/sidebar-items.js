@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["cldr_tag","Gets the CLDR tag used as the test data source (for formatters, likely subtags, …)"],["icu_tag","Gets the ICU tag used as the test data source (for properties, collator, …)"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["RelativeUnit","The year or month that a calendar assigns a week to relative to the year/month that it is in."]],"struct":[["WeekCalculator","Calculator for week-of-month and week-of-year based on locale-specific configurations."],["WeekOf","The week number assigned to a given week according to a calendar."]]});

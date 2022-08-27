@@ -311,11 +311,68 @@
 <span id="306">306</span>
 <span id="307">307</span>
 <span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any_calendar</span>::{<span class="ident">AnyCalendar</span>, <span class="ident">IntoAnyCalendar</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::week</span>::{<span class="ident">WeekCalculator</span>, <span class="ident">WeekOf</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTimeError</span>, <span class="ident">Iso</span>};
 <span class="kw">use</span> <span class="ident">alloc::rc::Rc</span>;
 <span class="kw">use</span> <span class="ident">alloc::sync::Arc</span>;
@@ -542,6 +599,61 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">day_of_year_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">types::DayOfYearInfo</span> {
         <span class="self">self</span>.<span class="ident">calendar</span>.<span class="ident">as_calendar</span>().<span class="ident">day_of_year_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>)
+    }
+
+    <span class="doccomment">/// The week of the month containing this date.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu::calendar::Date;</span>
+    <span class="doccomment">/// use icu::calendar::types::WeekOfMonth;</span>
+    <span class="doccomment">/// use icu::calendar::types::IsoWeekday;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let date = Date::new_iso_date(2022, 8, 10).unwrap(); // second Wednesday</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // The following info is usually locale-specific</span>
+    <span class="doccomment">/// let first_weekday = IsoWeekday::Sunday;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(</span>
+    <span class="doccomment">///     date.week_of_month(first_weekday),</span>
+    <span class="doccomment">///     WeekOfMonth(2)</span>
+    <span class="doccomment">/// );</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">week_of_month</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">first_weekday</span>: <span class="ident">types::IsoWeekday</span>) -&gt; <span class="ident">types::WeekOfMonth</span> {
+        <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">WeekCalculator</span> {
+            <span class="ident">first_weekday</span>,
+            <span class="ident">min_week_days</span>: <span class="number">0</span>, <span class="comment">// ignored</span>
+        };
+        <span class="ident">config</span>.<span class="ident">week_of_month</span>(<span class="self">self</span>.<span class="ident">day_of_month</span>(), <span class="self">self</span>.<span class="ident">day_of_week</span>())
+    }
+
+    <span class="doccomment">/// The week of the year containing this date.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu::calendar::Date;</span>
+    <span class="doccomment">/// use icu::calendar::types::IsoWeekday;</span>
+    <span class="doccomment">/// use icu::calendar::week::WeekCalculator;</span>
+    <span class="doccomment">/// use icu::calendar::week::RelativeUnit;</span>
+    <span class="doccomment">/// use icu::calendar::week::WeekOf;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let date = Date::new_iso_date(2022, 8, 26).unwrap();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// // The following info is usually locale-specific</span>
+    <span class="doccomment">/// let week_calculator = WeekCalculator::default();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(</span>
+    <span class="doccomment">///     date.week_of_year(&amp;week_calculator),</span>
+    <span class="doccomment">///     Ok(WeekOf {</span>
+    <span class="doccomment">///         week: 35,</span>
+    <span class="doccomment">///         unit: RelativeUnit::Current</span>
+    <span class="doccomment">///     })</span>
+    <span class="doccomment">/// );</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">week_of_year</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">WeekCalculator</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+        <span class="ident">config</span>.<span class="ident">week_of_year</span>(<span class="self">self</span>.<span class="ident">day_of_year_info</span>(), <span class="self">self</span>.<span class="ident">day_of_week</span>())
     }
 
     <span class="doccomment">/// Construct a date from raw values for a given calendar. This does not check any</span>

@@ -102,6 +102,11 @@
 <span id="97">97</span>
 <span id="98">98</span>
 <span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -155,12 +160,15 @@
 
 <span class="kw">impl</span> <span class="ident">AnyPayloadProvider</span> {
     <span class="doccomment">/// Creates an `AnyPayloadProvider` with an owned (allocated) payload of the given data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_owned</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="ident">M::Yokeable</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_owned</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="ident">M::Yokeable</span>) -&gt; <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="ident">M::Yokeable</span>: <span class="ident">icu_provider::RcWrapBounds</span>,
+    {
         <span class="ident">AnyPayloadProvider</span> {
             <span class="ident">key</span>: <span class="ident">M::KEY</span>,
-            <span class="ident">data</span>: <span class="ident">AnyPayload::from_rc_payload</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">alloc::rc::Rc::from</span>(<span class="ident">DataPayload::from_owned</span>(
-                <span class="ident">data</span>,
-            ))),
+            <span class="ident">data</span>: <span class="ident">AnyPayload::from_rcwrap_payload</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">icu_provider::RcWrap::from</span>(
+                <span class="ident">DataPayload::from_owned</span>(<span class="ident">data</span>),
+            )),
         }
     }
 
@@ -176,6 +184,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_default</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">M::Yokeable</span>: <span class="ident">Default</span>,
+        <span class="ident">M::Yokeable</span>: <span class="ident">icu_provider::RcWrapBounds</span>,
     {
         <span class="ident"><span class="self">Self</span>::new_owned</span>::<span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">M::Yokeable::default</span>())
     }
@@ -196,6 +205,7 @@
     <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
     <span class="ident">M::Yokeable</span>: <span class="ident">ZeroFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M::Yokeable</span><span class="op">&gt;</span>,
+    <span class="ident">M::Yokeable</span>: <span class="ident">icu_provider::RcWrapBounds</span>,
 {
     <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">as_downcasting</span>().<span class="ident">load</span>(<span class="ident">req</span>)

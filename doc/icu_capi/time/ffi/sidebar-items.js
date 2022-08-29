@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XTime","An ICU4X Time object representing a time in terms of hour, minute, second, nanosecond"]]});

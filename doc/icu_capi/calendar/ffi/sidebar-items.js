@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ICU4XAnyCalendarKind",""]],"struct":[["ICU4XCalendar",""],["ICU4XDateTime","An ICU4X DateTime object capable of containing a date and time for any calendar."],["ICU4XGregorianDateTime","An ICU4X DateTime object capable of containing a Gregorian date and time."],["ICU4XIsoDateTime","An ICU4X DateTime object capable of containing a ISO-8601 date and time."]]});
+initSidebarItems({"enum":[["ICU4XAnyCalendarKind","The various calendar types currently supported by [`ICU4XCalendar`]"]],"struct":[["ICU4XCalendar",""]]});

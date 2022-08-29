@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ICU4XIsoWeekday",""]],"struct":[["ICU4XDate","An ICU4X Date object capable of containing a date and time for any calendar."],["ICU4XIsoDate","An ICU4X Date object capable of containing a ISO-8601 date"]]});

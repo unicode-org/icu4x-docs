@@ -259,49 +259,19 @@
 <span id="254">254</span>
 <span id="255">255</span>
 <span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::DateTimeFormatterError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::calendar</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
-<span class="kw">use</span> <span class="ident">core::any</span>;
 <span class="kw">use</span> <span class="ident">icu_calendar::any_calendar::AnyCalendarKind</span>;
 <span class="kw">use</span> <span class="ident">icu_calendar</span>::{
     <span class="ident">buddhist::Buddhist</span>, <span class="ident">coptic::Coptic</span>, <span class="ident">ethiopian::Ethiopian</span>, <span class="ident">indian::Indian</span>, <span class="ident">japanese::Japanese</span>,
     <span class="ident">japanese::JapaneseExtended</span>, <span class="ident">Gregorian</span>,
 };
 <span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode::Value</span>;
-<span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_value</span> <span class="kw">as</span> <span class="ident">value</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr</span>, <span class="ident">TinyStr16</span>};
 
 <span class="doccomment">/// A calendar that can be found in CLDR</span>
 <span class="doccomment">///</span>
@@ -370,26 +340,6 @@
     <span class="kw">fn</span> <span class="ident">is_identifier_allowed_for_calendar</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">Value</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw-2">*</span><span class="ident">value</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;ethiopic&quot;</span>) <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">value</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;ethioaa&quot;</span>)
     }
-}
-
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">check_locale</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">CldrCalendar</span><span class="op">&gt;</span>(
-    <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">cal</span> <span class="op">=</span> <span class="ident">locale</span>.<span class="ident">get_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>));
-
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cal</span>) <span class="op">=</span> <span class="ident">cal</span> {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">C::is_identifier_allowed_for_calendar</span>(<span class="kw-2">&amp;</span><span class="ident">cal</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">cal</span>.<span class="ident">to_string</span>();
-            <span class="ident">string</span>.<span class="ident">truncate</span>(<span class="number">16</span>);
-            <span class="kw">let</span> <span class="ident">tiny</span> <span class="op">=</span> <span class="ident">TinyStr16::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">string</span>).<span class="ident">unwrap_or</span>(<span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;unknown&quot;</span>));
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeFormatterError::MismatchedCalendarLocale</span>(
-                <span class="ident">any::type_name</span>::<span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(),
-                <span class="ident">tiny</span>,
-            ));
-        }
-    }
-
-    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">load_lengths_for_cldr_calendar</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span>(

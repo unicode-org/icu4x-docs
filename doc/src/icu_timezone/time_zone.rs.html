@@ -135,6 +135,29 @@
 <span id="130">130</span>
 <span id="131">131</span>
 <span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -146,24 +169,30 @@
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">icu_calendar</span>::{<span class="ident">DateTime</span>, <span class="ident">Iso</span>};
 
-<span class="doccomment">/// A utility type that can hold time zone information</span>
+<span class="doccomment">/// A utility type that can hold time zone information.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The GMT offset is used as a final fallback for formatting. The other three fields are used</span>
+<span class="doccomment">/// for more human-friendly rendering of the time zone.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This type does not enforce that the four fields are consistent with each other. If they do not</span>
+<span class="doccomment">/// represent a real time zone, unexpected results when formatting may occur.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::timezone::{GmtOffset, CustomTimeZone};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let tz1 = CustomTimeZone::new(</span>
-<span class="doccomment">///     Some(GmtOffset::default()),</span>
-<span class="doccomment">///     /* time_zone_id */ None,</span>
-<span class="doccomment">///     /* meta_zone_id */ None,</span>
-<span class="doccomment">///     /* time_variaint */ None,</span>
-<span class="doccomment">/// );</span>
+<span class="doccomment">/// let tz1 = CustomTimeZone {</span>
+<span class="doccomment">///     gmt_offset: Some(GmtOffset::default()),</span>
+<span class="doccomment">///     time_zone_id: None,</span>
+<span class="doccomment">///     meta_zone_id: None,</span>
+<span class="doccomment">///     zone_variant: None,</span>
+<span class="doccomment">/// };</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let tz2: CustomTimeZone = &quot;+05:00&quot;.parse().expect(&quot;Failed to parse a time zone.&quot;);</span>
 <span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// this type will not add fields (it is largely an example type)</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// these four fields fully cover the needs of UTS 35</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CustomTimeZone</span> {
     <span class="doccomment">/// The GMT offset in seconds.</span>
     <span class="kw">pub</span> <span class="ident">gmt_offset</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GmtOffset</span><span class="op">&gt;</span>,
@@ -176,20 +205,37 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CustomTimeZone</span> {
-    <span class="doccomment">/// Creates a new [`CustomTimeZone`].</span>
-    <span class="doccomment">/// A GMT offset is required, as it is used as a final fallback for formatting.</span>
-    <span class="doccomment">/// The other arguments optionally allow access to more robust formats.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">gmt_offset</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GmtOffset</span><span class="op">&gt;</span>,
-        <span class="ident">time_zone_id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TimeZoneBcp47Id</span><span class="op">&gt;</span>,
-        <span class="ident">meta_zone_id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MetaZoneId</span><span class="op">&gt;</span>,
-        <span class="ident">zone_variant</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ZoneVariant</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="self">Self</span> {
+    <span class="doccomment">/// Creates a new [`CustomTimeZone`] with the given GMT offset.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_with_offset</span>(<span class="ident">gmt_offset</span>: <span class="ident">GmtOffset</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
-            <span class="ident">gmt_offset</span>,
-            <span class="ident">time_zone_id</span>,
-            <span class="ident">meta_zone_id</span>,
-            <span class="ident">zone_variant</span>,
+            <span class="ident">gmt_offset</span>: <span class="prelude-val">Some</span>(<span class="ident">gmt_offset</span>),
+            <span class="ident">time_zone_id</span>: <span class="prelude-val">None</span>,
+            <span class="ident">meta_zone_id</span>: <span class="prelude-val">None</span>,
+            <span class="ident">zone_variant</span>: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Creates a time zone with no information.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// One or more fields must be specified before this time zone is usable.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_empty</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">gmt_offset</span>: <span class="prelude-val">None</span>,
+            <span class="ident">time_zone_id</span>: <span class="prelude-val">None</span>,
+            <span class="ident">meta_zone_id</span>: <span class="prelude-val">None</span>,
+            <span class="ident">zone_variant</span>: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Creates a new [`CustomTimeZone`] with the GMT offset set to UTC.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// All other fields are left empty.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">utc</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">gmt_offset</span>: <span class="prelude-val">Some</span>(<span class="ident">GmtOffset::utc</span>()),
+            <span class="ident">time_zone_id</span>: <span class="prelude-val">None</span>,
+            <span class="ident">meta_zone_id</span>: <span class="prelude-val">None</span>,
+            <span class="ident">zone_variant</span>: <span class="prelude-val">None</span>,
         }
     }
 
@@ -208,19 +254,19 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
     <span class="doccomment">/// let mzc = MetaZoneCalculator::try_new_with_buffer_provider(&amp;provider).expect(&quot;data exists&quot;);</span>
-    <span class="doccomment">/// let mut tz = CustomTimeZone::new(</span>
-    <span class="doccomment">///     /* gmt_offset */ Some(&quot;+11&quot;.parse().expect(&quot;Failed to parse a GMT offset.&quot;)),</span>
-    <span class="doccomment">///     /* time_zone_id */ Some(TimeZoneBcp47Id(tinystr!(8, &quot;gugum&quot;))),</span>
-    <span class="doccomment">///     /* meta_zone_id */ None,</span>
-    <span class="doccomment">///     /* time_variaint */ None,</span>
-    <span class="doccomment">/// );</span>
-    <span class="doccomment">/// tz.maybe_set_meta_zone(</span>
+    <span class="doccomment">/// let mut tz = CustomTimeZone {</span>
+    <span class="doccomment">///     gmt_offset: Some(&quot;+11&quot;.parse().expect(&quot;Failed to parse a GMT offset.&quot;)),</span>
+    <span class="doccomment">///     time_zone_id: Some(TimeZoneBcp47Id(tinystr!(8, &quot;gugum&quot;))),</span>
+    <span class="doccomment">///     meta_zone_id: None,</span>
+    <span class="doccomment">///     zone_variant: None,</span>
+    <span class="doccomment">/// };</span>
+    <span class="doccomment">/// tz.maybe_calculate_meta_zone(</span>
     <span class="doccomment">///     &amp;DateTime::new_iso_datetime(1971, 10, 31, 2, 0, 0).unwrap(),</span>
     <span class="doccomment">///     &amp;mzc,</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// assert_eq!(tz.meta_zone_id, Some(MetaZoneId(tinystr!(4, &quot;guam&quot;))));</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maybe_set_meta_zone</span>(
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maybe_calculate_meta_zone</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">local_datetime</span>: <span class="kw-2">&amp;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Iso</span><span class="op">&gt;</span>,
         <span class="ident">metazone_calculator</span>: <span class="kw-2">&amp;</span><span class="ident">MetaZoneCalculator</span>,

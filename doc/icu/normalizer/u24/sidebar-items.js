@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["EMPTY_U24","An empty `&ZeroSlice<U24>`"]],"enum":[["U24Error","Error"]],"struct":[["U24","Little-endian unaligned 24-bit unsigned integer."]]});

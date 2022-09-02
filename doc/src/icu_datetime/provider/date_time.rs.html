@@ -443,6 +443,10 @@
 <span id="438">438</span>
 <span id="439">439</span>
 <span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -462,7 +466,6 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">options::components</span>, <span class="ident">provider::calendar::DateSkeletonPatternsV1Marker</span>};
 <span class="kw">use</span> <span class="ident">icu_calendar::types</span>::{<span class="ident">Era</span>, <span class="ident">MonthCode</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">icu_locid::extensions::unicode::Value</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
@@ -579,15 +582,14 @@
     <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>,
     <span class="ident">date_patterns_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ErasedDateLengthsV1Marker</span><span class="op">&gt;</span>,
     <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DataLocale</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-    <span class="ident">cal_val</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Value</span>,
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span> <span class="comment">// non-experimental mode</span>
+    <span class="ident">cal_val</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Value</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> <span class="ident">PatternSelector</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">D</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>))]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_options</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>,
         <span class="ident">date_patterns_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ErasedDateLengthsV1Marker</span><span class="op">&gt;</span>,
@@ -598,10 +600,14 @@
             <span class="ident">data_provider</span>,
             <span class="ident">date_patterns_data</span>,
             <span class="ident">locale</span>,
+            <span class="ident">cal_val</span>: <span class="prelude-val">None</span>,
         };
         <span class="kw">match</span> <span class="ident">options</span> {
             <span class="ident">DateTimeFormatterOptions::Length</span>(<span class="ident">bag</span>) =&gt; <span class="ident">selector</span>
                 .<span class="ident">pattern_for_length_bag</span>(<span class="ident">bag</span>, <span class="prelude-val">Some</span>(<span class="ident">preferences::Bag::from_data_locale</span>(<span class="ident">locale</span>))),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::panic</span>)]</span> <span class="comment">// explicit panic in experimental mode</span>
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Non-experimental constructor cannot handle experimental options&quot;</span>),
         }
     }
 
@@ -667,7 +673,7 @@
 <span class="kw">where</span>
     <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">TimeLengthsV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
 {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_options</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_options_experimental</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>,
         <span class="ident">date_patterns_data</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ErasedDateLengthsV1Marker</span><span class="op">&gt;</span>,
         <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DataLocale</span>,
@@ -678,7 +684,7 @@
             <span class="ident">data_provider</span>,
             <span class="ident">date_patterns_data</span>,
             <span class="ident">locale</span>,
-            <span class="ident">cal_val</span>,
+            <span class="ident">cal_val</span>: <span class="prelude-val">Some</span>(<span class="ident">cal_val</span>),
         };
         <span class="kw">match</span> <span class="ident">options</span> {
             <span class="ident">DateTimeFormatterOptions::Length</span>(<span class="ident">bag</span>) =&gt; <span class="ident">selector</span>
@@ -717,11 +723,13 @@
     <span class="kw">fn</span> <span class="ident">skeleton_data_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">DateSkeletonPatternsV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>, <span class="ident">extensions_unicode_value</span> <span class="kw">as</span> <span class="ident">value</span>};
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locale</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">locale</span>.<span class="ident">clone</span>();
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// experimental</span>
+        <span class="kw">let</span> <span class="ident">cal_val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cal_val</span>.<span class="ident">expect</span>(<span class="string">&quot;should be present for components bag&quot;</span>);
         <span class="comment">// Skeleton data for ethioaa is stored under ethiopic</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cal_val</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="macro">value!</span>(<span class="string">&quot;ethioaa&quot;</span>) {
+        <span class="kw">if</span> <span class="ident">cal_val</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="macro">value!</span>(<span class="string">&quot;ethioaa&quot;</span>) {
             <span class="ident">locale</span>.<span class="ident">set_unicode_ext</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="macro">value!</span>(<span class="string">&quot;ethiopic&quot;</span>));
         } <span class="kw">else</span> {
-            <span class="ident">locale</span>.<span class="ident">set_unicode_ext</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="self">self</span>.<span class="ident">cal_val</span>.<span class="ident">clone</span>());
+            <span class="ident">locale</span>.<span class="ident">set_unicode_ext</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>), <span class="ident">cal_val</span>.<span class="ident">clone</span>());
         };
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">data_provider</span>

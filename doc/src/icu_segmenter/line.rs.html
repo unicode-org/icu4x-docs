@@ -1130,7 +1130,6 @@
 <span id="1125">1125</span>
 <span id="1126">1126</span>
 <span id="1127">1127</span>
-<span id="1128">1128</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1246,8 +1245,7 @@
 <span class="doccomment">/// ```rust</span>
 <span class="doccomment">/// use icu_segmenter::LineBreakSegmenter;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
-<span class="doccomment">/// let segmenter = LineBreakSegmenter::try_new(&amp;provider).expect(&quot;Data exists&quot;);</span>
+<span class="doccomment">/// let segmenter = LineBreakSegmenter::try_new(&amp;icu_testdata::unstable()).expect(&quot;Data exists&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let breakpoints: Vec&lt;usize&gt; = segmenter.segment_str(&quot;Hello World&quot;).collect();</span>
 <span class="doccomment">/// assert_eq!(&amp;breakpoints, &amp;[6, 11]);</span>
@@ -1262,9 +1260,8 @@
 <span class="doccomment">/// options.line_break_rule = LineBreakRule::Strict;</span>
 <span class="doccomment">/// options.word_break_rule = WordBreakRule::BreakAll;</span>
 <span class="doccomment">/// options.ja_zh = false;</span>
-<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
 <span class="doccomment">/// let segmenter =</span>
-<span class="doccomment">///     LineBreakSegmenter::try_new_with_options(&amp;provider, options).expect(&quot;Data exists&quot;);</span>
+<span class="doccomment">///     LineBreakSegmenter::try_new_with_options(&amp;icu_testdata::unstable(), options).expect(&quot;Data exists&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let breakpoints: Vec&lt;usize&gt; = segmenter.segment_str(&quot;Hello World&quot;).collect();</span>
 <span class="doccomment">/// assert_eq!(&amp;breakpoints, &amp;[1, 2, 3, 4, 6, 7, 8, 9, 10, 11]);</span>
@@ -1275,8 +1272,7 @@
 <span class="doccomment">/// ```rust</span>
 <span class="doccomment">/// use icu_segmenter::LineBreakSegmenter;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let provider = icu_testdata::get_provider();</span>
-<span class="doccomment">/// let segmenter = LineBreakSegmenter::try_new(&amp;provider).expect(&quot;Data exists&quot;);</span>
+<span class="doccomment">/// let segmenter = LineBreakSegmenter::try_new(&amp;icu_testdata::unstable()).expect(&quot;Data exists&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let breakpoints: Vec&lt;usize&gt; = segmenter.segment_latin1(b&quot;Hello World&quot;).collect();</span>
 <span class="doccomment">/// assert_eq!(&amp;breakpoints, &amp;[6, 11]);</span>
@@ -2026,22 +2022,23 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">linebreak_propery</span>() {
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
-        <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load</span>(<span class="ident">Default::default</span>())
-            .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
-            .<span class="ident">take_payload</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
-        <span class="kw">let</span> <span class="ident">lb_data</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakDataV1</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>();
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataProvider</span>::<span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span><span class="ident">::load</span>(
+            <span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>(),
+            <span class="ident">Default::default</span>(),
+        )
+        .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
+        .<span class="ident">take_payload</span>()
+        .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">get_linebreak_property</span> <span class="op">=</span> <span class="op">|</span><span class="ident">codepoint</span><span class="op">|</span> {
             <span class="ident">get_linebreak_property_with_rule</span>(
-                <span class="kw-2">&amp;</span><span class="ident">lb_data</span>.<span class="ident">property_table</span>,
+                <span class="kw-2">&amp;</span><span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">property_table</span>,
                 <span class="ident">codepoint</span>,
                 <span class="ident">LineBreakRule::Strict</span>,
                 <span class="ident">WordBreakRule::Normal</span>,
@@ -2067,12 +2064,13 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::bool_assert_comparison</span>)]</span> <span class="comment">// clearer when we&#39;re testing bools directly</span>
     <span class="kw">fn</span> <span class="ident">break_rule</span>() {
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
-        <span class="kw">let</span> <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">provider</span>
-            .<span class="ident">load</span>(<span class="ident">Default::default</span>())
-            .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
-            .<span class="ident">take_payload</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataProvider</span>::<span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span><span class="ident">::load</span>(
+            <span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>(),
+            <span class="ident">Default::default</span>(),
+        )
+        .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
+        .<span class="ident">take_payload</span>()
+        .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
         <span class="kw">let</span> <span class="ident">lb_data</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakDataV1</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">get</span>();
 
         <span class="kw">let</span> <span class="ident">is_break</span> <span class="op">=</span> <span class="op">|</span><span class="ident">left</span>, <span class="ident">right</span><span class="op">|</span> {
@@ -2177,8 +2175,8 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">linebreak</span>() {
-        <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::get_provider</span>();
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LineBreakSegmenter::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LineBreakSegmenter::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="string">&quot;hello world&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">6</span>), <span class="ident">iter</span>.<span class="ident">next</span>());

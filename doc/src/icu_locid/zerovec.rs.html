@@ -124,6 +124,13 @@
 <span id="119">119</span>
 <span id="120">120</span>
 <span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -145,23 +152,26 @@
 <span class="doccomment">//! To perform lookup, store the stringified locale in a canonical BCP-47 form as a byte array,</span>
 <span class="doccomment">//! and then use [`Locale::strict_cmp()`] to perform an efficient, zero-allocation lookup.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! To produce more human-readable serialized output, you can use [`UnvalidatedStr`].</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use icu_locid::Locale;</span>
 <span class="doccomment">//! use zerovec::ZeroMap;</span>
+<span class="doccomment">//! use zerovec::ule::UnvalidatedStr;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // ZeroMap from locales to integers</span>
-<span class="doccomment">//! let data: &amp;[(&amp;[u8], u32)] = &amp;[</span>
-<span class="doccomment">//!     (b&quot;de-DE-u-hc-h12&quot;, 5),</span>
-<span class="doccomment">//!     (b&quot;en-US-u-ca-buddhist&quot;, 10),</span>
-<span class="doccomment">//!     (b&quot;my-MM&quot;, 15),</span>
-<span class="doccomment">//!     (b&quot;sr-Cyrl-ME&quot;, 20),</span>
-<span class="doccomment">//!     (b&quot;zh-TW&quot;, 25),</span>
+<span class="doccomment">//! let data: &amp;[(&amp;UnvalidatedStr, u32)] = &amp;[</span>
+<span class="doccomment">//!     (&quot;de-DE-u-hc-h12&quot;.into(), 5),</span>
+<span class="doccomment">//!     (&quot;en-US-u-ca-buddhist&quot;.into(), 10),</span>
+<span class="doccomment">//!     (&quot;my-MM&quot;.into(), 15),</span>
+<span class="doccomment">//!     (&quot;sr-Cyrl-ME&quot;.into(), 20),</span>
+<span class="doccomment">//!     (&quot;zh-TW&quot;.into(), 25),</span>
 <span class="doccomment">//! ];</span>
-<span class="doccomment">//! let zm: ZeroMap&lt;[u8], u32&gt; = data.iter().copied().collect();</span>
+<span class="doccomment">//! let zm: ZeroMap&lt;UnvalidatedStr, u32&gt; = data.iter().copied().collect();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Get the value associated with a locale</span>
 <span class="doccomment">//! let loc: Locale = &quot;en-US-u-ca-buddhist&quot;.parse().unwrap();</span>
-<span class="doccomment">//! let value = zm.get_copied_by(|bytes| loc.strict_cmp(bytes).reverse());</span>
+<span class="doccomment">//! let value = zm.get_copied_by(|uvstr| loc.strict_cmp(&amp;uvstr).reverse());</span>
 <span class="doccomment">//! assert_eq!(value, Some(10));</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
@@ -215,36 +225,40 @@
 <span class="doccomment">//! for a discussion on potential data models that could ensure that the locale is valid during</span>
 <span class="doccomment">//! deserialization.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! As above, to produce more human-readable serialized output, you can use [`UnvalidatedStr`].</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use icu_locid::langid;</span>
 <span class="doccomment">//! use icu_locid::Locale;</span>
 <span class="doccomment">//! use zerovec::ZeroMap;</span>
+<span class="doccomment">//! use zerovec::ule::UnvalidatedStr;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // ZeroMap from integer to locale string</span>
-<span class="doccomment">//! let data: &amp;[(u32, &amp;[u8])] = &amp;[</span>
-<span class="doccomment">//!     (5, b&quot;de-DE-u-hc-h12&quot;),</span>
-<span class="doccomment">//!     (10, b&quot;en-US-u-ca-buddhist&quot;),</span>
-<span class="doccomment">//!     (15, b&quot;my-MM&quot;),</span>
-<span class="doccomment">//!     (20, b&quot;sr-Cyrl-ME&quot;),</span>
-<span class="doccomment">//!     (25, b&quot;zh-TW&quot;),</span>
-<span class="doccomment">//!     (30, b&quot;INVALID&quot;),</span>
+<span class="doccomment">//! let data: &amp;[(u32, &amp;UnvalidatedStr)] = &amp;[</span>
+<span class="doccomment">//!     (5, &quot;de-DE-u-hc-h12&quot;.into()),</span>
+<span class="doccomment">//!     (10, &quot;en-US-u-ca-buddhist&quot;.into()),</span>
+<span class="doccomment">//!     (15, &quot;my-MM&quot;.into()),</span>
+<span class="doccomment">//!     (20, &quot;sr-Cyrl-ME&quot;.into()),</span>
+<span class="doccomment">//!     (25, &quot;zh-TW&quot;.into()),</span>
+<span class="doccomment">//!     (30, &quot;INVALID&quot;.into()),</span>
 <span class="doccomment">//! ];</span>
-<span class="doccomment">//! let zm: ZeroMap&lt;u32, [u8]&gt; = data.iter().copied().collect();</span>
+<span class="doccomment">//! let zm: ZeroMap&lt;u32, UnvalidatedStr&gt; = data.iter().copied().collect();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Construct a Locale by parsing the string.</span>
 <span class="doccomment">//! let value = zm.get(&amp;25).expect(&quot;element is present&quot;);</span>
-<span class="doccomment">//! let loc = Locale::from_bytes(value);</span>
+<span class="doccomment">//! let loc = Locale::from_bytes(&amp;*value);</span>
 <span class="doccomment">//! assert_eq!(loc, Ok(langid!(&quot;zh-TW&quot;).into()));</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Invalid entries are fallible</span>
 <span class="doccomment">//! let err_value = zm.get(&amp;30).expect(&quot;element is present&quot;);</span>
-<span class="doccomment">//! let err_loc = Locale::from_bytes(err_value);</span>
+<span class="doccomment">//! let err_loc = Locale::from_bytes(&amp;*err_value);</span>
 <span class="doccomment">//! assert!(matches!(err_loc, Err(_)));</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`Locale`]: crate::Locale</span>
 <span class="doccomment">//! [`Locale::strict_cmp()`]: crate::Locale::strict_cmp()</span>
 <span class="doccomment">//! [`LanguageIdentifier`]: crate::LanguageIdentifier</span>
+<span class="doccomment">//! [`UnvalidatedStr`]: zerovec::ule::UnvalidatedStr</span>
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_locid" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
 </body></html>

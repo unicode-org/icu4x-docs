@@ -374,12 +374,34 @@
 <span id="369">369</span>
 <span id="370">370</span>
 <span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="comment">// https://github.com/unicode-org/icu4x/blob/main/docs/process/boilerplate.md#library-annotations</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">test</span>), <span class="ident">no_std</span>)]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">test</span>), <span class="ident">not</span>(<span class="ident">doc</span>)), <span class="ident">no_std</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(
     <span class="ident">not</span>(<span class="ident">test</span>),
     <span class="ident">deny</span>(
@@ -403,10 +425,6 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! 1. More efficient, since the sink can pre-allocate bytes.</span>
 <span class="doccomment">//! 2. Smaller code, since the format machinery can be short-circuited.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Types implementing Writeable have a defaulted [`write_to_string`](Writeable::write_to_string)</span>
-<span class="doccomment">//! function. If desired, types implementing `Writeable` can manually implement `ToString`</span>
-<span class="doccomment">//! to wrap `write_to_string`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
@@ -436,6 +454,10 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let message = WelcomeMessage { name: &quot;Alice&quot; };</span>
 <span class="doccomment">//! assert_writeable_eq!(&amp;message, &quot;Hello, Alice!&quot;);</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Types implementing `Writeable` are recommended to also implement `fmt::Display`.</span>
+<span class="doccomment">//! // This can be simply done by redirecting to the `Writeable` implementation:</span>
+<span class="doccomment">//! writeable::impl_display_with_writeable!(WelcomeMessage&lt;&#39;_&gt;);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`ICU4X`]: ../icu/index.html</span>
@@ -625,6 +647,25 @@
     }
 }
 
+<span class="doccomment">/// Implements [`Display`](core::fmt::Display) for types that implement [`Writeable`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// It&#39;s recommended to do this for every [`Writeable`] type, as it will add</span>
+<span class="doccomment">/// support for `core::fmt` features like [`fmt!`](std::fmt),</span>
+<span class="doccomment">/// [`print!`](std::print), [`write!`](std::write), etc.</span>
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
+<span class="macro">macro_rules!</span> <span class="ident">impl_display_with_writeable</span> {
+    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>) =&gt; {
+        <span class="doccomment">/// This trait is implemented for compatibility with [`fmt!`](alloc::fmt).</span>
+        <span class="doccomment">/// To create a string, [`Writeable::write_to_string`] is usually more efficient.</span>
+        <span class="kw">impl</span> <span class="ident">core::fmt::Display</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
+            <span class="attribute">#[<span class="macro-nonterminal">inline</span>]</span>
+            <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">core::fmt::Formatter</span>) -&gt; <span class="ident">core::fmt::Result</span> {
+                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::write_to</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>)
+            }
+        }
+    };
+}
+
 <span class="doccomment">/// Testing macros for types implementing Writeable. The first argument should be a</span>
 <span class="doccomment">/// `Writeable`, the second argument a string, and the third argument (*_parts_eq only)</span>
 <span class="doccomment">/// a list of parts (`[(usize, usize, Part)]`).</span>
@@ -657,6 +698,8 @@
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// writeable::impl_display_with_writeable!(Demo);</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// assert_writeable_eq!(&amp;Demo, &quot;foo&quot;);</span>
 <span class="doccomment">/// assert_writeable_eq!(&amp;Demo, &quot;foo&quot;, &quot;Message: {}&quot;, &quot;Hello World&quot;);</span>
 <span class="doccomment">///</span>
@@ -681,6 +724,7 @@
     }};
 }
 
+<span class="doccomment">/// See [`assert_writeable_eq`].</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">assert_writeable_parts_eq</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">actual_writeable</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_parts</span>:<span class="ident">expr</span> $(,)<span class="question-mark">?</span>) =&gt; {

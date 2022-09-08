@@ -393,9 +393,6 @@
 <span id="388">388</span>
 <span id="389">389</span>
 <span id="390">390</span>
-<span id="391">391</span>
-<span id="392">392</span>
-<span id="393">393</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -446,7 +443,7 @@
 <span class="doccomment">//!         Ok(())</span>
 <span class="doccomment">//!     }</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//!     fn write_len(&amp;self) -&gt; LengthHint {</span>
+<span class="doccomment">//!     fn writeable_length_hint(&amp;self) -&gt; LengthHint {</span>
 <span class="doccomment">//!         // &quot;Hello, &quot; + &#39;!&#39; + length of name</span>
 <span class="doccomment">//!         LengthHint::exact(8 + self.name.len())</span>
 <span class="doccomment">//!     }</span>
@@ -491,22 +488,22 @@
         <span class="self">Self</span>(<span class="number">0</span>, <span class="prelude-val">None</span>)
     }
 
-    <span class="doccomment">/// This is the exact length from `write_to`.</span>
+    <span class="doccomment">/// `write_to` will use exactly n bytes.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">exact</span>(<span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">n</span>, <span class="prelude-val">Some</span>(<span class="ident">n</span>))
     }
 
-    <span class="doccomment">/// This is at least the length from `write_to`.</span>
+    <span class="doccomment">/// `write_to` will use at least n bytes.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_least</span>(<span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">n</span>, <span class="prelude-val">None</span>)
     }
 
-    <span class="doccomment">/// This is at most the length from `write_to`.</span>
+    <span class="doccomment">/// `write_to` will use at most n bytes.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_most</span>(<span class="ident">n</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="number">0</span>, <span class="prelude-val">Some</span>(<span class="ident">n</span>))
     }
 
-    <span class="doccomment">/// The length from `write_to` is in between `n` and `m`.</span>
+    <span class="doccomment">/// `write_to` will use between `n` and `m` bytes.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">between</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">m</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">Ord::min</span>(<span class="ident">n</span>, <span class="ident">m</span>), <span class="prelude-val">Some</span>(<span class="ident">Ord::max</span>(<span class="ident">n</span>, <span class="ident">m</span>)))
     }
@@ -521,14 +518,11 @@
     <span class="doccomment">/// use writeable::Writeable;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// fn pre_allocate_string(w: &amp;impl Writeable) -&gt; String {</span>
-    <span class="doccomment">///     String::with_capacity(w.write_len().capacity())</span>
+    <span class="doccomment">///     String::with_capacity(w.writeable_length_hint().capacity())</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">match</span> <span class="self">self</span> {
-            <span class="self">Self</span>(<span class="ident">lower_bound</span>, <span class="prelude-val">None</span>) =&gt; <span class="kw-2">*</span><span class="ident">lower_bound</span>,
-            <span class="self">Self</span>(<span class="ident">_lower_bound</span>, <span class="prelude-val">Some</span>(<span class="ident">upper_bound</span>)) =&gt; <span class="kw-2">*</span><span class="ident">upper_bound</span>,
-        }
+        <span class="self">self</span>.<span class="number">1</span>.<span class="ident">unwrap_or</span>(<span class="self">self</span>.<span class="number">0</span>)
     }
 
     <span class="doccomment">/// Returns whether the `LengthHint` indicates that the string is exactly 0 bytes long.</span>
@@ -557,7 +551,7 @@
 
 <span class="doccomment">/// `Writeable` is an alternative to `std::fmt::Display` with the addition of a length function.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Writeable</span> {
-    <span class="doccomment">/// Writes bytes to the given sink. Errors from the sink are bubbled up.</span>
+    <span class="doccomment">/// Writes a string to the given sink. Errors from the sink are bubbled up.</span>
     <span class="doccomment">/// The default implementation delegates to `write_to_parts`, and discards any</span>
     <span class="doccomment">/// `Part` annotations.</span>
     <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">fmt::Result</span> {
@@ -594,10 +588,10 @@
         <span class="self">self</span>.<span class="ident">write_to</span>(<span class="ident">sink</span>)
     }
 
-    <span class="doccomment">/// Returns a hint for the number of bytes that will be written to the sink.</span>
+    <span class="doccomment">/// Returns a hint for the number of UTF-8 bytes that will be written to the sink.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Override this method if it can be computed quickly.</span>
-    <span class="kw">fn</span> <span class="ident">write_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">LengthHint</span> {
+    <span class="kw">fn</span> <span class="ident">writeable_length_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">LengthHint</span> {
         <span class="ident">LengthHint::undefined</span>()
     }
 
@@ -607,7 +601,7 @@
     <span class="doccomment">/// The default impl allocates an owned `String`. However, if it is possible to return a</span>
     <span class="doccomment">/// borrowed string, overwrite this method to return a `Cow::Borrowed`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// To remove the `Cow` wrapper, call `.into_owned()`.</span>
+    <span class="doccomment">/// To remove the `Cow` wrapper, call `.into_owned()` or `.as_str()` as appropriate.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
@@ -641,7 +635,7 @@
     <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">fn</span> <span class="ident">write_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="self">self</span>.<span class="ident">write_len</span>().<span class="ident">capacity</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="self">self</span>.<span class="ident">writeable_length_hint</span>().<span class="ident">capacity</span>());
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">write_to</span>(<span class="kw-2">&amp;mut</span> <span class="ident">output</span>);
         <span class="ident">Cow::Owned</span>(<span class="ident">output</span>)
     }
@@ -693,7 +687,7 @@
 <span class="doccomment">///     fn write_to_parts&lt;S: writeable::PartsWrite + ?Sized&gt;(&amp;self, sink: &amp;mut S) -&gt; fmt::Result {</span>
 <span class="doccomment">///         sink.with_part(WORD, |w| w.write_str(&quot;foo&quot;))</span>
 <span class="doccomment">///     }</span>
-<span class="doccomment">///     fn write_len(&amp;self) -&gt; LengthHint {</span>
+<span class="doccomment">///     fn writeable_length_hint(&amp;self) -&gt; LengthHint {</span>
 <span class="doccomment">///         LengthHint::exact(3)</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
@@ -716,7 +710,7 @@
         <span class="kw">let</span> (<span class="ident">actual_str</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::writeable_to_parts_for_test</span>(<span class="ident">actual_writeable</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">actual_str</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="kw-2">*</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">actual_str</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::write_to_string</span>(<span class="ident">actual_writeable</span>), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
-        <span class="kw">let</span> <span class="ident">length_hint</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::write_len</span>(<span class="ident">actual_writeable</span>);
+        <span class="kw">let</span> <span class="ident">length_hint</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::writeable_length_hint</span>(<span class="ident">actual_writeable</span>);
         <span class="macro">assert!</span>(<span class="ident">length_hint</span>.<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">actual_str</span>.<span class="ident">len</span>(), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="kw-2">*</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">upper</span>) <span class="op">=</span> <span class="ident">length_hint</span>.<span class="number">1</span> {
             <span class="macro">assert!</span>(<span class="ident">actual_str</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">upper</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="kw-2">*</span>);
@@ -736,7 +730,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">actual_str</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_str</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">actual_str</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::write_to_string</span>(<span class="ident">actual_writeable</span>), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">actual_parts</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected_parts</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
-        <span class="kw">let</span> <span class="ident">length_hint</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::write_len</span>(<span class="ident">actual_writeable</span>);
+        <span class="kw">let</span> <span class="ident">length_hint</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Writeable::writeable_length_hint</span>(<span class="ident">actual_writeable</span>);
         <span class="macro">assert!</span>(<span class="ident">length_hint</span>.<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">actual_str</span>.<span class="ident">len</span>(), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">upper</span>) <span class="op">=</span> <span class="ident">length_hint</span>.<span class="number">1</span> {
             <span class="macro">assert!</span>(<span class="ident">actual_str</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">upper</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>)<span class="op">+</span>);

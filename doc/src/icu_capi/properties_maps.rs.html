@@ -186,6 +186,10 @@
 <span id="181">181</span>
 <span id="182">182</span>
 <span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -195,14 +199,11 @@
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::ffi::ICU4XDataProvider</span>;
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
     <span class="kw">use</span> <span class="ident">icu_collections::codepointtrie::TrieValue</span>;
-    <span class="kw">use</span> <span class="ident">icu_properties</span>::{<span class="ident">maps</span>, <span class="ident">PropertiesError</span>};
+    <span class="kw">use</span> <span class="ident">icu_properties::maps</span>;
 
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::ffi::ICU4XError</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::properties_sets::ffi::ICU4XCodePointSetData</span>;
     <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
-
-    <span class="kw">use</span> <span class="ident">icu_provider::prelude::BufferProvider</span>;
-    <span class="kw">use</span> <span class="ident">icu_provider::serde</span>::{<span class="ident">AsDeserializingBufferProvider</span>, <span class="ident">DeserializingBufferProvider</span>};
 
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
     <span class="doccomment">/// An ICU4X Unicode Map Property object, capable of querying whether a code point (key) to obtain the Unicode property value, for a specific Unicode property.</span>
@@ -212,6 +213,16 @@
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::CodePointMapData</span>, <span class="ident">Struct</span>)]</span>
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::CodePointMapDataBorrowed</span>, <span class="ident">Struct</span>)]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XCodePointMapData8</span>(<span class="ident">maps::CodePointMapData</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>);
+
+    <span class="kw">fn</span> <span class="ident">convert_8</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">TrieValue</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(
+        <span class="ident">data</span>: <span class="ident">maps::CodePointMapData</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span> {
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// infallible for the chosen properties</span>
+        <span class="ident">Box::new</span>(<span class="ident">ICU4XCodePointMapData8</span>(
+            <span class="ident">data</span>.<span class="ident">try_into_converted</span>()
+                .<span class="ident">expect</span>(<span class="string">&quot;try_into_converted to u8 must be infallible&quot;</span>),
+        ))
+    }
 
     <span class="kw">impl</span> <span class="ident">ICU4XCodePointMapData8</span> {
         <span class="doccomment">/// Gets the value for a code point.</span>
@@ -245,70 +256,68 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_general_category</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_general_category</span>(<span class="ident">p</span>))
+            <span class="ident">maps::load_general_category</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+                .<span class="ident">into</span>()
         }
 
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::load_bidi_class</span>, <span class="ident">Fn</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_bidi_class</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_bidi_class</span>(<span class="ident">p</span>))
+            <span class="ident">maps::load_bidi_class</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+                .<span class="ident">into</span>()
         }
 
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::load_east_asian_width</span>, <span class="ident">Fn</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_east_asian_width</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_east_asian_width</span>(<span class="ident">p</span>))
+            <span class="ident">maps::load_east_asian_width</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+                .<span class="ident">into</span>()
         }
 
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::load_line_break</span>, <span class="ident">Fn</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_line_break</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_line_break</span>(<span class="ident">p</span>))
+            <span class="ident">maps::load_line_break</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+                .<span class="ident">into</span>()
         }
 
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::load_grapheme_cluster_break</span>, <span class="ident">Fn</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_grapheme_cluster_break</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_grapheme_cluster_break</span>(<span class="ident">p</span>))
+            <span class="ident">maps::load_grapheme_cluster_break</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+                .<span class="ident">into</span>()
         }
 
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::load_word_break</span>, <span class="ident">Fn</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_word_break</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_word_break</span>(<span class="ident">p</span>))
+            <span class="ident">maps::load_word_break</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+                .<span class="ident">into</span>()
         }
 
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::properties::maps::load_sentence_break</span>, <span class="ident">Fn</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_sentence_break</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident"><span class="self">Self</span>::load_prop_inner</span>(<span class="ident">provider</span>, <span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">maps::load_sentence_break</span>(<span class="ident">p</span>))
-        }
-
-        <span class="kw">fn</span> <span class="ident">load_prop_inner</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">F</span><span class="op">&gt;</span>(
-            <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
-            <span class="ident">f</span>: <span class="ident">F</span>,
-        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData8</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span>
-        <span class="kw">where</span>
-            <span class="ident">P</span>: <span class="ident">TrieValue</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>(
-                <span class="kw-2">&amp;</span><span class="ident">DeserializingBufferProvider</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="kw">dyn</span> <span class="ident">BufferProvider</span><span class="op">&gt;</span>,
-            ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">maps::CodePointMapData</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>, <span class="ident">PropertiesError</span><span class="op">&gt;</span>,
-        {
-            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="number">0</span>.<span class="ident">as_deserializing</span>();
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// infallible</span>
-            <span class="ident">f</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>)
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">data</span><span class="op">|</span> {
-                    <span class="ident">Box::new</span>(<span class="ident">ICU4XCodePointMapData8</span>(
-                        <span class="ident">data</span>.<span class="ident">try_into_converted</span>()
-                            .<span class="ident">expect</span>(<span class="string">&quot;try_into_converted to u8 must be infallible&quot;</span>),
-                    ))
-                })
+            <span class="ident">maps::load_sentence_break</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
+                .<span class="ident">map</span>(<span class="ident">convert_8</span>)
                 .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
                 .<span class="ident">into</span>()
         }
@@ -355,9 +364,8 @@
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_script</span>(
             <span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">ICU4XDataProvider</span>,
         ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XCodePointMapData16</span><span class="op">&gt;</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="number">0</span>.<span class="ident">as_deserializing</span>();
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// infallible</span>
-            <span class="ident">maps::load_script</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>)
+            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// script is a 16-bit property</span>
+            <span class="ident">maps::load_script</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>.<span class="number">0</span>)
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">data</span><span class="op">|</span> {
                     <span class="ident">Box::new</span>(<span class="ident">ICU4XCodePointMapData16</span>(
                         <span class="ident">data</span>.<span class="ident">try_into_converted</span>()

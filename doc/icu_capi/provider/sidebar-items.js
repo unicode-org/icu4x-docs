@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["ffi",""]]});
+initSidebarItems({"enum":[["ICU4XDataProviderInner",""]],"mod":[["ffi",""]]});

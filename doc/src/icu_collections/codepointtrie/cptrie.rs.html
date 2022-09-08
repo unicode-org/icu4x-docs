@@ -1169,6 +1169,23 @@
 <span id="1164">1164</span>
 <span id="1165">1165</span>
 <span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1493,17 +1510,34 @@
     <span class="doccomment">/// use icu_collections::codepointtrie::planes;</span>
     <span class="doccomment">/// let trie = planes::get_planes_trie();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(0, trie.get(0x41)); // &#39;A&#39; as u32</span>
-    <span class="doccomment">/// assert_eq!(0, trie.get(0x13E0)); // &#39;Ꮰ&#39; as u32</span>
-    <span class="doccomment">/// assert_eq!(1, trie.get(0x10044)); // &#39;𐁄&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(0, trie.get32(0x41)); // &#39;A&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(0, trie.get32(0x13E0)); // &#39;Ꮰ&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(1, trie.get32(0x10044)); // &#39;𐁄&#39; as u32</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// `always` based on normalizer benchmarking</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">code_point</span>: <span class="ident">u32</span>) -&gt; <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">code_point</span>: <span class="ident">u32</span>) -&gt; <span class="ident">T</span> {
         <span class="comment">// If we cannot read from the data array, then return the sentinel value</span>
         <span class="comment">// self.error_value() for the instance type for T: TrieValue.</span>
-        <span class="self">self</span>.<span class="ident">get_ule</span>(<span class="ident">code_point</span>)
+        <span class="self">self</span>.<span class="ident">get32_ule</span>(<span class="ident">code_point</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">T::from_unaligned</span>(<span class="kw-2">*</span><span class="ident">t</span>))
             .<span class="ident">unwrap_or</span>(<span class="self">self</span>.<span class="ident">error_value</span>)
+    }
+
+    <span class="doccomment">/// Returns the value that is associated with `char` in this [`CodePointTrie`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_collections::codepointtrie::planes;</span>
+    <span class="doccomment">/// let trie = planes::get_planes_trie();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(0, trie.get(&#39;A&#39;)); // &#39;A&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(0, trie.get(&#39;Ꮰ&#39;)); // &#39;Ꮰ&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(1, trie.get(&#39;𐁄&#39;)); // &#39;𐁄&#39; as u32</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">T</span> {
+        <span class="self">self</span>.<span class="ident">get32</span>(<span class="ident">u32::from</span>(<span class="ident">c</span>))
     }
 
     <span class="doccomment">/// Returns a reference to the ULE of the value that is associated with `code_point` in this [`CodePointTrie`].</span>
@@ -1514,12 +1548,12 @@
     <span class="doccomment">/// use icu_collections::codepointtrie::planes;</span>
     <span class="doccomment">/// let trie = planes::get_planes_trie();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(Some(&amp;0), trie.get_ule(0x41)); // &#39;A&#39; as u32</span>
-    <span class="doccomment">/// assert_eq!(Some(&amp;0), trie.get_ule(0x13E0)); // &#39;Ꮰ&#39; as u32</span>
-    <span class="doccomment">/// assert_eq!(Some(&amp;1), trie.get_ule(0x10044)); // &#39;𐁄&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(Some(&amp;0), trie.get32_ule(0x41)); // &#39;A&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(Some(&amp;0), trie.get32_ule(0x13E0)); // &#39;Ꮰ&#39; as u32</span>
+    <span class="doccomment">/// assert_eq!(Some(&amp;1), trie.get32_ule(0x10044)); // &#39;𐁄&#39; as u32</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// `always` based on normalizer benchmarking</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_ule</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">code_point</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get32_ule</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">code_point</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T::ULE</span><span class="op">&gt;</span> {
         <span class="comment">// All code points up to the fast max limit are represented</span>
         <span class="comment">// individually in the `index` array to hold their `data` array position, and</span>
         <span class="comment">// thus only need 2 lookups for a [CodePointTrie::get()](`crate::codepointtrie::CodePointTrie::get`).</span>
@@ -1604,9 +1638,9 @@
     <span class="doccomment">/// let start = 0x1_0000;</span>
     <span class="doccomment">/// let exp_end = 0x1_ffff;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let start_val = trie.get(start);</span>
-    <span class="doccomment">/// assert_eq!(trie.get(exp_end), start_val);</span>
-    <span class="doccomment">/// assert_ne!(trie.get(exp_end + 1), start_val);</span>
+    <span class="doccomment">/// let start_val = trie.get32(start);</span>
+    <span class="doccomment">/// assert_eq!(trie.get32(exp_end), start_val);</span>
+    <span class="doccomment">/// assert_ne!(trie.get32(exp_end + 1), start_val);</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// use core::ops::RangeInclusive;</span>
     <span class="doccomment">/// use icu_collections::codepointtrie::CodePointMapRange;</span>
@@ -2017,10 +2051,10 @@
     <span class="doccomment">/// let start = plane_val * 0x1_0000;</span>
     <span class="doccomment">/// let end = start + 0xffff;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// assert!(!sip.contains_u32(start - 1));</span>
-    <span class="doccomment">/// assert!(sip.contains_u32(start));</span>
-    <span class="doccomment">/// assert!(sip.contains_u32(end));</span>
-    <span class="doccomment">/// assert!(!sip.contains_u32(end + 1));</span>
+    <span class="doccomment">/// assert!(!sip.contains32(start - 1));</span>
+    <span class="doccomment">/// assert!(sip.contains32(start));</span>
+    <span class="doccomment">/// assert!(sip.contains32(end));</span>
+    <span class="doccomment">/// assert!(!sip.contains32(end + 1));</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_set_for_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">CodePointInversionList</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">value_ranges</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_ranges_for_value</span>(<span class="ident">value</span>);
@@ -2058,13 +2092,13 @@
     <span class="doccomment">/// let cp = &#39;𑖎&#39; as u32;</span>
     <span class="doccomment">/// assert_eq!(cp, 0x1158E);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let plane_num: u8 = trie.get(cp);</span>
-    <span class="doccomment">/// assert_eq!(trie.get_u32(cp), plane_num as u32);</span>
+    <span class="doccomment">/// let plane_num: u8 = trie.get32(cp);</span>
+    <span class="doccomment">/// assert_eq!(trie.get32_u32(cp), plane_num as u32);</span>
     <span class="doccomment">/// ```</span>
     <span class="comment">// Note: This API method maintains consistency with the corresponding</span>
     <span class="comment">// original ICU APIs.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_u32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">code_point</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
-        <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">code_point</span>).<span class="ident">into</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get32_u32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">code_point</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
+        <span class="self">self</span>.<span class="ident">get32</span>(<span class="ident">code_point</span>).<span class="ident">into</span>()
     }
 }
 

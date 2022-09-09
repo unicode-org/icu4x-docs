@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1662727770366,
+  "lastUpdate": 1662747155820,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -50189,6 +50189,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 87,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "79da612943fd8d18b06836c390b97b9e4c226599",
+          "message": "Filter out more data provider traits and fix a rust link (#2538)",
+          "timestamp": "2022-09-09T10:59:27-07:00",
+          "tree_id": "ebed317d24c3ab25cbd04f755fe55d50a3961d65",
+          "url": "https://github.com/unicode-org/icu4x/commit/79da612943fd8d18b06836c390b97b9e4c226599"
+        },
+        "date": 1662747030508,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 113771,
+            "range": "± 7277",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 25039,
+            "range": "± 167",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 70553,
+            "range": "± 104",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 72,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dbe360cc7a724d048f601c2339c8ba7eb4142184",
+          "message": "Add experimental notices on all exported modules, structs, and enums (#2536)",
+          "timestamp": "2022-09-09T10:59:50-07:00",
+          "tree_id": "b34e1be3d2310844b7255211d75e0e1b23bd9b1a",
+          "url": "https://github.com/unicode-org/icu4x/commit/dbe360cc7a724d048f601c2339c8ba7eb4142184"
+        },
+        "date": 1662747091906,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 126596,
+            "range": "± 4947",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26142,
+            "range": "± 1374",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 71149,
+            "range": "± 3512",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 219,
+            "range": "± 10",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 81,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 92,
+            "range": "± 6",
             "unit": "ns/iter"
           }
         ]

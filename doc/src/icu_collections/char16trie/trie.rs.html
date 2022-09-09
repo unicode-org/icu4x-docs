@@ -467,13 +467,37 @@
 <span id="462">462</span>
 <span id="463">463</span>
 <span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">zerofrom::ZeroFrom</span>;
-<span class="kw">use</span> <span class="ident">zerovec::ule::AsULE</span>;
-<span class="kw">use</span> <span class="ident">zerovec::ZeroVec</span>;
+<span class="kw">use</span> <span class="ident">zerovec</span>::{<span class="ident">ZeroSlice</span>, <span class="ident">ZeroVec</span>};
 
 <span class="comment">// Match-node lead unit values, after masking off intermediate-value bits:</span>
 
@@ -563,7 +587,7 @@
 
     <span class="doccomment">/// Returns a new [`Char16TrieIterator`] backed by borrowed data from the `trie` data</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Char16TrieIterator</span> {
-        <span class="ident">Char16TrieIterator::new</span>(<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">as_ule_slice</span>())
+        <span class="ident">Char16TrieIterator::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">data</span>)
     }
 }
 
@@ -571,7 +595,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Char16TrieIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// A reference to the Char16Trie data to iterate over.</span>
-    <span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="op">&lt;</span><span class="ident">u16</span> <span class="kw">as</span> <span class="ident">zerovec::ule::AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>],
+    <span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Index of next trie unit to read, or None if there are no more matches.</span>
     <span class="ident">pos</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Remaining length of a linear-match node, minus 1, or None if not in</span>
@@ -615,9 +639,25 @@
     (((<span class="ident">supplementary</span>) <span class="op">&amp;</span> <span class="number">0x3ff</span>) <span class="op">|</span> <span class="number">0xdc00</span>) <span class="kw">as</span> <span class="ident">u16</span>
 }
 
+<span class="doccomment">/// A macro that takes an `Option` argument and either unwraps it if it has a value or</span>
+<span class="doccomment">/// causes the function to return `TrieResult::NoMatch` if there is no value.</span>
+<span class="doccomment">/// This could perhaps be done with std::ops::Try once stabilized.</span>
+<span class="macro">macro_rules!</span> <span class="ident">trie_unwrap</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">option</span>:<span class="ident">expr</span>) =&gt; {
+        <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">option</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
+            <span class="prelude-val">None</span> =&gt; {
+                <span class="comment">// Unexpected</span>
+                <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+                <span class="kw">return</span> <span class="ident">TrieResult::NoMatch</span>;
+            }
+        }
+    };
+}
+
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Char16TrieIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns a new [`Char16TrieIterator`] backed by borrowed data for the `trie` array</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="op">&lt;</span><span class="ident">u16</span> <span class="kw">as</span> <span class="ident">zerovec::ule::AsULE</span><span class="op">&gt;</span><span class="ident">::ULE</span>]) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">trie</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">trie</span>,
             <span class="ident">pos</span>: <span class="prelude-val">Some</span>(<span class="number">0</span>),
@@ -718,12 +758,12 @@
         };
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">length</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">remaining_match_length</span> {
             <span class="comment">// Remaining part of a linear-match node</span>
-            <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) {
+            <span class="kw">if</span> <span class="ident">c</span> <span class="op">==</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) {
                 <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                 <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>);
                 <span class="kw">if</span> <span class="ident">length</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="self">self</span>.<span class="ident">remaining_match_length</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                    <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+                    <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>));
                     <span class="kw">if</span> <span class="ident">node</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MIN_VALUE_LEAD</span> {
                         <span class="kw">return</span> <span class="self">self</span>.<span class="ident">value_result</span>(<span class="ident">pos</span>);
                     }
@@ -739,17 +779,11 @@
         }
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// TODO(#1440) This potentially panics</span>
-    <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u16</span> {
-        <span class="comment">// TODO(#1440) This potentially panics</span>
-        <span class="ident">u16::from_unaligned</span>(<span class="self">self</span>.<span class="ident">trie</span>[<span class="ident">pos</span>])
-    }
-
     <span class="kw">fn</span> <span class="ident">branch_next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">length</span>: <span class="ident">usize</span>, <span class="ident">in_unit</span>: <span class="ident">u16</span>) -&gt; <span class="ident">TrieResult</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">pos</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">length</span>;
         <span class="kw">if</span> <span class="ident">length</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="ident">length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+            <span class="ident">length</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) <span class="kw">as</span> <span class="ident">usize</span>;
             <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
         <span class="ident">length</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -757,21 +791,21 @@
         <span class="comment">// The length of the branch is the number of units to select from.</span>
         <span class="comment">// The data structure encodes a binary search.</span>
         <span class="kw">while</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="ident">MAX_BRANCH_LINEAR_SUB_NODE_LENGTH</span> {
-            <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) {
+            <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">&lt;</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) {
                 <span class="ident">length</span> <span class="op">&gt;</span><span class="op">&gt;</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">jump_by_delta</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>);
+                <span class="ident">pos</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">jump_by_delta</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>));
             } <span class="kw">else</span> {
                 <span class="ident">length</span> <span class="op">=</span> <span class="ident">length</span> <span class="op">-</span> (<span class="ident">length</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">1</span>);
-                <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">skip_delta</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>);
+                <span class="ident">pos</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">skip_delta</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>));
             }
         }
         <span class="comment">// Drop down to linear search for the last few bytes.</span>
         <span class="comment">// length&gt;=2 because the loop body above sees length&gt;kMaxBranchLinearSubNodeLength&gt;=3</span>
         <span class="comment">// and divides length by 2.</span>
         <span class="kw">loop</span> {
-            <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) {
+            <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">==</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) {
                 <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">node</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>));
                 <span class="kw">if</span> <span class="ident">node</span> <span class="op">&amp;</span> <span class="ident">VALUE_IS_FINAL</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                     <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>);
                     <span class="kw">return</span> <span class="self">self</span>.<span class="ident">value_result</span>(<span class="ident">pos</span>);
@@ -783,13 +817,14 @@
                     <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="ident">node</span> <span class="kw">as</span> <span class="ident">usize</span>;
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">node</span> <span class="op">&lt;</span> <span class="ident">THREE_UNIT_VALUE_LEAD</span> {
                     <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> (((<span class="ident">node</span> <span class="op">-</span> <span class="ident">MIN_TWO_UNIT_VALUE_LEAD</span>) <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">usize</span>
-                        <span class="op">|</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+                        <span class="op">|</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) <span class="kw">as</span> <span class="ident">usize</span>;
                     <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                 } <span class="kw">else</span> {
-                    <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> (<span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">usize</span>;
+                    <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> (<span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>
+                        <span class="op">|</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>)) <span class="kw">as</span> <span class="ident">usize</span>;
                     <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">2</span>;
                 }
-                <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+                <span class="ident">node</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>));
                 <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>);
 
                 <span class="kw">if</span> <span class="ident">node</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MIN_VALUE_LEAD</span> {
@@ -798,16 +833,16 @@
                 <span class="kw">return</span> <span class="ident">TrieResult::NoValue</span>;
             }
             <span class="ident">length</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">skip_value</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>);
+            <span class="ident">pos</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">skip_value</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>));
             <span class="kw">if</span> <span class="ident">length</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">1</span> {
                 <span class="kw">break</span>;
             }
         }
 
-        <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) {
+        <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">==</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) {
             <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>);
-            <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+            <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>));
             <span class="kw">if</span> <span class="ident">node</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MIN_VALUE_LEAD</span> {
                 <span class="kw">return</span> <span class="self">self</span>.<span class="ident">value_result</span>(<span class="ident">pos</span>);
             }
@@ -819,7 +854,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">next_impl</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">in_unit</span>: <span class="ident">u16</span>) -&gt; <span class="ident">TrieResult</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">node</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>;
         <span class="kw">loop</span> {
             <span class="kw">if</span> <span class="ident">node</span> <span class="op">&lt;</span> <span class="ident">MIN_LINEAR_MATCH</span> {
@@ -827,12 +862,12 @@
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">node</span> <span class="op">&lt;</span> <span class="ident">MIN_VALUE_LEAD</span> {
                 <span class="comment">// Match the first of length+1 units.</span>
                 <span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">node</span> <span class="op">-</span> <span class="ident">MIN_LINEAR_MATCH</span>;
-                <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) {
+                <span class="kw">if</span> <span class="ident">in_unit</span> <span class="op">==</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)) {
                     <span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                     <span class="kw">if</span> <span class="ident">length</span> <span class="op">==</span> <span class="number">0</span> {
                         <span class="self">self</span>.<span class="ident">remaining_match_length</span> <span class="op">=</span> <span class="prelude-val">None</span>;
                         <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>);
-                        <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+                        <span class="ident">node</span> <span class="op">=</span> <span class="macro">trie_unwrap!</span>(<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>));
                         <span class="kw">if</span> <span class="ident">node</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MIN_VALUE_LEAD</span> {
                             <span class="kw">return</span> <span class="self">self</span>.<span class="ident">value_result</span>(<span class="ident">pos</span>);
                         }
@@ -861,74 +896,89 @@
         <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">jump_by_delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
-        <span class="kw">if</span> <span class="ident">delta</span> <span class="op">&lt;</span> <span class="ident">MIN_TWO_UNIT_DELTA_LEAD</span> {
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// 1 call site and we want the Option to go away</span>
+    <span class="kw">fn</span> <span class="ident">jump_by_delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">delta</span> <span class="op">&lt;</span> <span class="ident">MIN_TWO_UNIT_DELTA_LEAD</span> {
             <span class="comment">// nothing to do</span>
             <span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span> <span class="op">+</span> <span class="ident">delta</span> <span class="kw">as</span> <span class="ident">usize</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">delta</span> <span class="op">==</span> <span class="ident">THREE_UNIT_DELTA_LEAD</span> {
-            <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> ((<span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>) <span class="op">|</span> (<span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">2</span>) <span class="kw">as</span> <span class="ident">usize</span>);
+            <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span>
+                ((<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>) <span class="op">|</span> (<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">2</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>);
             <span class="ident">pos</span> <span class="op">+</span> <span class="ident">delta</span> <span class="op">+</span> <span class="number">3</span>
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span>
-                ((<span class="ident">delta</span> <span class="op">-</span> <span class="ident">MIN_TWO_UNIT_DELTA_LEAD</span>) <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> (<span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">usize</span>);
+            <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> ((<span class="ident">delta</span> <span class="op">-</span> <span class="ident">MIN_TWO_UNIT_DELTA_LEAD</span>) <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>
+                <span class="op">|</span> (<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>);
             <span class="ident">pos</span> <span class="op">+</span> <span class="ident">delta</span> <span class="op">+</span> <span class="number">2</span>
-        }
+        };
+        <span class="prelude-val">Some</span>(<span class="ident">v</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">skip_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">let</span> <span class="ident">lead_unit</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
-        <span class="ident">skip_value</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">lead_unit</span> <span class="op">&amp;</span> <span class="number">0x7fff</span>)
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// 1 call site and we want the Option to go away</span>
+    <span class="kw">fn</span> <span class="ident">skip_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">lead_unit</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Some</span>(<span class="ident">skip_value</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">lead_unit</span> <span class="op">&amp;</span> <span class="number">0x7fff</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">skip_delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
-        <span class="kw">if</span> <span class="ident">delta</span> <span class="op">&lt;</span> <span class="ident">MIN_TWO_UNIT_DELTA_LEAD</span> {
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// 1 call site and we want the Option to go away</span>
+    <span class="kw">fn</span> <span class="ident">skip_delta</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">delta</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">delta</span> <span class="op">&lt;</span> <span class="ident">MIN_TWO_UNIT_DELTA_LEAD</span> {
             <span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">delta</span> <span class="op">==</span> <span class="ident">THREE_UNIT_DELTA_LEAD</span> {
             <span class="ident">pos</span> <span class="op">+</span> <span class="number">3</span>
         } <span class="kw">else</span> {
             <span class="ident">pos</span> <span class="op">+</span> <span class="number">2</span>
-        }
+        };
+        <span class="prelude-val">Some</span>(<span class="ident">v</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">value_result</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">TrieResult</span> {
-        <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="op">&amp;</span> <span class="ident">VALUE_IS_FINAL</span>;
-        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_value</span>(<span class="ident">pos</span>);
-        <span class="kw">match</span> <span class="ident">node</span> {
-            <span class="ident">VALUE_IS_FINAL</span> =&gt; <span class="ident">TrieResult::FinalValue</span>(<span class="ident">value</span>),
-            <span class="kw">_</span> =&gt; <span class="ident">TrieResult::Intermediate</span>(<span class="ident">value</span>),
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">get_value</span>(<span class="ident">pos</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">result</span>) =&gt; <span class="ident">result</span>,
+            <span class="prelude-val">None</span> =&gt; {
+                <span class="comment">// Unexpected</span>
+                <span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
+                <span class="ident">TrieResult::NoMatch</span>
+            }
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="ident">i32</span> {
-        <span class="kw">let</span> <span class="ident">lead_unit</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>);
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// 1 call site and we want the Option to go away</span>
+    <span class="kw">fn</span> <span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TrieResult</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">lead_unit</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&amp;</span> <span class="ident">VALUE_IS_FINAL</span> <span class="op">==</span> <span class="ident">VALUE_IS_FINAL</span> {
             <span class="self">self</span>.<span class="ident">read_value</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">lead_unit</span> <span class="op">&amp;</span> <span class="number">0x7fff</span>)
+                .<span class="ident">map</span>(<span class="ident">TrieResult::FinalValue</span>)
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">read_node_value</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">lead_unit</span>)
+                .<span class="ident">map</span>(<span class="ident">TrieResult::Intermediate</span>)
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">read_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">lead_unit</span>: <span class="ident">u16</span>) -&gt; <span class="ident">i32</span> {
-        <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&lt;</span> <span class="ident">MIN_TWO_UNIT_VALUE_LEAD</span> {
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// 1 call site and we want the Option to go away</span>
+    <span class="kw">fn</span> <span class="ident">read_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">lead_unit</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&lt;</span> <span class="ident">MIN_TWO_UNIT_VALUE_LEAD</span> {
             <span class="ident">lead_unit</span>.<span class="ident">into</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&lt;</span> <span class="ident">THREE_UNIT_VALUE_LEAD</span> {
-            ((<span class="ident">lead_unit</span> <span class="op">-</span> <span class="ident">MIN_TWO_UNIT_VALUE_LEAD</span>) <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">i32</span>
+            ((<span class="ident">lead_unit</span> <span class="op">-</span> <span class="ident">MIN_TWO_UNIT_VALUE_LEAD</span>) <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>
         } <span class="kw">else</span> {
-            (<span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">i32</span>
-        }
+            (<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>
+        };
+        <span class="prelude-val">Some</span>(<span class="ident">v</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_node_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">lead_unit</span>: <span class="ident">u16</span>) -&gt; <span class="ident">i32</span> {
-        <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&lt;</span> (<span class="ident">MIN_TWO_UNIT_NODE_VALUE_LEAD</span>) {
+    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span> <span class="comment">// 1 call site and we want the Option to go away</span>
+    <span class="kw">fn</span> <span class="ident">read_node_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">lead_unit</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&lt;</span> (<span class="ident">MIN_TWO_UNIT_NODE_VALUE_LEAD</span>) {
             ((<span class="ident">lead_unit</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">6</span>) <span class="op">-</span> <span class="number">1</span>).<span class="ident">into</span>()
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">lead_unit</span> <span class="op">&lt;</span> <span class="ident">THREE_UNIT_NODE_VALUE_LEAD</span> {
             (((<span class="ident">lead_unit</span> <span class="op">&amp;</span> <span class="number">0x7fc0</span>) <span class="op">-</span> <span class="ident">MIN_TWO_UNIT_NODE_VALUE_LEAD</span>) <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">10</span>
-                <span class="op">|</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">i32</span>
+                <span class="op">|</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>
         } <span class="kw">else</span> {
-            (<span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span>) <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">i32</span>
-        }
+            (<span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span> <span class="op">|</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="number">1</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>
+        };
+        <span class="prelude-val">Some</span>(<span class="ident">v</span>)
     }
 }
 </code></pre></div>

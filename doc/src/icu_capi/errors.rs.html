@@ -333,6 +333,25 @@
 <span id="328">328</span>
 <span id="329">329</span>
 <span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -345,6 +364,7 @@
 <span class="kw">use</span> <span class="ident">icu_datetime::DateTimeFormatterError</span>;
 <span class="kw">use</span> <span class="ident">icu_decimal::FixedDecimalFormatterError</span>;
 <span class="kw">use</span> <span class="ident">icu_locid::ParserError</span>;
+<span class="kw">use</span> <span class="ident">icu_normalizer::NormalizerError</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::PluralRulesError</span>;
 <span class="kw">use</span> <span class="ident">icu_properties::PropertiesError</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">DataError</span>, <span class="ident">DataErrorKind</span>};
@@ -368,6 +388,7 @@
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::plurals::PluralRulesError</span>, <span class="ident">Enum</span>, <span class="ident">compact</span>)]</span>
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::provider::DataError</span>, <span class="ident">Struct</span>, <span class="ident">compact</span>)]</span>
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::provider::DataErrorKind</span>, <span class="ident">Enum</span>, <span class="ident">compact</span>)]</span>
+    <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::normalizer::NormalizerError</span>, <span class="ident">Enum</span>, <span class="ident">compact</span>)]</span>
     <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ICU4XError</span> {
         <span class="comment">// general errors</span>
         <span class="doccomment">/// The error is not currently categorized as ICU4XError.</span>
@@ -450,6 +471,10 @@
         <span class="ident">TimeZoneOffsetOutOfBoundsError</span> <span class="op">=</span> <span class="number">0xA_00</span>,
         <span class="ident">TimeZoneInvalidOffsetError</span> <span class="op">=</span> <span class="number">0xA_01</span>,
         <span class="ident">TimeZoneMissingInputError</span> <span class="op">=</span> <span class="number">0xA_02</span>,
+
+        <span class="comment">// normalizer errors</span>
+        <span class="ident">NormalizerFutureExtensionError</span> <span class="op">=</span> <span class="number">0xB_00</span>,
+        <span class="ident">NormalizerValidationError</span> <span class="op">=</span> <span class="number">0xB_01</span>,
     }
 }
 
@@ -657,6 +682,19 @@
             <span class="ident">TimeZoneError::OffsetOutOfBounds</span> =&gt; <span class="ident">ICU4XError::TimeZoneOffsetOutOfBoundsError</span>,
             <span class="ident">TimeZoneError::InvalidOffset</span> =&gt; <span class="ident">ICU4XError::TimeZoneInvalidOffsetError</span>,
             <span class="ident">TimeZoneError::DataProvider</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>.<span class="ident">into</span>(),
+            <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
+        };
+        <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);
+        <span class="ident">ret</span>
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">NormalizerError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ICU4XError</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">NormalizerError</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
+            <span class="ident">NormalizerError::FutureExtension</span> =&gt; <span class="ident">ICU4XError::NormalizerFutureExtensionError</span>,
+            <span class="ident">NormalizerError::ValidationError</span> =&gt; <span class="ident">ICU4XError::NormalizerValidationError</span>,
+            <span class="ident">NormalizerError::DataProvider</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>.<span class="ident">into</span>(),
             <span class="kw">_</span> =&gt; <span class="ident">ICU4XError::UnknownError</span>,
         };
         <span class="ident">log_conversion</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>, <span class="ident">ret</span>);

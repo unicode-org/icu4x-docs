@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XComposingNormalizer",""],["ICU4XDecomposingNormalizer",""]]});

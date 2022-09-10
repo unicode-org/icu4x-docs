@@ -201,6 +201,9 @@
 <span id="196">196</span>
 <span id="197">197</span>
 <span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -221,7 +224,8 @@
         <span class="ident">LineBreakDataV1Marker</span>, <span class="ident">LstmDataV1Marker</span>, <span class="ident">UCharDictionaryBreakDataV1Marker</span>,
     };
     <span class="kw">use</span> <span class="ident">icu_segmenter</span>::{
-        <span class="ident">LineBreakIteratorLatin1</span>, <span class="ident">LineBreakIteratorUtf16</span>, <span class="ident">LineBreakIteratorUtf8</span>, <span class="ident">LineBreakSegmenter</span>,
+        <span class="ident">LineBreakIteratorLatin1</span>, <span class="ident">LineBreakIteratorPotentiallyIllFormedUtf8</span>, <span class="ident">LineBreakIteratorUtf16</span>,
+        <span class="ident">LineBreakSegmenter</span>,
     };
 
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
@@ -252,7 +256,7 @@
     }
 
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XLineBreakIteratorUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">LineBreakIteratorUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span>);
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XLineBreakIteratorUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">LineBreakIteratorPotentiallyIllFormedUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span>);
 
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XLineBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">LineBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;a</span><span class="op">&gt;</span>);
@@ -307,10 +311,12 @@
                 .<span class="ident">into</span>()
         }
 
-        <span class="doccomment">/// Segments a UTF-8 string.</span>
-        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::segmenter::LineBreakSegmenter::segment_str</span>, <span class="ident">FnInStruct</span>)]</span>
+        <span class="doccomment">/// Segments a (potentially ill-formed) UTF-8 string.</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::segmenter::LineBreakSegmenter::segment_utf8</span>, <span class="ident">FnInStruct</span>)]</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::segmenter::LineBreakSegmenter::segment_str</span>, <span class="ident">FnInStruct</span>, <span class="ident">hidden</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf8</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XLineBreakIteratorUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-            <span class="ident">Box::new</span>(<span class="ident">ICU4XLineBreakIteratorUtf8</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">segment_str</span>(<span class="ident">input</span>)))
+            <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">as_bytes</span>(); <span class="comment">// #2520</span>
+            <span class="ident">Box::new</span>(<span class="ident">ICU4XLineBreakIteratorUtf8</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">segment_utf8</span>(<span class="ident">input</span>)))
         }
 
         <span class="doccomment">/// Segments a UTF-16 string.</span>

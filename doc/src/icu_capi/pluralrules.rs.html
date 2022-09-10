@@ -162,16 +162,23 @@
 <span id="157">157</span>
 <span id="158">158</span>
 <span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="attribute">#[<span class="ident">diplomat::bridge</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ffi</span> {
-    <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
+    <span class="kw">use</span> <span class="ident">core::str</span>::{<span class="self">self</span>};
 
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 
+    <span class="kw">use</span> <span class="ident">fixed_decimal::FixedDecimal</span>;
     <span class="kw">use</span> <span class="ident">icu_plurals</span>::{<span class="ident">PluralCategory</span>, <span class="ident">PluralOperands</span>, <span class="ident">PluralRules</span>};
 
     <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">locale::ffi::ICU4XLocale</span>, <span class="ident">provider::ffi::ICU4XDataProvider</span>};
@@ -195,8 +202,10 @@
         <span class="doccomment">/// Construct from a string in the format</span>
         <span class="doccomment">/// [specified in TR35](https://unicode.org/reports/tr35/tr35-numbers.html#Language_Plural_Rules)</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::plurals::PluralCategory::from_tr35_string</span>, <span class="ident">FnInEnum</span>)]</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::plurals::PluralCategory::from_tr35_bytes</span>, <span class="ident">FnInEnum</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_tr35_string</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">ICU4XPluralCategory</span>, ()<span class="op">&gt;</span> {
-            <span class="ident">PluralCategory::from_tr35_string</span>(<span class="ident">s</span>)
+            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">as_bytes</span>(); <span class="comment">// #2520</span>
+            <span class="ident">PluralCategory::from_tr35_bytes</span>(<span class="ident">s</span>)
                 .<span class="ident">map</span>(<span class="ident">Into::into</span>)
                 .<span class="ident">ok_or</span>(())
                 .<span class="ident">into</span>()
@@ -296,7 +305,10 @@
         <span class="doccomment">/// Construct for a given string representing a number</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::plurals::PluralOperands::from_str</span>, <span class="ident">FnInStruct</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span><span class="ident">ICU4XPluralOperands</span>, <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
-            <span class="ident">PluralOperands::from_str</span>(<span class="ident">s</span>)
+            <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">as_bytes</span>(); <span class="comment">// #2520</span>
+            <span class="ident">FixedDecimal::try_from</span>(<span class="ident">s</span>)
+                .<span class="ident">as_ref</span>()
+                .<span class="ident">map</span>(<span class="ident">PluralOperands::from</span>)
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">ops</span><span class="op">|</span> <span class="ident">ICU4XPluralOperands</span> {
                     <span class="ident">i</span>: <span class="ident">ops</span>.<span class="ident">i</span>,
                     <span class="ident">v</span>: <span class="ident">ops</span>.<span class="ident">v</span>,

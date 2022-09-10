@@ -234,6 +234,13 @@
 <span id="229">229</span>
 <span id="230">230</span>
 <span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -343,22 +350,29 @@
                 .<span class="ident">into</span>()
         }
 
-        <span class="doccomment">/// Compare guaranteed well-formed UTF-8 strings.</span>
-        <span class="doccomment">///</span>
-        <span class="doccomment">/// Note: passing ill-formed UTF-8 strings is undefined behavior</span>
-        <span class="doccomment">/// (and may be memory-unsafe to do so, too).</span>
-        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::collator::Collator::compare</span>, <span class="ident">FnInStruct</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">right</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">ICU4XOrdering</span> {
-            <span class="self">self</span>.<span class="number">0</span>.<span class="ident">compare</span>(<span class="ident">left</span>, <span class="ident">right</span>).<span class="ident">into</span>()
-        }
-
         <span class="doccomment">/// Compare potentially ill-formed UTF-8 strings.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Ill-formed input is compared</span>
+        <span class="doccomment">/// as if errors had been replaced with REPLACEMENT CHARACTERs according</span>
+        <span class="doccomment">/// to the WHATWG Encoding Standard.</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::collator::Collator::compare_utf8</span>, <span class="ident">FnInStruct</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare_utf8</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">right</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">ICU4XOrdering</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">right</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">ICU4XOrdering</span> {
+            <span class="kw">let</span> <span class="ident">left</span> <span class="op">=</span> <span class="ident">left</span>.<span class="ident">as_bytes</span>(); <span class="comment">// #2520</span>
+            <span class="kw">let</span> <span class="ident">right</span> <span class="op">=</span> <span class="ident">right</span>.<span class="ident">as_bytes</span>(); <span class="comment">// #2520</span>
             <span class="self">self</span>.<span class="number">0</span>.<span class="ident">compare_utf8</span>(<span class="ident">left</span>, <span class="ident">right</span>).<span class="ident">into</span>()
         }
 
-        <span class="doccomment">/// Compare potentially ill-formed UTF-16 strings.</span>
+        <span class="doccomment">/// Compare guaranteed well-formed UTF-8 strings.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// Note: In C++, passing ill-formed UTF-8 strings is undefined behavior</span>
+        <span class="doccomment">/// (and may be memory-unsafe to do so, too).</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::collator::Collator::compare</span>, <span class="ident">FnInStruct</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare_valid_utf8</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">right</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">ICU4XOrdering</span> {
+            <span class="self">self</span>.<span class="number">0</span>.<span class="ident">compare</span>(<span class="ident">left</span>, <span class="ident">right</span>).<span class="ident">into</span>()
+        }
+
+        <span class="doccomment">/// Compare potentially ill-formed UTF-16 strings, with unpaired surrogates</span>
+        <span class="doccomment">/// compared as REPLACEMENT CHARACTER.</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu::collator::Collator::compare_utf16</span>, <span class="ident">FnInStruct</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compare_utf16</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">left</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>], <span class="ident">right</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="ident">ICU4XOrdering</span> {
             <span class="self">self</span>.<span class="number">0</span>.<span class="ident">compare_utf16</span>(<span class="ident">left</span>, <span class="ident">right</span>).<span class="ident">into</span>()

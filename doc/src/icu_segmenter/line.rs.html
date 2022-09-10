@@ -1165,6 +1165,68 @@
 <span id="1160">1160</span>
 <span id="1161">1161</span>
 <span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
+<span id="1211">1211</span>
+<span id="1212">1212</span>
+<span id="1213">1213</span>
+<span id="1214">1214</span>
+<span id="1215">1215</span>
+<span id="1216">1216</span>
+<span id="1217">1217</span>
+<span id="1218">1218</span>
+<span id="1219">1219</span>
+<span id="1220">1220</span>
+<span id="1221">1221</span>
+<span id="1222">1222</span>
+<span id="1223">1223</span>
+<span id="1224">1224</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1182,6 +1244,7 @@
 <span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
 <span class="kw">use</span> <span class="ident">icu_locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">utf8_iter::Utf8CharIndices</span>;
 
 <span class="doccomment">/// An enum specifies the strictness of line-breaking rules. It can be passed as</span>
 <span class="doccomment">/// an argument when creating a line breaker.</span>
@@ -1284,6 +1347,10 @@
 
 <span class="doccomment">/// Line break iterator for an `str` (a UTF-8 string).</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LineBreakIteratorUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">LineBreakTypeUtf8</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// Line break iterator for a potentially invalid UTF-8 string</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LineBreakIteratorPotentiallyIllFormedUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">=</span>
+    <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">LineBreakTypePotentiallyIllFormedUtf8</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Line break iterator for a Latin-1 (8-bit) string.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LineBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">LineBreakTypeLatin1</span><span class="op">&gt;</span>;
@@ -1468,7 +1535,24 @@
             <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
         }
     }
-
+    <span class="doccomment">/// Create a line break iterator for a potentially ill-formed UTF8 string</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Invalid characters are treated as REPLACEMENT CHARACTER</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf8</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u8</span>],
+    ) -&gt; <span class="ident">LineBreakIteratorPotentiallyIllFormedUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
+        <span class="ident">LineBreakIterator</span> {
+            <span class="ident">iter</span>: <span class="ident">Utf8CharIndices::new</span>(<span class="ident">input</span>),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
+            <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
+            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
+            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+        }
+    }
     <span class="doccomment">/// Create a line break iterator for a Latin-1 (8-bit) string.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_latin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">LineBreakIteratorLatin1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
         <span class="ident">LineBreakIterator</span> {
@@ -1949,44 +2033,84 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="ident">iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>,
         <span class="ident">left_codepoint</span>: <span class="ident">char</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="comment">// word segmenter doesn&#39;t define break rules for some languages such as Thai.</span>
-        <span class="kw">let</span> <span class="ident">start_iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">iter</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">start_point</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String::new</span>();
-        <span class="ident">s</span>.<span class="ident">push</span>(<span class="ident">left_codepoint</span>);
-        <span class="kw">loop</span> {
-            <span class="ident">s</span>.<span class="ident">push</span>(<span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>);
-            <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">iter</span>.<span class="ident">next</span>();
-            <span class="kw">if</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
-                <span class="kw">break</span>;
-            }
-            <span class="kw">if</span> <span class="op">!</span><span class="ident"><span class="self">Self</span>::use_complex_breaking</span>(<span class="ident">iter</span>, <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>) {
-                <span class="kw">break</span>;
-            }
-        }
-
-        <span class="comment">// Restore iterator to move to head of complex string</span>
-        <span class="ident">iter</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
-        <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="ident">iter</span>.<span class="ident">dictionary</span>, <span class="ident">iter</span>.<span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
-        <span class="ident">iter</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len_utf8</span>();
-        <span class="kw">loop</span> {
-            <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">iter</span>.<span class="ident">result_cache</span>.<span class="ident">first</span>().<span class="ident">unwrap</span>() {
-                <span class="comment">// Re-calculate breaking offset</span>
-                <span class="ident">iter</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">result_cache</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span> <span class="op">-</span> <span class="ident">i</span>).<span class="ident">collect</span>();
-                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
-            }
-            <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">iter</span>.<span class="ident">next</span>();
-            <span class="kw">if</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
-                <span class="ident">iter</span>.<span class="ident">result_cache</span>.<span class="ident">clear</span>();
-                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">iter</span>.<span class="ident">len</span>);
-            }
-            <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_current_position_character_len</span>(<span class="ident">iter</span>);
-        }
+        <span class="ident">handle_complex_language_utf8</span>(<span class="ident">iter</span>, <span class="ident">left_codepoint</span>)
     }
 }
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakTypePotentiallyIllFormedUtf8</span>;
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LineBreakTypePotentiallyIllFormedUtf8</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf8CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">char</span>;
+
+    <span class="kw">fn</span> <span class="ident">get_linebreak_property_with_rule</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">u8</span> {
+        <span class="ident">get_linebreak_property_with_rule</span>(
+            <span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>,
+            <span class="ident">c</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">line_break_rule</span>,
+            <span class="ident">iterator</span>.<span class="ident">options</span>.<span class="ident">word_break_rule</span>,
+        )
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">use_complex_breaking</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">bool</span> {
+        <span class="ident">use_complex_breaking_utf32</span>(<span class="kw-2">&amp;</span><span class="ident">iterator</span>.<span class="ident">data</span>.<span class="ident">property_table</span>, <span class="ident">c</span> <span class="kw">as</span> <span class="ident">u32</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="ident">iterator</span>: <span class="kw-2">&amp;</span><span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
+        <span class="ident">iterator</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len_utf8</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_complex_language</span>(
+        <span class="ident">iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="ident">left_codepoint</span>: <span class="ident">char</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="ident">handle_complex_language_utf8</span>(<span class="ident">iter</span>, <span class="ident">left_codepoint</span>)
+    }
+}
+<span class="doccomment">/// handle_complex_language impl for UTF8 iterators</span>
+<span class="kw">fn</span> <span class="ident">handle_complex_language_utf8</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">T</span><span class="op">&gt;</span>(
+    <span class="ident">iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">left_codepoint</span>: <span class="ident">char</span>,
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">char</span><span class="op">&gt;</span>,
+{
+    <span class="comment">// word segmenter doesn&#39;t define break rules for some languages such as Thai.</span>
+    <span class="kw">let</span> <span class="ident">start_iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">iter</span>.<span class="ident">clone</span>();
+    <span class="kw">let</span> <span class="ident">start_point</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String::new</span>();
+    <span class="ident">s</span>.<span class="ident">push</span>(<span class="ident">left_codepoint</span>);
+    <span class="kw">loop</span> {
+        <span class="ident">s</span>.<span class="ident">push</span>(<span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>);
+        <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">iter</span>.<span class="ident">next</span>();
+        <span class="kw">if</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
+            <span class="kw">break</span>;
+        }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">T::use_complex_breaking</span>(<span class="ident">iter</span>, <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>) {
+            <span class="kw">break</span>;
+        }
+    }
+
+    <span class="comment">// Restore iterator to move to head of complex string</span>
+    <span class="ident">iter</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
+    <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
+    <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="ident">iter</span>.<span class="ident">dictionary</span>, <span class="ident">iter</span>.<span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
+    <span class="ident">iter</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len_utf8</span>();
+    <span class="kw">loop</span> {
+        <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">iter</span>.<span class="ident">result_cache</span>.<span class="ident">first</span>().<span class="ident">unwrap</span>() {
+            <span class="comment">// Re-calculate breaking offset</span>
+            <span class="ident">iter</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">result_cache</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span> <span class="op">-</span> <span class="ident">i</span>).<span class="ident">collect</span>();
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">0</span>);
+        }
+        <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">iter</span>.<span class="ident">next</span>();
+        <span class="kw">if</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>() {
+            <span class="ident">iter</span>.<span class="ident">result_cache</span>.<span class="ident">clear</span>();
+            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">iter</span>.<span class="ident">len</span>);
+        }
+        <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="ident">T::get_current_position_character_len</span>(<span class="ident">iter</span>);
+    }
+}
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LineBreakTypeLatin1</span>;
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LineBreakTypeLatin1</span> {

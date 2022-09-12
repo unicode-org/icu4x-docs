@@ -246,6 +246,54 @@
 <span id="241">241</span>
 <span id="242">242</span>
 <span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -255,20 +303,29 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span> <span class="comment">// feature-specific</span>
 <span class="kw">use</span> <span class="ident">icu_provider::RcWrapBounds</span>;
+<span class="kw">use</span> <span class="ident">icu_provider_adapters::empty::EmptyDataProvider</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span> <span class="comment">// feature-specific</span>
 <span class="kw">use</span> <span class="ident">yoke</span>::{<span class="ident">trait_hack::YokeTraitHack</span>, <span class="ident">Yokeable</span>};
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span> <span class="comment">// feature-specific</span>
 <span class="kw">use</span> <span class="ident">zerofrom::ZeroFrom</span>;
 
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ICU4XDataProviderInner</span> {
+    <span class="ident">Empty</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>)]</span>
     <span class="ident">Any</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">AnyProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>),
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;buffer_provider&quot;</span>)]</span>
     <span class="ident">Buffer</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BufferProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>),
 }
 
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ICU4XDataProviderInner</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident"><span class="self">Self</span>::Empty</span>
+    }
+}
+
 <span class="attribute">#[<span class="ident">diplomat::bridge</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">ffi</span> {
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::ICU4XDataProviderInner</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errors::ffi::ICU4XError</span>;
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
     <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
@@ -276,7 +333,7 @@
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
     <span class="doccomment">/// An ICU4X data provider, capable of loading ICU4X data keys from some source.</span>
     <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu_provider</span>, <span class="ident">Mod</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XDataProvider</span>(<span class="kw">pub</span> <span class="ident"><span class="kw">super</span>::ICU4XDataProviderInner</span>);
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XDataProvider</span>(<span class="kw">pub</span> <span class="ident">ICU4XDataProviderInner</span>);
 
     <span class="doccomment">/// A result type for `ICU4XDataProvider::create`.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ICU4XCreateDataProviderResult</span> {
@@ -287,6 +344,7 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span> <span class="comment">// feature-specific</span>
     <span class="kw">fn</span> <span class="ident">convert_any_provider</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">icu_provider::AnyProvider</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(
         <span class="ident">x</span>: <span class="ident">D</span>,
     ) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XDataProvider</span><span class="op">&gt;</span> {
@@ -402,14 +460,49 @@
             <span class="ident">hidden</span>
         )]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_empty</span>() -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">ICU4XDataProvider</span><span class="op">&gt;</span> {
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;buffer_provider&quot;</span>)))]</span>
-            <span class="macro">panic!</span>(<span class="string">&quot;Requires feature &#39;any_provider&#39; or &#39;buffer_provider&#39;&quot;</span>);
+            <span class="ident">Box::new</span>(<span class="ident">ICU4XDataProvider</span>(<span class="ident">ICU4XDataProviderInner::Empty</span>))
+        }
 
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;buffer_provider&quot;</span>, <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>)))]</span>
-            <span class="kw">return</span> <span class="ident">convert_buffer_provider</span>(<span class="ident">icu_provider_adapters::empty::EmptyDataProvider::new</span>());
-
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>)]</span>
-            <span class="kw">return</span> <span class="ident">convert_any_provider</span>(<span class="ident">icu_provider_adapters::empty::EmptyDataProvider::new</span>());
+        <span class="doccomment">/// Creates a provider that tries the current provider and then, if the current provider</span>
+        <span class="doccomment">/// doesn&#39;t support the data key, another provider `other`.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// This takes ownership of the `other` provider, leaving an empty provider in its place.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// The providers must be the same type (Any or Buffer). This condition is satisfied if</span>
+        <span class="doccomment">/// both providers originate from the same constructor, such as `create_from_byte_slice`</span>
+        <span class="doccomment">/// or `create_fs`. If the condition is not upheld, a runtime error occurs.</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu_provider_adapters::fork::ForkByKeyProvider</span>, <span class="ident">Typedef</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fork_by_key</span>(
+            <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+            <span class="ident">other</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ICU4XDataProvider</span>,
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">core::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="number">0</span>);
+            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">core::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="number">0</span>);
+            <span class="kw">match</span> (<span class="ident">a</span>, <span class="ident">b</span>) {
+                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>)]</span>
+                (<span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">a</span>), <span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">b</span>)) =&gt; {
+                    <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">Box::from</span>(
+                        <span class="ident">icu_provider_adapters::fork::ForkByKeyProvider::new</span>(<span class="ident">a</span>, <span class="ident">b</span>),
+                    ));
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;buffer_provider&quot;</span>)]</span>
+                (<span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">a</span>), <span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">b</span>)) =&gt; {
+                    <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">Box::from</span>(
+                        <span class="ident">icu_provider_adapters::fork::ForkByKeyProvider::new</span>(<span class="ident">a</span>, <span class="ident">b</span>),
+                    ));
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="kw">_</span> =&gt; {
+                    <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">ICU4XError::DataMismatchedAnyBufferError</span>;
+                    <span class="ident"><span class="kw">crate</span>::errors::log_conversion</span>(
+                        <span class="kw-2">&amp;</span><span class="string">&quot;fork_by_key must be passed the same type of provider (Any or Buffer)&quot;</span>,
+                        <span class="ident">e</span>,
+                    );
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>)
+                }
+            }
+            .<span class="ident">into</span>()
         }
     }
 }
@@ -419,8 +512,8 @@
 <span class="kw">where</span>
     <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="macro">panic!</span>(<span class="string">&quot;Requires feature &#39;any_provider&#39; or &#39;buffer_provider&#39;&quot;</span>);
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="ident">EmptyDataProvider::new</span>().<span class="ident">load</span>(<span class="ident">req</span>)
     }
 }
 
@@ -435,6 +528,7 @@
 {
     <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">ICU4XDataProviderInner::Empty</span> =&gt; <span class="ident">EmptyDataProvider::new</span>().<span class="ident">load</span>(<span class="ident">req</span>),
             <span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">buffer_provider</span>) =&gt; {
                 <span class="ident">buffer_provider</span>.<span class="ident">as_deserializing</span>().<span class="ident">load</span>(<span class="ident">req</span>)
             }
@@ -452,6 +546,7 @@
 {
     <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">ICU4XDataProviderInner::Empty</span> =&gt; <span class="ident">EmptyDataProvider::new</span>().<span class="ident">load</span>(<span class="ident">req</span>),
             <span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">any_provider</span>) =&gt; <span class="ident">any_provider</span>.<span class="ident">as_downcasting</span>().<span class="ident">load</span>(<span class="ident">req</span>),
         }
     }
@@ -471,6 +566,7 @@
 {
     <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">ICU4XDataProviderInner::Empty</span> =&gt; <span class="ident">EmptyDataProvider::new</span>().<span class="ident">load</span>(<span class="ident">req</span>),
             <span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">any_provider</span>) =&gt; <span class="ident">any_provider</span>.<span class="ident">as_downcasting</span>().<span class="ident">load</span>(<span class="ident">req</span>),
             <span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">buffer_provider</span>) =&gt; {
                 <span class="ident">buffer_provider</span>.<span class="ident">as_deserializing</span>().<span class="ident">load</span>(<span class="ident">req</span>)

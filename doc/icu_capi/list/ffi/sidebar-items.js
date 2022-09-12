@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ICU4XListStyle",""]],"struct":[["ICU4XList","A list of strings"],["ICU4XListFormatter",""]]});

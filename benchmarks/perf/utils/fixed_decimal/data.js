@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663015594914,
+  "lastUpdate": 1663026094931,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -50609,6 +50609,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 90,
             "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "5f984a8dc2de9791cb8db1d2a24934bc5cf7ab79",
+          "message": "Whack-a-mole part 6 (#2547)\n\n* Fix collator links\r\n\r\n* blanket-ignore any/buffer provider ctors\r\n\r\n* collator, decimal, casemapping, bidi, calendar",
+          "timestamp": "2022-09-12T21:15:22Z",
+          "tree_id": "049c9954f4e66939999b682e207e8b394778f92f",
+          "url": "https://github.com/unicode-org/icu4x/commit/5f984a8dc2de9791cb8db1d2a24934bc5cf7ab79"
+        },
+        "date": 1663017980589,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 111908,
+            "range": "± 364",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24097,
+            "range": "± 107",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 63193,
+            "range": "± 159",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 95,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 74,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "53b5fd5658334e37c9f5b45c5d7e643999be310a",
+          "message": "Add ListFormatter FFI (#2545)",
+          "timestamp": "2022-09-12T16:29:13-07:00",
+          "tree_id": "be58aa9147a3347e873dd90a980c017df98613ad",
+          "url": "https://github.com/unicode-org/icu4x/commit/53b5fd5658334e37c9f5b45c5d7e643999be310a"
+        },
+        "date": 1663026032656,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 121926,
+            "range": "± 8313",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26191,
+            "range": "± 1614",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 73372,
+            "range": "± 5118",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 219,
+            "range": "± 41",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 81,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 88,
+            "range": "± 6",
             "unit": "ns/iter"
           }
         ]

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ICU4XScriptWithExtensions","An ICU4X ScriptWithExtensions map object, capable of holding a map of codepoints to scriptextensions values"]]});

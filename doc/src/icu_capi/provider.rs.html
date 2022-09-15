@@ -372,6 +372,58 @@
 <span id="367">367</span>
 <span id="368">368</span>
 <span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -409,6 +461,7 @@
     <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
     <span class="kw">use</span> <span class="ident">diplomat_runtime::DiplomatResult</span>;
     <span class="kw">use</span> <span class="ident">icu_provider_adapters::fallback::LocaleFallbackProvider</span>;
+    <span class="kw">use</span> <span class="ident">icu_provider_adapters::fork::predicates::MissingLocalePredicate</span>;
 
     <span class="attribute">#[<span class="ident">diplomat::opaque</span>]</span>
     <span class="doccomment">/// An ICU4X data provider, capable of loading ICU4X data keys from some source.</span>
@@ -552,6 +605,11 @@
         <span class="doccomment">/// both providers originate from the same constructor, such as `create_from_byte_slice`</span>
         <span class="doccomment">/// or `create_fs`. If the condition is not upheld, a runtime error occurs.</span>
         <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(<span class="ident">icu_provider_adapters::fork::ForkByKeyProvider</span>, <span class="ident">Typedef</span>)]</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(
+            <span class="ident">icu_provider_adapters::fork::predicates::MissingDataKeyPredicate</span>,
+            <span class="ident">Struct</span>,
+            <span class="ident">hidden</span>
+        )]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fork_by_key</span>(
             <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
             <span class="ident">other</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ICU4XDataProvider</span>,
@@ -577,6 +635,52 @@
                     <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">ICU4XError::DataMismatchedAnyBufferError</span>;
                     <span class="ident"><span class="kw">crate</span>::errors::log_conversion</span>(
                         <span class="kw-2">&amp;</span><span class="string">&quot;fork_by_key must be passed the same type of provider (Any or Buffer)&quot;</span>,
+                        <span class="ident">e</span>,
+                    );
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>)
+                }
+            }
+            .<span class="ident">into</span>()
+        }
+
+        <span class="doccomment">/// Same as `fork_by_key` but forks by locale instead of key.</span>
+        <span class="attribute">#[<span class="ident">diplomat::rust_link</span>(
+            <span class="ident">icu_provider_adapters::fork::predicates::MissingLocalePredicate</span>,
+            <span class="ident">Struct</span>
+        )]</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fork_by_locale</span>(
+            <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+            <span class="ident">other</span>: <span class="kw-2">&amp;mut</span> <span class="ident">ICU4XDataProvider</span>,
+        ) -&gt; <span class="ident">DiplomatResult</span><span class="op">&lt;</span>(), <span class="ident">ICU4XError</span><span class="op">&gt;</span> {
+            <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">core::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="number">0</span>);
+            <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">core::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">other</span>.<span class="number">0</span>);
+            <span class="kw">match</span> (<span class="ident">a</span>, <span class="ident">b</span>) {
+                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;any_provider&quot;</span>)]</span>
+                (<span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">a</span>), <span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">b</span>)) =&gt; {
+                    <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">ICU4XDataProviderInner::Any</span>(<span class="ident">Box::from</span>(
+                        <span class="ident">icu_provider_adapters::fork::ForkByErrorProvider::new_with_predicate</span>(
+                            <span class="ident">a</span>,
+                            <span class="ident">b</span>,
+                            <span class="ident">MissingLocalePredicate</span>,
+                        ),
+                    ));
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;buffer_provider&quot;</span>)]</span>
+                (<span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">a</span>), <span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">b</span>)) =&gt; {
+                    <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">ICU4XDataProviderInner::Buffer</span>(<span class="ident">Box::from</span>(
+                        <span class="ident">icu_provider_adapters::fork::ForkByErrorProvider::new_with_predicate</span>(
+                            <span class="ident">a</span>,
+                            <span class="ident">b</span>,
+                            <span class="ident">MissingLocalePredicate</span>,
+                        ),
+                    ));
+                    <span class="prelude-val">Ok</span>(())
+                }
+                <span class="kw">_</span> =&gt; {
+                    <span class="kw">let</span> <span class="ident">e</span> <span class="op">=</span> <span class="ident">ICU4XError::DataMismatchedAnyBufferError</span>;
+                    <span class="ident"><span class="kw">crate</span>::errors::log_conversion</span>(
+                        <span class="kw-2">&amp;</span><span class="string">&quot;fork_by_locale must be passed the same type of provider (Any or Buffer)&quot;</span>,
                         <span class="ident">e</span>,
                     );
                     <span class="prelude-val">Err</span>(<span class="ident">e</span>)

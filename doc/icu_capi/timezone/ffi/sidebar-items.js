@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ICU4XCustomTimeZone",""],["ICU4XMetaZoneCalculator",""]]});
+initSidebarItems({"struct":[["ICU4XCustomTimeZone",""],["ICU4XMetazoneCalculator",""]]});

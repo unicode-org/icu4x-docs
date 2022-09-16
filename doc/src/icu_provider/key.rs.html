@@ -575,6 +575,93 @@
 <span id="570">570</span>
 <span id="571">571</span>
 <span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -585,6 +672,7 @@
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 <span class="kw">use</span> <span class="ident">core::fmt::Write</span>;
+<span class="kw">use</span> <span class="ident">core::ops::Deref</span>;
 <span class="kw">use</span> <span class="ident">writeable</span>::{<span class="ident">LengthHint</span>, <span class="ident">Writeable</span>};
 <span class="kw">use</span> <span class="ident">zerovec::ule</span>::<span class="kw-2">*</span>;
 
@@ -617,17 +705,26 @@
 }
 
 <span class="doccomment">/// A compact hash of a [`DataKey`]. Useful for keys in maps.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The hash will be stable over time within major releases.</span>
 <span class="attribute">#[<span class="macro-nonterminal">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>, <span class="ident">ULE</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">serde::Deserialize</span>))]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataKeyHash</span>([<span class="ident">u8</span>; <span class="number">4</span>]);
 
 <span class="kw">impl</span> <span class="ident">DataKeyHash</span> {
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">compute_from_str</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span>(
-            <span class="ident">helpers::fxhash_32</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>(), <span class="macro">leading_tag!</span>().<span class="ident">len</span>(), <span class="macro">trailing_tag!</span>().<span class="ident">len</span>())
-                .<span class="ident">to_le_bytes</span>(),
-        )
+    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">compute_from_path</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">DataKeyPath</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">helpers::fxhash_32</span>(
+            <span class="ident">path</span>.<span class="ident">tagged</span>.<span class="ident">as_bytes</span>(),
+            <span class="macro">leading_tag!</span>().<span class="ident">len</span>(),
+            <span class="macro">trailing_tag!</span>().<span class="ident">len</span>(),
+        );
+        <span class="self">Self</span>(<span class="ident">hash</span>.<span class="ident">to_le_bytes</span>())
+    }
+
+    <span class="doccomment">/// Gets the hash value as a byte array.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">to_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [<span class="ident">u8</span>; <span class="number">4</span>] {
+        <span class="self">self</span>.<span class="number">0</span>
     }
 }
 
@@ -687,6 +784,41 @@
     }
 }
 
+<span class="doccomment">/// The string path of a data key. For example, &quot;foo@1&quot;</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataKeyPath</span> {
+    <span class="comment">// This string literal is wrapped in leading_tag!() and trailing_tag!() to make it detectable</span>
+    <span class="comment">// in a compiled binary.</span>
+    <span class="ident">tagged</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">DataKeyPath</span> {
+    <span class="doccomment">/// Gets the path as a static string slice.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+        <span class="doccomment">/// core::slice::from_raw_parts(a, b) = core::mem::transmute((a, b)) hack</span>
+        <span class="doccomment">/// ```compile_fail</span>
+        <span class="doccomment">/// const unsafe fn canary() { core::slice::from_raw_parts(0 as *const u8, 0); }</span>
+        <span class="doccomment">/// ```</span>
+        <span class="kw">const</span> <span class="kw">_</span>: () <span class="op">=</span> ();
+        <span class="kw">unsafe</span> {
+            <span class="comment">// Safe due to invariant that self.path is tagged correctly</span>
+            <span class="ident">core::str::from_utf8_unchecked</span>(<span class="ident">core::mem::transmute</span>((
+                <span class="self">self</span>.<span class="ident">tagged</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="macro">leading_tag!</span>().<span class="ident">len</span>()),
+                <span class="self">self</span>.<span class="ident">tagged</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="macro">trailing_tag!</span>().<span class="ident">len</span>() <span class="op">-</span> <span class="macro">leading_tag!</span>().<span class="ident">len</span>(),
+            )))
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">DataKeyPath</span> {
+    <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">str</span>;
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
+        <span class="self">self</span>.<span class="ident">get</span>()
+    }
+}
+
 <span class="doccomment">/// Metadata statically associated with a particular [`DataKey`].</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
@@ -720,6 +852,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">DataKeyMetadata</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::const_default</span>()
     }
@@ -750,9 +883,7 @@
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataKey</span> {
-    <span class="comment">// This string literal is wrapped in leading_tag!() and trailing_tag!() to make it detectable</span>
-    <span class="comment">// in a compiled binary.</span>
-    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    <span class="ident">path</span>: <span class="ident">DataKeyPath</span>,
     <span class="ident">hash</span>: <span class="ident">DataKeyHash</span>,
     <span class="ident">metadata</span>: <span class="ident">DataKeyMetadata</span>,
 }
@@ -760,11 +891,26 @@
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">DataKey</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">hash</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">hash</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">get_path</span>() <span class="op">==</span> <span class="ident">other</span>.<span class="ident">get_path</span>()
+        <span class="self">self</span>.<span class="ident">hash</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">hash</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">path</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">path</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">metadata</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">metadata</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Eq</span> <span class="kw">for</span> <span class="ident">DataKey</span> {}
+
+<span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">DataKey</span> {
+    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">core::cmp::Ordering</span> {
+        <span class="self">self</span>.<span class="ident">path</span>
+            .<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">path</span>)
+            .<span class="ident">then_with</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">metadata</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">metadata</span>))
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">DataKey</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">core::cmp::Ordering</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">cmp</span>(<span class="ident">other</span>))
+    }
+}
 
 <span class="kw">impl</span> <span class="ident">core::hash::Hash</span> <span class="kw">for</span> <span class="ident">DataKey</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -781,33 +927,60 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Useful for reading and writing data to a file system.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-        <span class="doccomment">/// core::slice::from_raw_parts(a, b) = core::mem::transmute((a, b)) hack</span>
-        <span class="doccomment">/// ```compile_fail</span>
-        <span class="doccomment">/// const unsafe fn canary() { core::slice::from_raw_parts(0 as *const u8, 0); }</span>
-        <span class="doccomment">/// ```</span>
-        <span class="kw">const</span> <span class="kw">_</span>: () <span class="op">=</span> ();
-        <span class="kw">unsafe</span> {
-            <span class="comment">// Safe due to invariant that self.path is tagged correctly</span>
-            <span class="ident">core::str::from_utf8_unchecked</span>(<span class="ident">core::mem::transmute</span>((
-                <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="macro">leading_tag!</span>().<span class="ident">len</span>()),
-                <span class="self">self</span>.<span class="ident">path</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="macro">trailing_tag!</span>().<span class="ident">len</span>() <span class="op">-</span> <span class="macro">leading_tag!</span>().<span class="ident">len</span>(),
-            )))
-        }
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataKeyPath</span> {
+        <span class="self">self</span>.<span class="ident">path</span>
     }
 
     <span class="doccomment">/// Gets a platform-independent hash of a [`DataKey`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The hash is 4 bytes and allows for fast key comparison.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Example</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider::DataKey;</span>
+    <span class="doccomment">/// use icu_provider::DataKeyHash;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// const KEY: DataKey = icu_provider::data_key!(&quot;foo@1&quot;);</span>
+    <span class="doccomment">/// const KEY_HASH: DataKeyHash = KEY.hashed();</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(KEY_HASH.to_bytes(), [0xe2, 0xb6, 0x17, 0x71]);</span>
+    <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataKeyHash</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">hashed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataKeyHash</span> {
         <span class="self">self</span>.<span class="ident">hash</span>
     }
 
     <span class="doccomment">/// Gets the metadata associated with this [`DataKey`].</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">get_metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataKeyMetadata</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DataKeyMetadata</span> {
         <span class="self">self</span>.<span class="ident">metadata</span>
+    }
+
+    <span class="doccomment">/// Constructs a [`DataKey`] from a path and metadata.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// use icu_provider::data_key;</span>
+    <span class="doccomment">/// use icu_provider::DataKey;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// const CONST_KEY: DataKey = data_key!(&quot;foo@1&quot;);</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let runtime_key = DataKey::from_path_and_metadata(</span>
+    <span class="doccomment">///     CONST_KEY.path(),</span>
+    <span class="doccomment">///     CONST_KEY.metadata(),</span>
+    <span class="doccomment">/// );</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// assert_eq!(CONST_KEY, runtime_key);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_path_and_metadata</span>(<span class="ident">path</span>: <span class="ident">DataKeyPath</span>, <span class="ident">metadata</span>: <span class="ident">DataKeyMetadata</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">path</span>,
+            <span class="ident">hash</span>: <span class="ident">DataKeyHash::compute_from_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
+            <span class="ident">metadata</span>,
+        }
     }
 
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
@@ -870,14 +1043,15 @@
                 (<span class="ident">At</span> <span class="op">|</span> <span class="ident">Version</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span>)) =&gt; <span class="ident">Version</span>,
                 <span class="comment">// One of these cases will be hit at the latest when i == end, so the loop converges.</span>
                 (<span class="ident">Version</span> <span class="op">|</span> <span class="ident">MetaAfter</span>, <span class="prelude-val">None</span>) =&gt; {
+                    <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">DataKeyPath</span> { <span class="ident">tagged</span>: <span class="ident">path</span> };
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
                         <span class="ident">path</span>,
-                        <span class="ident">hash</span>: <span class="ident">DataKeyHash::compute_from_str</span>(<span class="ident">path</span>),
+                        <span class="ident">hash</span>: <span class="ident">DataKeyHash::compute_from_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
                         <span class="ident">metadata</span>: <span class="ident">DataKeyMetadata</span> {
                             <span class="ident">fallback_priority</span>,
                             <span class="ident">extension_key</span>,
                         },
-                    })
+                    });
                 }
 
                 (<span class="ident">Version</span> <span class="op">|</span> <span class="ident">MetaAfter</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;[&#39;</span>)) =&gt; <span class="ident">MetaOpen</span>,
@@ -997,15 +1171,15 @@
 
 <span class="kw">impl</span> <span class="ident">Writeable</span> <span class="kw">for</span> <span class="ident">DataKey</span> {
     <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
-        <span class="self">self</span>.<span class="ident">get_path</span>().<span class="ident">write_to</span>(<span class="ident">sink</span>)
+        <span class="self">self</span>.<span class="ident">path</span>().<span class="ident">write_to</span>(<span class="ident">sink</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">writeable_length_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">LengthHint</span> {
-        <span class="self">self</span>.<span class="ident">get_path</span>().<span class="ident">writeable_length_hint</span>()
+        <span class="self">self</span>.<span class="ident">path</span>().<span class="ident">writeable_length_hint</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">write_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
-        <span class="ident">Cow::Borrowed</span>(<span class="self">self</span>.<span class="ident">get_path</span>())
+        <span class="ident">Cow::Borrowed</span>(<span class="self">self</span>.<span class="ident">path</span>().<span class="ident">get</span>())
     }
 }
 
@@ -1093,28 +1267,28 @@
 <span class="kw">fn</span> <span class="ident">test_metadata_parsing</span>() {
     <span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>;
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">get_metadata</span>()),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
         <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
             <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Language</span>,
             <span class="ident">extension_key</span>: <span class="prelude-val">None</span>
         })
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[R]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">get_metadata</span>()),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[R]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
         <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
             <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Region</span>,
             <span class="ident">extension_key</span>: <span class="prelude-val">None</span>
         })
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[u-ca]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">get_metadata</span>()),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[u-ca]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
         <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
             <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Language</span>,
             <span class="ident">extension_key</span>: <span class="prelude-val">Some</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>))
         })
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[R][u-ca]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">get_metadata</span>()),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[R][u-ca]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
         <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
             <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Region</span>,
             <span class="ident">extension_key</span>: <span class="prelude-val">Some</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>))

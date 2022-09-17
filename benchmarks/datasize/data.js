@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663368124672,
+  "lastUpdate": 1663400315369,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -27383,6 +27383,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/c25e0e47b4ae3a9379734ab60b492df31ec90228"
         },
         "date": 1663368072254,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3918971,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9ecc55e1134420428dd0553092562ea3a85e96a7",
+          "message": "Remove `format_to_write`s (#2528)",
+          "timestamp": "2022-09-17T09:27:59+02:00",
+          "tree_id": "223bfcdbd97a029cd142bdd992eed1141813e434",
+          "url": "https://github.com/unicode-org/icu4x/commit/9ecc55e1134420428dd0553092562ea3a85e96a7"
+        },
+        "date": 1663399767703,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3918971,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "dsipasseuth@google.com",
+            "name": "Sipasseuth Daniel",
+            "username": "dsipasseuth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a2f18db5f482ec62d853b15aa3e94557bb6a69df",
+          "message": "Modified doc examples to use icu::* instead of icu_* (#2541)",
+          "timestamp": "2022-09-17T09:36:05+02:00",
+          "tree_id": "294b3107c70228a8252d255dd5c749c5177c286d",
+          "url": "https://github.com/unicode-org/icu4x/commit/a2f18db5f482ec62d853b15aa3e94557bb6a69df"
+        },
+        "date": 1663400252526,
         "tool": "ndjson",
         "benches": [
           {

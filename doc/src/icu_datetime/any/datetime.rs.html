@@ -587,32 +587,16 @@
 <span id="582">582</span>
 <span id="583">583</span>
 <span id="584">584</span>
-<span id="585">585</span>
-<span id="586">586</span>
-<span id="587">587</span>
-<span id="588">588</span>
-<span id="589">589</span>
-<span id="590">590</span>
-<span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">calendar</span>, <span class="ident">options::DateTimeFormatterOptions</span>, <span class="ident">raw</span>, <span class="ident">DateFormatter</span>, <span class="ident">TimeFormatter</span>};
-<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
-
-<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::options::components</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::{<span class="ident">calendar</span>::<span class="kw-2">*</span>, <span class="ident">date_time::PatternSelector</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">calendar</span>, <span class="ident">options::DateTimeFormatterOptions</span>, <span class="ident">raw</span>, <span class="ident">DateFormatter</span>, <span class="ident">TimeFormatter</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">input::DateTimeInput</span>, <span class="ident">DateTimeFormatterError</span>, <span class="ident">FormattedDateTime</span>};
+<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">icu_calendar::any_calendar</span>::{<span class="ident">AnyCalendar</span>, <span class="ident">AnyCalendarKind</span>};
 <span class="kw">use</span> <span class="ident">icu_calendar::provider</span>::{
     <span class="ident">JapaneseErasV1Marker</span>, <span class="ident">JapaneseExtendedErasV1Marker</span>, <span class="ident">WeekDataV1Marker</span>,
@@ -620,7 +604,9 @@
 <span class="kw">use</span> <span class="ident">icu_calendar</span>::{<span class="ident">types::Time</span>, <span class="ident">DateTime</span>};
 <span class="kw">use</span> <span class="ident">icu_decimal::provider::DecimalSymbolsV1Marker</span>;
 <span class="kw">use</span> <span class="ident">icu_plurals::provider::OrdinalV1Marker</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::DataLocale</span>;
+<span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="doccomment">/// [`DateTimeFormatter`] is a formatter capable of formatting</span>
 <span class="doccomment">/// date/times from any calendar, selected at runtime. For the difference between this and [`TypedDateTimeFormatter`](crate::TypedDateTimeFormatter),</span>
@@ -641,6 +627,7 @@
 <span class="doccomment">/// use icu::datetime::{options::length, DateTimeFormatter};</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
 <span class="doccomment">/// use std::str::FromStr;</span>
+<span class="doccomment">/// use writeable::assert_writeable_eq;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let mut options = length::Bag::from_date_time_style(</span>
 <span class="doccomment">///     length::Date::Medium,</span>
@@ -658,10 +645,9 @@
 <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
 <span class="doccomment">/// let any_datetime = datetime.to_any();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let value = dtf</span>
-<span class="doccomment">///     .format_to_string(&amp;any_datetime)</span>
-<span class="doccomment">///     .expect(&quot;calendars should match&quot;);</span>
-<span class="doccomment">/// assert_eq!(value, &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
+<span class="doccomment">/// assert_writeable_eq!(dtf</span>
+<span class="doccomment">///     .format(&amp;any_datetime)</span>
+<span class="doccomment">///     .expect(&quot;calendars should match&quot;), &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Since this works with [`AnyCalendar`], you can use [`DateTime`](icu_calendar::DateTime) with [`AnyCalendar`]</span>
@@ -671,6 +657,7 @@
 <span class="doccomment">/// use icu::calendar::{AnyCalendar, AnyCalendarKind, DateTime, types::Time};</span>
 <span class="doccomment">/// use icu::datetime::{options::length, DateTimeFormatter};</span>
 <span class="doccomment">/// use icu::locid::locale;</span>
+<span class="doccomment">/// use writeable::assert_writeable_eq;</span>
 <span class="doccomment">/// # use std::str::FromStr;</span>
 <span class="doccomment">/// # use std::rc::Rc;</span>
 <span class="doccomment">/// # use std::convert::TryInto;</span>
@@ -702,11 +689,11 @@
 <span class="doccomment">/// let dtf = DateTimeFormatter::try_new_unstable(&amp;icu_testdata::unstable(), &amp;locale.into(), options.into())</span>
 <span class="doccomment">///     .expect(&quot;Failed to create DateTimeFormatter instance.&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let manual_value = dtf.format_to_string(&amp;manual_datetime).expect(&quot;calendars should match&quot;);</span>
-<span class="doccomment">/// assert_eq!(manual_value, &quot;Mar 28, 15 Heisei, 12:33 PM&quot;);</span>
+<span class="doccomment">/// let manual_value = dtf.format(&amp;manual_datetime).expect(&quot;calendars should match&quot;);</span>
+<span class="doccomment">/// assert_writeable_eq!(manual_value, &quot;Mar 28, 15 Heisei, 12:33 PM&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let converted_value = dtf.format_to_string(&amp;iso_converted).expect(&quot;calendars should match&quot;);</span>
-<span class="doccomment">/// assert_eq!(converted_value, &quot;Sep 1, 2 Reiwa, 12:34 PM&quot;);</span>
+<span class="doccomment">/// let converted_value = dtf.format(&amp;iso_converted).expect(&quot;calendars should match&quot;);</span>
+<span class="doccomment">/// assert_writeable_eq!(converted_value, &quot;Sep 1, 2 Reiwa, 12:34 PM&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This model replicates that of `ICU` and `ECMA402`.</span>
@@ -761,6 +748,7 @@
     <span class="doccomment">/// use icu::locid::locale;</span>
     <span class="doccomment">/// use icu_provider::any::DynamicDataProviderAnyMarkerWrap;</span>
     <span class="doccomment">/// use std::str::FromStr;</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut options = length::Bag::from_date_time_style(length::Date::Medium, length::Time::Short);</span>
     <span class="doccomment">/// let locale = locale!(&quot;en-u-ca-gregory&quot;);</span>
@@ -776,10 +764,9 @@
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">/// let any_datetime = datetime.to_any();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let value = dtf</span>
-    <span class="doccomment">///     .format_to_string(&amp;any_datetime)</span>
-    <span class="doccomment">///     .expect(&quot;calendars should match&quot;);</span>
-    <span class="doccomment">/// assert_eq!(value, &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
+    <span class="doccomment">/// assert_writeable_eq!(dtf</span>
+    <span class="doccomment">///     .format(&amp;any_datetime)</span>
+    <span class="doccomment">///     .expect(&quot;calendars should match&quot;), &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
@@ -813,6 +800,7 @@
     <span class="doccomment">/// use icu_provider::any::DynamicDataProviderAnyMarkerWrap;</span>
     <span class="doccomment">/// use std::str::FromStr;</span>
     <span class="doccomment">/// use icu_provider::AsDeserializingBufferProvider;</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let mut options = components::Bag::default();</span>
     <span class="doccomment">/// options.year = Some(components::Year::Numeric);</span>
@@ -829,8 +817,7 @@
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">/// let any_datetime = datetime.to_any();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let value = dtf.format_to_string(&amp;any_datetime).expect(&quot;calendars should match&quot;);</span>
-    <span class="doccomment">/// assert_eq!(value, &quot;September 2020&quot;);</span>
+    <span class="doccomment">/// assert_writeable_eq!(dtf.format(&amp;any_datetime).expect(&quot;calendars should match&quot;), &quot;September 2020&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
@@ -904,6 +891,7 @@
     <span class="doccomment">/// use icu::locid::locale;</span>
     <span class="doccomment">/// use icu_provider::any::DynamicDataProviderAnyMarkerWrap;</span>
     <span class="doccomment">/// use std::str::FromStr;</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let options = length::Bag::from_date_time_style(length::Date::Medium, length::Time::Short);</span>
     <span class="doccomment">/// let locale = locale!(&quot;en-u-ca-gregory&quot;);</span>
@@ -919,10 +907,9 @@
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">/// let any_datetime = datetime.to_any();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let value = dtf</span>
-    <span class="doccomment">///     .format_to_string(&amp;any_datetime)</span>
-    <span class="doccomment">///     .expect(&quot;calendars should match&quot;);</span>
-    <span class="doccomment">/// assert_eq!(value, &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
+    <span class="doccomment">/// assert_writeable_eq!(dtf</span>
+    <span class="doccomment">///     .format(&amp;any_datetime)</span>
+    <span class="doccomment">///     .expect(&quot;calendars should match&quot;), &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(
@@ -988,6 +975,7 @@
     <span class="doccomment">/// use icu::locid::locale;</span>
     <span class="doccomment">/// use icu_provider::any::DynamicDataProviderAnyMarkerWrap;</span>
     <span class="doccomment">/// use std::str::FromStr;</span>
+    <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let length = length::Date::Medium;</span>
     <span class="doccomment">/// let locale = locale!(&quot;en-u-ca-gregory&quot;);</span>
@@ -1012,10 +1000,9 @@
     <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
     <span class="doccomment">/// let any_datetime = datetime.to_any();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let value = dtf</span>
-    <span class="doccomment">///     .format_to_string(&amp;any_datetime)</span>
-    <span class="doccomment">///     .expect(&quot;calendars should match&quot;);</span>
-    <span class="doccomment">/// assert_eq!(value, &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
+    <span class="doccomment">/// assert_writeable_eq!(dtf</span>
+    <span class="doccomment">///     .format(&amp;any_datetime)</span>
+    <span class="doccomment">///     .expect(&quot;calendars should match&quot;), &quot;Sep 1, 2020, 12:34 PM&quot;);</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [data provider]: icu_provider</span>
@@ -1052,26 +1039,6 @@
         }
     }
 
-    <span class="doccomment">/// Takes a mutable reference to anything that implements [`Write`](std::fmt::Write) trait</span>
-    <span class="doccomment">/// and a [`DateTimeInput`] implementer and populates the buffer with a formatted value.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This function will fail if the date passed in uses a different calendar than that of the</span>
-    <span class="doccomment">/// AnyCalendar. Please convert dates before passing them in if necessary. This function</span>
-    <span class="doccomment">/// will automatically convert and format dates that are associated with the ISO calendar.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_write</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">w</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">core::fmt::Write</span>,
-        <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span><span class="op">&lt;</span><span class="ident">Calendar</span> <span class="op">=</span> <span class="ident">AnyCalendar</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">converted</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">convert_if_necessary</span>(<span class="ident">value</span>)<span class="question-mark">?</span> {
-            <span class="self">self</span>.<span class="number">0</span>.<span class="ident">format_to_write</span>(<span class="ident">w</span>, <span class="kw-2">&amp;</span><span class="ident">converted</span>)<span class="question-mark">?</span>;
-        } <span class="kw">else</span> {
-            <span class="self">self</span>.<span class="number">0</span>.<span class="ident">format_to_write</span>(<span class="ident">w</span>, <span class="ident">value</span>)<span class="question-mark">?</span>;
-        }
-        <span class="prelude-val">Ok</span>(())
-    }
-
     <span class="doccomment">/// Takes a [`DateTimeInput`] implementer and returns it formatted as a string.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function will fail if the date passed in uses a different calendar than that of the</span>
@@ -1082,11 +1049,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">DateTimeInput</span><span class="op">&lt;</span><span class="ident">Calendar</span> <span class="op">=</span> <span class="ident">AnyCalendar</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">DateTimeFormatterError</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">converted</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">convert_if_necessary</span>(<span class="ident">value</span>)<span class="question-mark">?</span> {
-            <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="ident">converted</span>))
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">format_to_string</span>(<span class="ident">value</span>))
-        }
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">format</span>(<span class="ident">value</span>)<span class="question-mark">?</span>.<span class="ident">write_to_string</span>().<span class="ident">into_owned</span>())
     }
 
     <span class="doccomment">/// Returns a [`components::Bag`] that represents the resolved components for the</span>
@@ -1162,24 +1125,23 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
     <span class="kw">use</span> <span class="ident">icu::calendar</span>::{<span class="ident">AnyCalendar</span>, <span class="ident">DateTime</span>};
     <span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">options::length</span>, <span class="ident">DateTimeFormatter</span>};
-    <span class="kw">use</span> <span class="ident">icu::locid::Locale</span>;
+    <span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
 
-    <span class="kw">fn</span> <span class="ident">test_format</span>(<span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">AnyCalendar</span><span class="op">&gt;</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
+    <span class="kw">fn</span> <span class="ident">test_format</span>(<span class="ident">datetime</span>: <span class="kw-2">&amp;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">AnyCalendar</span><span class="op">&gt;</span>, <span class="ident">locale</span>: <span class="ident">Locale</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
         <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Short</span>);
 
         <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">DateTimeFormatter::try_new_unstable</span>(
             <span class="kw-2">&amp;</span><span class="ident">icu_testdata::unstable</span>(),
-            <span class="kw-2">&amp;</span><span class="ident">Locale::from_str</span>(<span class="ident">locale</span>).<span class="ident">unwrap</span>().<span class="ident">into</span>(),
+            <span class="kw-2">&amp;</span><span class="ident">locale</span>.<span class="ident">into</span>(),
             <span class="ident">options</span>.<span class="ident">into</span>(),
         )
         .<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">dtf</span>
-            .<span class="ident">format_to_string</span>(<span class="ident">datetime</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;calendars should match&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">value</span>, <span class="ident">expected</span>);
+        <span class="macro">writeable::assert_writeable_eq!</span>(
+            <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="ident">datetime</span>).<span class="ident">expect</span>(<span class="string">&quot;calendars should match&quot;</span>),
+            <span class="ident">expected</span>
+        );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1188,13 +1150,25 @@
         <span class="kw">let</span> <span class="ident">datetime</span> <span class="op">=</span> <span class="ident">DateTime::new_iso_datetime</span>(<span class="number">2022</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">12</span>, <span class="number">33</span>, <span class="number">44</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">datetime</span> <span class="op">=</span> <span class="ident">datetime</span>.<span class="ident">to_any</span>();
         <span class="comment">// fr with unspecified and nonsense calendars falls back to gregorian</span>
-        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="string">&quot;fr&quot;</span>, <span class="string">&quot;5 avril 2022 à 12:33&quot;</span>);
-        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="string">&quot;fr-u-ca-blahblah&quot;</span>, <span class="string">&quot;5 avril 2022 à 12:33&quot;</span>);
+        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="macro">locale!</span>(<span class="string">&quot;fr&quot;</span>), <span class="string">&quot;5 avril 2022 à 12:33&quot;</span>);
+        <span class="ident">test_format</span>(
+            <span class="kw-2">&amp;</span><span class="ident">datetime</span>,
+            <span class="macro">locale!</span>(<span class="string">&quot;fr-u-ca-blahblah&quot;</span>),
+            <span class="string">&quot;5 avril 2022 à 12:33&quot;</span>,
+        );
         <span class="comment">// thai falls back to buddhist</span>
-        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="string">&quot;th-u-ca-buddhist&quot;</span>, <span class="string">&quot;5 เมษายน 2565 12:33&quot;</span>);
-        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="string">&quot;th&quot;</span>, <span class="string">&quot;5 เมษายน 2565 12:33&quot;</span>);
+        <span class="ident">test_format</span>(
+            <span class="kw-2">&amp;</span><span class="ident">datetime</span>,
+            <span class="macro">locale!</span>(<span class="string">&quot;th-u-ca-buddhist&quot;</span>),
+            <span class="string">&quot;5 เมษายน 2565 12:33&quot;</span>,
+        );
+        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="macro">locale!</span>(<span class="string">&quot;th&quot;</span>), <span class="string">&quot;5 เมษายน 2565 12:33&quot;</span>);
         <span class="comment">// except when overridden</span>
-        <span class="ident">test_format</span>(<span class="kw-2">&amp;</span><span class="ident">datetime</span>, <span class="string">&quot;th-u-ca-gregory&quot;</span>, <span class="string">&quot;5 เมษายน ค.ศ. 2022 12:33&quot;</span>);
+        <span class="ident">test_format</span>(
+            <span class="kw-2">&amp;</span><span class="ident">datetime</span>,
+            <span class="macro">locale!</span>(<span class="string">&quot;th-u-ca-gregory&quot;</span>),
+            <span class="string">&quot;5 เมษายน ค.ศ. 2022 12:33&quot;</span>,
+        );
     }
 }
 </code></pre></div>

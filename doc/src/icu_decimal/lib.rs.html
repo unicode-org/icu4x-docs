@@ -164,6 +164,8 @@
 <span id="159">159</span>
 <span id="160">160</span>
 <span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -185,7 +187,7 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use icu::decimal::FixedDecimalFormatter;</span>
 <span class="doccomment">//! use icu::locid::locale;</span>
-<span class="doccomment">//! use writeable::Writeable;</span>
+<span class="doccomment">//! use writeable::assert_writeable_eq;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let fdf = FixedDecimalFormatter::try_new_unstable(</span>
 <span class="doccomment">//!     &amp;icu_testdata::unstable(),</span>
@@ -195,10 +197,8 @@
 <span class="doccomment">//! .expect(&quot;Data should load successfully&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let fixed_decimal = 1000007.into();</span>
-<span class="doccomment">//! let formatted_value = fdf.format(&amp;fixed_decimal);</span>
-<span class="doccomment">//! let formatted_str = formatted_value.write_to_string();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(&quot;১০,০০,০০৭&quot;, formatted_str);</span>
+<span class="doccomment">//! assert_writeable_eq!(fdf.format(&amp;fixed_decimal), &quot;১০,০০,০০৭&quot;);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Format a number with digits after the decimal separator</span>
@@ -207,7 +207,7 @@
 <span class="doccomment">//! use fixed_decimal::FixedDecimal;</span>
 <span class="doccomment">//! use icu::decimal::FixedDecimalFormatter;</span>
 <span class="doccomment">//! use icu::locid::Locale;</span>
-<span class="doccomment">//! use writeable::Writeable;</span>
+<span class="doccomment">//! use writeable::assert_writeable_eq;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let fdf = FixedDecimalFormatter::try_new_unstable(</span>
 <span class="doccomment">//!     &amp;icu_testdata::unstable(),</span>
@@ -218,7 +218,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let fixed_decimal = FixedDecimal::from(200050).multiplied_pow10(-2);</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(&quot;2,000.50&quot;, fdf.format(&amp;fixed_decimal).write_to_string());</span>
+<span class="doccomment">//! assert_writeable_eq!(fdf.format(&amp;fixed_decimal), &quot;2,000.50&quot;);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Format a number using an alternative numbering system</span>
@@ -228,22 +228,19 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use icu::decimal::FixedDecimalFormatter;</span>
-<span class="doccomment">//! use icu::locid::Locale;</span>
-<span class="doccomment">//! use writeable::Writeable;</span>
+<span class="doccomment">//! use icu::locid::locale;</span>
+<span class="doccomment">//! use writeable::assert_writeable_eq;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let locale = &quot;th-u-nu-thai&quot;.parse::&lt;Locale&gt;().unwrap();</span>
 <span class="doccomment">//! let fdf = FixedDecimalFormatter::try_new_unstable(</span>
 <span class="doccomment">//!     &amp;icu_testdata::unstable(),</span>
-<span class="doccomment">//!     &amp;locale.into(),</span>
+<span class="doccomment">//!     &amp;locale!(&quot;th-u-nu-thai&quot;).into(),</span>
 <span class="doccomment">//!     Default::default(),</span>
 <span class="doccomment">//! )</span>
 <span class="doccomment">//! .expect(&quot;Data should load successfully&quot;);</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let fixed_decimal = 1000007.into();</span>
-<span class="doccomment">//! let formatted_value = fdf.format(&amp;fixed_decimal);</span>
-<span class="doccomment">//! let formatted_str = formatted_value.write_to_string();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! assert_eq!(&quot;๑,๐๐๐,๐๐๗&quot;, formatted_str);</span>
+<span class="doccomment">//! assert_writeable_eq!(fdf.format(&amp;fixed_decimal), &quot;๑,๐๐๐,๐๐๗&quot;);</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`FixedDecimalFormatter`]: FixedDecimalFormatter</span>
@@ -275,8 +272,10 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error::Error</span> <span class="kw">as</span> <span class="ident">FixedDecimalFormatterError</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">format::FormattedFixedDecimal</span>;
 
+<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">fixed_decimal::FixedDecimal</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="doccomment">/// A formatter for [`FixedDecimal`], rendering decimal digits in an i18n-friendly way.</span>
 <span class="doccomment">///</span>
@@ -323,6 +322,11 @@
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">symbols</span>: <span class="self">self</span>.<span class="ident">symbols</span>.<span class="ident">get</span>(),
         }
+    }
+
+    <span class="doccomment">/// Formats a [`FixedDecimal`], returning a [`String`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">FixedDecimal</span>) -&gt; <span class="ident">String</span> {
+        <span class="self">self</span>.<span class="ident">format</span>(<span class="ident">value</span>).<span class="ident">write_to_string</span>().<span class="ident">into_owned</span>()
     }
 }
 </code></pre></div>

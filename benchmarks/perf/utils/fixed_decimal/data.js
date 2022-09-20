@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663685997114,
+  "lastUpdate": 1663706414707,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -51689,6 +51689,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 73,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9cb743f8445210db627ba8effd7da6f5ec1312d1",
+          "message": "Remove metadata from path and add FallbackSupplement (#2567)",
+          "timestamp": "2022-09-20T10:24:03-05:00",
+          "tree_id": "03ada325295547c8f11ab8edb7549e92a51de418",
+          "url": "https://github.com/unicode-org/icu4x/commit/9cb743f8445210db627ba8effd7da6f5ec1312d1"
+        },
+        "date": 1663688134474,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 100471,
+            "range": "± 699",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21302,
+            "range": "± 50",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65934,
+            "range": "± 955",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 168,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 67,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 72,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "35614614+pdogr@users.noreply.github.com",
+            "name": "Pawan Dogra",
+            "username": "pdogr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "16c90be4247f0d35852ee6cd55c63e5c4c2680a6",
+          "message": "Add NicheBytes trait and NichedOptionULE (#2501)\n\n* Add NicheBytes trait, NichedOption, NichedOptionULE\r\n\r\n* Add ULE types for NonZeroU8, NonZeroI8",
+          "timestamp": "2022-09-20T20:27:15Z",
+          "tree_id": "7d23cd5982d146c6d09390f0cd7b0f4199bf2856",
+          "url": "https://github.com/unicode-org/icu4x/commit/16c90be4247f0d35852ee6cd55c63e5c4c2680a6"
+        },
+        "date": 1663706348210,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 135441,
+            "range": "± 4394",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 27634,
+            "range": "± 417",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 75255,
+            "range": "± 3029",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 212,
+            "range": "± 7",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 91,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 94,
+            "range": "± 2",
             "unit": "ns/iter"
           }
         ]

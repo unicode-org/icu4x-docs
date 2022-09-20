@@ -662,6 +662,9 @@
 <span id="657">657</span>
 <span id="658">658</span>
 <span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -784,6 +787,14 @@
     }
 }
 
+<span class="doccomment">/// What additional data to load when performing fallback.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
+<span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">FallbackSupplement</span> {
+    <span class="doccomment">/// Collation supplement; see `CollationFallbackSupplementV1Marker`</span>
+    <span class="ident">Collation</span>,
+}
+
 <span class="doccomment">/// The string path of a data key. For example, &quot;foo@1&quot;</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DataKeyPath</span> {
@@ -827,6 +838,10 @@
     <span class="kw">pub</span> <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority</span>,
     <span class="doccomment">/// A Unicode extension keyword to consider when loading data for this [`DataKey`].</span>
     <span class="kw">pub</span> <span class="ident">extension_key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">icu_locid::extensions::unicode::Key</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Optional choice for additional fallbacking data required for loading this marker.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// For more information, see `LocaleFallbackConfig::fallback_supplement`.</span>
+    <span class="kw">pub</span> <span class="ident">fallback_supplement</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FallbackSupplement</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">DataKeyMetadata</span> {
@@ -835,18 +850,20 @@
         <span class="self">Self</span> {
             <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::const_default</span>(),
             <span class="ident">extension_key</span>: <span class="prelude-val">None</span>,
+            <span class="ident">fallback_supplement</span>: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="doccomment">/// Create a new [`DataKeyMetadata`] with the specified options.</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from_fallback_priority_and_extension_key</span>(
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">construct_internal</span>(
         <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority</span>,
         <span class="ident">extension_key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">icu_locid::extensions::unicode::Key</span><span class="op">&gt;</span>,
+        <span class="ident">fallback_supplement</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FallbackSupplement</span><span class="op">&gt;</span>,
     ) -&gt; <span class="self">Self</span> {
-        <span class="comment">// Note: We need this function because the struct is non-exhaustive.</span>
         <span class="self">Self</span> {
             <span class="ident">fallback_priority</span>,
             <span class="ident">extension_key</span>,
+            <span class="ident">fallback_supplement</span>,
         }
     }
 }
@@ -987,7 +1004,10 @@
     <span class="comment">// Error is a str of the expected character class and the index where it wasn&#39;t encountered</span>
     <span class="comment">// The indexing operations in this function have been reviewed in detail and won&#39;t panic.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">construct_internal</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, (<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">usize</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">construct_internal</span>(
+        <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+        <span class="ident">metadata</span>: <span class="ident">DataKeyMetadata</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, (<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">usize</span>)<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="macro">leading_tag!</span>().<span class="ident">len</span>() <span class="op">+</span> <span class="macro">trailing_tag!</span>().<span class="ident">len</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;tag&quot;</span>, <span class="number">0</span>));
         }
@@ -1011,27 +1031,40 @@
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
 
+        <span class="kw">match</span> <span class="ident"><span class="self">Self</span>::validate_path_manual_slice</span>(<span class="ident">path</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            <span class="prelude-val">Ok</span>(()) =&gt; (),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+        };
+
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">DataKeyPath</span> { <span class="ident">tagged</span>: <span class="ident">path</span> };
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">path</span>,
+            <span class="ident">hash</span>: <span class="ident">DataKeyHash::compute_from_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
+            <span class="ident">metadata</span>,
+        })
+    }
+
+    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">validate_path_manual_slice</span>(
+        <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+        <span class="ident">start</span>: <span class="ident">usize</span>,
+        <span class="ident">end</span>: <span class="ident">usize</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), (<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">usize</span>)<span class="op">&gt;</span> {
+        <span class="macro">debug_assert!</span>(<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">end</span>);
+        <span class="macro">debug_assert!</span>(<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">path</span>.<span class="ident">len</span>());
         <span class="comment">// Regex: [a-zA-Z0-9_][a-zA-Z0-9_/]*@[0-9]+</span>
         <span class="kw">enum</span> <span class="ident">State</span> {
             <span class="ident">Empty</span>,
             <span class="ident">Body</span>,
             <span class="ident">At</span>,
             <span class="ident">Version</span>,
-            <span class="ident">MetaOpen</span>,
-            <span class="ident">MetaU</span>,
-            <span class="ident">MetaUDash</span>,
-            <span class="ident">MetaUDashB</span>,
-            <span class="ident">MetaClose</span>,
-            <span class="ident">MetaAfter</span>,
         }
         <span class="kw">use</span> <span class="ident">State</span>::<span class="kw-2">*</span>;
-        <span class="ident">i</span> <span class="op">=</span> <span class="ident">start</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">start</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">Empty</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fallback_priority</span> <span class="op">=</span> <span class="ident">FallbackPriority::const_default</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">extension_key_first_byte</span> <span class="op">=</span> <span class="string">b&#39;\0&#39;</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">extension_key</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">byte</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">i</span> <span class="op">&lt;</span> <span class="ident">end</span> {
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::indexing_slicing</span>)]</span> <span class="comment">// protected by debug assertion</span>
                 <span class="prelude-val">Some</span>(<span class="ident">path</span>.<span class="ident">as_bytes</span>()[<span class="ident">i</span>])
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
@@ -1042,55 +1075,14 @@
                 (<span class="ident">Body</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;@&#39;</span>)) =&gt; <span class="ident">At</span>,
                 (<span class="ident">At</span> <span class="op">|</span> <span class="ident">Version</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;0&#39;</span>..<span class="op">=</span><span class="string">b&#39;9&#39;</span>)) =&gt; <span class="ident">Version</span>,
                 <span class="comment">// One of these cases will be hit at the latest when i == end, so the loop converges.</span>
-                (<span class="ident">Version</span> <span class="op">|</span> <span class="ident">MetaAfter</span>, <span class="prelude-val">None</span>) =&gt; {
-                    <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">DataKeyPath</span> { <span class="ident">tagged</span>: <span class="ident">path</span> };
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-                        <span class="ident">path</span>,
-                        <span class="ident">hash</span>: <span class="ident">DataKeyHash::compute_from_path</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
-                        <span class="ident">metadata</span>: <span class="ident">DataKeyMetadata</span> {
-                            <span class="ident">fallback_priority</span>,
-                            <span class="ident">extension_key</span>,
-                        },
-                    });
+                (<span class="ident">Version</span>, <span class="prelude-val">None</span>) =&gt; {
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
                 }
-
-                (<span class="ident">Version</span> <span class="op">|</span> <span class="ident">MetaAfter</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;[&#39;</span>)) =&gt; <span class="ident">MetaOpen</span>,
-                (<span class="ident">MetaOpen</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;R&#39;</span>)) =&gt; {
-                    <span class="ident">fallback_priority</span> <span class="op">=</span> <span class="ident">FallbackPriority::Region</span>;
-                    <span class="ident">MetaClose</span>
-                }
-                (<span class="ident">MetaOpen</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;C&#39;</span>)) =&gt; {
-                    <span class="ident">fallback_priority</span> <span class="op">=</span> <span class="ident">FallbackPriority::Collation</span>;
-                    <span class="ident">MetaClose</span>
-                }
-                (<span class="ident">MetaOpen</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;u&#39;</span>)) =&gt; <span class="ident">MetaU</span>,
-                (<span class="ident">MetaU</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;-&#39;</span>)) =&gt; <span class="ident">MetaUDash</span>,
-                (<span class="ident">MetaUDash</span>, <span class="prelude-val">Some</span>(<span class="ident">b</span> @ <span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span>)) =&gt; {
-                    <span class="ident">extension_key_first_byte</span> <span class="op">=</span> <span class="ident">b</span>;
-                    <span class="ident">MetaUDashB</span>
-                }
-                (<span class="ident">MetaUDashB</span>, <span class="prelude-val">Some</span>(<span class="ident">b</span> @ <span class="string">b&#39;a&#39;</span>..<span class="op">=</span><span class="string">b&#39;z&#39;</span>)) =&gt; {
-                    <span class="ident">extension_key</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">icu_locid::extensions::unicode::Key::from_bytes</span>(<span class="kw-2">&amp;</span>[
-                        <span class="ident">extension_key_first_byte</span>,
-                        <span class="ident">b</span>,
-                    ]) {
-                        <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">v</span>),
-                        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
-                    };
-                    <span class="ident">MetaClose</span>
-                }
-                (<span class="ident">MetaClose</span>, <span class="prelude-val">Some</span>(<span class="string">b&#39;]&#39;</span>)) =&gt; <span class="ident">MetaAfter</span>,
 
                 (<span class="ident">Empty</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-Z0-9_]&quot;</span>, <span class="ident">i</span>)),
                 (<span class="ident">Body</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-z0-9_/@]&quot;</span>, <span class="ident">i</span>)),
                 (<span class="ident">At</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">Version</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9\\[]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">MetaOpen</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[uR]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">MetaU</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[-]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">MetaUDash</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-z]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">MetaUDashB</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[a-z]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">MetaClose</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[\\]]&quot;</span>, <span class="ident">i</span>)),
-                (<span class="ident">MetaAfter</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[\\[]&quot;</span>, <span class="ident">i</span>)),
+                (<span class="ident">Version</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="ident">i</span>)),
             };
             <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
@@ -1141,9 +1133,12 @@
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">data_key</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>:<span class="ident">expr</span>) =&gt; {{
+        <span class="macro-nonterminal">$</span><span class="macro">crate::data_key!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKeyMetadata::const_default</span>())
+    }};
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">metadata</span>:<span class="ident">expr</span>) =&gt; {{
         <span class="comment">// Force the DataKey into a const context</span>
         <span class="kw">const</span> <span class="ident">RESOURCE_KEY_MACRO_CONST</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey</span> <span class="op">=</span> {
-            <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey::construct_internal</span>(<span class="macro-nonterminal">$</span><span class="macro">crate::tagged!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>)) {
+            <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::DataKey::construct_internal</span>(<span class="macro-nonterminal">$</span><span class="macro">crate::tagged!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">metadata</span>) {
                 <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
                 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::panic</span>)]</span> <span class="comment">// Const context</span>
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="macro">concat!</span>(<span class="string">&quot;Invalid resource key: &quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">path</span>)),
@@ -1188,19 +1183,16 @@
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_path_syntax</span>() {
     <span class="comment">// Valid keys:</span>
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world/foo@1&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@999&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world/foo@1&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_458/world@1&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world@1&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[R]&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[u-ca]&quot;</span>)).<span class="ident">unwrap</span>();
-    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[R][u-ca]&quot;</span>)).<span class="ident">unwrap</span>();
+    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1&quot;</span>), <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
+    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world/foo@1&quot;</span>), <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
+    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@999&quot;</span>), <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
+    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world/foo@1&quot;</span>), <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
+    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_458/world@1&quot;</span>), <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
+    <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello_world@1&quot;</span>), <span class="ident">Default::default</span>()).<span class="ident">unwrap</span>();
 
     <span class="comment">// No version:</span>
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world&quot;</span>)),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world&quot;</span>), <span class="ident">Default::default</span>()),
         <span class="prelude-val">Err</span>((
             <span class="string">&quot;[a-zA-z0-9_/@]&quot;</span>,
             <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world&quot;</span>).<span class="ident">len</span>()
@@ -1208,91 +1200,75 @@
     );
 
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@&quot;</span>)),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@&quot;</span>), <span class="ident">Default::default</span>()),
         <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@foo&quot;</span>)),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@foo&quot;</span>), <span class="ident">Default::default</span>()),
         <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1foo&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9\\[]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@1&quot;</span>).<span class="ident">len</span>()))
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1foo&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@1&quot;</span>).<span class="ident">len</span>()))
+    );
+
+    <span class="comment">// Meta no longer accepted:</span>
+    <span class="macro">assert_eq!</span>(
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[R]&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
+    );
+    <span class="macro">assert_eq!</span>(
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[u-ca]&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
+    );
+    <span class="macro">assert_eq!</span>(
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[R][u-ca]&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
     );
 
     <span class="comment">// Invalid meta:</span>
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[U]&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[uR]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1[&quot;</span>).<span class="ident">len</span>()))
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[U]&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[uca]&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[-]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1[u&quot;</span>).<span class="ident">len</span>()))
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[uca]&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[u-&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[a-z]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1[u-&quot;</span>).<span class="ident">len</span>()))
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[u-&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[u-caa]&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[\\]]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1[u-ca&quot;</span>).<span class="ident">len</span>()))
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[u-caa]&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[R&quot;</span>)),
-        <span class="prelude-val">Err</span>((<span class="string">&quot;[\\]]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1[u&quot;</span>).<span class="ident">len</span>()))
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;foo@1[R&quot;</span>), <span class="ident">Default::default</span>()),
+        <span class="prelude-val">Err</span>((<span class="string">&quot;[0-9]&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;foo@1&quot;</span>).<span class="ident">len</span>()))
     );
 
     <span class="comment">// Invalid characters:</span>
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;你好/世界@1&quot;</span>)),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;你好/世界@1&quot;</span>), <span class="ident">Default::default</span>()),
         <span class="prelude-val">Err</span>((<span class="string">&quot;[a-zA-Z0-9_]&quot;</span>, <span class="macro">leading_tag!</span>().<span class="ident">len</span>()))
     );
 
     <span class="comment">// Invalid tag:</span>
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">concat!</span>(<span class="string">&quot;hello/world@1&quot;</span>, <span class="macro">trailing_tag!</span>()),),
+        <span class="ident">DataKey::construct_internal</span>(
+            <span class="macro">concat!</span>(<span class="string">&quot;hello/world@1&quot;</span>, <span class="macro">trailing_tag!</span>()),
+            <span class="ident">Default::default</span>()
+        ),
         <span class="prelude-val">Err</span>((<span class="string">&quot;tag&quot;</span>, <span class="number">0</span>))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@1&quot;</span>),),
+        <span class="ident">DataKey::construct_internal</span>(<span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@1&quot;</span>), <span class="ident">Default::default</span>()),
         <span class="prelude-val">Err</span>((<span class="string">&quot;tag&quot;</span>, <span class="macro">concat!</span>(<span class="macro">leading_tag!</span>(), <span class="string">&quot;hello/world@1&quot;</span>).<span class="ident">len</span>()))
     );
     <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="string">&quot;hello/world@1&quot;</span>),
+        <span class="ident">DataKey::construct_internal</span>(<span class="string">&quot;hello/world@1&quot;</span>, <span class="ident">Default::default</span>()),
         <span class="prelude-val">Err</span>((<span class="string">&quot;tag&quot;</span>, <span class="number">0</span>))
-    );
-}
-
-<span class="attribute">#[<span class="ident">test</span>]</span>
-<span class="kw">fn</span> <span class="ident">test_metadata_parsing</span>() {
-    <span class="kw">use</span> <span class="ident">icu_locid::extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>;
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
-        <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
-            <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Language</span>,
-            <span class="ident">extension_key</span>: <span class="prelude-val">None</span>
-        })
-    );
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[R]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
-        <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
-            <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Region</span>,
-            <span class="ident">extension_key</span>: <span class="prelude-val">None</span>
-        })
-    );
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[u-ca]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
-        <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
-            <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Language</span>,
-            <span class="ident">extension_key</span>: <span class="prelude-val">Some</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>))
-        })
-    );
-    <span class="macro">assert_eq!</span>(
-        <span class="ident">DataKey::construct_internal</span>(<span class="macro">tagged!</span>(<span class="string">&quot;hello/world@1[R][u-ca]&quot;</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">metadata</span>()),
-        <span class="prelude-val">Ok</span>(<span class="ident">DataKeyMetadata</span> {
-            <span class="ident">fallback_priority</span>: <span class="ident">FallbackPriority::Region</span>,
-            <span class="ident">extension_key</span>: <span class="prelude-val">Some</span>(<span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>))
-        })
     );
 }
 
@@ -1319,6 +1295,36 @@
     ] {
         <span class="macro">assert_eq!</span>(<span class="ident">cas</span>.<span class="ident">expected</span>, <span class="ident">cas</span>.<span class="ident">key</span>.<span class="ident">to_string</span>());
         <span class="macro">writeable::assert_writeable_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">cas</span>.<span class="ident">key</span>, <span class="ident">cas</span>.<span class="ident">expected</span>);
+    }
+}
+
+<span class="attribute">#[<span class="ident">test</span>]</span>
+<span class="kw">fn</span> <span class="ident">test_key_hash</span>() {
+    <span class="kw">struct</span> <span class="ident">KeyTestCase</span> {
+        <span class="kw">pub</span> <span class="ident">key</span>: <span class="ident">DataKey</span>,
+        <span class="kw">pub</span> <span class="ident">hash</span>: <span class="ident">DataKeyHash</span>,
+        <span class="kw">pub</span> <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
+    }
+
+    <span class="kw">for</span> <span class="ident">cas</span> <span class="kw">in</span> [
+        <span class="ident">KeyTestCase</span> {
+            <span class="ident">key</span>: <span class="macro">data_key!</span>(<span class="string">&quot;core/cardinal@1&quot;</span>),
+            <span class="ident">hash</span>: <span class="ident">DataKeyHash</span>([<span class="number">172</span>, <span class="number">207</span>, <span class="number">42</span>, <span class="number">236</span>]),
+            <span class="ident">path</span>: <span class="string">&quot;core/cardinal@1&quot;</span>,
+        },
+        <span class="ident">KeyTestCase</span> {
+            <span class="ident">key</span>: <span class="macro">data_key!</span>(<span class="string">&quot;core/maxlengthsubcatg@1&quot;</span>),
+            <span class="ident">hash</span>: <span class="ident">DataKeyHash</span>([<span class="number">193</span>, <span class="number">6</span>, <span class="number">79</span>, <span class="number">61</span>]),
+            <span class="ident">path</span>: <span class="string">&quot;core/maxlengthsubcatg@1&quot;</span>,
+        },
+        <span class="ident">KeyTestCase</span> {
+            <span class="ident">key</span>: <span class="macro">data_key!</span>(<span class="string">&quot;core/cardinal@65535&quot;</span>),
+            <span class="ident">hash</span>: <span class="ident">DataKeyHash</span>([<span class="number">176</span>, <span class="number">131</span>, <span class="number">182</span>, <span class="number">223</span>]),
+            <span class="ident">path</span>: <span class="string">&quot;core/cardinal@65535&quot;</span>,
+        },
+    ] {
+        <span class="macro">assert_eq!</span>(<span class="ident">cas</span>.<span class="ident">hash</span>, <span class="ident">cas</span>.<span class="ident">key</span>.<span class="ident">hashed</span>(), <span class="string">&quot;{}&quot;</span>, <span class="ident">cas</span>.<span class="ident">path</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">cas</span>.<span class="ident">path</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">cas</span>.<span class="ident">key</span>.<span class="ident">path</span>(), <span class="string">&quot;{}&quot;</span>, <span class="ident">cas</span>.<span class="ident">path</span>);
     }
 }
 </code></pre></div>

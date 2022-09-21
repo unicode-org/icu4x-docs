@@ -101,20 +101,62 @@
 <span id="96">96</span>
 <span id="97">97</span>
 <span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">serde::Deserialize</span>;
 <span class="kw">use</span> <span class="ident">zerovec::maps</span>::{<span class="ident">ZeroMap2dBorrowed</span>, <span class="ident">ZeroMapKV</span>};
 <span class="kw">use</span> <span class="ident">zerovec::vecs</span>::{<span class="ident">Index32</span>, <span class="ident">VarZeroSlice</span>, <span class="ident">VarZeroVec</span>};
+
 <span class="doccomment">/// A versioned Serde schema for ICU4X data blobs.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;export&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Serialize</span>))]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">BlobSchema</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">borrow</span>)]</span>
     <span class="ident">V001</span>(<span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>),
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">BlobSchema</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deserialize_v1</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">serde::Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+        <span class="ident">de</span>: <span class="ident">D</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>, <span class="ident">D::Error</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">blob</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::deserialize</span>(<span class="ident">de</span>)<span class="question-mark">?</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
+        <span class="ident">blob</span>.<span class="ident">check_invariants</span>();
+        <span class="prelude-val">Ok</span>(<span class="ident">blob</span>)
+    }
 }
 
 <span class="doccomment">/// Version 1 of the ICU4X data blob schema.</span>
@@ -142,9 +184,25 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> <span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>], <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">keys</span>
+            .<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">hashed</span>())
+            .<span class="ident">ok_or</span>(<span class="ident">DataErrorKind::MissingDataKey</span>)
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">cursor</span><span class="op">|</span> {
+                <span class="ident">cursor</span>
+                    .<span class="ident">get1_copied_by</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>.<span class="number">0</span>).<span class="ident">reverse</span>())
+                    .<span class="ident">ok_or</span>(<span class="ident">DataErrorKind::MissingLocale</span>)
+            })
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">kind</span><span class="op">|</span> <span class="ident">kind</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">buffers</span>
+            .<span class="ident">get</span>(<span class="ident">idx</span>)
+            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Invalid blob bytes&quot;</span>).<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+    }
+
     <span class="doccomment">/// Verifies the weak invariants using debug assertions</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">check_invariants</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+    <span class="kw">fn</span> <span class="ident">check_invariants</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">use</span> <span class="ident">zerovec::maps::ZeroVecLike</span>;
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">keys</span>.<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">buffers</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span>;

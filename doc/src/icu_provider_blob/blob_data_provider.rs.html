@@ -113,6 +113,28 @@
 <span id="108">108</span>
 <span id="109">109</span>
 <span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -121,15 +143,12 @@
 <span class="kw">use</span> <span class="ident">icu_provider::buf::BufferFormat</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::RcWrap</span>;
-<span class="kw">use</span> <span class="ident">serde::de::Deserialize</span>;
 <span class="kw">use</span> <span class="ident">yoke</span>::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// A data provider loading data from blobs dynamically created at runtime.</span>
+<span class="doccomment">/// A data provider that reads from serialized blobs of data.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This enables data blobs to be read from the filesystem or from an HTTP request dynamically</span>
-<span class="doccomment">/// at runtime, so that the code and data can be shipped separately.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// If you prefer to bake the data into your binary, see [`StaticDataProvider`].</span>
+<span class="doccomment">/// This enables data blobs to be read from arbitrary sources at runtime, allowing code and data</span>
+<span class="doccomment">/// to be separated. Alternatively, blobs can also be statically included at compile time.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # `Sync + Send`</span>
 <span class="doccomment">///</span>
@@ -138,13 +157,15 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu_locid::locale;</span>
-<span class="doccomment">/// use icu_provider::hello_world::*;</span>
-<span class="doccomment">/// use icu_provider::prelude::*;</span>
-<span class="doccomment">/// use icu_provider_blob::BlobDataProvider;</span>
-<span class="doccomment">/// use std::fs;</span>
+<span class="doccomment">/// ## Dynamic loading</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// # use icu_locid::locale;</span>
+<span class="doccomment">/// # use icu_provider::hello_world::*;</span>
+<span class="doccomment">/// # use icu_provider::prelude::*;</span>
+<span class="doccomment">/// # use icu_provider_blob::BlobDataProvider;</span>
+<span class="doccomment">/// # use std::fs;</span>
+<span class="doccomment">/// #</span>
 <span class="doccomment">/// // Read an ICU4X data blob dynamically:</span>
 <span class="doccomment">/// let blob = fs::read(concat!(</span>
 <span class="doccomment">///     env!(&quot;CARGO_MANIFEST_DIR&quot;),</span>
@@ -169,26 +190,62 @@
 <span class="doccomment">/// assert_eq!(response.get().message, &quot;Ave, munde&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// [`StaticDataProvider`]: crate::StaticDataProvider</span>
+<span class="doccomment">/// ## Static loading</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// # use icu_locid::locale;</span>
+<span class="doccomment">/// # use icu_provider::hello_world::*;</span>
+<span class="doccomment">/// # use icu_provider::prelude::*;</span>
+<span class="doccomment">/// # use icu_provider_blob::BlobDataProvider;</span>
+<span class="doccomment">/// # use std::fs;</span>
+<span class="doccomment">/// #</span>
+<span class="doccomment">/// // Read an ICU4X data blob statically:</span>
+<span class="doccomment">/// static BLOB: &amp;[u8] = include_bytes!(concat!(</span>
+<span class="doccomment">///     env!(&quot;CARGO_MANIFEST_DIR&quot;),</span>
+<span class="doccomment">///     &quot;/tests/data/hello_world.postcard&quot;,</span>
+<span class="doccomment">/// ));</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Create a DataProvider from it:</span>
+<span class="doccomment">/// let provider = BlobDataProvider::try_new_from_static_blob(BLOB).expect(&quot;Deserialization should succeed&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Check that it works:</span>
+<span class="doccomment">/// let response: DataPayload&lt;HelloWorldV1Marker&gt; = provider</span>
+<span class="doccomment">///     .as_deserializing()</span>
+<span class="doccomment">///     .load(DataRequest {</span>
+<span class="doccomment">///         locale: &amp;locale!(&quot;la&quot;).into(),</span>
+<span class="doccomment">///         metadata: Default::default(),</span>
+<span class="doccomment">///     })</span>
+<span class="doccomment">///     .expect(&quot;Data should be valid&quot;)</span>
+<span class="doccomment">///     .take_payload()</span>
+<span class="doccomment">///     .expect(&quot;Data should be present&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_eq!(response.get().message, &quot;Ave, munde&quot;);</span>
+<span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BlobDataProvider</span> {
-    <span class="ident">data</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>, <span class="ident">RcWrap</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">data</span>: <span class="ident">Yoke</span><span class="op">&lt;</span><span class="ident">BlobSchemaV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RcWrap</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">BlobDataProvider</span> {
-    <span class="doccomment">/// Create a [`BlobDataProvider`] from a blob of ICU4X data.</span>
+    <span class="doccomment">/// Create a [`BlobDataProvider`] from a blob of data. The data will be transformed into</span>
+    <span class="doccomment">/// a `Rc&lt;[u8]&gt;`/`Arc&lt;[u8]&gt;` (per the `&quot;sync&quot;` feature), which will allocate unless the</span>
+    <span class="doccomment">/// blob is already of that shape.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_from_blob</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">RcWrap</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">blob</span>: <span class="ident">B</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">BlobDataProvider</span> {
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">data</span>: <span class="ident">Yoke::try_attach_to_cart</span>(<span class="ident">blob</span>.<span class="ident">into</span>(), <span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
-                <span class="ident">BlobSchema::deserialize</span>(<span class="kw-2">&amp;mut</span> <span class="ident">postcard::Deserializer::from_bytes</span>(<span class="ident">bytes</span>)).<span class="ident">map</span>(
-                    <span class="op">|</span><span class="ident">blob</span><span class="op">|</span> {
-                        <span class="kw">let</span> <span class="ident">BlobSchema::V001</span>(<span class="ident">blob</span>) <span class="op">=</span> <span class="ident">blob</span>;
-                        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
-                        <span class="ident">blob</span>.<span class="ident">check_invariants</span>();
-                        <span class="ident">blob</span>
-                    },
-                )
-            })<span class="question-mark">?</span>,
+                <span class="ident">BlobSchema::deserialize_v1</span>(<span class="kw-2">&amp;mut</span> <span class="ident">postcard::Deserializer::from_bytes</span>(<span class="ident">bytes</span>))
+            })<span class="question-mark">?</span>
+            .<span class="ident">wrap_cart_in_option</span>(),
+        })
+    }
+
+    <span class="doccomment">/// Create a [`BlobDataProvider`] from a static blob. This is a special case of</span>
+    <span class="doccomment">/// [`try_new_from_blob`](BlobDataProvider::try_new_from_blob) and is allocation-free.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_from_static_blob</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+            <span class="ident">data</span>: <span class="ident">Yoke::new_owned</span>(<span class="ident">BlobSchema::deserialize_v1</span>(
+                <span class="kw-2">&amp;mut</span> <span class="ident">postcard::Deserializer::from_bytes</span>(<span class="ident">blob</span>),
+            )<span class="question-mark">?</span>),
         })
     }
 }
@@ -204,21 +261,8 @@
         <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
             <span class="ident">metadata</span>,
             <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_yoked_buffer</span>(
-                <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">try_map_project_cloned</span>(<span class="op">|</span><span class="ident">blob</span>, <span class="kw">_</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">idx</span> <span class="op">=</span> <span class="ident">blob</span>
-                        .<span class="ident">keys</span>
-                        .<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">hashed</span>())
-                        .<span class="ident">ok_or</span>(<span class="ident">DataErrorKind::MissingDataKey</span>)
-                        .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">cursor</span><span class="op">|</span> {
-                            <span class="ident">cursor</span>
-                                .<span class="ident">get1_copied_by</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>.<span class="number">0</span>).<span class="ident">reverse</span>())
-                                .<span class="ident">ok_or</span>(<span class="ident">DataErrorKind::MissingLocale</span>)
-                        })
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">kind</span><span class="op">|</span> <span class="ident">kind</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))<span class="question-mark">?</span>;
-                    <span class="ident">blob</span>.<span class="ident">buffers</span>
-                        .<span class="ident">get</span>(<span class="ident">idx</span>)
-                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;Invalid blob bytes&quot;</span>).<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
-                })<span class="question-mark">?</span>,
+                <span class="self">self</span>.<span class="ident">data</span>
+                    .<span class="ident">try_map_project_cloned</span>(<span class="op">|</span><span class="ident">blob</span>, <span class="kw">_</span><span class="op">|</span> <span class="ident">blob</span>.<span class="ident">load</span>(<span class="ident">key</span>, <span class="ident">req</span>))<span class="question-mark">?</span>,
             )),
         })
     }

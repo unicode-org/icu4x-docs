@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663788175346,
+  "lastUpdate": 1663795473408,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -27863,6 +27863,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/35ca5455a371af3124e5683c367846f9e6fbbcbc"
         },
         "date": 1663788121932,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "abf9d5b3d09cb4bae27d136f873d6c99fab97f96",
+          "message": "Removing `StaticDataProvider` (#2582)",
+          "timestamp": "2022-09-21T23:08:50+02:00",
+          "tree_id": "0402eb060932fbcd18f313bfb337002ed139f527",
+          "url": "https://github.com/unicode-org/icu4x/commit/abf9d5b3d09cb4bae27d136f873d6c99fab97f96"
+        },
+        "date": 1663794625235,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3d80f0da848636527c6749f510865e14622abc61",
+          "message": "Improve performance of VarZeroVec::deserialize and add provider benches (#2603)",
+          "timestamp": "2022-09-21T14:22:18-07:00",
+          "tree_id": "d38c1c64f1c6b892c21ff7e8981b06550f8168a5",
+          "url": "https://github.com/unicode-org/icu4x/commit/3d80f0da848636527c6749f510865e14622abc61"
+        },
+        "date": 1663795415189,
         "tool": "ndjson",
         "benches": [
           {

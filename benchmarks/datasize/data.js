@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663776638068,
+  "lastUpdate": 1663788175346,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -27803,6 +27803,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/f53a87eaed760170e328dffb8705bcdda41657ea"
         },
         "date": 1663776572189,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0e395d9c03f8d98bd3c37a0bba7bced4d5511529",
+          "message": "Turn ZeroVec into a struct (#2599)\n\n* Add alternate owned/borrowed ZeroVec methods\n\n* Use everywhere\n\n* Replace with internal pointer\n\n* fix\n\n* fix\n\n* rm old docs\n\n* clip\n\n* fix\n\n* oops\n\n* Add to_mut_slice()\n\n* fix\n\n* merge fix",
+          "timestamp": "2022-09-21T11:36:04-07:00",
+          "tree_id": "3cc1befc84d22a4b67f1f3fcd3b3b356f0c74d8d",
+          "url": "https://github.com/unicode-org/icu4x/commit/0e395d9c03f8d98bd3c37a0bba7bced4d5511529"
+        },
+        "date": 1663785445063,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "35ca5455a371af3124e5683c367846f9e6fbbcbc",
+          "message": "Move `decimal-bn-en.postcard` (#2607)",
+          "timestamp": "2022-09-21T21:20:43+02:00",
+          "tree_id": "05d9d48b2562fe66a6471479234a4c48f9181a09",
+          "url": "https://github.com/unicode-org/icu4x/commit/35ca5455a371af3124e5683c367846f9e6fbbcbc"
+        },
+        "date": 1663788121932,
         "tool": "ndjson",
         "benches": [
           {

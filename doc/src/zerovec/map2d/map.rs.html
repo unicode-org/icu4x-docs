@@ -822,6 +822,9 @@
 <span id="817">817</span>
 <span id="818">818</span>
 <span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1059,14 +1062,14 @@
     <span class="doccomment">/// Removes key0_index from the keys0 array and the joiner array</span>
     <span class="kw">fn</span> <span class="ident">remove_key0_index</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key0_index</span>: <span class="ident">usize</span>) {
         <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_remove</span>(<span class="ident">key0_index</span>);
-        <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">to_mut</span>().<span class="ident">remove</span>(<span class="ident">key0_index</span>);
+        <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">with_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">remove</span>(<span class="ident">key0_index</span>));
     }
 
     <span class="doccomment">/// Shifts all joiner ranges from key0_index onward one index up</span>
     <span class="kw">fn</span> <span class="ident">joiner_expand</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key0_index</span>: <span class="ident">usize</span>) {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// slice overflow</span>
         <span class="self">self</span>.<span class="ident">joiner</span>
-            .<span class="ident">to_mut</span>()
+            .<span class="ident">to_mut_slice</span>()
             .<span class="ident">iter_mut</span>()
             .<span class="ident">skip</span>(<span class="ident">key0_index</span>)
             .<span class="ident">for_each</span>(<span class="op">|</span><span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span><span class="op">|</span> {
@@ -1076,16 +1079,16 @@
                     .<span class="ident">checked_add</span>(<span class="number">1</span>)
                     .<span class="ident">expect</span>(<span class="string">&quot;Attempted to add more than 2^32 elements to a ZeroMap2d&quot;</span>)
                     .<span class="ident">to_unaligned</span>()
-            });
+            })
     }
 
     <span class="doccomment">/// Shifts all joiner ranges from key0_index onward one index down</span>
     <span class="kw">fn</span> <span class="ident">joiner_shrink</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">key0_index</span>: <span class="ident">usize</span>) {
         <span class="self">self</span>.<span class="ident">joiner</span>
-            .<span class="ident">to_mut</span>()
+            .<span class="ident">to_mut_slice</span>()
             .<span class="ident">iter_mut</span>()
             .<span class="ident">skip</span>(<span class="ident">key0_index</span>)
-            .<span class="ident">for_each</span>(<span class="op">|</span><span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span> (<span class="ident">v</span>.<span class="ident">as_unsigned_int</span>() <span class="op">-</span> <span class="number">1</span>).<span class="ident">to_unaligned</span>());
+            .<span class="ident">for_each</span>(<span class="op">|</span><span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span> (<span class="ident">v</span>.<span class="ident">as_unsigned_int</span>() <span class="op">-</span> <span class="number">1</span>).<span class="ident">to_unaligned</span>())
     }
 }
 
@@ -1210,7 +1213,7 @@
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">K0</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">K1</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">V</span>)<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_empty</span>() {
             <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_push</span>(<span class="ident">key0</span>);
-            <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">to_mut</span>().<span class="ident">push</span>(<span class="number">1u32</span>.<span class="ident">to_unaligned</span>());
+            <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">with_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">push</span>(<span class="number">1u32</span>.<span class="ident">to_unaligned</span>()));
             <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_push</span>(<span class="ident">key1</span>);
             <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_push</span>(<span class="ident">value</span>);
             <span class="kw">return</span> <span class="prelude-val">None</span>;
@@ -1250,10 +1253,11 @@
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span>
         <span class="kw">if</span> <span class="ident">key0_cmp</span> <span class="op">==</span> <span class="ident">Ordering::Greater</span> {
             <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_push</span>(<span class="ident">key0</span>);
-            <span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">to_mut</span>().<span class="ident">push</span>(<span class="ident">joiner_value</span>.<span class="ident">to_unaligned</span>());
+            <span class="self">self</span>.<span class="ident">joiner</span>
+                .<span class="ident">with_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">push</span>(<span class="ident">joiner_value</span>.<span class="ident">to_unaligned</span>()));
         } <span class="kw">else</span> {
             <span class="comment">// This unwrap is protected because we are not empty</span>
-            <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">to_mut</span>().<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="ident">joiner_value</span>.<span class="ident">to_unaligned</span>();
+            <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">joiner</span>.<span class="ident">to_mut_slice</span>().<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">=</span> <span class="ident">joiner_value</span>.<span class="ident">to_unaligned</span>();
         }
         <span class="self">self</span>.<span class="ident">keys1</span>.<span class="ident">zvl_push</span>(<span class="ident">key1</span>);
         <span class="self">self</span>.<span class="ident">values</span>.<span class="ident">zvl_push</span>(<span class="ident">value</span>);
@@ -1377,8 +1381,7 @@
                 };
                 <span class="self">self</span>.<span class="ident">keys0</span>.<span class="ident">zvl_insert</span>(<span class="ident">key0_index</span>, <span class="ident">key0</span>);
                 <span class="self">self</span>.<span class="ident">joiner</span>
-                    .<span class="ident">to_mut</span>()
-                    .<span class="ident">insert</span>(<span class="ident">key0_index</span>, <span class="ident">joiner_value</span>.<span class="ident">to_unaligned</span>());
+                    .<span class="ident">with_mut</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">insert</span>(<span class="ident">key0_index</span>, <span class="ident">joiner_value</span>.<span class="ident">to_unaligned</span>()));
                 (<span class="ident">key0_index</span>, (<span class="ident">joiner_value</span> <span class="kw">as</span> <span class="ident">usize</span>)..(<span class="ident">joiner_value</span> <span class="kw">as</span> <span class="ident">usize</span>))
             }
         }
@@ -1528,13 +1531,16 @@
     <span class="kw">fn</span> <span class="ident">stress_test</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zm2d</span> <span class="op">=</span> <span class="ident">ZeroMap2d</span>::<span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">str</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="ident">::new</span>();
 
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Borrowed([]), joiner: ZeroVec::Borrowed([]), keys1: [], values: [] }&quot;</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>),
+            <span class="string">&quot;ZeroMap2d { keys0: ZeroVec([]), joiner: ZeroVec([]), keys1: [], values: [] }&quot;</span>
+        );
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">0</span>), <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">try_append</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>, <span class="string">&quot;CCC&quot;</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">None</span>));
 
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3]), joiner: ZeroVec::Owned([1]), keys1: [\&quot;ccc\&quot;], values: [\&quot;CCC\&quot;] }&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec([3]), joiner: ZeroVec([1]), keys1: [\&quot;ccc\&quot;], values: [\&quot;CCC\&quot;] }&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">0</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">3</span>).<span class="ident">unwrap</span>().<span class="ident">get1</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get_2d</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
@@ -1543,7 +1549,7 @@
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">try_append</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;eee&quot;</span>, <span class="string">&quot;EEE&quot;</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">None</span>));
 
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3]), joiner: ZeroVec::Owned([2]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;] }&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec([3]), joiner: ZeroVec([2]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;] }&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">0</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">3</span>).<span class="ident">unwrap</span>().<span class="ident">get1</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get_2d</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
@@ -1567,7 +1573,7 @@
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">try_append</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>, <span class="string">&quot;YYY&quot;</span>);
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">result</span>, <span class="prelude-val">None</span>));
 
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3, 5, 7, 9]), joiner: ZeroVec::Owned([2, 3, 6, 7]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;, \&quot;ddd\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;, \&quot;yyy\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;, \&quot;DD1\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;, \&quot;YYY\&quot;] }&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec([3, 5, 7, 9]), joiner: ZeroVec([2, 3, 6, 7]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;, \&quot;ddd\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;, \&quot;yyy\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;, \&quot;DD1\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;, \&quot;YYY\&quot;] }&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">0</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">3</span>).<span class="ident">unwrap</span>().<span class="ident">get1</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get_2d</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
@@ -1598,7 +1604,7 @@
         <span class="ident">zm2d</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;mmm&quot;</span>, <span class="string">&quot;MM1&quot;</span>);
         <span class="ident">zm2d</span>.<span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="number">6</span>, <span class="string">&quot;nnn&quot;</span>, <span class="string">&quot;NNN&quot;</span>);
 
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3, 5, 6, 7, 9]), joiner: ZeroVec::Owned([3, 4, 7, 10, 11]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;, \&quot;mmm\&quot;, \&quot;ddd\&quot;, \&quot;ddd\&quot;, \&quot;mmm\&quot;, \&quot;nnn\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;, \&quot;yyy\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;, \&quot;MM0\&quot;, \&quot;DD1\&quot;, \&quot;DD3\&quot;, \&quot;MM1\&quot;, \&quot;NNN\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;, \&quot;YYY\&quot;] }&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec([3, 5, 6, 7, 9]), joiner: ZeroVec([3, 4, 7, 10, 11]), keys1: [\&quot;ccc\&quot;, \&quot;eee\&quot;, \&quot;mmm\&quot;, \&quot;ddd\&quot;, \&quot;ddd\&quot;, \&quot;mmm\&quot;, \&quot;nnn\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;, \&quot;yyy\&quot;], values: [\&quot;CCC\&quot;, \&quot;EEE\&quot;, \&quot;MM0\&quot;, \&quot;DD1\&quot;, \&quot;DD3\&quot;, \&quot;MM1\&quot;, \&quot;NNN\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;, \&quot;YYY\&quot;] }&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">0</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get0</span>(<span class="kw-2">&amp;</span><span class="number">3</span>).<span class="ident">unwrap</span>().<span class="ident">get1</span>(<span class="string">&quot;&quot;</span>), <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zm2d</span>.<span class="ident">get_2d</span>(<span class="kw-2">&amp;</span><span class="number">3</span>, <span class="string">&quot;ccc&quot;</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;CCC&quot;</span>));
@@ -1638,7 +1644,7 @@
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">zm2d</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="number">9</span>, <span class="string">&quot;yyy&quot;</span>); <span class="comment">// last element</span>
         <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Some</span>(<span class="ident">String::from</span>(<span class="string">&quot;YYY&quot;</span>).<span class="ident">into_boxed_str</span>()));
 
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec::Owned([3, 6, 7]), joiner: ZeroVec::Owned([1, 4, 7]), keys1: [\&quot;eee\&quot;, \&quot;ddd\&quot;, \&quot;mmm\&quot;, \&quot;nnn\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;], values: [\&quot;EEE\&quot;, \&quot;DD3\&quot;, \&quot;MM1\&quot;, \&quot;NNN\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;] }&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">zm2d</span>), <span class="string">&quot;ZeroMap2d { keys0: ZeroVec([3, 6, 7]), joiner: ZeroVec([1, 4, 7]), keys1: [\&quot;eee\&quot;, \&quot;ddd\&quot;, \&quot;mmm\&quot;, \&quot;nnn\&quot;, \&quot;ddd\&quot;, \&quot;eee\&quot;, \&quot;www\&quot;], values: [\&quot;EEE\&quot;, \&quot;DD3\&quot;, \&quot;MM1\&quot;, \&quot;NNN\&quot;, \&quot;DD2\&quot;, \&quot;EEE\&quot;, \&quot;WWW\&quot;] }&quot;</span>);
     }
 }
 </code></pre></div>

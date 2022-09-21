@@ -222,6 +222,8 @@
 <span id="217">217</span>
 <span id="218">218</span>
 <span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -278,7 +280,7 @@
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">seq</span>.<span class="ident">next_element</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()<span class="question-mark">?</span> {
             <span class="ident">vec</span>.<span class="ident">push</span>(<span class="ident">T::to_unaligned</span>(<span class="ident">value</span>));
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">ZeroVec::Owned</span>(<span class="ident">vec</span>))
+        <span class="prelude-val">Ok</span>(<span class="ident">ZeroVec::new_owned</span>(<span class="ident">vec</span>))
     }
 }
 
@@ -332,7 +334,7 @@
         <span class="ident">D</span>: <span class="ident">Deserializer</span><span class="op">&lt;</span><span class="lifetime">&#39;de</span><span class="op">&gt;</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">zv</span> <span class="op">=</span> <span class="ident">ZeroVec</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">mem::take</span>(<span class="ident">zv</span>.<span class="ident">to_mut</span>());
+        <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">zv</span>.<span class="ident">with_mut</span>(<span class="ident">mem::take</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">ZeroSlice::from_boxed_slice</span>(<span class="ident">vec</span>.<span class="ident">into_boxed_slice</span>()))
     }
 }
@@ -353,14 +355,14 @@
             ))
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">deserialized</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ZeroVec::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">borrowed</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ZeroVec::Borrowed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="ident">deserialized</span> {
+            <span class="kw">let</span> <span class="ident">borrowed</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="ident">deserialized</span>.<span class="ident">as_maybe_borrowed</span>() {
                 <span class="ident">b</span>
             } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">de::Error::custom</span>(
                     <span class="string">&quot;&amp;ZeroSlice can only deserialize in zero-copy ways&quot;</span>,
                 ));
             };
-            <span class="prelude-val">Ok</span>(<span class="ident">ZeroSlice::from_ule_slice</span>(<span class="ident">borrowed</span>))
+            <span class="prelude-val">Ok</span>(<span class="ident">borrowed</span>)
         }
     }
 }
@@ -405,7 +407,7 @@
         <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">serde_json::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">json_str</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to ZeroVec&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec_orig</span>, <span class="ident">zerovec_new</span>);
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">zerovec_new</span>, <span class="ident">ZeroVec::Owned</span>(<span class="kw">_</span>)));
+        <span class="macro">assert!</span>(<span class="ident">zerovec_new</span>.<span class="ident">is_owned</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -418,7 +420,8 @@
         <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_buf</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to ZeroVec&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec_orig</span>, <span class="ident">zerovec_new</span>);
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">zerovec_new</span>, <span class="ident">ZeroVec::Borrowed</span>(<span class="kw">_</span>)));
+
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec_new</span>.<span class="ident">is_owned</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -429,7 +432,8 @@
         <span class="kw">let</span> <span class="ident">zerovec_new</span>: <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">bincode::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">bincode_buf</span>).<span class="ident">expect</span>(<span class="string">&quot;deserialize from buffer to ZeroVec&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">zerovec_orig</span>, <span class="ident">zerovec_new</span>);
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">zerovec_new</span>, <span class="ident">ZeroVec::Borrowed</span>(<span class="kw">_</span>)));
+
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">zerovec_new</span>.<span class="ident">is_owned</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>

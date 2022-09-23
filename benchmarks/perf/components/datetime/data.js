@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663966434991,
+  "lastUpdate": 1663975533268,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -72911,6 +72911,186 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 6084,
             "range": "± 583",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "hsivonen@hsivonen.fi",
+            "name": "Henri Sivonen",
+            "username": "hsivonen"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4cb5ed130c8a7557c310a4fa0fa7ebf4d8e5270c",
+          "message": "Add module declaration-level notes about special-casing in Pernosco (#2619)",
+          "timestamp": "2022-09-23T22:44:56Z",
+          "tree_id": "d341576f93e6094d54d81a320b8eac045a6907a5",
+          "url": "https://github.com/unicode-org/icu4x/commit/4cb5ed130c8a7557c310a4fa0fa7ebf4d8e5270c"
+        },
+        "date": 1663974628034,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 63849,
+            "range": "± 11983",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 107082,
+            "range": "± 324",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_write",
+            "value": 58414,
+            "range": "± 502",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_string",
+            "value": 66822,
+            "range": "± 614",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 63723,
+            "range": "± 484",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 71225,
+            "range": "± 1225",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_write",
+            "value": 101872,
+            "range": "± 208",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_string",
+            "value": 115308,
+            "range": "± 511",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 106812,
+            "range": "± 107",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 119974,
+            "range": "± 283",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5124,
+            "range": "± 15",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "younies.mahmoud@gmail.com",
+            "name": "Younies Mahmoud",
+            "username": "younies"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c2e29bd30a695d032bc82fb8606e3f6439991613",
+          "message": "Fixes the bidi documentation (#2621)\n\nFix bidi documentation",
+          "timestamp": "2022-09-24T01:11:20+02:00",
+          "tree_id": "85845f20eba917337c6c8a7704c365a330bcb182",
+          "url": "https://github.com/unicode-org/icu4x/commit/c2e29bd30a695d032bc82fb8606e3f6439991613"
+        },
+        "date": 1663975469153,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 77242,
+            "range": "± 488",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 129813,
+            "range": "± 351",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_write",
+            "value": 70554,
+            "range": "± 836",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_string",
+            "value": 80658,
+            "range": "± 300",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 77353,
+            "range": "± 194",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 85988,
+            "range": "± 443",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_write",
+            "value": 123713,
+            "range": "± 343",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_string",
+            "value": 139608,
+            "range": "± 631",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 129549,
+            "range": "± 363",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 145026,
+            "range": "± 451",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6047,
+            "range": "± 79",
             "unit": "ns/iter"
           }
         ]

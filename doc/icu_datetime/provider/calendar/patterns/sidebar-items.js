@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["GenericLengthPatternsV1","Data struct for generic date/time patterns, broken down by pattern length."],["GenericPatternV1",""],["LengthPatternsV1","Data struct for date/time patterns broken down by pattern length."]]});
+initSidebarItems({"struct":[["GenericLengthPatternsV1","Data struct for generic date/time patterns, broken down by pattern length."],["GenericPatternV1","A general purpose pattern representation. Used for date-time glue patterns."],["LengthPatternsV1","Data struct for date/time patterns broken down by pattern length."]]});

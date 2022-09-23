@@ -492,6 +492,53 @@
 <span id="487">487</span>
 <span id="488">488</span>
 <span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -515,11 +562,11 @@
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="doccomment">/// [`ZonedDateTimeFormatter`] is a formatter capable of formatting</span>
-<span class="doccomment">/// date/times with timezones from any calendar, selected at runtime. For the difference between this and [`TypedZonedDateTimeFormatter`](crate::TypedZonedDateTimeFormatter),</span>
+<span class="doccomment">/// date/times with time zones from any calendar, selected at runtime. For the difference between this and [`TypedZonedDateTimeFormatter`](crate::TypedZonedDateTimeFormatter),</span>
 <span class="doccomment">/// please read the [crate root docs][crate].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This is equivalently the composition of</span>
-<span class="doccomment">/// [`DateTimeFormatter`](crate::DateTimeFormatter) and [`TimeZoneFormatter`](crate::TimeZoneFormatter).</span>
+<span class="doccomment">/// [`DateTimeFormatter`](crate::DateTimeFormatter) and [`TimeZoneFormatter`].</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`ZonedDateTimeFormatter`] uses data from the [data provider]s, the selected [`DataLocale`], and the</span>
 <span class="doccomment">/// provided pattern to collect all data necessary to format a datetime with time zones into that locale.</span>
@@ -533,6 +580,8 @@
 <span class="doccomment">/// of the data using the instance.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Using a GMT time zone:</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
@@ -557,15 +606,60 @@
 <span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
 <span class="doccomment">/// let any_datetime = datetime.to_any();</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let time_zone: CustomTimeZone =</span>
-<span class="doccomment">///     &quot;+05:00&quot;.parse().expect(&quot;Time zone should parse&quot;);</span>
+<span class="doccomment">/// let time_zone = CustomTimeZone::utc();</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_writeable_eq!(</span>
 <span class="doccomment">///     zdtf</span>
 <span class="doccomment">///       .format(&amp;any_datetime, &amp;time_zone)</span>
-<span class="doccomment">///       .expect(&quot;calendars should match&quot;),</span>
-<span class="doccomment">///     &quot;Sep 1, 2020, 12:34:28 PM GMT+05:00&quot;);</span>
+<span class="doccomment">///       .expect(&quot;Calendars should match&quot;),</span>
+<span class="doccomment">///     &quot;Sep 1, 2020, 12:34:28 PM GMT&quot;);</span>
 <span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Using a non-GMT time zone, specified by id:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// use icu::calendar::{DateTime, Gregorian};</span>
+<span class="doccomment">/// use icu::datetime::{options::length, ZonedDateTimeFormatter};</span>
+<span class="doccomment">/// use icu::locid::locale;</span>
+<span class="doccomment">/// use icu::timezone::{CustomTimeZone, GmtOffset, MetazoneCalculator, ZoneVariant};</span>
+<span class="doccomment">/// use tinystr::TinyAsciiStr;</span>
+<span class="doccomment">/// use writeable::assert_writeable_eq;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let options = length::Bag::from_date_time_style(</span>
+<span class="doccomment">///     length::Date::Medium,</span>
+<span class="doccomment">///     length::Time::Full,</span>
+<span class="doccomment">/// );</span>
+<span class="doccomment">/// let zdtf = ZonedDateTimeFormatter::try_new_unstable(</span>
+<span class="doccomment">///     &amp;icu_testdata::unstable(),</span>
+<span class="doccomment">///     &amp;locale!(&quot;en&quot;).into(),</span>
+<span class="doccomment">///     options.into(),</span>
+<span class="doccomment">///     Default::default(),</span>
+<span class="doccomment">/// )</span>
+<span class="doccomment">/// .expect(&quot;Failed to create ZonedDateTimeFormatter instance.&quot;);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Create a DateTime at September 1, 2020 at 12:34:28 PM</span>
+<span class="doccomment">/// let datetime = DateTime::new_iso_datetime(2020, 9, 1, 12, 34, 28)</span>
+<span class="doccomment">///     .expect(&quot;Failed to construct DateTime.&quot;);</span>
+<span class="doccomment">/// let any_datetime = datetime.to_any();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Create a time zone for America/Chicago at GMT-6:</span>
+<span class="doccomment">/// let mut time_zone = CustomTimeZone::new_empty();</span>
+<span class="doccomment">/// time_zone.gmt_offset = &quot;-06:00&quot;.parse::&lt;GmtOffset&gt;().ok();</span>
+<span class="doccomment">/// time_zone.time_zone_id = &quot;uschi&quot;.parse::&lt;TinyAsciiStr&lt;8&gt;&gt;().ok().map(Into::into);</span>
+<span class="doccomment">/// time_zone.zone_variant = Some(ZoneVariant::daylight());</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Compute the metazone during `datetime` (September 1, 2020 at 12:34:28 PM):</span>
+<span class="doccomment">/// let mzc = MetazoneCalculator::try_new_unstable(&amp;icu_testdata::unstable()).unwrap();</span>
+<span class="doccomment">/// time_zone.maybe_calculate_metazone(&amp;mzc, &amp;datetime);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// assert_writeable_eq!(</span>
+<span class="doccomment">///     zdtf</span>
+<span class="doccomment">///       .format(&amp;any_datetime, &amp;time_zone)</span>
+<span class="doccomment">///       .expect(&quot;Calendars should match&quot;),</span>
+<span class="doccomment">///     &quot;Sep 1, 2020, 12:34:28 PM Central Daylight Time&quot;);</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`TimeZoneFormatter`]: crate::time_zone::TimeZoneFormatter</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ZonedDateTimeFormatter</span>(<span class="ident">raw::ZonedDateTimeFormatter</span>, <span class="ident">AnyCalendar</span>);
 
 <span class="kw">impl</span> <span class="ident">ZonedDateTimeFormatter</span> {
@@ -707,7 +801,7 @@
     <span class="doccomment">/// use icu::datetime::options::length;</span>
     <span class="doccomment">/// use icu::datetime::{DateTimeFormatterOptions, ZonedDateTimeFormatter};</span>
     <span class="doccomment">/// use icu::locid::locale;</span>
-    <span class="doccomment">/// use icu::datetime::TimeZoneFormatterOptions;</span>
+    <span class="doccomment">/// use icu::datetime::time_zone::TimeZoneFormatterOptions;</span>
     <span class="doccomment">/// use icu::timezone::CustomTimeZone;</span>
     <span class="doccomment">/// use std::str::FromStr;</span>
     <span class="doccomment">/// use writeable::assert_writeable_eq;</span>

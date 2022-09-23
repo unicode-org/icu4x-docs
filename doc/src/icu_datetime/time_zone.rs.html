@@ -1268,9 +1268,63 @@
 <span id="1263">1263</span>
 <span id="1264">1264</span>
 <span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
+<span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
+<span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
+
+<span class="doccomment">//! A formatter specifically for the time zone.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::time_zones::TimeZoneBcp47Id</span>;
 <span class="kw">use</span> <span class="ident">alloc::borrow::Cow</span>;
@@ -1290,6 +1344,9 @@
 };
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doc</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ZonedDateTimeFormatter</span>;
 
 <span class="doccomment">/// Loads a resource into its destination if the destination has not already been filled.</span>
 <span class="kw">fn</span> <span class="ident">load</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">P</span><span class="op">&gt;</span>(
@@ -1314,6 +1371,10 @@
     <span class="prelude-val">Ok</span>(())
 }
 
+<span class="doccomment">/// [`TimeZoneFormatter`] is available for users who need to separately control the formatting of time</span>
+<span class="doccomment">/// zones.  Note: most users might prefer [`ZonedDateTimeFormatter`], which includes default time zone</span>
+<span class="doccomment">/// formatting according to the calendar.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// [`TimeZoneFormatter`] uses data from the [data provider] and the selected locale</span>
 <span class="doccomment">/// to format time zones into that locale.</span>
 <span class="doccomment">///</span>
@@ -1329,11 +1390,15 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// Here, we configure the [`TimeZoneFormatter`] to first look for time zone formatting symbol</span>
+<span class="doccomment">/// data for `generic_non_location_short`, and if it does not exist, to subsequently check</span>
+<span class="doccomment">/// for `generic_non_location_long` data.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::calendar::DateTime;</span>
 <span class="doccomment">/// use icu::timezone::{CustomTimeZone, MetazoneCalculator};</span>
-<span class="doccomment">/// use icu_datetime::TimeZoneFormatter;</span>
-<span class="doccomment">/// use icu_locid::locale;</span>
+<span class="doccomment">/// use icu::datetime::{DateTimeFormatterError, time_zone::TimeZoneFormatter};</span>
+<span class="doccomment">/// use icu::locid::locale;</span>
 <span class="doccomment">/// use tinystr::tinystr;</span>
 <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
 <span class="doccomment">///</span>
@@ -1341,28 +1406,60 @@
 <span class="doccomment">/// //   1. The GMT offset</span>
 <span class="doccomment">/// //   2. The BCP-47 time zone ID</span>
 <span class="doccomment">/// //   3. A datetime (for metazone resolution)</span>
-<span class="doccomment">/// let mut time_zone = &quot;-0600&quot;.parse::&lt;CustomTimeZone&gt;().unwrap();</span>
-<span class="doccomment">/// time_zone.time_zone_id = Some(tinystr!(8, &quot;uschi&quot;).into());</span>
+<span class="doccomment">/// //   4. Note: we do not need the zone variant because of `load_generic_*()`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Set up the Metazone calculator and the DateTime to use in calculation</span>
 <span class="doccomment">/// let mzc = MetazoneCalculator::try_new_unstable(&amp;icu_testdata::unstable())</span>
 <span class="doccomment">///     .unwrap();</span>
 <span class="doccomment">/// let datetime = DateTime::new_iso_datetime(2022, 8, 29, 0, 0, 0)</span>
 <span class="doccomment">///     .unwrap();</span>
-<span class="doccomment">/// time_zone.maybe_calculate_metazone(&amp;mzc, &amp;datetime);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // Set up the formatter:</span>
+<span class="doccomment">/// // Set up the formatter</span>
 <span class="doccomment">/// let mut tzf = TimeZoneFormatter::try_new_unstable(</span>
 <span class="doccomment">///     &amp;icu_testdata::unstable(),</span>
 <span class="doccomment">///     &amp;locale!(&quot;en&quot;).into(),</span>
 <span class="doccomment">///     Default::default(),</span>
 <span class="doccomment">/// )</span>
 <span class="doccomment">/// .unwrap();</span>
-<span class="doccomment">/// tzf.load_generic_non_location_long(&amp;icu_testdata::unstable()).unwrap();</span>
+<span class="doccomment">/// tzf.load_generic_non_location_short(&amp;icu_testdata::unstable())?</span>
+<span class="doccomment">///     .load_generic_non_location_long(&amp;icu_testdata::unstable())?;</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// // Check the result:</span>
+<span class="doccomment">/// // &quot;uschi&quot; - has metazone symbol data for generic_non_location_short</span>
+<span class="doccomment">/// let mut time_zone = &quot;-0600&quot;.parse::&lt;CustomTimeZone&gt;().unwrap();</span>
+<span class="doccomment">/// time_zone.time_zone_id = Some(tinystr!(8, &quot;uschi&quot;).into());</span>
+<span class="doccomment">/// time_zone.maybe_calculate_metazone(&amp;mzc, &amp;datetime);</span>
 <span class="doccomment">/// assert_writeable_eq!(</span>
 <span class="doccomment">///     tzf.format(&amp;time_zone),</span>
-<span class="doccomment">///     &quot;Central Time&quot;</span>
+<span class="doccomment">///     &quot;CT&quot;</span>
 <span class="doccomment">/// );</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // &quot;ushnl&quot; - has time zone override symbol data for generic_non_location_short</span>
+<span class="doccomment">/// let mut time_zone = &quot;-1000&quot;.parse::&lt;CustomTimeZone&gt;().unwrap();</span>
+<span class="doccomment">/// time_zone.time_zone_id = Some(tinystr!(8, &quot;ushnl&quot;).into());</span>
+<span class="doccomment">/// time_zone.maybe_calculate_metazone(&amp;mzc, &amp;datetime);</span>
+<span class="doccomment">/// assert_writeable_eq!(</span>
+<span class="doccomment">///     tzf.format(&amp;time_zone),</span>
+<span class="doccomment">///     &quot;HST&quot;</span>
+<span class="doccomment">/// );</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // &quot;frpar&quot; - does not have symbol data for generic_non_location_short, so falls</span>
+<span class="doccomment">/// //           back to generic_non_location_long</span>
+<span class="doccomment">/// let mut time_zone = &quot;+0100&quot;.parse::&lt;CustomTimeZone&gt;().unwrap();</span>
+<span class="doccomment">/// time_zone.time_zone_id = Some(tinystr!(8, &quot;frpar&quot;).into());</span>
+<span class="doccomment">/// time_zone.maybe_calculate_metazone(&amp;mzc, &amp;datetime);</span>
+<span class="doccomment">/// assert_writeable_eq!(</span>
+<span class="doccomment">///     tzf.format(&amp;time_zone),</span>
+<span class="doccomment">///     &quot;Central European Time&quot;</span>
+<span class="doccomment">/// );</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // GMT with offset - used when metazone is not available</span>
+<span class="doccomment">/// let mut time_zone = &quot;+0530&quot;.parse::&lt;CustomTimeZone&gt;().unwrap();</span>
+<span class="doccomment">/// assert_writeable_eq!(</span>
+<span class="doccomment">///     tzf.format(&amp;time_zone),</span>
+<span class="doccomment">///     &quot;GMT+05:30&quot;</span>
+<span class="doccomment">/// );</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Ok::&lt;(), DateTimeFormatterError&gt;(())</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [data provider]: icu_provider</span>
@@ -1636,8 +1733,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::timezone::CustomTimeZone;</span>
-    <span class="doccomment">/// use icu_datetime::{TimeZoneFormatter, TimeZoneFormatterOptions};</span>
-    <span class="doccomment">/// use icu_locid::locale;</span>
+    <span class="doccomment">/// use icu::datetime::time_zone::{TimeZoneFormatter, TimeZoneFormatterOptions};</span>
+    <span class="doccomment">/// use icu::locid::locale;</span>
     <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let tzf = TimeZoneFormatter::try_new_unstable(</span>
@@ -1868,8 +1965,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::timezone::CustomTimeZone;</span>
-    <span class="doccomment">/// use icu_datetime::{TimeZoneFormatter, TimeZoneFormatterOptions};</span>
-    <span class="doccomment">/// use icu_locid::locale;</span>
+    <span class="doccomment">/// use icu::datetime::time_zone::{TimeZoneFormatter, TimeZoneFormatterOptions};</span>
+    <span class="doccomment">/// use icu::locid::locale;</span>
     <span class="doccomment">/// use writeable::assert_writeable_eq;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let tzf = TimeZoneFormatter::try_new_unstable(</span>
@@ -2016,11 +2113,15 @@
     <span class="ident">Off</span>,
 }
 
-<span class="doccomment">/// An enum for fallback formats.</span>
+<span class="doccomment">/// An enum for time zone fallback formats.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">FallbackFormat</span> {
+    <span class="doccomment">/// The ISO 8601 format for time zone format fallback.</span>
     <span class="ident">Iso8601</span>(<span class="ident">IsoFormat</span>, <span class="ident">IsoMinutes</span>, <span class="ident">IsoSeconds</span>),
+    <span class="doccomment">/// The localized GMT format for time zone format fallback.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [UTS 35 on Dates](https://unicode.org/reports/tr35/tr35-dates.html#71-time-zone-format-terminology) for more information.</span>
     <span class="ident">LocalizedGmt</span>,
 }
 
@@ -2034,6 +2135,9 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TimeZoneFormatterOptions</span> {
+    <span class="doccomment">/// The time zone format fallback option.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [UTS 35 on Dates](https://unicode.org/reports/tr35/tr35-dates.html#71-time-zone-format-terminology) for more information.</span>
     <span class="kw">pub</span> <span class="ident">fallback_format</span>: <span class="ident">FallbackFormat</span>,
 }
 

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["calendar","Data providers for calendar-specific symbols and patterns. Data struct definitions for calendar-specific symbols and patterns."],["time_zones","Data providers for time zones."]]});
+initSidebarItems({"mod":[["calendar","Data structs for calendar-specific symbols and patterns."],["time_zones","Data provider structs for time zones."]]});

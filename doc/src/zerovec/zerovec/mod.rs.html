@@ -918,6 +918,85 @@
 <span id="913">913</span>
 <span id="914">914</span>
 <span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1007,25 +1086,87 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">AsULE</span>,
 {
-    <span class="doccomment">/// Pointer to data</span>
-    <span class="ident">buf</span>: <span class="kw-2">*mut</span> [<span class="ident">T::ULE</span>],
-    <span class="doccomment">/// Borrowed if zero. Capacity of buffer above if not</span>
-    <span class="ident">capacity</span>: <span class="ident">usize</span>,
+    <span class="ident">vector</span>: <span class="ident">EyepatchHackVector</span><span class="op">&lt;</span><span class="ident">T::ULE</span><span class="op">&gt;</span>,
+
     <span class="doccomment">/// Marker type, signalling variance and dropck behavior</span>
     <span class="doccomment">/// by containing all potential types this type represents</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>)]</span> <span class="comment">// needed to get correct marker type behavior</span>
     <span class="ident">marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ULE</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>])<span class="op">&gt;</span>,
 }
 
+<span class="comment">// Send inherits as long as all fields are Send, but also references are Send only</span>
+<span class="comment">// when their contents are Sync (this is the core purpose of Sync), so</span>
+<span class="comment">// we need a Send+Sync bound since this struct can logically be a vector or a slice.</span>
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">AsULE</span><span class="op">&gt;</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T::ULE</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> {}
+<span class="comment">// Sync typically inherits as long as all fields are Sync</span>
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">AsULE</span><span class="op">&gt;</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T::ULE</span>: <span class="ident">Sync</span> {}
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">AsULE</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">ZeroVec</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">ZeroSlice</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Target</span> {
-        <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span> };
+        <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">T::ULE</span>] <span class="op">=</span> <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">as_slice</span>();
         <span class="ident">ZeroSlice::from_ule_slice</span>(<span class="ident">slice</span>)
+    }
+}
+
+<span class="comment">// Represents an unsafe potentially-owned vector/slice type, without a lifetime</span>
+<span class="comment">// working around dropck limitations.</span>
+<span class="comment">//</span>
+<span class="comment">// Must either be constructed by deconstructing a Vec&lt;U&gt;, or from &amp;[U] with capacity set to</span>
+<span class="comment">// zero. Should not outlive its source &amp;[U] in the borrowed case; this type does not in</span>
+<span class="comment">// and of itself uphold this guarantee, but the .as_slice() method assumes it.</span>
+<span class="comment">//</span>
+<span class="comment">// After https://github.com/rust-lang/rust/issues/34761 stabilizes,</span>
+<span class="comment">// we should remove this type and use #[may_dangle]</span>
+<span class="kw">struct</span> <span class="ident">EyepatchHackVector</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Pointer to data</span>
+    <span class="doccomment">/// This pointer is *always* valid, the reason it is represented as a raw pointer</span>
+    <span class="doccomment">/// is that it may logically represent an `&amp;[T::ULE]` or the ptr,len of a `Vec&lt;T::ULE&gt;`</span>
+    <span class="ident">buf</span>: <span class="kw-2">*mut</span> [<span class="ident">U</span>],
+    <span class="doccomment">/// Borrowed if zero. Capacity of buffer above if not</span>
+    <span class="ident">capacity</span>: <span class="ident">usize</span>,
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="ident">EyepatchHackVector</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> {
+    <span class="comment">// Return a slice to the inner data for an arbitrary caller-specified lifetime</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">as_arbitrary_slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">U</span>] {
+        <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span>
+    }
+    <span class="comment">// Return a slice to the inner data</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">as_slice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">U</span>] {
+        <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span> }
+    }
+
+    <span class="doccomment">/// Return this type as a vector</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Data MUST be known to be owned beforehand</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Because this borrows self, this is effectively creating two owners to the same</span>
+    <span class="doccomment">/// data, make sure that `self` is cleaned up after this</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// (this does not simply take `self` since then it wouldn&#39;t be usable from the Drop impl)</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_vec</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> {
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">capacity</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">U</span>] <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_slice</span>();
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">len</span>();
+        <span class="comment">// Safety: we are assuming owned, and in owned cases</span>
+        <span class="comment">// this always represents a valid vector</span>
+        <span class="ident">Vec::from_raw_parts</span>(<span class="self">self</span>.<span class="ident">buf</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">U</span>, <span class="ident">len</span>, <span class="self">self</span>.<span class="ident">capacity</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">EyepatchHackVector</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">capacity</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">unsafe</span> {
+                <span class="comment">// we don&#39;t need to clean up self here since we&#39;re already in a Drop impl</span>
+                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_vec</span>();
+            }
+        }
     }
 }
 
@@ -1035,8 +1176,10 @@
             <span class="ident">ZeroVec::new_owned</span>(<span class="self">self</span>.<span class="ident">as_ule_slice</span>().<span class="ident">into</span>())
         } <span class="kw">else</span> {
             <span class="self">Self</span> {
-                <span class="ident">buf</span>: <span class="self">self</span>.<span class="ident">buf</span>,
-                <span class="ident">capacity</span>: <span class="number">0</span>,
+                <span class="ident">vector</span>: <span class="ident">EyepatchHackVector</span> {
+                    <span class="ident">buf</span>: <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">buf</span>,
+                    <span class="ident">capacity</span>: <span class="number">0</span>,
+                },
                 <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
             }
         }
@@ -1136,13 +1279,18 @@
     <span class="doccomment">/// [`Self::alloc_from_slice()`].</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_owned</span>(<span class="ident">vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ULE</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+        <span class="comment">// Deconstruct the vector into parts</span>
+        <span class="comment">// This is the only part of the code that goes from Vec</span>
+        <span class="comment">// to ZeroVec, all other such operations should use this function</span>
         <span class="kw">let</span> <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">T::ULE</span>] <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">vec</span>;
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">slice</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="kw">_</span>] <span class="kw">as</span> <span class="kw-2">*mut</span> [<span class="kw">_</span>];
         <span class="kw">let</span> <span class="ident">capacity</span> <span class="op">=</span> <span class="ident">vec</span>.<span class="ident">capacity</span>();
         <span class="ident">mem::forget</span>(<span class="ident">vec</span>);
         <span class="self">Self</span> {
-            <span class="ident">buf</span>: <span class="ident">slice</span>,
-            <span class="ident">capacity</span>,
+            <span class="ident">vector</span>: <span class="ident">EyepatchHackVector</span> {
+                <span class="ident">buf</span>: <span class="ident">slice</span>,
+                <span class="ident">capacity</span>,
+            },
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
         }
     }
@@ -1153,8 +1301,10 @@
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new_borrowed</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">T::ULE</span>]) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="ident">slice</span> <span class="kw">as</span> <span class="kw-2">*const</span> [<span class="kw">_</span>] <span class="kw">as</span> <span class="kw-2">*mut</span> [<span class="kw">_</span>];
         <span class="self">Self</span> {
-            <span class="ident">buf</span>: <span class="ident">slice</span>,
-            <span class="ident">capacity</span>: <span class="number">0</span>,
+            <span class="ident">vector</span>: <span class="ident">EyepatchHackVector</span> {
+                <span class="ident">buf</span>: <span class="ident">slice</span>,
+                <span class="ident">capacity</span>: <span class="number">0</span>,
+            },
             <span class="ident">marker</span>: <span class="ident">PhantomData</span>,
         }
     }
@@ -1382,7 +1532,7 @@
     <span class="doccomment">/// Check if this type is fully owned</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_owned</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">capacity</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
+        <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">capacity</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// If this is a borrowed ZeroVec, return it as a slice that covers</span>
@@ -1392,7 +1542,9 @@
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_owned</span>() {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">ule_slice</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span> };
+            <span class="comment">// We can extend the lifetime of the slice to &#39;a</span>
+            <span class="comment">// since we know it is borrowed</span>
+            <span class="kw">let</span> <span class="ident">ule_slice</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">as_arbitrary_slice</span>() };
             <span class="prelude-val">Some</span>(<span class="ident">ZeroSlice::from_ule_slice</span>(<span class="ident">ule_slice</span>))
         }
     }
@@ -1638,7 +1790,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust,ignore</span>
+    <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// # use crate::zerovec::ule::AsULE;</span>
     <span class="doccomment">/// use zerovec::ZeroVec;</span>
     <span class="doccomment">///</span>
@@ -1668,7 +1820,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust,ignore</span>
+    <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// # use crate::zerovec::ule::AsULE;</span>
     <span class="doccomment">/// use zerovec::ZeroVec;</span>
     <span class="doccomment">///</span>
@@ -1676,15 +1828,17 @@
     <span class="doccomment">/// let mut zerovec: ZeroVec&lt;u16&gt; = ZeroVec::parse_byte_slice(bytes).expect(&quot;infallible&quot;);</span>
     <span class="doccomment">/// assert!(!zerovec.is_owned());</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// zerovec.to_mut_slice().push(12_u16.to_unaligned());</span>
+    <span class="doccomment">/// zerovec.to_mut_slice()[1] = 5u16.to_unaligned();</span>
     <span class="doccomment">/// assert!(zerovec.is_owned());</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_mut_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">T::ULE</span>] {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_owned</span>() {
-            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span> };
+            <span class="comment">// `buf` is either a valid vector or slice of `T::ULE`s, either</span>
+            <span class="comment">// way it&#39;s always valid</span>
+            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">as_slice</span>();
             <span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">ZeroVec::new_owned</span>(<span class="ident">slice</span>.<span class="ident">into</span>());
         }
-        <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span> }
+        <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">buf</span> }
     }
     <span class="doccomment">/// Remove all elements from this ZeroVec and reset it to an empty borrowed state.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
@@ -1697,15 +1851,19 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_cow</span>(<span class="self">self</span>) -&gt; <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, [<span class="ident">T::ULE</span>]<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_owned</span>() {
             <span class="kw">let</span> <span class="ident">vec</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-                <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span>).<span class="ident">len</span>();
-                <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">buf</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T::ULE</span>;
-                <span class="kw">let</span> <span class="ident">capacity</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">capacity</span>;
-                <span class="ident">mem::forget</span>(<span class="self">self</span>);
-                <span class="ident">Vec::from_raw_parts</span>(<span class="ident">ptr</span>, <span class="ident">len</span>, <span class="ident">capacity</span>)
+                <span class="comment">// safe to call: we know it&#39;s owned,</span>
+                <span class="comment">// and we mem::forget self immediately afterwards</span>
+                <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">get_vec</span>()
             };
+            <span class="ident">mem::forget</span>(<span class="self">self</span>);
             <span class="ident">Cow::Owned</span>(<span class="ident">vec</span>)
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buf</span> };
+            <span class="comment">// We can extend the lifetime of the slice to &#39;a</span>
+            <span class="comment">// since we know it is borrowed</span>
+            <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">vector</span>.<span class="ident">as_arbitrary_slice</span>() };
+            <span class="comment">// The borrowed destructor is a no-op, but we want to prevent</span>
+            <span class="comment">// the check being run</span>
+            <span class="ident">mem::forget</span>(<span class="self">self</span>);
             <span class="ident">Cow::Borrowed</span>(<span class="ident">slice</span>)
         }
     }

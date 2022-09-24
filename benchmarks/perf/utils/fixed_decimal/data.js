@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1663993981566,
+  "lastUpdate": 1664041573193,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -53128,6 +53128,126 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 71,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e14f99bfcd725d72d85e00eb61c2749d5c16183b",
+          "message": "from_tr35_string -> get_for_cldr_string (#2633)",
+          "timestamp": "2022-09-24T10:32:06-07:00",
+          "tree_id": "a6a6c4003f786a56f99a6d95bdb95cc1a519861a",
+          "url": "https://github.com/unicode-org/icu4x/commit/e14f99bfcd725d72d85e00eb61c2749d5c16183b"
+        },
+        "date": 1664041466487,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 153864,
+            "range": "± 9979",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26249,
+            "range": "± 1873",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 70610,
+            "range": "± 6667",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 321,
+            "range": "± 22",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 94,
+            "range": "± 11",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 86,
+            "range": "± 14",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "463c3e6ad24c0764e49d80d06e418bac596d63d1",
+          "message": "Propagate \"help choosing\" docs to all unstable constructors (#2634)",
+          "timestamp": "2022-09-24T10:31:21-07:00",
+          "tree_id": "e889a5ad59e4316dd91f513687a28541ce92a909",
+          "url": "https://github.com/unicode-org/icu4x/commit/463c3e6ad24c0764e49d80d06e418bac596d63d1"
+        },
+        "date": 1664041506334,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 139906,
+            "range": "± 1952",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 27981,
+            "range": "± 375",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 75166,
+            "range": "± 506",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 218,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 90,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 99,
             "range": "± 0",
             "unit": "ns/iter"
           }

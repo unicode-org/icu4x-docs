@@ -1119,16 +1119,6 @@
 <span id="1114">1114</span>
 <span id="1115">1115</span>
 <span id="1116">1116</span>
-<span id="1117">1117</span>
-<span id="1118">1118</span>
-<span id="1119">1119</span>
-<span id="1120">1120</span>
-<span id="1121">1121</span>
-<span id="1122">1122</span>
-<span id="1123">1123</span>
-<span id="1124">1124</span>
-<span id="1125">1125</span>
-<span id="1126">1126</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1145,14 +1135,12 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">types</span>, <span class="ident">AsCalendar</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>, <span class="ident">Ref</span>,
 };
-<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 
 <span class="kw">use</span> <span class="ident">icu_locid</span>::{
     <span class="ident">extensions::unicode::Value</span>, <span class="ident">extensions_unicode_key</span> <span class="kw">as</span> <span class="ident">key</span>, <span class="ident">extensions_unicode_value</span> <span class="kw">as</span> <span class="ident">value</span>,
     <span class="ident">subtags_language</span> <span class="kw">as</span> <span class="ident">language</span>, <span class="ident">Locale</span>,
 };
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">tinystr::tinystr</span>;
 
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
 
@@ -1186,19 +1174,19 @@
 <span class="doccomment">/// let manual_time = Time::try_new(12, 33, 12, 0).expect(&quot;failed to construct Time&quot;);</span>
 <span class="doccomment">/// // construct from era code, year, month code, day, time, and a calendar</span>
 <span class="doccomment">/// // This is March 28, 15 Heisei</span>
-<span class="doccomment">/// let manual_datetime = DateTime::new_from_codes(&quot;heisei&quot;.parse().unwrap(), 15, &quot;M03&quot;.parse().unwrap(), 28,</span>
+<span class="doccomment">/// let manual_datetime = DateTime::try_new_from_codes(&quot;heisei&quot;.parse().unwrap(), 15, &quot;M03&quot;.parse().unwrap(), 28,</span>
 <span class="doccomment">///                                                manual_time, calendar.clone())</span>
 <span class="doccomment">///                     .expect(&quot;Failed to construct DateTime manually&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // construct another datetime by converting from ISO</span>
-<span class="doccomment">/// let iso_datetime = DateTime::new_iso_datetime(2020, 9, 1, 12, 34, 28)</span>
+<span class="doccomment">/// let iso_datetime = DateTime::try_new_iso_datetime(2020, 9, 1, 12, 34, 28)</span>
 <span class="doccomment">///     .expect(&quot;Failed to construct ISO DateTime.&quot;);</span>
 <span class="doccomment">/// let iso_converted = iso_datetime.to_calendar(calendar);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // Construct a datetime in the appropriate typed calendar and convert</span>
 <span class="doccomment">/// let japanese_calendar = Japanese::try_new_unstable(&amp;icu_testdata::unstable()).unwrap();</span>
-<span class="doccomment">/// let japanese_datetime = DateTime::new_japanese_datetime(&quot;heisei&quot;.parse().unwrap(), 15, 3, 28,</span>
+<span class="doccomment">/// let japanese_datetime = DateTime::try_new_japanese_datetime(&quot;heisei&quot;.parse().unwrap(), 15, 3, 28,</span>
 <span class="doccomment">///                                                         12, 33, 12, japanese_calendar).unwrap();</span>
 <span class="doccomment">/// // This is a DateTime&lt;AnyCalendar&gt;</span>
 <span class="doccomment">/// let any_japanese_datetime = japanese_datetime.to_any();</span>
@@ -1743,14 +1731,16 @@
 <span class="kw">impl</span> <span class="ident">AnyCalendarKind</span> {
     <span class="doccomment">/// Construct from a BCP-47 string</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns None if the calendar is unknown</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bcp47_string</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::from_bcp47_bytes</span>(<span class="ident">x</span>.<span class="ident">as_bytes</span>())
+    <span class="doccomment">/// Returns None if the calendar is unknown. If you prefer an error, use</span>
+    <span class="doccomment">/// [`DateTimeError::unknown_any_calendar_kind`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_for_bcp47_string</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="self">Self</span>::get_for_bcp47_bytes</span>(<span class="ident">x</span>.<span class="ident">as_bytes</span>())
     }
     <span class="doccomment">/// Construct from a BCP-47 byte string</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns None if the calendar is unknown</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bcp47_bytes</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Returns None if the calendar is unknown. If you prefer an error, use</span>
+    <span class="doccomment">/// [`DateTimeError::unknown_any_calendar_kind`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_for_bcp47_bytes</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">x</span> {
             <span class="string">b&quot;gregory&quot;</span> =&gt; <span class="ident">AnyCalendarKind::Gregorian</span>,
             <span class="string">b&quot;buddhist&quot;</span> =&gt; <span class="ident">AnyCalendarKind::Buddhist</span>,
@@ -1766,9 +1756,10 @@
     }
     <span class="doccomment">/// Construct from a BCP-47 [`Value`]</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns an error if the calendar is unknown</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bcp47</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Value</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;gregory&quot;</span>) {
+    <span class="doccomment">/// Returns None if the calendar is unknown. If you prefer an error, use</span>
+    <span class="doccomment">/// [`DateTimeError::unknown_any_calendar_kind`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_for_bcp47_value</span>(<span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="ident">Value</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;gregory&quot;</span>) {
             <span class="ident">AnyCalendarKind::Gregorian</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;buddhist&quot;</span>) {
             <span class="ident">AnyCalendarKind::Buddhist</span>
@@ -1787,10 +1778,7 @@
         } <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="macro">value!</span>(<span class="string">&quot;ethioaa&quot;</span>) {
             <span class="ident">AnyCalendarKind::EthiopianAmeteAlem</span>
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">to_string</span>();
-            <span class="ident">string</span>.<span class="ident">truncate</span>(<span class="number">16</span>);
-            <span class="kw">let</span> <span class="ident">tiny</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">parse</span>().<span class="ident">unwrap_or</span>(<span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;unknown&quot;</span>));
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::UnknownAnyCalendarKind</span>(<span class="ident">tiny</span>));
+            <span class="kw">return</span> <span class="prelude-val">None</span>;
         })
     }
 
@@ -1826,37 +1814,29 @@
 
     <span class="doccomment">/// Extract the calendar component from a [`Locale`]</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Will not perform any kind of fallbacking and will error for</span>
-    <span class="doccomment">/// unknown or unspecified calendar kinds</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_locale</span>(<span class="ident">l</span>: <span class="kw-2">&amp;</span><span class="ident">Locale</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Returns None if the calendar is not specified or unknown. If you prefer an error, use</span>
+    <span class="doccomment">/// [`DateTimeError::unknown_any_calendar_kind`].</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_for_locale</span>(<span class="ident">l</span>: <span class="kw-2">&amp;</span><span class="ident">Locale</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">l</span>.<span class="ident">extensions</span>
             .<span class="ident">unicode</span>
             .<span class="ident">keywords</span>
             .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>))
-            .<span class="ident">ok_or</span>(<span class="ident">DateTimeError::UnknownAnyCalendarKind</span>(<span class="macro">tinystr!</span>(
-                <span class="number">16</span>,
-                <span class="string">&quot;(unspecified)&quot;</span>
-            )))
-            .<span class="ident">and_then</span>(<span class="ident"><span class="self">Self</span>::from_bcp47</span>)
+            .<span class="ident">and_then</span>(<span class="ident"><span class="self">Self</span>::get_for_bcp47_value</span>)
     }
 
     <span class="doccomment">/// Extract the calendar component from a [`DataLocale`]</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Will NOT perform any kind of fallbacking and will error for</span>
-    <span class="doccomment">/// unknown or unspecified calendar kinds</span>
-    <span class="kw">fn</span> <span class="ident">from_data_locale</span>(<span class="ident">l</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Returns None if the calendar is not specified or unknown. If you prefer an error, use</span>
+    <span class="doccomment">/// [`DateTimeError::unknown_any_calendar_kind`].</span>
+    <span class="kw">fn</span> <span class="ident">get_for_data_locale</span>(<span class="ident">l</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">l</span>.<span class="ident">get_unicode_ext</span>(<span class="kw-2">&amp;</span><span class="macro">key!</span>(<span class="string">&quot;ca&quot;</span>))
-            .<span class="ident">ok_or</span>(<span class="ident">DateTimeError::UnknownAnyCalendarKind</span>(<span class="macro">tinystr!</span>(
-                <span class="number">16</span>,
-                <span class="string">&quot;(unspecified)&quot;</span>
-            )))
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::from_bcp47</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>))
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::get_for_bcp47_value</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>))
     }
 
     <span class="comment">// Do not make public, this will eventually need fallback</span>
     <span class="comment">// data from the provider</span>
     <span class="kw">fn</span> <span class="ident">from_data_locale_with_fallback</span>(<span class="ident">l</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">kind</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::from_data_locale</span>(<span class="ident">l</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">kind</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_for_data_locale</span>(<span class="ident">l</span>) {
             <span class="ident">kind</span>
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">lang</span> <span class="op">=</span> <span class="ident">l</span>.<span class="ident">language</span>();
@@ -2016,7 +1996,7 @@
         <span class="kw">let</span> <span class="ident">era</span> <span class="op">=</span> <span class="ident">types::Era</span>(<span class="ident">era</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;era must parse&quot;</span>));
         <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="ident">types::MonthCode</span>(<span class="ident">month_code</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;month code must parse&quot;</span>));
 
-        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Date::new_from_codes</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">calendar</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Date::try_new_from_codes</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">calendar</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
             <span class="macro">panic!</span>(
                 <span class="string">&quot;Failed to construct date for {} with {:?}, {}, {}, {}: {}&quot;</span>,
                 <span class="ident">calendar</span>.<span class="ident">debug_name</span>(),
@@ -2065,7 +2045,7 @@
         <span class="kw">let</span> <span class="ident">era</span> <span class="op">=</span> <span class="ident">types::Era</span>(<span class="ident">era</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;era must parse&quot;</span>));
         <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="ident">types::MonthCode</span>(<span class="ident">month_code</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;month code must parse&quot;</span>));
 
-        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Date::new_from_codes</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">calendar</span>);
+        <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">Date::try_new_from_codes</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">calendar</span>);
         <span class="macro">assert_eq!</span>(
             <span class="ident">date</span>,
             <span class="prelude-val">Err</span>(<span class="ident">error</span>),

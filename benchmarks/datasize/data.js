@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664040891500,
+  "lastUpdate": 1664083431249,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -28343,6 +28343,156 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/e14f99bfcd725d72d85e00eb61c2749d5c16183b"
         },
         "date": 1664040825885,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ee45dc4f3e4cbee4a07f92020434d28e63959fe4",
+          "message": "Fix \"help choosing a constructor\" docs (#2631)",
+          "timestamp": "2022-09-24T22:12:27-07:00",
+          "tree_id": "b865fcadcb08e8f06ad469d64fd407e1cbfdc73a",
+          "url": "https://github.com/unicode-org/icu4x/commit/ee45dc4f3e4cbee4a07f92020434d28e63959fe4"
+        },
+        "date": 1664082823994,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "139e795cc84df7c5adc166beff851052554716e4",
+          "message": "Don't export utils functions from codepointinvlist (#2629)",
+          "timestamp": "2022-09-24T22:13:13-07:00",
+          "tree_id": "406baffbe78bda0d2b02df157b4ae2d29a6f36e9",
+          "url": "https://github.com/unicode-org/icu4x/commit/139e795cc84df7c5adc166beff851052554716e4"
+        },
+        "date": 1664082875141,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b4279d35203e3771542471388697fbfd15896bd3",
+          "message": "Add _with_length to TimeFormatter and [Typed]DateFormatter (#2617)",
+          "timestamp": "2022-09-24T22:15:17-07:00",
+          "tree_id": "72db3406581f4332e2fed7a01abe34c935f8acb4",
+          "url": "https://github.com/unicode-org/icu4x/commit/b4279d35203e3771542471388697fbfd15896bd3"
+        },
+        "date": 1664083010251,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3bd2e1444b62b6884eedc6b3439fcd2f032d7662",
+          "message": "Add constructor trio in icu_segmenter (#2616)",
+          "timestamp": "2022-09-24T22:16:00-07:00",
+          "tree_id": "e073750e671e6f29919abee5e9cef7ca0f9da786",
+          "url": "https://github.com/unicode-org/icu4x/commit/3bd2e1444b62b6884eedc6b3439fcd2f032d7662"
+        },
+        "date": 1664083041206,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "dbb02a18b48a63100c748e6ef3f39d5c734810f9",
+          "message": "Consistently use try_ or get_for_ prefix on fallible functions (#2615)",
+          "timestamp": "2022-09-24T22:16:59-07:00",
+          "tree_id": "14174484487c0908eda88c7cdd95bc05c6512f45",
+          "url": "https://github.com/unicode-org/icu4x/commit/dbb02a18b48a63100c748e6ef3f39d5c734810f9"
+        },
+        "date": 1664083366319,
         "tool": "ndjson",
         "benches": [
           {

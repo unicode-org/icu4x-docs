@@ -160,8 +160,6 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -172,7 +170,7 @@
 <span class="doccomment">//! Those extensions are treated as a pass-through, and no Unicode related</span>
 <span class="doccomment">//! behavior depends on them.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The main struct for this extension is [`Other`] which is a list of [`Keys`].</span>
+<span class="doccomment">//! The main struct for this extension is [`Other`] which is a list of [`Subtag`]s.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
@@ -182,15 +180,13 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! let mut loc: Locale = &quot;en-US-a-foo-faa&quot;.parse().expect(&quot;Parsing failed.&quot;);</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [`Keys`]: Key</span>
 
-<span class="kw">mod</span> <span class="ident">key</span>;
+<span class="kw">mod</span> <span class="ident">subtag</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser::ParserError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser::SubtagIterator</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">key::Key</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">subtag::Subtag</span>;
 
 <span class="doccomment">/// A list of [`Other Use Extensions`] as defined in [`Unicode Locale</span>
 <span class="doccomment">/// Identifier`] specification.</span>
@@ -201,22 +197,22 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu::locid::extensions::other::{Key, Other};</span>
+<span class="doccomment">/// use icu::locid::extensions::other::{Subtag, Other};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let key1: Key = &quot;foo&quot;.parse().expect(&quot;Failed to parse a Key.&quot;);</span>
-<span class="doccomment">/// let key2: Key = &quot;bar&quot;.parse().expect(&quot;Failed to parse a Key.&quot;);</span>
+<span class="doccomment">/// let subtag1: Subtag = &quot;foo&quot;.parse().expect(&quot;Failed to parse a Subtag.&quot;);</span>
+<span class="doccomment">/// let subtag2: Subtag = &quot;bar&quot;.parse().expect(&quot;Failed to parse a Subtag.&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let other = Other::from_vec_unchecked(b&#39;a&#39;, vec![key1, key2]);</span>
+<span class="doccomment">/// let other = Other::from_vec_unchecked(b&#39;a&#39;, vec![subtag1, subtag2]);</span>
 <span class="doccomment">/// assert_eq!(&amp;other.to_string(), &quot;-a-foo-bar&quot;);</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`Other Use Extensions`]: https://unicode.org/reports/tr35/#other_extensions</span>
 <span class="doccomment">/// [`Unicode Locale Identifier`]: https://unicode.org/reports/tr35/#Unicode_locale_identifier</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Hash</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Other</span>((<span class="ident">u8</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>));
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Other</span>((<span class="ident">u8</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Subtag</span><span class="op">&gt;</span>));
 
 <span class="kw">impl</span> <span class="ident">Other</span> {
-    <span class="doccomment">/// A constructor which takes a pre-sorted list of [`Key`].</span>
+    <span class="doccomment">/// A constructor which takes a pre-sorted list of [`Subtag`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">///</span>
@@ -225,15 +221,15 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use icu::locid::extensions::other::{Key, Other};</span>
+    <span class="doccomment">/// use icu::locid::extensions::other::{Subtag, Other};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let key1: Key = &quot;foo&quot;.parse().expect(&quot;Failed to parse a Key.&quot;);</span>
-    <span class="doccomment">/// let key2: Key = &quot;bar&quot;.parse().expect(&quot;Failed to parse a Key.&quot;);</span>
+    <span class="doccomment">/// let subtag1: Subtag = &quot;foo&quot;.parse().expect(&quot;Failed to parse a Subtag.&quot;);</span>
+    <span class="doccomment">/// let subtag2: Subtag = &quot;bar&quot;.parse().expect(&quot;Failed to parse a Subtag.&quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let other = Other::from_vec_unchecked(b&#39;a&#39;, vec![key1, key2]);</span>
+    <span class="doccomment">/// let other = Other::from_vec_unchecked(b&#39;a&#39;, vec![subtag1, subtag2]);</span>
     <span class="doccomment">/// assert_eq!(&amp;other.to_string(), &quot;-a-foo-bar&quot;);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec_unchecked</span>(<span class="ident">ext</span>: <span class="ident">u8</span>, <span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec_unchecked</span>(<span class="ident">ext</span>: <span class="ident">u8</span>, <span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Subtag</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="macro">assert!</span>(<span class="ident">ext</span>.<span class="ident">is_ascii_alphabetic</span>());
         <span class="self">Self</span>((<span class="ident">ext</span>, <span class="ident">input</span>))
     }
@@ -243,10 +239,10 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">subtag</span>) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek</span>() {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">Key::valid_key</span>(<span class="ident">subtag</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">Subtag::valid_key</span>(<span class="ident">subtag</span>) {
                 <span class="kw">break</span>;
             }
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">key</span>) <span class="op">=</span> <span class="ident">Key::try_from_bytes</span>(<span class="ident">subtag</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">key</span>) <span class="op">=</span> <span class="ident">Subtag::try_from_bytes</span>(<span class="ident">subtag</span>) {
                 <span class="ident">keys</span>.<span class="ident">push</span>(<span class="ident">key</span>);
             }
             <span class="ident">iter</span>.<span class="ident">next</span>();

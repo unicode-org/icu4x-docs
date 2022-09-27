@@ -1024,7 +1024,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso</span>::{<span class="ident">Iso</span>, <span class="ident">IsoDateInner</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::{<span class="ident">EraStartDate</span>, <span class="ident">JapaneseErasV1Marker</span>, <span class="ident">JapaneseExtendedErasV1Marker</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">types</span>, <span class="ident">AsCalendar</span>, <span class="ident">Calendar</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">DateTimeError</span>, <span class="ident">Ref</span>,
+    <span class="ident">types</span>, <span class="ident">AsCalendar</span>, <span class="ident">Calendar</span>, <span class="ident">CalendarError</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>, <span class="ident">Ref</span>,
 };
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">tinystr</span>::{<span class="ident">tinystr</span>, <span class="ident">TinyStr16</span>};
@@ -1097,7 +1097,7 @@
     <span class="doccomment">/// &lt;/div&gt;</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">JapaneseErasV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">eras</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load</span>(<span class="ident">DataRequest</span> {
                 <span class="ident">locale</span>: <span class="ident">Default::default</span>(),
@@ -1107,7 +1107,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">eras</span> })
     }
 
-    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">skip</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">DataError</span>);
+    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">skip</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">CalendarError</span>);
 
     <span class="kw">fn</span> <span class="ident">japanese_date_from_codes</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
@@ -1116,16 +1116,16 @@
         <span class="ident">month_code</span>: <span class="ident">types::MonthCode</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
         <span class="ident">debug_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JapaneseDateInner</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JapaneseDateInner</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::calendar_arithmetic::ordinal_solar_month_from_code</span>(<span class="ident">month_code</span>);
         <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">month</span>) <span class="op">=</span> <span class="ident">month</span> {
             <span class="ident">month</span>
         } <span class="kw">else</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::UnknownMonthCode</span>(<span class="ident">month_code</span>.<span class="number">0</span>, <span class="ident">debug_name</span>));
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::UnknownMonthCode</span>(<span class="ident">month_code</span>.<span class="number">0</span>, <span class="ident">debug_name</span>));
         };
 
         <span class="kw">if</span> <span class="ident">month</span> <span class="op">&gt;</span> <span class="number">12</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::UnknownMonthCode</span>(<span class="ident">month_code</span>.<span class="number">0</span>, <span class="ident">debug_name</span>));
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::UnknownMonthCode</span>(<span class="ident">month_code</span>.<span class="number">0</span>, <span class="ident">debug_name</span>));
         }
 
         <span class="self">self</span>.<span class="ident">new_japanese_date_inner</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>)
@@ -1141,7 +1141,7 @@
     <span class="doccomment">/// &lt;/div&gt;</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">JapaneseExtendedErasV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
         <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">eras</span> <span class="op">=</span> <span class="ident">data_provider</span>
             .<span class="ident">load</span>(<span class="ident">DataRequest</span> {
                 <span class="ident">locale</span>: <span class="ident">Default::default</span>(),
@@ -1151,7 +1151,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="ident">Japanese</span> { <span class="ident">eras</span>: <span class="ident">eras</span>.<span class="ident">cast</span>() }))
     }
 
-    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">skip</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">DataError</span>);
+    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">skip</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">CalendarError</span>);
 }
 
 <span class="kw">impl</span> <span class="ident">Calendar</span> <span class="kw">for</span> <span class="ident">Japanese</span> {
@@ -1163,7 +1163,7 @@
         <span class="ident">year</span>: <span class="ident">i32</span>,
         <span class="ident">month_code</span>: <span class="ident">types::MonthCode</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">japanese_date_from_codes</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month_code</span>, <span class="ident">day</span>, <span class="self">self</span>.<span class="ident">debug_name</span>())
     }
 
@@ -1270,7 +1270,7 @@
         <span class="ident">year</span>: <span class="ident">i32</span>,
         <span class="ident">month_code</span>: <span class="ident">types::MonthCode</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::DateInner</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="number">0</span>
             .<span class="ident">japanese_date_from_codes</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month_code</span>, <span class="ident">day</span>, <span class="self">self</span>.<span class="ident">debug_name</span>())
     }
@@ -1395,7 +1395,7 @@
         <span class="ident">month</span>: <span class="ident">u8</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
         <span class="ident">japanese_calendar</span>: <span class="ident">A</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Date</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Date</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">japanese_calendar</span>
             .<span class="ident">as_calendar</span>()
             .<span class="ident">new_japanese_date_inner</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>)<span class="question-mark">?</span>;
@@ -1441,7 +1441,7 @@
         <span class="ident">month</span>: <span class="ident">u8</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
         <span class="ident">japanext_calendar</span>: <span class="ident">A</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Date</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Date</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">japanext_calendar</span>
             .<span class="ident">as_calendar</span>()
             .<span class="number">0</span>
@@ -1505,7 +1505,7 @@
         <span class="ident">minute</span>: <span class="ident">u8</span>,
         <span class="ident">second</span>: <span class="ident">u8</span>,
         <span class="ident">japanese_calendar</span>: <span class="ident">A</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">DateTime</span> {
             <span class="ident">date</span>: <span class="ident">Date::try_new_japanese_date</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">japanese_calendar</span>)<span class="question-mark">?</span>,
             <span class="ident">time</span>: <span class="ident">types::Time::try_new</span>(<span class="ident">hour</span>, <span class="ident">minute</span>, <span class="ident">second</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1562,7 +1562,7 @@
         <span class="ident">minute</span>: <span class="ident">u8</span>,
         <span class="ident">second</span>: <span class="ident">u8</span>,
         <span class="ident">japanext_calendar</span>: <span class="ident">A</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">DateTime</span> {
             <span class="ident">date</span>: <span class="ident">Date::try_new_japanese_extended_date</span>(<span class="ident">era</span>, <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>, <span class="ident">japanext_calendar</span>)<span class="question-mark">?</span>,
             <span class="ident">time</span>: <span class="ident">types::Time::try_new</span>(<span class="ident">hour</span>, <span class="ident">minute</span>, <span class="ident">second</span>, <span class="number">0</span>)<span class="question-mark">?</span>,
@@ -1659,7 +1659,7 @@
     <span class="kw">fn</span> <span class="ident">japanese_era_range_for</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">era</span>: <span class="ident">TinyStr16</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">EraStartDate</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EraStartDate</span><span class="op">&gt;</span>), <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">EraStartDate</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">EraStartDate</span><span class="op">&gt;</span>), <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="comment">// Avoid linear search by trying well known eras</span>
         <span class="kw">if</span> <span class="ident">era</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;reiwa&quot;</span>) {
             <span class="comment">// Check if we&#39;re the last</span>
@@ -1703,7 +1703,7 @@
             <span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="ident">start</span>, <span class="ident">data</span>.<span class="ident">get</span>(<span class="ident">index</span> <span class="op">+</span> <span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="number">0</span>)));
         }
 
-        <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::UnknownEra</span>(<span class="ident">era</span>, <span class="self">self</span>.<span class="ident">debug_name</span>()))
+        <span class="prelude-val">Err</span>(<span class="ident">CalendarError::UnknownEra</span>(<span class="ident">era</span>, <span class="self">self</span>.<span class="ident">debug_name</span>()))
     }
 
     <span class="kw">fn</span> <span class="ident">new_japanese_date_inner</span>(
@@ -1712,18 +1712,18 @@
         <span class="ident">year</span>: <span class="ident">i32</span>,
         <span class="ident">month</span>: <span class="ident">u8</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JapaneseDateInner</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JapaneseDateInner</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cal</span> <span class="op">=</span> <span class="ident">Ref</span>(<span class="self">self</span>);
         <span class="kw">if</span> <span class="ident">era</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;bce&quot;</span>) {
             <span class="kw">if</span> <span class="ident">year</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::OutOfRange</span>);
             }
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Date::try_new_iso_date</span>(<span class="number">1</span> <span class="op">-</span> <span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>)<span class="question-mark">?</span>
                 .<span class="ident">to_calendar</span>(<span class="ident">cal</span>)
                 .<span class="ident">inner</span>);
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">era</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro">tinystr!</span>(<span class="number">16</span>, <span class="string">&quot;ce&quot;</span>) {
             <span class="kw">if</span> <span class="ident">year</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::OutOfRange</span>);
             }
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Date::try_new_iso_date</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="ident">day</span>)<span class="question-mark">?</span>
                 .<span class="ident">to_calendar</span>(<span class="ident">cal</span>)
@@ -1739,10 +1739,10 @@
         };
 
         <span class="kw">if</span> <span class="ident">date_in_iso</span> <span class="op">&lt;</span> <span class="ident">era_start</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::OutOfRange</span>);
         } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">next_era_start</span>) <span class="op">=</span> <span class="ident">next_era_start</span> {
             <span class="kw">if</span> <span class="ident">date_in_iso</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">next_era_start</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::OutOfRange</span>);
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::OutOfRange</span>);
             }
         }
 
@@ -1844,7 +1844,7 @@
         <span class="ident">year</span>: <span class="ident">i32</span>,
         <span class="ident">month</span>: <span class="ident">u8</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
-        <span class="ident">error</span>: <span class="ident">DateTimeError</span>,
+        <span class="ident">error</span>: <span class="ident">CalendarError</span>,
     ) {
         <span class="kw">let</span> <span class="ident">era</span> <span class="op">=</span> <span class="ident">types::Era</span>(<span class="ident">era</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;era must parse&quot;</span>));
 
@@ -1862,7 +1862,7 @@
         <span class="ident">year</span>: <span class="ident">i32</span>,
         <span class="ident">month</span>: <span class="ident">u8</span>,
         <span class="ident">day</span>: <span class="ident">u8</span>,
-        <span class="ident">error</span>: <span class="ident">DateTimeError</span>,
+        <span class="ident">error</span>: <span class="ident">CalendarError</span>,
     ) {
         <span class="kw">let</span> <span class="ident">era</span> <span class="op">=</span> <span class="ident">types::Era</span>(<span class="ident">era</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;era must parse&quot;</span>));
 
@@ -1888,11 +1888,11 @@
         <span class="ident">single_test_roundtrip</span>(<span class="ident">calendar</span>, <span class="string">&quot;heisei&quot;</span>, <span class="number">12</span>, <span class="number">3</span>, <span class="number">1</span>);
         <span class="ident">single_test_roundtrip</span>(<span class="ident">calendar</span>, <span class="string">&quot;taisho&quot;</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>);
         <span class="comment">// Heisei did not start until later in the year</span>
-        <span class="ident">single_test_error</span>(<span class="ident">calendar</span>, <span class="string">&quot;heisei&quot;</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="ident">DateTimeError::OutOfRange</span>);
+        <span class="ident">single_test_error</span>(<span class="ident">calendar</span>, <span class="string">&quot;heisei&quot;</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="ident">CalendarError::OutOfRange</span>);
 
         <span class="ident">single_test_roundtrip_ext</span>(<span class="ident">calendar_ext</span>, <span class="string">&quot;heisei&quot;</span>, <span class="number">12</span>, <span class="number">3</span>, <span class="number">1</span>);
         <span class="ident">single_test_roundtrip_ext</span>(<span class="ident">calendar_ext</span>, <span class="string">&quot;taisho&quot;</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">1</span>);
-        <span class="ident">single_test_error_ext</span>(<span class="ident">calendar_ext</span>, <span class="string">&quot;heisei&quot;</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="ident">DateTimeError::OutOfRange</span>);
+        <span class="ident">single_test_error_ext</span>(<span class="ident">calendar_ext</span>, <span class="string">&quot;heisei&quot;</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="ident">CalendarError::OutOfRange</span>);
 
         <span class="ident">single_test_roundtrip_ext</span>(<span class="ident">calendar_ext</span>, <span class="string">&quot;hakuho-672&quot;</span>, <span class="number">4</span>, <span class="number">3</span>, <span class="number">1</span>);
         <span class="ident">single_test_error</span>(
@@ -1901,7 +1901,7 @@
             <span class="number">4</span>,
             <span class="number">3</span>,
             <span class="number">1</span>,
-            <span class="ident">DateTimeError::UnknownEra</span>(<span class="string">&quot;hakuho-672&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(), <span class="string">&quot;Japanese (Modern eras only)&quot;</span>),
+            <span class="ident">CalendarError::UnknownEra</span>(<span class="string">&quot;hakuho-672&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(), <span class="string">&quot;Japanese (Modern eras only)&quot;</span>),
         );
 
         <span class="comment">// handle bce/ce</span>
@@ -1911,8 +1911,8 @@
         <span class="ident">single_test_roundtrip</span>(<span class="ident">calendar</span>, <span class="string">&quot;ce&quot;</span>, <span class="number">100</span>, <span class="number">3</span>, <span class="number">1</span>);
         <span class="ident">single_test_roundtrip_ext</span>(<span class="ident">calendar_ext</span>, <span class="string">&quot;ce&quot;</span>, <span class="number">100</span>, <span class="number">3</span>, <span class="number">1</span>);
         <span class="ident">single_test_roundtrip</span>(<span class="ident">calendar</span>, <span class="string">&quot;ce&quot;</span>, <span class="number">1000</span>, <span class="number">3</span>, <span class="number">1</span>);
-        <span class="ident">single_test_error</span>(<span class="ident">calendar</span>, <span class="string">&quot;ce&quot;</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="ident">DateTimeError::OutOfRange</span>);
-        <span class="ident">single_test_error</span>(<span class="ident">calendar</span>, <span class="string">&quot;bce&quot;</span>, <span class="op">-</span><span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="ident">DateTimeError::OutOfRange</span>);
+        <span class="ident">single_test_error</span>(<span class="ident">calendar</span>, <span class="string">&quot;ce&quot;</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="ident">CalendarError::OutOfRange</span>);
+        <span class="ident">single_test_error</span>(<span class="ident">calendar</span>, <span class="string">&quot;bce&quot;</span>, <span class="op">-</span><span class="number">1</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="ident">CalendarError::OutOfRange</span>);
 
         <span class="comment">// handle the cases where bce/ce get adjusted to different eras</span>
         <span class="comment">// single_test_gregorian_roundtrip(calendar, &quot;ce&quot;, 2021, 3, 1, &quot;reiwa&quot;, 3);</span>
@@ -1931,7 +1931,7 @@
             <span class="number">1</span>,
             <span class="number">7</span>,
             <span class="number">5</span>,
-            <span class="ident">DateTimeError::OutOfRange</span>,
+            <span class="ident">CalendarError::OutOfRange</span>,
         );
         <span class="ident">single_test_error_ext</span>(
             <span class="ident">calendar_ext</span>,
@@ -1939,7 +1939,7 @@
             <span class="number">1</span>,
             <span class="number">4</span>,
             <span class="number">13</span>,
-            <span class="ident">DateTimeError::OutOfRange</span>,
+            <span class="ident">CalendarError::OutOfRange</span>,
         );
     }
 }

@@ -607,12 +607,17 @@
 <span id="602">602</span>
 <span id="603">603</span>
 <span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">error::DateTimeError</span>,
+    <span class="ident">error::CalendarError</span>,
     <span class="ident">provider::WeekDataV1</span>,
     <span class="ident">types</span>::{<span class="ident">DayOfMonth</span>, <span class="ident">DayOfYearInfo</span>, <span class="ident">IsoWeekday</span>, <span class="ident">WeekOfMonth</span>},
 };
@@ -657,7 +662,7 @@
     <span class="doccomment">/// &lt;div class=&quot;stab unstable&quot;&gt;</span>
     <span class="doccomment">/// ⚠️ The bounds on this function may change over time, including in SemVer minor releases.</span>
     <span class="doccomment">/// &lt;/div&gt;</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">P</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">P</span>, <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::provider::WeekDataV1Marker</span><span class="op">&gt;</span>,
     {
@@ -668,9 +673,14 @@
             })
             .<span class="ident">and_then</span>(<span class="ident">DataResponse::take_payload</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">payload</span><span class="op">|</span> <span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">into</span>())
+            .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
     }
 
-    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">include</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">DataError</span>);
+    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(
+        <span class="ident">locale</span>: <span class="ident">include</span>,
+        <span class="ident">options</span>: <span class="ident">skip</span>,
+        <span class="ident">error</span>: <span class="ident">CalendarError</span>
+    );
 
     <span class="doccomment">/// Returns the week of month according to a calendar with min_week_days = 1.</span>
     <span class="doccomment">///</span>
@@ -739,7 +749,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">day_of_year_info</span>: <span class="ident">DayOfYearInfo</span>,
         <span class="ident">iso_weekday</span>: <span class="ident">IsoWeekday</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="ident">week_of</span>(
             <span class="self">self</span>,
             <span class="ident">day_of_year_info</span>.<span class="ident">days_in_prev_year</span> <span class="kw">as</span> <span class="ident">u16</span>,
@@ -793,9 +803,9 @@
 
 <span class="kw">impl</span> <span class="ident">UnitInfo</span> {
     <span class="doccomment">/// Creates a UnitInfo for a given year or month.</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">first_day</span>: <span class="ident">IsoWeekday</span>, <span class="ident">duration_days</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UnitInfo</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">first_day</span>: <span class="ident">IsoWeekday</span>, <span class="ident">duration_days</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">UnitInfo</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">duration_days</span> <span class="op">&lt;</span> <span class="ident">MIN_UNIT_DAYS</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DateTimeError::Underflow</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">CalendarError::Underflow</span> {
                 <span class="ident">field</span>: <span class="string">&quot;Month/Year duration&quot;</span>,
                 <span class="ident">min</span>: <span class="ident">MIN_UNIT_DAYS</span> <span class="kw">as</span> <span class="ident">isize</span>,
             });
@@ -883,7 +893,7 @@
     <span class="ident">num_days_in_unit</span>: <span class="ident">u16</span>,
     <span class="ident">day</span>: <span class="ident">u16</span>,
     <span class="ident">week_day</span>: <span class="ident">IsoWeekday</span>,
-) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="ident">UnitInfo::new</span>(
         <span class="comment">// The first day of this month/year is (day - 1) days from `day`.</span>
         <span class="ident">add_to_weekday</span>(<span class="ident">week_day</span>, <span class="number">1</span> <span class="op">-</span> <span class="ident">i32::from</span>(<span class="ident">day</span>)),
@@ -942,7 +952,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">week_of</span>, <span class="ident">RelativeUnit</span>, <span class="ident">RelativeWeek</span>, <span class="ident">UnitInfo</span>, <span class="ident">WeekCalculator</span>, <span class="ident">WeekOf</span>};
-    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">error::DateTimeError</span>, <span class="ident">types::IsoWeekday</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>};
+    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">error::CalendarError</span>, <span class="ident">types::IsoWeekday</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>};
 
     <span class="kw">static</span> <span class="ident">ISO_CALENDAR</span>: <span class="ident">WeekCalculator</span> <span class="op">=</span> <span class="ident">WeekCalculator</span> {
         <span class="ident">first_weekday</span>: <span class="ident">IsoWeekday::Monday</span>,
@@ -998,7 +1008,7 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_num_weeks</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">test_num_weeks</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="comment">// 4 days in first &amp; last week.</span>
         <span class="macro">assert_eq!</span>(
             <span class="ident">UnitInfo::new</span>(<span class="ident">IsoWeekday::Thursday</span>, <span class="number">4</span> <span class="op">+</span> <span class="number">2</span> <span class="op">*</span> <span class="number">7</span> <span class="op">+</span> <span class="number">4</span>)<span class="question-mark">?</span>.<span class="ident">num_weeks</span>(<span class="kw-2">&amp;</span><span class="ident">ISO_CALENDAR</span>),
@@ -1058,7 +1068,7 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_relative_week_of_month</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">test_relative_week_of_month</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">min_week_days</span> <span class="kw">in</span> <span class="number">1</span>..<span class="number">7</span> {
             <span class="kw">for</span> <span class="ident">start_of_week</span> <span class="kw">in</span> <span class="number">1</span>..<span class="number">7</span> {
                 <span class="kw">let</span> <span class="ident">calendar</span> <span class="op">=</span> <span class="ident">WeekCalculator</span> {
@@ -1092,7 +1102,7 @@
     <span class="kw">fn</span> <span class="ident">week_of_month_from_iso_date</span>(
         <span class="ident">calendar</span>: <span class="kw-2">&amp;</span><span class="ident">WeekCalculator</span>,
         <span class="ident">yyyymmdd</span>: <span class="ident">u32</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WeekOf</span>, <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> (<span class="ident">yyyymmdd</span> <span class="op">/</span> <span class="number">10000</span>) <span class="kw">as</span> <span class="ident">i32</span>;
         <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> ((<span class="ident">yyyymmdd</span> <span class="op">/</span> <span class="number">100</span>) <span class="op">%</span> <span class="number">100</span>) <span class="kw">as</span> <span class="ident">u8</span>;
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> (<span class="ident">yyyymmdd</span> <span class="op">%</span> <span class="number">100</span>) <span class="kw">as</span> <span class="ident">u8</span>;
@@ -1110,7 +1120,7 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_week_of_month_using_dates</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DateTimeError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">test_week_of_month_using_dates</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">CalendarError</span><span class="op">&gt;</span> {
         <span class="macro">assert_eq!</span>(
             <span class="ident">week_of_month_from_iso_date</span>(<span class="kw-2">&amp;</span><span class="ident">ISO_CALENDAR</span>, <span class="number">20210418</span>)<span class="question-mark">?</span>,
             <span class="ident">WeekOf</span> {

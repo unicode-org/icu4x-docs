@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["reference","Reference version of the Plural Rules parser, AST and serializer."]]});
+initSidebarItems({"struct":[["RawPluralOperands","🚧 [Experimental] A struct for low-level users who want to construct a [`PluralOperands`] directly based on the LDML Plural Operand definitions. This may be useful for people with experimental rules parsing."]]});

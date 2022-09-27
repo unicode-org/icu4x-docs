@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664233833929,
+  "lastUpdate": 1664236664726,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -28733,6 +28733,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/39b0797a56ff36fc82fde6e52093f6219e4c7b5e"
         },
         "date": 1664233744765,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "774971a31cf76fc126f264ff430326ea4d01b9f4",
+          "message": "Make PluralOperands fields private, add static constructor (#2598)",
+          "timestamp": "2022-09-26T23:53:46Z",
+          "tree_id": "5d90895c0732c35ddebe0f987c58f0f850cf00f8",
+          "url": "https://github.com/unicode-org/icu4x/commit/774971a31cf76fc126f264ff430326ea4d01b9f4"
+        },
+        "date": 1664236508210,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eeed42d3771b29764ad15b9f8a393896408fa4b9",
+          "message": "Update utils in prep for 1.0 (#2651)\n\n\r\n* reformat doctests for  bumped utils crates\r\n\r\n* Bump fixed_decimal to 0.5.0\r\n\r\n* Bump zerovec to 0.9\r\n\r\n* Bump tinystr to 0.7\r\n\r\n* Bump litemap to 0.6.0",
+          "timestamp": "2022-09-26T23:55:24Z",
+          "tree_id": "2c8098b55aaa88a1f60692eed7c74bcfef8df0cf",
+          "url": "https://github.com/unicode-org/icu4x/commit/eeed42d3771b29764ad15b9f8a393896408fa4b9"
+        },
+        "date": 1664236608170,
         "tool": "ndjson",
         "benches": [
           {

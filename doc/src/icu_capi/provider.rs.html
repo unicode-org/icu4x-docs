@@ -416,7 +416,7 @@
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span> <span class="comment">// feature-specific</span>
-<span class="kw">use</span> <span class="ident">icu_provider::RcWrapBounds</span>;
+<span class="kw">use</span> <span class="ident">icu_provider::MaybeSendSync</span>;
 <span class="kw">use</span> <span class="ident">icu_provider_adapters::empty::EmptyDataProvider</span>;
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_imports</span>)]</span> <span class="comment">// feature-specific</span>
 <span class="kw">use</span> <span class="ident">yoke</span>::{<span class="ident">trait_hack::YokeTraitHack</span>, <span class="ident">Yokeable</span>};
@@ -546,7 +546,7 @@
             <span class="macro">panic!</span>(<span class="string">&quot;Requires feature &#39;buffer_provider&#39;&quot;</span>);
 
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;buffer_provider&quot;</span>)]</span>
-            <span class="ident">icu_provider_blob::BlobDataProvider::try_new_from_blob</span>(<span class="ident">blob</span>)
+            <span class="ident">icu_provider_blob::BlobDataProvider::try_new_from_blob</span>(<span class="ident">Box::from</span>(<span class="ident">blob</span>)) <span class="comment">// allocates</span>
                 .<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
                 .<span class="ident">map</span>(<span class="ident">convert_buffer_provider</span>)
                 .<span class="ident">into</span>()
@@ -770,7 +770,7 @@
     <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
     <span class="ident">M::Yokeable</span>: <span class="ident">ZeroFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M::Yokeable</span><span class="op">&gt;</span>,
-    <span class="ident">M::Yokeable</span>: <span class="ident">RcWrapBounds</span>,
+    <span class="ident">M::Yokeable</span>: <span class="ident">MaybeSendSync</span>,
 {
     <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
@@ -786,7 +786,7 @@
     <span class="ident">M</span>: <span class="ident">KeyedDataMarker</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">YokeTraitHack</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">M::Yokeable</span> <span class="kw">as</span> <span class="ident">Yokeable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span><span class="op">&gt;</span>: <span class="ident">Clone</span>,
     <span class="ident">M::Yokeable</span>: <span class="ident">ZeroFrom</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">M::Yokeable</span><span class="op">&gt;</span>,
-    <span class="ident">M::Yokeable</span>: <span class="ident">RcWrapBounds</span>,
+    <span class="ident">M::Yokeable</span>: <span class="ident">MaybeSendSync</span>,
     <span class="comment">// Actual bound:</span>
     <span class="comment">//     for&lt;&#39;de&gt; &lt;M::Yokeable as Yokeable&lt;&#39;de&gt;&gt;::Output: Deserialize&lt;&#39;de&gt;,</span>
     <span class="comment">// Necessary workaround bound (see `yoke::trait_hack` docs):</span>

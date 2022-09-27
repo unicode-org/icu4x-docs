@@ -442,6 +442,12 @@
 <span id="437">437</span>
 <span id="438">438</span>
 <span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -817,30 +823,36 @@
                 }
             });
 
-        <span class="kw">let</span> <span class="ident">any_cases</span> <span class="op">=</span> <span class="ident">marker_data_feature_ident</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="ident">data</span>, <span class="ident">feature</span>, <span class="ident">ident</span>)<span class="op">|</span> {
-            <span class="comment">// TODO(#1678): Remove the special case</span>
-            <span class="kw">if</span> <span class="ident">marker</span>.<span class="ident">to_string</span>() <span class="op">==</span> <span class="string">&quot;:: icu_datetime :: provider :: calendar :: DateSkeletonPatternsV1Marker&quot;</span> {
-                <span class="macro">quote!</span> {
-                    #<span class="ident">feature</span>
-                    #<span class="ident">ident</span> =&gt; {
-                        #<span class="ident">data::DATA</span>
-                            .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
-                            .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">data</span><span class="op">|</span> <span class="ident">AnyPayload::from_rcwrap_payload</span>::<span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span>(
-                                <span class="ident">icu_provider::RcWrap::from</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>(<span class="ident">data</span>)))))
+        <span class="kw">let</span> <span class="ident">any_cases</span> <span class="op">=</span> <span class="ident">marker_data_feature_ident</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="ident">data</span>, <span class="ident">feature</span>, <span class="ident">ident</span>)<span class="op">|</span> {
+                <span class="comment">// TODO(#1678): Remove the special case</span>
+                <span class="kw">if</span> <span class="ident">marker</span>.<span class="ident">to_string</span>()
+                    <span class="op">==</span> <span class="string">&quot;:: icu_datetime :: provider :: calendar :: DateSkeletonPatternsV1Marker&quot;</span>
+                {
+                    <span class="macro">quote!</span> {
+                        #<span class="ident">feature</span>
+                        #<span class="ident">ident</span> =&gt; {
+                            #<span class="ident">data::DATA</span>
+                                .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
+                                .<span class="ident">copied</span>()
+                                .<span class="ident">map</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>)
+                                .<span class="ident">map</span>(<span class="ident">DataPayload</span>::<span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>)
+                                .<span class="ident">map</span>(<span class="ident">DataPayload::wrap_into_any_payload</span>)
+                        }
+                    }
+                } <span class="kw">else</span> {
+                    <span class="macro">quote!</span> {
+                        #<span class="ident">feature</span>
+                        #<span class="ident">ident</span> =&gt; {
+                            #<span class="ident">data::DATA</span>
+                                .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
+                                .<span class="ident">copied</span>()
+                                .<span class="ident">map</span>(<span class="ident">AnyPayload::from_static_ref</span>)
+                        }
                     }
                 }
-            } <span class="kw">else</span> {
-                <span class="macro">quote!</span>{
-                    #<span class="ident">feature</span>
-                    #<span class="ident">ident</span> =&gt; {
-                        #<span class="ident">data::DATA</span>
-                            .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
-                            .<span class="ident">copied</span>()
-                            .<span class="ident">map</span>(<span class="ident">AnyPayload::from_static_ref</span>)
-                    }
-                }
-            }
-        });
+            });
 
         <span class="self">self</span>.<span class="ident">write_to_file</span>(
             <span class="ident">PathBuf::from</span>(<span class="string">&quot;any&quot;</span>),

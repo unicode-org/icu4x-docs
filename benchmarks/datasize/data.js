@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664320856976,
+  "lastUpdate": 1664323961577,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -29153,6 +29153,126 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/5f91c4bf32fe62c1011a8ba178b6a2afa9051d42"
         },
         "date": 1664320784143,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "82ef865e12d81ad6661f2c692dfbd4786e909185",
+          "message": "ICU4X version (#2666)",
+          "timestamp": "2022-09-27T23:38:55Z",
+          "tree_id": "26f8bb3aea568807b4e16a7176a36cb3d5768a96",
+          "url": "https://github.com/unicode-org/icu4x/commit/82ef865e12d81ad6661f2c692dfbd4786e909185"
+        },
+        "date": 1664322015945,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d7d90cbb6ec9ae3b2efd61b5c55b55bc44d8cdd6",
+          "message": "Another tutorial fix (#2667)\n\n\r\n* language as_str",
+          "timestamp": "2022-09-27T23:45:37Z",
+          "tree_id": "d830a7d2d153e08e7ef7b3e81e4b3a1bccced270",
+          "url": "https://github.com/unicode-org/icu4x/commit/d7d90cbb6ec9ae3b2efd61b5c55b55bc44d8cdd6"
+        },
+        "date": 1664322554507,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "369623318efe879a103fe4297c863315414c6b85",
+          "message": "More tutorial fixes (#2668)\n\n\r\n* More tutorial fixes",
+          "timestamp": "2022-09-27T23:54:26Z",
+          "tree_id": "74c06864f785654d9af10a1e41a0de327b096a1e",
+          "url": "https://github.com/unicode-org/icu4x/commit/369623318efe879a103fe4297c863315414c6b85"
+        },
+        "date": 1664323265750,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 3919062,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "28bf527db690f991069533f8fe7c7b2467d84fc2",
+          "message": "Fix wording in tutorial (#2669)",
+          "timestamp": "2022-09-27T23:57:17Z",
+          "tree_id": "fc04bed22f42c91c805b099926f2b46ca41b7019",
+          "url": "https://github.com/unicode-org/icu4x/commit/28bf527db690f991069533f8fe7c7b2467d84fc2"
+        },
+        "date": 1664323900784,
         "tool": "ndjson",
         "benches": [
           {

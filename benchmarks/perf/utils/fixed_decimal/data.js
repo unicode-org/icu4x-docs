@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664382337279,
+  "lastUpdate": 1664403308522,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -55349,6 +55349,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 84,
             "range": "± 5",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "498012a76a52412aa4c56aa4d481b95ce4e6bd6c",
+          "message": "`icu_datagen@1.0.1` (#2679)\n\n* including segmenter data\r\n\r\n* lock",
+          "timestamp": "2022-09-28T14:34:22-07:00",
+          "tree_id": "57bbf21d0923754236ece560135990764f62f4db",
+          "url": "https://github.com/unicode-org/icu4x/commit/498012a76a52412aa4c56aa4d481b95ce4e6bd6c"
+        },
+        "date": 1664401627931,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 121088,
+            "range": "± 17182",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 26335,
+            "range": "± 2951",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66940,
+            "range": "± 3236",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 233,
+            "range": "± 14",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 86,
+            "range": "± 5",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 82,
+            "range": "± 5",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f74dc3a64b28c7c45e640bdb752036665a7bfe22",
+          "message": "Doc improvements, with separate data management tutorial (#2678)",
+          "timestamp": "2022-09-28T21:56:01Z",
+          "tree_id": "fb97eea77ca33dc348b42739a5c198412429bb11",
+          "url": "https://github.com/unicode-org/icu4x/commit/f74dc3a64b28c7c45e640bdb752036665a7bfe22"
+        },
+        "date": 1664403234081,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 163114,
+            "range": "± 13520",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 30284,
+            "range": "± 97",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 84878,
+            "range": "± 285",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 243,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 90,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 99,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

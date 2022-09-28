@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664323165130,
+  "lastUpdate": 1664324561222,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -54988,6 +54988,126 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 83,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "369623318efe879a103fe4297c863315414c6b85",
+          "message": "More tutorial fixes (#2668)\n\n\r\n* More tutorial fixes",
+          "timestamp": "2022-09-27T23:54:26Z",
+          "tree_id": "74c06864f785654d9af10a1e41a0de327b096a1e",
+          "url": "https://github.com/unicode-org/icu4x/commit/369623318efe879a103fe4297c863315414c6b85"
+        },
+        "date": 1664324296489,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 107387,
+            "range": "± 335",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22321,
+            "range": "± 76",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 62491,
+            "range": "± 759",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 179,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 66,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 73,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "28bf527db690f991069533f8fe7c7b2467d84fc2",
+          "message": "Fix wording in tutorial (#2669)",
+          "timestamp": "2022-09-27T23:57:17Z",
+          "tree_id": "fc04bed22f42c91c805b099926f2b46ca41b7019",
+          "url": "https://github.com/unicode-org/icu4x/commit/28bf527db690f991069533f8fe7c7b2467d84fc2"
+        },
+        "date": 1664324500250,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 101470,
+            "range": "± 426",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 20506,
+            "range": "± 145",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65986,
+            "range": "± 198",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 168,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 68,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 70,
             "range": "± 0",
             "unit": "ns/iter"
           }

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TerritoryDisplayNamesV1","TerritoryDisplayNames provides mapping between a region code and locale display name."],["TerritoryDisplayNamesV1Marker","Marker type for [`TerritoryDisplayNamesV1`]: “displaynames/territories@1”"]]});

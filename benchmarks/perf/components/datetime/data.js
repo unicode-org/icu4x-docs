@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1664405603865,
+  "lastUpdate": 1664561525413,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -76871,6 +76871,276 @@ window.BENCHMARK_DATA = {
             "name": "pattern/parse",
             "value": 5886,
             "range": "± 125",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7f22b4677338c848fd42e2a9fb7d28cf546e0d95",
+          "message": "Some wasm demo fixes (#2688)\n\n* Change default calendar now that we have fallbacking\r\n\r\n* Handle calendaring when locale is already specified with unicode extensions",
+          "timestamp": "2022-09-29T22:24:37Z",
+          "tree_id": "46d6a8ea9d632588cde6597d62a1bfe8fec0678f",
+          "url": "https://github.com/unicode-org/icu4x/commit/7f22b4677338c848fd42e2a9fb7d28cf546e0d95"
+        },
+        "date": 1664491056071,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 85057,
+            "range": "± 6070",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 144109,
+            "range": "± 6621",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_write",
+            "value": 78542,
+            "range": "± 2141",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_string",
+            "value": 89419,
+            "range": "± 2892",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 84619,
+            "range": "± 3825",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 94787,
+            "range": "± 2667",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_write",
+            "value": 136969,
+            "range": "± 3482",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_string",
+            "value": 152739,
+            "range": "± 5826",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 143927,
+            "range": "± 3708",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 160271,
+            "range": "± 5725",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 6205,
+            "range": "± 330",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90648681+snktd@users.noreply.github.com",
+            "name": "snktd",
+            "username": "snktd"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f9d456b6387304cf77b620b3ebd7549b02dc0627",
+          "message": "Transformer code for DisplayNames component. (#2635)",
+          "timestamp": "2022-09-30T18:26:06+02:00",
+          "tree_id": "9ad2942718485d2150b146d8b214682d24db1bc6",
+          "url": "https://github.com/unicode-org/icu4x/commit/f9d456b6387304cf77b620b3ebd7549b02dc0627"
+        },
+        "date": 1664556041670,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 56577,
+            "range": "± 485",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 94729,
+            "range": "± 832",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_write",
+            "value": 52435,
+            "range": "± 1263",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_string",
+            "value": 59364,
+            "range": "± 1164",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 56614,
+            "range": "± 2273",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 63284,
+            "range": "± 486",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_write",
+            "value": 91073,
+            "range": "± 4432",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_string",
+            "value": 99864,
+            "range": "± 1186",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 94905,
+            "range": "± 706",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 106030,
+            "range": "± 3211",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 4555,
+            "range": "± 23",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1ff25a693f73a876ad2684d57d6dd9f407371852",
+          "message": "Update icu4x placeholder crate (#2681)",
+          "timestamp": "2022-09-30T19:58:33+02:00",
+          "tree_id": "b030e0a0d4c7985dc4967a8866a80c142bc5983d",
+          "url": "https://github.com/unicode-org/icu4x/commit/1ff25a693f73a876ad2684d57d6dd9f407371852"
+        },
+        "date": 1664561459966,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "datetime/datetime_lengths",
+            "value": 75019,
+            "range": "± 4273",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/zoned_datetime_overview",
+            "value": 130626,
+            "range": "± 7828",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_write",
+            "value": 70483,
+            "range": "± 3694",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedDateTimeFormatter/format_to_string",
+            "value": 78545,
+            "range": "± 2622",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/format",
+            "value": 74335,
+            "range": "± 3715",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedDateTime/to_string",
+            "value": 83821,
+            "range": "± 2247",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_write",
+            "value": 127873,
+            "range": "± 5136",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/TypedZonedDateTimeFormatter/format_to_string",
+            "value": 137069,
+            "range": "± 7146",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/format",
+            "value": 130407,
+            "range": "± 6994",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "datetime/FormattedZonedDateTime/to_string",
+            "value": 147368,
+            "range": "± 8603",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "pattern/parse",
+            "value": 5583,
+            "range": "± 206",
             "unit": "ns/iter"
           }
         ]

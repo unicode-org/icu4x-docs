@@ -1,0 +1,632 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Introduction to ICU4X for Rust"><meta name="keywords" content="rust, rustlang, rust-lang, icu_tutorials"><title>icu_tutorials - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><script defer src="../main.js"></script>
+    <noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../icu_tutorials/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../icu_tutorials/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Crate icu_tutorials</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 1.0.0-beta1</li><li><a id="all-types" href="all.html">All Items</a></li></div></ul><div id="sidebar-vars" data-name="icu_tutorials" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../icu_tutorials/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">icu_tutorials</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/icu_tutorials/lib.rs.html#5-12">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="introduction-to-icu4x-for-rust"><a href="#introduction-to-icu4x-for-rust">Introduction to ICU4X for Rust</a></h2>
+<p><code>ICU4X</code> is an implementation of <a href="http://site.icu-project.org/">Internationalization Components of Unicode</a> (ICU) intended to be modular, performant and flexible.</p>
+<p>The library provides a layer of APIs for all software to enable internationalization capabilities.</p>
+<p>To use <code>ICU4X</code> in the Rust ecosystem one can either add dependencies on selected components, or add a dependency on the meta-crate <code>icu</code> which brings the full selection of components in the most user-friendly configuration of features.</p>
+<p>In this tutorial we are going to build up to writing an app that uses the <code>icu::datetime</code> component to format a date and time, covering various topics in the process.</p>
+<h2 id="1-requirements"><a href="#1-requirements">1. Requirements</a></h2>
+<p>For this tutorial we assume the user has basic Rust knowledge. If acquiring it is necessary, the <a href="https://doc.rust-lang.org/book/">Rust Book</a> provides an excellent introduction.
+We also assume that the user is familiar with a terminal and have <code>rust</code> and <code>cargo</code> installed.</p>
+<p>To verify that, open a terminal and check that the results are similar to:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo --version
+cargo 1.64.0 (387270bc7 2022-09-16)</code></pre></div><h2 id="2-creating-an-app-with-icu4x-as-a-dependency"><a href="#2-creating-an-app-with-icu4x-as-a-dependency">2. Creating an app with ICU4X as a dependency</a></h2>
+<p>Use <code>cargo</code> to initialize a binary application:</p>
+<div class="example-wrap"><pre class="language-console"><code>cargo new --bin myapp
+cd myapp</code></pre></div>
+<p>Then add a dependency on <code>ICU4X</code>’s main crate, <code>icu</code>:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo add icu</code></pre></div><h2 id="3-locales"><a href="#3-locales">3. Locales</a></h2>
+<p><code>ICU4X</code> comes with a variety of components allowing to manage various facets of software internationalization.</p>
+<p>Most of those features depend on the selection of a <code>Locale</code> which is a particular combination of language, script, region with optional variants. An examples of such locales are <code>en-US</code> (American English), <code>sr-Cyrl</code> (Serbian with Cyrillic script) or <code>ar-EG-u-nu-latn</code> (Egyptian Arabic with ASCII numerals).</p>
+<p>In <code>ICU4X</code> <code>Locale</code> is a part of the <code>locid</code> component. If the user needs just this one feature, they can use <code>icu_locid</code> crate as a dependency, but since here we already added a dependency on <code>icu</code>, we can refer to it via <code>icu::locid</code>.</p>
+<p>Let’s use this in our application.</p>
+<p>Open <code>src/main.rs</code> and edit it to:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid::Locale</span>;
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">loc</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="string">&quot;ES-AR&quot;</span>.<span class="ident">parse</span>()
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to parse locale.&quot;</span>);
+
+    <span class="kw">if</span> <span class="ident">loc</span>.<span class="ident">id</span>.<span class="ident">language</span>.<span class="ident">as_str</span>() <span class="op">==</span> <span class="string">&quot;es&quot;</span> {
+        <span class="macro">println!</span>(<span class="string">&quot;¡Hola!&quot;</span>);
+    }
+
+    <span class="macro">println!</span>(<span class="string">&quot;You are using: {}&quot;</span>, <span class="ident">loc</span>);
+}</code></pre></div>
+<p>After saving it, call <code>cargo run</code> and it should display:</p>
+<div class="example-wrap"><pre class="language-text"><code>¡Hola!
+You are using: es-AR</code></pre></div>
+<p><em>Notice:</em> Here, <code>ICU4X</code> canonicalized the locales’s syntax which uses lowercase letters for the language portion.</p>
+<p>Congratulations! <code>ICU4X</code> has been used to semantically operate on a locale!</p>
+<h3 id="convenience-macro"><a href="#convenience-macro">Convenience macro</a></h3>
+<p>The scenario of working with statically declared <code>Locale</code>s is common.</p>
+<p>It’s a bit unergonomic to have to parse them at runtime and handle a parser error in such case.</p>
+<p>For that purpose, ICU4X provides a macro one can use to parse it at compilation time:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">Locale</span>, <span class="ident">locale</span>};
+
+<span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ES-AR&quot;</span>);
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">if</span> <span class="ident">LOCALE</span>.<span class="ident">id</span>.<span class="ident">language</span>.<span class="ident">as_str</span>() <span class="op">==</span> <span class="string">&quot;es&quot;</span> {
+        <span class="macro">println!</span>(<span class="string">&quot;¡Hola amigo!&quot;</span>);
+    }
+
+    <span class="macro">println!</span>(<span class="string">&quot;You are using: {}&quot;</span>, <span class="ident">LOCALE</span>);
+}</code></pre></div>
+<p>In this case, the parsing is performed at compilation time, so we don’t need to handle an error case. Try passing an malformed identifier, like “foo-bar” and call <code>cargo check</code>.</p>
+<p><em>Notice:</em> <code>locale!</code> does not support variants or extension tags (e.g. <code>u-nu-latn</code>), as storing these requires allocation. If you have such a tag you need to use runtime parsing.</p>
+<p>Next, let’s add some more complex functionality.</p>
+<h2 id="4-basic-data-management"><a href="#4-basic-data-management">4. Basic Data Management</a></h2>
+<p>While the locale API is purely algorithmic, many internationalization APIs require more complex data to work. Data management is a complex and non-trivial area which often requires customizations for particular environments and integrations into a project’s ecosystem.</p>
+<p>The way <code>ICU4X</code> handles data is one of its novelties, aimed at making the data management more flexible and enabling better integration in asynchronous environments.</p>
+<p>As a result, compared to most internationalization solutions, working with data in <code>ICU4X</code> is a bit more explicit. <code>ICU4X</code> provides a trait called <code>DataProvider</code> (as well as <code>BufferProvider</code> and <code>AnyProvider</code>) and a number of concrete APIs that implement these traits for different scenarios.
+Users are also free to design their own providers that best fit into their ecosystem requirements.</p>
+<p><code>BufferProvider</code> and <code>AnyProvider</code> abstract over different ways the data may be loaded: <code>BufferProvider</code> abstracts over data providers that deserialize data, whereas <code>AnyProvider</code> abstracts over data providers that can provide concrete Rust objects.</p>
+<h2 id="5-using-an-icu4x-component"><a href="#5-using-an-icu4x-component">5. Using an ICU4X component</a></h2>
+<p>We’re going to extend our app to use the <code>icu::datetime</code> component to format a date and time. This component requires data, but as we don’t want to jump into data management just yet, we will use <code>ICU4X</code>’s <code>icu_testdata</code> crate. This contains test providers that support all ICU4X keys for a small representative set of locales. It contains both a <code>BufferProvider</code> (<code>icu_testdata::buffer()</code>), and an <code>AnyProvider</code> (<code>icu_testdata::any()</code>). The latter requires fewer features, so we will be using that.</p>
+<p>First, we need to add the crate to our <code>Cargo.toml</code>:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo add icu_testdata</code></pre></div>
+<p>We can then use it in our code to format a date:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">Locale</span>, <span class="ident">locale</span>};
+<span class="kw">use</span> <span class="ident">icu::calendar::DateTime</span>;
+<span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">DateTimeFormatter</span>, <span class="ident">options::length</span>};
+
+<span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>); <span class="comment">// let&#39;s try some other language</span>
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">icu_testdata::any</span>();
+
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);
+
+    <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">DateTimeFormatter::try_new_with_any_provider</span>(<span class="kw-2">&amp;</span><span class="ident">provider</span>, <span class="kw-2">&amp;</span><span class="ident">LOCALE</span>.<span class="ident">into</span>(), <span class="ident">options</span>.<span class="ident">into</span>())
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize DateTimeFormatter&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">DateTime::try_new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">10</span>, <span class="number">14</span>, <span class="number">13</span>, <span class="number">21</span>, <span class="number">28</span>)
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to create a datetime.&quot;</span>);
+
+    <span class="comment">// DateTimeFormatter works with data from any calendar, we need to cast to DateTime&lt;AnyCalendar&gt;</span>
+    <span class="comment">// For smaller codesize you can use TypedDateTimeFormatter&lt;Gregorian&gt; with the DateTime&lt;Gregorian&gt;</span>
+    <span class="comment">// that we have constructed</span>
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">date</span>.<span class="ident">to_any</span>();
+
+    <span class="kw">let</span> <span class="ident">formatted_date</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>).<span class="ident">expect</span>(<span class="string">&quot;Formatting should succeed&quot;</span>);
+
+    <span class="macro">println!</span>(<span class="string">&quot;📅: {}&quot;</span>, <span class="ident">formatted_date</span>);
+}</code></pre></div>
+<p>If all went well, running the app with <code>cargo run</code> should display:</p>
+<div class="example-wrap"><pre class="language-text"><code>📅: 2020年10月14日 13:21:28</code></pre></div>
+<p>Here’s an internationalized date!</p>
+<p><em>Notice:</em> By default, <code>cargo run</code> builds and runs a <code>debug</code> mode of the binary. If you want to evaluate performance, memory or size of this example, use <code>cargo run --release</code>.</p>
+<h2 id="6-summary"><a href="#6-summary">6. Summary</a></h2>
+<p>This concludes this introduction tutorial. With the help of <code>DateTimeFormat</code>, <code>Locale</code> and <code>DataProvider</code> we formatted a date to Japanese, but that’s just the start. 
+Internationalization is a broad domain and there are many more components in <code>ICU4X</code>.</p>
+<p>Next, learn how to <a href="data_management.md">generate optimized data for your binary</a>, or continue exploring by reading <a href="https://icu4x.unicode.org/doc/icu/">the docs</a>.</p>
+<h2 id="hooking-up-a-data-provider"><a href="#hooking-up-a-data-provider">Hooking up a data provider</a></h2>
+<p><code>DataProvider</code> is a general mechanism for loading data required for ICU4X components to operate from a source.</p>
+<p>At the moment, <code>DataProvider</code> is only synchronous, but the model of plugging it in is intended to extend to asynchronous <code>DataProviders</code> later.</p>
+<h3 id="data"><a href="#data">Data</a></h3>
+<p>The first step is to ensure that the provider has a structures to represent the data which will be collected. The structures live in a <code>provider</code> module in your crate and should represent the data efficiently (rather than 1-1 match to CLDR data model).</p>
+<h3 id="types-of-providers"><a href="#types-of-providers">Types of providers</a></h3>
+<p>Any component that needs to use <code>DataProvider</code> should only depend on <code>icu_provider</code> crate and use the <code>DataProvider</code> trait. The specific implementations such as <code>icu_provider_blob::BlobDataProvider</code> will be provided by the downstream consumer of the component.</p>
+<h3 id="hooking-up-data-provider"><a href="#hooking-up-data-provider">Hooking up data provider</a></h3>
+<p>Each component should use <code>DataProvider</code> only to construct the instance of each main struct that requires data. It means that all heavy data pulling should happen in the constructor, which, in result, must be fallible. Currently, since <code>DataProvider</code> is synchronous, the constructor may be synchronous as well, but in the future we expect to have both synchronous and asynchronous data providers and constructors.</p>
+<h3 id="example"><a href="#example">Example</a></h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">displaydoc::Display</span>;
+<span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">DataPayload</span>, <span class="ident">DataProvider</span>, <span class="ident">DataRequest</span>, <span class="ident">DataError</span>};
+<span class="kw">use</span> <span class="ident">icu::locid::Locale</span>;
+<span class="kw">use</span> <span class="ident">icu::decimal::provider</span>::{<span class="ident">DecimalSymbolsV1Marker</span>, <span class="ident">DecimalSymbolsV1</span>};
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Display</span>, <span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MyError</span> {
+     <span class="doccomment">/// Some custom error</span>
+     <span class="ident">SomeError</span>,
+
+     <span class="doccomment">/// An error originating inside of the data provider.</span>
+     <span class="attribute">#[<span class="ident">displaydoc</span>(<span class="string">&quot;{0}&quot;</span>)]</span>
+     <span class="ident">DataProvider</span>(<span class="ident">DataError</span>),
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+<span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">MyError</span> {}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">DataError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MyError</span> {
+     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">DataError</span>) -&gt; <span class="self">Self</span> {
+         <span class="ident">MyError::DataProvider</span>(<span class="ident">e</span>)
+     }
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">AdditiveIdentity</span>(<span class="ident">char</span>);
+
+<span class="kw">impl</span> <span class="ident">AdditiveIdentity</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span><span class="op">&lt;</span><span class="ident">L</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Locale</span><span class="op">&gt;</span>, <span class="ident">P</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">DecimalSymbolsV1Marker</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+        <span class="ident">locale</span>: <span class="ident">L</span>,
+        <span class="ident">data_provider</span>: <span class="kw-2">&amp;</span><span class="ident">P</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">MyError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">data_provider</span>.<span class="ident">load</span>(<span class="ident">DataRequest</span> {
+            <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">locale</span>.<span class="ident">into</span>().<span class="ident">into</span>(),
+            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+        })<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">decimal_data</span>: <span class="kw-2">&amp;</span><span class="ident">DecimalSymbolsV1</span> <span class="op">=</span> <span class="ident">response</span>.<span class="ident">get</span>();
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="ident">decimal_data</span>.<span class="ident">digits</span>[<span class="number">0</span>]))
+    }
+}</code></pre></div>
+<h2 id="writing-a-new-data-struct"><a href="#writing-a-new-data-struct">Writing a New Data Struct</a></h2>
+<p>ICU4X is a heavily data-driven library. Most new features or components will require pulling in data from an external source.</p>
+<p>This tutorial aims to help ICU4X contributors add new data to the data pipeline. It is recommended that readers review <a href="../design/data_pipeline.md">data_pipeline.md</a> for additional theory behind the design decisions in the data provider.</p>
+<h3 id="lifecycle-of-icu4x-data"><a href="#lifecycle-of-icu4x-data">Lifecycle of ICU4X Data</a></h3>
+<p>It is important to understand the phases of life of ICU4X data as it makes its way from the data source, like CLDR, to the data struct used at runtime. The following flowchart shows the phases and how they connect:</p>
+<p><img src="../assets/data_lifecycle.svg" alt="Lifecycle of Data in ICU4X" /></p>
+<p>The following steps take place at build time:</p>
+<ol>
+<li>Source data file is obtained from an external source. Examples could include the CLDR JSON release or the Unicode Character Database.</li>
+<li>The source data is parsed and transformed into a runtime data struct. This step can be expensive, because it is normally run as an offline build step.</li>
+<li>The runtime data struct is stored in a way so that a provider can use it: a postcard blob, JSON directory tree, Rust module, etc.</li>
+</ol>
+<p>These steps are performed by the <code>icu_datagen</code>, but clients can also write their own data generation logic.</p>
+<p>When deserializing from the blob store, it is a design principle of ICU4X that no heap allocations will be required. We have many utilities and abstractions to help make this safe and easy.</p>
+<h3 id="code-layout"><a href="#code-layout">Code Layout</a></h3>
+<p>With a mental model of the lifecycle of data in ICU4X, we can discuss where to find the code that performs each step.</p>
+<h4 id="data-structs"><a href="#data-structs">Data Structs</a></h4>
+<p>The data struct definitions should live in the crate that uses them. By convention, the top-level module <code>provider</code> should contain the struct definitions. For example:</p>
+<ul>
+<li><code>icu::decimal::provider::DecimalSymbolsV1</code></li>
+<li><code>icu::locale_canonicalizer::provider::LikelySubtagsV1</code></li>
+<li><code>icu::uniset::provider::PropertyCodePointSetV1</code></li>
+</ul>
+<p>In general, data structs should be annotated with <code>#[icu_provider::data_struct]</code>, and they should support <em>at least</em> <code>Debug</code>, <code>PartialEq</code>, <code>Clone</code>, <code>Default</code>, and Serde <code>Serialize</code> and <code>Deserialize</code>.</p>
+<p>As explained in <em>data_pipeline.md</em>, the data struct should support zero-copy deserialization. The <code>#[icu_provider::data_struct]</code> annotation will enforce this for you. <strong>See more information in <a href="https://github.com/unicode-org/icu4x/blob/main/docs/process/style_guide.md#zero-copy-in-dataprovider-structs--required">style_guide.md</a>,</strong> as well as the example below in this tutorial.</p>
+<h4 id="data-download"><a href="#data-download">Data Download</a></h4>
+<p>The first step to introduce data into the ICU4X pipeline is to download it from an external source. This corresponds to step 1 above.</p>
+<p>When clients use ICU4X, this is generally a manual step, although we may provide tooling to assist with it. For the purpose of ICU4X test data, the tool <a href="https://unicode-org.github.io/icu4x-docs/doc/icu_datagen/index.html"><code>icu4x-testdata-download-source</code></a> should automatically download data from the external source and save it in the ICU4X tree. <code>icu4x-testdata-download-source</code> should not do anything other than downloading the raw source data.</p>
+<h4 id="source-data-providers"><a href="#source-data-providers">Source Data Providers</a></h4>
+<p>“Source data providers” read from a source data file, deserialize it, and transform it to an ICU4X data struct. This corresponds to steps 2 and 3 above.</p>
+<p>Although they may share common code, source data providers are implemented specific to their data source. There are therefore many source data providers in ICU4X.</p>
+<p>Examples of source data providers include:</p>
+<ul>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_datagen/transform/cldr/struct.NumbersProvider.html"><code>NumbersProvider</code></a></li>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_datagen/transform/uprops/struct.BinaryPropertyCodePointSetDataProvider.html"><code>BinaryPropertyCodePointSetDataProvider</code></a></li>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_datagen/transform/index.html">… more examples</a></li>
+</ul>
+<p>Source data providers must implement the following traits:</p>
+<ul>
+<li><code>DataProvider&lt;M&gt;</code> or <code>DynamicDataProvider&lt;M&gt;</code> for one or more data markers <code>M</code>; this impl is the main step where data transformation takes place</li>
+<li><code>IterableDataProvider&lt;M&gt;</code>, required for the data exporter (see below)</li>
+<li><code>DynamicDataProvider&lt;SerializeMarker&gt;</code> and <code>IterableDynamicDataProvider&lt;SerializeMarker&gt;</code>, usually implemented with the macro <a href="https://unicode-org.github.io/icu4x-docs/doc/icu_provider/macro.impl_dynamic_data_provider.html"><code>impl_dynamic_data_provider!</code></a> after the above traits have been implemented</li>
+</ul>
+<p>Source data providers are often complex to write. Rules of thumb:</p>
+<ul>
+<li>Optimize for readability and maintainability. The source data providers are not used in production, so performance is not a driving concern; however, we want the transformer to be fast enough to make a good developer experience.</li>
+<li>If the data source is similar to an existing data source (e.g., importing new data from CLDR JSON), try to share code with existing data providers for that source.</li>
+<li>If the data source is novel, feel free to add a new module under <code>icu_datagen::transform</code>.</li>
+</ul>
+<h4 id="data-exporters-and-runtime-data-providers"><a href="#data-exporters-and-runtime-data-providers">Data Exporters and Runtime Data Providers</a></h4>
+<p>“Data exporters” read from one or more ICU4X data structs and dump them to storage. This corresponds to step 4 above.</p>
+<p>Examples of data exporters include:</p>
+<ul>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_provider_fs/export/fs_exporter/struct.FilesystemExporter.html"><code>FilesystemExporter</code></a></li>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_provider_blob/export/struct.BlobExporter.html"><code>BlobExporter</code></a></li>
+</ul>
+<p>“Runtime data providers” are ones that read serialized ICU4X data structs and deserialize them for use at runtime. These are the providers where performance is the key driving factor.</p>
+<p>Examples of runtime data providers include:</p>
+<ul>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_provider_fs/struct.FsDataProvider.html"><code>FsDataProvider</code></a></li>
+<li><a href="https://unicode-org.github.io/icu4x-docs/doc/icu_provider_blob/struct.BlobDataProvider.html"><code>BlobDataProvider</code></a></li>
+</ul>
+<p><strong>Most ICU4X contributors will not need to touch the data exporters or runtime data providers.</strong> New implementations are only necessary when adding a new ICU4X data struct storage mechanism.</p>
+<h4 id="data-generation-tool-icu4x-datagen"><a href="#data-generation-tool-icu4x-datagen">Data Generation Tool (<code>icu4x-datagen</code>)</a></h4>
+<p>The <a href="https://unicode-org.github.io/icu4x-docs/doc/icu_datagen/index.html">data generation tool, i.e., <code>icu4x-datagen</code></a>, ties together the source data providers with a data exporter.</p>
+<p>When adding new data structs, it is necessary to make <code>icu4x-datagen</code> aware of your source data provider. To do this, edit 
+<a href="https://github.com/unicode-org/icu4x/blob/main/provider/datagen/src/registry.rs"><em>provider/datagen/src/registry.rs</em></a> and add your data provider to the macro</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="macro">registry!</span>(
+    <span class="comment">// ...</span>
+    <span class="ident">FooV1Marker</span>,
+)</code></pre></div>
+<p>as well as to the list of keys </p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
+<span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">marker</span>(<span class="ident">FooV1Marker</span>, <span class="string">&quot;foo/bar@1&quot;</span>))]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FooV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+  <span class="ident">message</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+}
+</code></pre></div>
+<p>When finished, run from the top level:</p>
+<div class="example-wrap"><pre class="language-bash"><code>$ cargo make testdata</code></pre></div>
+<p>If everything is hooked together properly, JSON files for your new data struct should appear under <em>provider/testdata/data/json</em>, and the file <em>provider/testdata/data/testdata.postcard</em> should have changed.</p>
+<h3 id="example-1"><a href="#example-1">Example</a></h3>
+<p>The following example shows all the pieces that make up the data pipeline for <code>DecimalSymbolsV1</code>.</p>
+<h4 id="data-struct"><a href="#data-struct">Data Struct</a></h4>
+<p><a href="https://github.com/unicode-org/icu4x/blob/main/components/decimal/src/provider.rs"><em>components/decimal/src/provider.rs</em></a></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
+<span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">yoke</span>, <span class="ident">zerofrom</span>};
+<span class="kw">use</span> <span class="ident">icu::decimal::provider</span>::{ <span class="ident">AffixesV1</span>, <span class="ident">GroupingSizesV1</span> };
+
+<span class="doccomment">/// Symbols and metadata required for formatting a [`FixedDecimal`](crate::FixedDecimal).</span>
+<span class="attribute">#[<span class="ident">icu_provider::data_struct</span>(<span class="ident">marker</span>(<span class="ident">DecimalSymbolsV1Marker</span>, <span class="string">&quot;decimal/symbols@1&quot;</span>, <span class="ident">extension_key</span> <span class="op">=</span> <span class="string">&quot;nu&quot;</span> ))]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(
+<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>,
+<span class="ident">derive</span>(<span class="ident">serde::Serialize</span>, <span class="ident">databake::Bake</span>),
+<span class="ident">databake</span>(<span class="ident">path</span> <span class="op">=</span> <span class="ident">icu_decimal::provider</span>),
+)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">derive</span>(<span class="ident">serde::Deserialize</span>))]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DecimalSymbolsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Prefix and suffix to apply when a negative sign is needed.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">minus_sign_affixes</span>: <span class="ident">AffixesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// Prefix and suffix to apply when a plus sign is needed.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">plus_sign_affixes</span>: <span class="ident">AffixesV1</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// Character used to separate the integer and fraction parts of the number.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">decimal_separator</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// Character used to separate groups in the integer part of the number.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>, <span class="ident">serde</span>(<span class="ident">borrow</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">grouping_separator</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// Settings used to determine where to place groups in the integer part of the number.</span>
+    <span class="kw">pub</span> <span class="ident">grouping_sizes</span>: <span class="ident">GroupingSizesV1</span>,
+
+    <span class="doccomment">/// Digit characters for the current numbering system. In most systems, these digits are</span>
+    <span class="doccomment">/// contiguous, but in some systems, such as *hanidec*, they are not contiguous.</span>
+    <span class="kw">pub</span> <span class="ident">digits</span>: [<span class="ident">char</span>; <span class="number">10</span>],
+}</code></pre></div>
+<p>The above example is an abridged definition for <code>DecimalSymbolsV1</code>. Note how the lifetime parameter <code>'data</code> is passed down into all fields that may need to borrow data.</p>
+<h4 id="cldr-json-deserialize"><a href="#cldr-json-deserialize">CLDR JSON Deserialize</a></h4>
+<p><a href="https://github.com/unicode-org/icu4x/blob/main/provider/datagen/src/transform/cldr/cldr_serde/numbers.rs"><em>provider/datagen/src/transform/cldr/cldr_serde/numbers.rs</em></a></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid::LanguageIdentifier</span>;
+<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
+<span class="kw">use</span> <span class="ident">serde::de</span>::{<span class="ident">Deserializer</span>, <span class="ident">Error</span>, <span class="ident">MapAccess</span>, <span class="ident">Unexpected</span>, <span class="ident">Visitor</span>};
+<span class="kw">use</span> <span class="ident">serde::Deserialize</span>;
+<span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
+<span class="kw">use</span> <span class="ident">tinystr::TinyStr8</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Numbers</span> {
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;defaultNumberingSystem&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">default_numbering_system</span>: <span class="ident">TinyStr8</span>,
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;minimumGroupingDigits&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">deserialize_with</span> <span class="op">=</span> <span class="string">&quot;serde_aux::prelude::deserialize_number_from_string&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">minimum_grouping_digits</span>: <span class="ident">u8</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LangNumbers</span> {
+    <span class="kw">pub</span> <span class="ident">numbers</span>: <span class="ident">Numbers</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LangData</span>(<span class="kw">pub</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span>, <span class="ident">LangNumbers</span><span class="op">&gt;</span>);
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Resource</span> {
+    <span class="kw">pub</span> <span class="ident">main</span>: <span class="ident">LangData</span>,
+}</code></pre></div>
+<p>The above example is an abridged definition of the Serde structure corresponding to CLDR JSON. Since this Serde definition is not used at runtime, it does not need to be zero-copy.</p>
+<h4 id="transformer"><a href="#transformer">Transformer</a></h4>
+<p><a href="https://github.com/unicode-org/icu4x/blob/main/provider/core/src/data_provider.rs"><em>provider/core/src/data_provider.rs</em></a></p>
+<p><a href="https://github.com/unicode-org/icu4x/blob/main/provider/core/src/datagen/iter.rs"><em>provider/core/src/datagen/iter.rs</em></a></p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">FooV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DatagenProvider</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">req</span>: <span class="ident">DataRequest</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span><span class="ident">FooV1Marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="comment">// Use the data inside self.source and emit it as an ICU4X data struct.</span>
+        <span class="comment">// This is the core transform operation. This step could take a lot of</span>
+        <span class="comment">// work, such as pre-parsing patterns, re-organizing the data, etc.</span>
+        <span class="comment">// This method will be called once per option returned by supported_locales.</span>
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">IterableDataProvider</span><span class="op">&lt;</span><span class="ident">FooV1Marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FooProvider</span> {
+    <span class="kw">fn</span> <span class="ident">supported_locales</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataLocale</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="comment">// This should list all supported locales.</span>
+    }
+}
+
+<span class="comment">// Once we have DataProvider and IterableDataProvider, we can apply this macro:</span>
+<span class="macro">icu_provider::make_exportable_provider!</span>(<span class="ident">FooProvider</span>, [<span class="ident">FooV1Marker</span>,]);</code></pre></div>
+<p>The above example is an abridged snippet of code illustrating the most important boilerplate for implementing and ICU4X data transform.</p>
+<h2 id="using-icu4x-from-c"><a href="#using-icu4x-from-c">Using ICU4X from C++</a></h2>
+<p>ICU4X’s core functionality is completely available from C++, with headers generated by <a href="https://github.com/rust-diplomat/diplomat">Diplomat</a>.</p>
+<p>Generated headers can be found under <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/cpp/include"><code>ffi/diplomat/cpp/include</code></a>, with Sphinx docs at <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/cpp/docs"><code>ffi/diplomat/cpp/docs</code></a>. The port is header-only; no additional C++ translation units need to be compiled to use ICU4X from C++.</p>
+<p>Typically C++ users can build ICU4X by building the <code>icu_capi_staticlib</code> crate (<a href="https://crates.io/crates/icu_capi_staticlib">crates.io</a>, <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/capi_staticlib">source</a>) with the <code>cpp_default</code> feature, and link the resultant static library to their C++ application. This crate builds on the <code>icu_capi</code> crate: a <code>no_std</code> crate containing all of the relevant <a href="https://github.com/rust-diplomat/diplomat">Diplomat</a>-generated <code>extern &quot;C&quot;</code> declarations.</p>
+<p>Using ICU4X in C++ is best demonstrated via the <a href="https://github.com/unicode-org/icu4x/blob/main/ffi/diplomat/cpp/examples/">examples</a> present in the codebase. For example, <a href="https://github.com/unicode-org/icu4x/blob/main/ffi/diplomat/cpp/examples/fixeddecimal/test.cpp">here’s an example showing off decimal formatting in ICU4X</a>, built with <a href="https://github.com/unicode-org/icu4x/blob/main/ffi/diplomat/cpp/examples/fixeddecimal/Makefile">this Makefile</a>.</p>
+<p><em>We are still working on improving the user experience of using ICU4X from other languages. As such, this tutorial may be a bit sparse, but we are happy to answer questions on our <a href="https://github.com/unicode-org/icu4x/discussions">discussions forum</a> and help you out</em></p>
+<h3 id="building-and-linking-icu4x"><a href="#building-and-linking-icu4x">Building and linking ICU4X</a></h3>
+<p>As seen in the Makefile, if one wishes to use ICU4X in C++, one should:</p>
+<ul>
+<li>Fetch <code>icu_capi_staticlib</code> from somewhere, either by downloading from crates.io, or cloning the <code>icu4x</code> repository at the appropriately tagged version</li>
+<li>Fetch the headers from <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/cpp/include"><code>ffi/diplomat/cpp/include</code></a> in the ICU4X repo.</li>
+<li>Build <code>icu_capi_staticlib</code> with <code>cargo build -p icu_capi_staticlib --release</code>. Be sure to pass <code>--release</code> to get an optimized build! Further options include:
+<ul>
+<li>Cargo features (passed in via <code>--features foo,bar,..</code>)
+<ul>
+<li><code>provider_test</code> to include testing data via <code>ICU4XDataProvider::create_test()</code> (not recommended for production builds). It needs <code>buffer_provider</code> or <code>any_provider</code> to be enabled.</li>
+<li><code>provider_fs</code>  for loading data from files with <code>ICU4XDataProvider::create_fs()</code></li>
+<li><code>icu_provider/deserialize_json</code>  for JSON support in <code>ICU4XDataProvider::create_fs()</code></li>
+<li><code>buffer_provider</code> for working with blob data providers (<code>ICU4XDataProvider::create_from_byte_slice()</code>)</li>
+<li><code>logging</code> and <code>simple_logger</code> enable basic stdout logging of error metadata. Further loggers can be added on request.</li>
+<li><code>cpp_default</code> turns on a bunch of these and is useful for exploration, but should not be used in production as it enables <code>provider_test</code></li>
+</ul>
+</li>
+<li>Build options:
+<ul>
+<li><code>--profile=release-opt-size</code> to optimize for size</li>
+<li>Using <code>cargo panic-abort-build</code> and potentially <code>--features=x86tiny</code> (see below)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Copy out the static library from <code>target/{debug, release}/libicu_capi_staticlib.a</code></li>
+<li>Build their code with <code>g++ -std=c++17 libicu_capi_staticlib_test.a -ldl -lpthread -lm</code>. C++ versions beyond C++17 are supported, as are other C++ compilers.</li>
+</ul>
+<h3 id="using-icu4x-from-c-1"><a href="#using-icu4x-from-c-1">Using ICU4X from C++</a></h3>
+<p>Here’s an annotated, shorter version of the fixed decimal example, that can be built using the steps above, using <code>--features cpp_default</code>:</p>
+<div class="example-wrap"><pre class="language-cpp"><code>#include &quot;path/to/include/ICU4XFixedDecimalFormatter.hpp&quot;
+#include &quot;path/to/include/ICU4XDataStruct.hpp&quot;
+#include &quot;path/to/include/ICU4XLogger.hpp&quot;
+
+#include &lt;iostream&gt;
+#include &lt;array&gt;
+
+int main() {
+   // For basic logging
+   ICU4XLogger::init_simple_logger();
+
+   // Create a locale object representing Bangla
+   ICU4XLocale locale = ICU4XLocale::create_from_string(&quot;bn&quot;).ok().value();
+
+   // Use a testing data provider
+   // Production code probably should use create_fs() or create_from_byte_slice()
+   // with data generated by icu4x-datagen
+   ICU4XDataProvider dp = ICU4XDataProvider::create_test();
+
+   // Create a formatter object with the appropriate settings
+   ICU4XFixedDecimalFormatter fdf = ICU4XFixedDecimalFormatter::create_with_grouping_strategy(
+       dp, locale, ICU4XFixedDecimalGroupingStrategy::Auto).ok().value();
+
+   // Create a decimal representing the number 1,000,007
+   ICU4XFixedDecimal decimal = ICU4XFixedDecimal::create_from_u64(1000007);
+
+   // Format it to a string
+   std::string out = fdf.format(decimal).ok().value();
+
+   // Report formatted value
+   std::cout &lt;&lt; &quot;Formatted value is &quot; &lt;&lt; out &lt;&lt; std::endl;
+   if (out != &quot;১০,০০,০০৭&quot;) {
+       std::cout &lt;&lt; &quot;Output does not match expected output&quot; &lt;&lt; std::endl;
+       return 1;
+   }
+   return 0;
+}</code></pre></div><h3 id="no_std-and-embedded-platforms"><a href="#no_std-and-embedded-platforms">no_std and embedded platforms</a></h3>
+<p>Users wishing to use ICU4X on a <code>no_std</code> platform will need to write their own crate depending on <code>icu_capi</code> that fills in an allocator and panic hooks, similar to what we do in our <a href="https://github.com/unicode-org/icu4x/blob/main/ffi/freertos/src/lib.rs">freertos port</a>. ICU4X is happy to accept such ports upstream.</p>
+<p>The <code>icu_capi_staticlib</code> crate additionally supports an <code>x86tiny</code> for highly size-optimized builds, to be run with <code>cargo panic-abort-build</code> (shorthand for <code>build</code> with <code>-Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort</code>). This requires a nighly compiler; it has been tested to work on <code>nightly-2022-04-05</code>.</p>
+<h3 id="tips"><a href="#tips">Tips</a></h3>
+<p>Documentation can be found in the Sphinx docs found <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/cpp/docs"><code>ffi/diplomat/cpp/docs</code></a>. These docs mirror the Rust code in the <code>icu_capi</code> crate, which can be explored on <a href="https://docs.rs/icu_capi/latest/icu_capi/">docs.rs</a>, though the precise types used may be different.</p>
+<p>Fallible methods return <code>diplomat::result</code>, a Result type that can most commonly be converted to a <code>std::optional</code> over its Ok/Err types by calling <code>.ok()</code> or <code>.err()</code>. Most methods either use <code>ICU4XError</code> (an enum of error codes) as their error type, or <code>std::monostate</code>. Further error details can be logged by enabling a logger via <code>ICU4XLogger</code>, further loggers may be added on request.</p>
+<p>The C++ headers include C headers for the underlying APIs as well, under namespace <code>capi</code>, found in the <code>.h</code> files. While these can be used directly, we recommend against it unless you are writing C code. These headers are not intended to be ergonomic and primarily exist for the C++ headers to use internally.</p>
+<p>Slices are represented using <code>std::span</code> if available, otherwise a simple wrapper called <code>diplomat::span</code> is used.</p>
+<p>These bindings may be customized by running <code>diplomat-tool</code> directly (including replacing the types used with alternate types like <code>mozilla::Span</code>), please ask on our <a href="https://github.com/unicode-org/icu4x/discussions">discussions forum</a> for more help on this.</p>
+<h2 id="data-management-in-icu4x"><a href="#data-management-in-icu4x">Data management in ICU4X</a></h2>
+<p>Unless you’re happy shipping your app with the ~10 locales supported by <code>icu_testdata</code> (and with the size impact of all keys), you will need generate your own data that is customized to suit your needs.</p>
+<p>This tutorial introduces data providers beyond <code>icu_testdata</code>, as well as the <code>icu_datagen</code> tool.</p>
+<h2 id="1-prerequesites"><a href="#1-prerequesites">1. Prerequesites</a></h2>
+<p>This tutorial assumes you have finished the <a href="intro.md">introductory tutorial</a> and continues where that tutorial left off. In particular, you should still have the latest version of code for <code>myapp</code>.</p>
+<h2 id="2-generating-data"><a href="#2-generating-data">2. Generating data</a></h2>
+<p>Data generation is done using the <code>icu_datagen</code> crate, which pulls in data from <a href="http://cldr.unicode.org/index/downloads">Unicode’s <em>Common Locale Data Repository</em> (<em>CLDR</em>)</a> and from <code>ICU4C</code> releases to generate <code>ICU4X</code> data. The crate has a command line interface as well as a Rust API, which can be used for example in <code>build.rs</code> files. Here we will use the CLI.</p>
+<p>First we will need to install the binary:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo install icu_datagen --features bin</code></pre></div>
+<p>Get a coffee, this might take a while ☕.</p>
+<p>Once installed, run:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format blob --all-keys --all-locales</code></pre></div>
+<p>Let’s dissect this invocation:</p>
+<ul>
+<li><code>--cldr-tag</code> selects the CLDR version to use</li>
+<li><code>--icuexport-tag</code> selects the ICU-exported data version to use</li>
+<li><code>--out</code> is the location where we want the generated ICU4X data to be stored</li>
+<li><code>--format</code> sets the format of the output (we’ll discuss formats later)</li>
+<li><code>--all-keys</code> <code>--all-locales</code> specifies that we want to include all data for all locales</li>
+</ul>
+<p>This will generate a <code>my-data</code> file containing the serialized data.</p>
+<h2 id="3-using-the-generated-data"><a href="#3-using-the-generated-data">3. Using the generated data</a></h2>
+<p>Once we have generated some data, it needs to be loaded as a data provider. The blob format we chose can be loaded by <code>BlobDataProvider</code> from the <code>icu_provider_blob</code> crate.</p>
+<p>This provider performs deserialization, so it’s a <code>BufferProvider</code>. This means that the feature <code>&quot;serde&quot;</code> needs to be enabled on <code>icu</code>.</p>
+<p>Let’s update our <code>Cargo.toml</code>:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo add icu --features serde
+$ cargo add icu_provider_blob</code></pre></div>
+<p>We can then use the provider in our code:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
+<span class="kw">use</span> <span class="ident">icu::calendar::DateTime</span>;
+<span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">DateTimeFormatter</span>, <span class="ident">options::length</span>};
+<span class="kw">use</span> <span class="ident">icu_provider_blob::BlobDataProvider</span>;
+
+<span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">std::fs::read</span>(<span class="string">&quot;my-data&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to read file&quot;</span>);
+    <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> 
+        <span class="ident">BlobDataProvider::try_new_from_blob</span>(<span class="ident">blob</span>.<span class="ident">into_boxed_slice</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize Data Provider.&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);
+
+    <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">DateTimeFormatter::try_new_with_buffer_provider</span>(<span class="kw-2">&amp;</span><span class="ident">buffer_provider</span>, <span class="kw-2">&amp;</span><span class="ident">LOCALE</span>.<span class="ident">into</span>(), <span class="ident">options</span>.<span class="ident">into</span>())
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize DateTimeFormatter&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">DateTime::try_new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">10</span>, <span class="number">14</span>, <span class="number">13</span>, <span class="number">21</span>, <span class="number">28</span>)
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to create a datetime.&quot;</span>);
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">date</span>.<span class="ident">to_any</span>();
+
+    <span class="kw">let</span> <span class="ident">formatted_date</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>).<span class="ident">expect</span>(<span class="string">&quot;Formatting should succeed&quot;</span>);
+
+    <span class="macro">println!</span>(<span class="string">&quot;📅: {}&quot;</span>, <span class="ident">formatted_date</span>);
+}</code></pre></div>
+<p><em>Notice:</em> We used the <code>with_buffer_provider</code> constructor (<code>DateTimeFormatter::try_new_with_buffer_provider</code>) now, instead of the <code>with_any_provider</code> constructor that we used with test data, as we now have a <code>BufferProvider</code>. </p>
+<h2 id="4-data-slicing"><a href="#4-data-slicing">4. Data slicing</a></h2>
+<p>You might have noticed that the blob we generated is a hefty 13MB. This is no surprise, as we included <code>--all-keys</code> <code>--all-locales</code>. However, our binary only uses date formatting data in Japanese. There’s room for optimization:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format blob --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
+<p>The <code>--keys-for-bin</code> argument tells <code>icu4x-datagen</code> to analyze the binary and only include keys that are used by its code. In addition, we know that we only need data for the Japanese locale. This significantly reduces the blob’s file size, to 54KB, and our program still works. Quite the improvement!</p>
+<p>But there is more to optimize. You might have noticed this in the output of the <code>icu4x-datagen</code> invocation, which lists 21 keys, including clearly irrelevant ones like <code>datetime/ethopic/datesymbols@1</code>. Remember how we had to convert our <code>DateTime&lt;Gregorian&gt;</code> into a <code>DateTime&lt;AnyCalendar&gt;</code> in order to use the <code>DateTimeFormatter</code>? Turns out, as <code>DateTimeFormatter</code> contains logic for many different calendars, datagen includes data for all of these as well.</p>
+<p>We can instead use <code>TypedDateTimeFormatter&lt;Gregorian&gt;</code>, which only supports formatting <code>DateTime&lt;Gregorian&gt;</code>s:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
+<span class="kw">use</span> <span class="ident">icu::calendar</span>::{<span class="ident">DateTime</span>, <span class="ident">Gregorian</span>};
+<span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">TypedDateTimeFormatter</span>, <span class="ident">options::length</span>};
+<span class="kw">use</span> <span class="ident">icu_provider_blob::BlobDataProvider</span>;
+
+<span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">std::fs::read</span>(<span class="string">&quot;my-data&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to read file&quot;</span>);
+    <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> 
+        <span class="ident">BlobDataProvider::try_new_from_blob</span>(<span class="ident">blob</span>.<span class="ident">into_boxed_slice</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize Data Provider.&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);
+
+    <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">TypedDateTimeFormatter</span>::<span class="op">&lt;</span><span class="ident">Gregorian</span><span class="op">&gt;</span><span class="ident">::try_new_with_buffer_provider</span>(<span class="kw-2">&amp;</span><span class="ident">buffer_provider</span>, <span class="kw-2">&amp;</span><span class="ident">LOCALE</span>.<span class="ident">into</span>(), <span class="ident">options</span>.<span class="ident">into</span>())
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize DateTimeFormatter&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">DateTime::try_new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">10</span>, <span class="number">14</span>, <span class="number">13</span>, <span class="number">21</span>, <span class="number">28</span>)
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to create a datetime.&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">formatted_date</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>);
+
+    <span class="macro">println!</span>(<span class="string">&quot;📅: {}&quot;</span>, <span class="ident">formatted_date</span>);
+}</code></pre></div>
+<p>This has two advantages: it reduces our code size, as <code>DateTimeFormatter</code> includes much more functionality than <code>TypedDateTimeFormatter&lt;Gregorian&gt;</code>, and it reduces our data size, as static analysis can now determine that we need even fewer keys. The data size improvement could have also been achieved by manually listing the data keys we think we’ll need (there’s a <code>--keys</code> flag), but we risk a runtime error if we’re wrong.</p>
+<p>This is a common pattern in <code>ICU4X</code>, and most of our APIs are designed with data slicing in mind.</p>
+<p>Rerunning datagen awards us with a 3KB data blob, which only contains 7 data keys!</p>
+<h2 id="5-other-formats"><a href="#5-other-formats">5. Other formats</a></h2>
+<p>So far we’ve used <code>--format blob</code> and <code>BlobDataProvider</code>. This is useful if we want to ship code and data separately, but there are other options.</p>
+<h3 id="mod-and-bakeddataprovider"><a href="#mod-and-bakeddataprovider"><code>mod</code> and <code>BakedDataProvider</code></a></h3>
+<p>The <code>mod</code> format will generate a Rust module that defines a data provider. This format naturally has no deserialization overhead, and allows for compile-time optimizations (data slicing isn’t really necessary, as the compiler will do it for us), but cannot be dynamically loaded at runtime.</p>
+<p>Let’s give it a try:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format mod --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
+<p>The output might tell you additional crates that need to be installed. Don’t worry, these are transitive dependencies already anyway, but are required directly now to construct our data:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo add icu_provider
+$ cargo add litemap
+$ cargo add zerovec</code></pre></div>
+<p>We can then use the data by directly including the source with the <code>include!</code> macro.</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>; <span class="comment">// required as BakedDataProvider is written for #[no_std]</span>
+<span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
+<span class="kw">use</span> <span class="ident">icu::calendar::DateTime</span>;
+<span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">TypedDateTimeFormatter</span>, <span class="ident">options::length</span>};
+
+<span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
+
+<span class="macro">include!</span>(<span class="string">&quot;../my-data/mod.rs&quot;</span>); <span class="comment">// defines BakedDataProvider</span>
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">unstable_provider</span> <span class="op">=</span> <span class="ident">BakedDataProvider</span>;
+
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);
+
+    <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">TypedDateTimeFormatter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">unstable_provider</span>, <span class="kw-2">&amp;</span><span class="ident">LOCALE</span>.<span class="ident">into</span>(), <span class="ident">options</span>.<span class="ident">into</span>())
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize DateTimeFormatter&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">DateTime::try_new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">10</span>, <span class="number">14</span>, <span class="number">13</span>, <span class="number">21</span>, <span class="number">28</span>)
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to create a datetime.&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">formatted_date</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>);
+
+    <span class="macro">println!</span>(<span class="string">&quot;📅: {}&quot;</span>, <span class="ident">formatted_date</span>);
+}</code></pre></div>
+<p>With this provider, we can use the <code>unstable</code> constructors. These are only guaranteed to work if the <code>BakedDataProvider</code> was generated with the same version of ICU4X that you are building with, but if you build the data as part of your a build pipeline, that shouldn’t be a problem.</p>
+<p>You can also make the <code>BakedDataProvider</code> implement the <code>AnyProvider</code> trait, so that it can be used with <code>_with_any_provider</code> constructors. Using these constructors is slightly less performant than the <code>unstable</code> ones, but, as the name suggests, stable across (minor) releases.</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="macro">include!</span>(<span class="string">&quot;../my-data/mod.rs&quot;</span>);
+<span class="macro">include!</span>(<span class="string">&quot;../my-data/any.rs&quot;</span>);
+<span class="kw">let</span> <span class="ident">_any_provider</span> <span class="op">=</span> <span class="ident">BakedDataProvider</span>;</code></pre></div>
+<h3 id="dir-and-fsdataprovider"><a href="#dir-and-fsdataprovider"><code>dir</code> and <code>FsDataProvider</code></a></h3>
+<p>The <code>dir</code> format will generate a directory tree of data files in JSON (although the <code>--syntax</code> option can be used to generate <code>postcard</code> or <code>bincode</code> files, which doesn’t have many practical uses).</p>
+<p>Let’s give it a try:</p>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format dir --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
+<p>This directory can be read by the <code>FsDataProvider</code> from the <code>icu_provider_fs</code> crate. You will also need to activate the feature for the chosen syntax on the <code>icu_provider</code> crate.</p>
+<p>Same as <code>BlobDataProvider</code>, this also a buffer provider, so you will need to activate <code>icu</code>’s <code>serde</code> feature and use the <code>with_buffer_provider</code> constructors.</p>
+<div class="example-wrap"><pre class="language-console"><code>$ cargo add icu --features serde
+$ cargo add icu_provider --features deserialize_json
+$ cargo add icu_provider_fs</code></pre></div>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
+<span class="kw">use</span> <span class="ident">icu::calendar::DateTime</span>;
+<span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">TypedDateTimeFormatter</span>, <span class="ident">options::length</span>};
+<span class="kw">use</span> <span class="ident">icu_provider_fs::FsDataProvider</span>;
+
+<span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> <span class="ident">FsDataProvider::try_new</span>(<span class="string">&quot;my-data&quot;</span>)
+           .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize Data Provider&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);
+
+    <span class="kw">let</span> <span class="ident">dtf</span> <span class="op">=</span> <span class="ident">TypedDateTimeFormatter::try_new_with_buffer_provider</span>(<span class="kw-2">&amp;</span><span class="ident">buffer_provider</span>, <span class="kw-2">&amp;</span><span class="ident">LOCALE</span>.<span class="ident">into</span>(), <span class="ident">options</span>.<span class="ident">into</span>())
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize DateTimeFormatter&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">date</span> <span class="op">=</span> <span class="ident">DateTime::try_new_gregorian_datetime</span>(<span class="number">2020</span>, <span class="number">10</span>, <span class="number">14</span>, <span class="number">13</span>, <span class="number">21</span>, <span class="number">28</span>)
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to create a datetime.&quot;</span>);
+
+    <span class="kw">let</span> <span class="ident">formatted_date</span> <span class="op">=</span> <span class="ident">dtf</span>.<span class="ident">format</span>(<span class="kw-2">&amp;</span><span class="ident">date</span>);
+
+    <span class="macro">println!</span>(<span class="string">&quot;📅: {}&quot;</span>, <span class="ident">formatted_date</span>);
+}</code></pre></div>
+<h2 id="6-summary-1"><a href="#6-summary-1">6. Summary</a></h2>
+<p>We have learned how to generate data and load it into our programs, optimize data size, and gotten to know the different data providers that are part of <code>ICU4X</code>.</p>
+<p>You can learn more about datagen, including the Rust API which we have not used in this tutorial, by reading <a href="https://icu4x.unicode.org/doc/icu_datagen/">the docs</a>.</p>
+<h2 id="using-icu4x-from-javascript-and-typescript"><a href="#using-icu4x-from-javascript-and-typescript">Using ICU4X from JavaScript and TypeScript</a></h2>
+<p>ICU4X’s core functionality is completely available from JS and TypeScript via WebAssembly, with bindings generated by <a href="https://github.com/rust-diplomat/diplomat">Diplomat</a>.</p>
+<p>A generated package can be found under [<code>ffi/diplomat/wasm/icu4x</code>], with Sphinx docs at <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/wasm/icu4x/docs"><code>ffi/diplomat/wasm/icu4x/docs</code></a>. You can also run <code>tsdoc</code> on the package to get TypeScript docs.</p>
+<p><em>We are still working on improving the user experience of using ICU4X from other languages. As such, this tutorial may be a bit sparse, but we are happy to answer questions on our <a href="https://github.com/unicode-org/icu4x/discussions">discussions forum</a> and help you out</em></p>
+<h2 id="building-the-package"><a href="#building-the-package">Building the package</a></h2>
+<p>We plan to release ICU4X on NPM soon. In the meantime, you can build the package yourself.</p>
+<p>The package needs to contain ICU4X WASM sources, the best way to do this is to check out ICU4X at the appropriate versioned tag and running <code>cargo make wasm-copy-to-diplomat</code>.</p>
+<h2 id="using-the-built-package"><a href="#using-the-built-package">Using the built package</a></h2>
+<p>We hope to fill in these docs over time with more examples. In the meantime, an ICU4X web demo can be built with <code>cargo make diplomat-build-webpack-demo</code> and found in <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/wasm/icu4x/wasm-demo"><code>ffi/diplomat/wasm/icu4x/wasm-demo</code></a>, you can explore that code for ideas on how ICU4X is used.</p>
+<p>Similar to C++, the JS APIs mirror the Rust code in the <code>icu_capi</code> crate, which can be explored on <a href="https://docs.rs/icu_capi/latest/icu_capi/">docs.rs</a>, though the precise types used may be different.</p>
+<h2 id="techniques-for-writing-design-docs"><a href="#techniques-for-writing-design-docs">Techniques for Writing Design Docs</a></h2>
+<p>According to <a href="../process/bylaws.md">bylaws.md</a>, designs should make their way to GitHub Markdown files somewhat early in the process.  However, since Markdown is not a WYSIWYG platform like Google Docs, it takes a bit of time before you become accustomed to the practice.  This document contains tips on the workflow.</p>
+<h3 id="design-document-evolution"><a href="#design-document-evolution">Design Document Evolution</a></h3><h4 id="google-doc-for-rapid-prototyping"><a href="#google-doc-for-rapid-prototyping">Google Doc for Rapid Prototyping</a></h4>
+<p>A first step when writing a design doc may be to start in Google Docs.  You can share the doc with a trusted group to receive early feedback on typographical errors, mistakes, points that need clarification, and so on.  You should also be keeping an eye out for open questions, and you should explicitly enumerate open questions in your doc.</p>
+<p>This phase is called “Rapid Prototyping” as defined by the Bylaws.</p>
+<h4 id="markdown-draft"><a href="#markdown-draft">Markdown Draft</a></h4>
+<p>Once you’ve done some basic polishing of your design doc, you should migrate it to Markdown in the ICU4X repository.  You should file issues for all open questions, and reference those open questions from your doc.  Send the Markdown file out for review in a PR, and we will discuss it in the next ICU4X-SC weekly meeting.  If the SC agrees with the design you have put forward in the doc, the PR will be considered as approved and can be merged in.</p>
+<h4 id="addressing-open-questions"><a href="#addressing-open-questions">Addressing Open Questions</a></h4>
+<p>Once the working draft of your design is checked in, you can address open questions using the GitHub issue tracking feature.  Once each question reaches a resolution, open a PR referencing that issue, updating the Markdown file to reflect the conclusion.  Once approved by the SC, the PR can be merged and the issue can be closed.</p>
+<h3 id="markdown-techniques"><a href="#markdown-techniques">Markdown Techniques</a></h3><h4 id="images"><a href="#images">Images</a></h4>
+<p>You can include images using code such as the following:</p>
+<div class="example-wrap"><pre class="language-markdown"><code>![JSON Data Provider](../assets/multi_provider_architecture.svg)</code></pre></div>
+<p>Inside the <code>![...]</code> is the alt text, and inside the <code>(...)</code> is the relative path to the image file.  You should save your images in an <em>assets</em> folder in the same directory as the Markdown file.</p>
+<p>Shane likes SVG files because they scale up and down nicely on different screen sizes and resolutions.  However, bitmaps are acceptable, too, depending on how you created the images.</p>
+<p>Create the images using your favorite editor.  For the images in <a href="../design/data-pipeline.md">data-pipeline.md</a>, Shane used Lucidchart.  You can also use Inkscape, Gimp, Google Slides, Adobe Illustrator, etc.  If you have a tablet, another good option may be to draw the image on your screen with your stylus into a whiteboard program and export it as an image.</p>
+<h5 id="previewing-images-in-prs"><a href="#previewing-images-in-prs">Previewing Images in PRs</a></h5>
+<p>Here is how others can view your Markdown with images in a PR:</p>
+<ol>
+<li>In the PR, click “Files Changed” (goes to /pull/123/files)</li>
+<li>Find the Markdown file you want to preview</li>
+<li>Click the three dots (…) to open the menu, then click “View File” (goes to /blob/abcdef0/docs/example.md)</li>
+</ol>
+</div></details></section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="icu_tutorials" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
+</body></html>

@@ -684,20 +684,6 @@
 <span id="679">679</span>
 <span id="680">680</span>
 <span id="681">681</span>
-<span id="682">682</span>
-<span id="683">683</span>
-<span id="684">684</span>
-<span id="685">685</span>
-<span id="686">686</span>
-<span id="687">687</span>
-<span id="688">688</span>
-<span id="689">689</span>
-<span id="690">690</span>
-<span id="691">691</span>
-<span id="692">692</span>
-<span id="693">693</span>
-<span id="694">694</span>
-<span id="695">695</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -705,6 +691,7 @@
 <span class="doccomment">//! This module contains various types used by `icu_calendar` and `icu_datetime`</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::CalendarError</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers</span>;
 <span class="kw">use</span> <span class="ident">core::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">core::convert::TryInto</span>;
 <span class="kw">use</span> <span class="ident">core::fmt</span>;
@@ -1179,23 +1166,8 @@
     <span class="doccomment">/// Takes a number of minutes, which could be positive or negative, and returns the Time</span>
     <span class="doccomment">/// and the day number, which could be positive or negative.</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_minute_with_remainder_days</span>(<span class="ident">minute</span>: <span class="ident">i32</span>) -&gt; (<span class="ident">Time</span>, <span class="ident">i32</span>) {
-        <span class="kw">let</span> <span class="ident">minutes_a_hour</span> <span class="op">=</span> <span class="number">60</span>;
-        <span class="kw">let</span> <span class="ident">hours_a_day</span> <span class="op">=</span> <span class="number">24</span>;
-        <span class="kw">let</span> <span class="ident">minutes_a_day</span> <span class="op">=</span> <span class="ident">minutes_a_hour</span> <span class="op">*</span> <span class="ident">hours_a_day</span>;
-        <span class="kw">let</span> <span class="ident">extra_days</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">minute</span>.<span class="ident">is_negative</span>() {
-            <span class="comment">// TODO: migrate to div_floor</span>
-            (<span class="ident">minute</span> <span class="op">+</span> <span class="number">1</span>) <span class="op">/</span> <span class="ident">minutes_a_day</span> <span class="op">-</span> <span class="number">1</span>
-        } <span class="kw">else</span> {
-            <span class="ident">minute</span> <span class="op">/</span> <span class="ident">minutes_a_day</span>
-        };
-
-        <span class="kw">let</span> <span class="ident">minutes</span> <span class="op">=</span> (<span class="ident">minutes_a_hour</span> <span class="op">+</span> <span class="ident">minute</span> <span class="op">%</span> <span class="ident">minutes_a_hour</span>) <span class="op">%</span> <span class="ident">minutes_a_hour</span>;
-        <span class="kw">let</span> <span class="ident">hours</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">minute</span>.<span class="ident">is_negative</span>() {
-            ((<span class="ident">minutes_a_day</span> <span class="op">-</span> <span class="ident">minutes</span> <span class="op">-</span> (<span class="ident">minute</span> <span class="op">%</span> <span class="ident">minutes_a_day</span>).<span class="ident">abs</span>()) <span class="op">/</span> <span class="ident">minutes_a_hour</span>)
-                <span class="op">%</span> <span class="ident">hours_a_day</span>
-        } <span class="kw">else</span> {
-            (<span class="ident">minute</span> <span class="op">/</span> <span class="ident">minutes_a_hour</span>) <span class="op">%</span> <span class="ident">hours_a_day</span>
-        };
+        <span class="kw">let</span> (<span class="ident">extra_days</span>, <span class="ident">minute_in_day</span>) <span class="op">=</span> <span class="ident">helpers::div_rem_euclid</span>(<span class="ident">minute</span>, <span class="number">1440</span>);
+        <span class="kw">let</span> (<span class="ident">hours</span>, <span class="ident">minutes</span>) <span class="op">=</span> (<span class="ident">minute_in_day</span> <span class="op">/</span> <span class="number">60</span>, <span class="ident">minute_in_day</span> <span class="op">%</span> <span class="number">60</span>);
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// values are moduloed to be in range</span>
         (
             <span class="self">Self</span> {

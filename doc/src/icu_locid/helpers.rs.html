@@ -649,8 +649,6 @@
 <span id="644">644</span>
 <span id="645">645</span>
 <span id="646">646</span>
-<span id="647">647</span>
-<span id="648">648</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -1040,12 +1038,17 @@
         }
 
         <span class="kw">impl</span> <span class="ident">writeable::Writeable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
                 <span class="ident">sink</span>.<span class="ident">write_str</span>(<span class="self">self</span>.<span class="ident">as_str</span>())
             }
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="kw">fn</span> <span class="ident">writeable_length_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">writeable::LengthHint</span> {
                 <span class="ident">writeable::LengthHint::exact</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">len</span>())
+            }
+            <span class="attribute">#[<span class="ident">inline</span>]</span>
+            <span class="kw">fn</span> <span class="ident">write_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">alloc::borrow::Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
+                <span class="ident">alloc::borrow::Cow::Borrowed</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_str</span>())
             }
         }
 
@@ -1199,7 +1202,7 @@
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_writeable_for_each_subtag_str_no_test</span> {
-    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">tt</span>) =&gt; {
+    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">tt</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">borrow_cond</span>:<span class="ident">expr</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">borrow</span>:<span class="ident">expr</span>)<span class="question-mark">?</span>) =&gt; {
         <span class="kw">impl</span> <span class="ident">writeable::Writeable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
             <span class="kw">fn</span> <span class="macro-nonterminal">write_to</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">core::fmt::Write</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;mut</span> <span class="ident">W</span>) -&gt; <span class="ident">core::fmt::Result</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">initial</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -1229,6 +1232,20 @@
                 .<span class="ident">expect</span>(<span class="string">&quot;infallible&quot;</span>);
                 <span class="ident">result</span>
             }
+
+            $(
+                <span class="kw">fn</span> <span class="ident">write_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">alloc::borrow::Cow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span> {
+                    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// impl_writeable_for_subtag_list&#39;s $borrow uses unwrap</span>
+                    <span class="kw">let</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">self</span> <span class="op">=</span> <span class="self">self</span>;
+                    <span class="kw">if</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">borrow_cond</span> {
+                        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">borrow</span>
+                    } <span class="kw">else</span> {
+                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">alloc::string::String::with_capacity</span>(<span class="self">self</span>.<span class="ident">writeable_length_hint</span>().<span class="ident">capacity</span>());
+                        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">write_to</span>(<span class="kw-2">&amp;mut</span> <span class="ident">output</span>);
+                        <span class="ident">alloc::borrow::Cow::Owned</span>(<span class="ident">output</span>)
+                    }
+                }
+            )<span class="question-mark">?</span>
         }
 
         <span class="macro">writeable::impl_display_with_writeable!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>);
@@ -1237,34 +1254,13 @@
 
 <span class="macro">macro_rules!</span> <span class="macro-nonterminal">impl_writeable_for_subtag_list</span> {
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample2</span>:<span class="ident">literal</span>) =&gt; {
-        <span class="macro">impl_writeable_for_each_subtag_str_no_test!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>);
+        <span class="macro">impl_writeable_for_each_subtag_str_no_test!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>, <span class="macro-nonterminal">selff</span>, <span class="ident">selff</span>.<span class="number">0</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> =&gt; <span class="ident">alloc::borrow::Cow::Borrowed</span>(<span class="ident">selff</span>.<span class="number">0</span>.<span class="ident">as_slice</span>().<span class="ident">get</span>(<span class="number">0</span>).<span class="ident">unwrap</span>().<span class="ident">as_str</span>()));
 
-        <span class="attribute">#[<span class="macro-nonterminal">test</span>]</span>
+        <span class="attribute">#[<span class="ident">test</span>]</span>
         <span class="kw">fn</span> <span class="ident">test_writeable</span>() {
             <span class="macro">writeable::assert_writeable_eq!</span>(<span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">type</span><span class="macro-nonterminal">::default</span>(), <span class="string">&quot;&quot;</span>);
             <span class="macro">writeable::assert_writeable_eq!</span>(
                 <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">type</span><span class="macro-nonterminal">::from_vec_unchecked</span>(<span class="macro">alloc::vec!</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()]),
-                <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>,
-            );
-            <span class="macro">writeable::assert_writeable_eq!</span>(
-                <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">type</span><span class="macro-nonterminal">::from_vec_unchecked</span>(<span class="macro">alloc::vec!</span>[
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
-                    <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample2</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()
-                ]),
-                <span class="macro">core::concat!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>, <span class="string">&quot;-&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample2</span>),
-            );
-        }
-    };
-}
-
-<span class="macro">macro_rules!</span> <span class="ident">impl_writeable_for_tinystr_list</span> {
-    (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">if_empty</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>:<span class="ident">literal</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample2</span>:<span class="ident">literal</span>) =&gt; {
-        <span class="macro">impl_writeable_for_each_subtag_str_no_test!</span>(<span class="macro-nonterminal">$</span><span class="kw">type</span>);
-
-        <span class="attribute">#[<span class="macro-nonterminal">test</span>]</span>
-        <span class="kw">fn</span> <span class="ident">test_writeable</span>() {
-            <span class="macro">writeable::assert_writeable_eq!</span>(
-                <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="kw">type</span><span class="macro-nonterminal">::from_vec_unchecked</span>(<span class="macro">vec!</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()]),
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sample1</span>,
             );
             <span class="macro">writeable::assert_writeable_eq!</span>(

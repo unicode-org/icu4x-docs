@@ -326,6 +326,20 @@
 <span id="321">321</span>
 <span id="322">322</span>
 <span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -361,6 +375,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any_calendar::AnyCalendarKind</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::calendar_arithmetic</span>::{<span class="ident">ArithmeticDate</span>, <span class="ident">CalendarArithmetic</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers::quotient</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso::Iso</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::julian::Julian</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">CalendarError</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>};
@@ -531,7 +546,7 @@
     <span class="kw">fn</span> <span class="ident">fixed_from_coptic</span>(<span class="ident">date</span>: <span class="ident">ArithmeticDate</span><span class="op">&lt;</span><span class="ident">Coptic</span><span class="op">&gt;</span>) -&gt; <span class="ident">i32</span> {
         <span class="ident">COPTIC_EPOCH</span> <span class="op">-</span> <span class="number">1</span>
             <span class="op">+</span> <span class="number">365</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">year</span> <span class="op">-</span> <span class="number">1</span>)
-            <span class="op">+</span> (<span class="ident">date</span>.<span class="ident">year</span> <span class="op">/</span> <span class="number">4</span>)
+            <span class="op">+</span> <span class="ident">quotient</span>(<span class="ident">date</span>.<span class="ident">year</span>, <span class="number">4</span>)
             <span class="op">+</span> <span class="number">30</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">-</span> <span class="number">1</span>)
             <span class="op">+</span> <span class="ident">date</span>.<span class="ident">day</span> <span class="kw">as</span> <span class="ident">i32</span>
     }
@@ -547,8 +562,8 @@
 
     <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L1990</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">coptic_from_fixed</span>(<span class="ident">date</span>: <span class="ident">i32</span>) -&gt; <span class="ident">CopticDateInner</span> {
-        <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> (<span class="number">4</span> <span class="op">*</span> (<span class="ident">date</span> <span class="op">-</span> <span class="ident">COPTIC_EPOCH</span>) <span class="op">+</span> <span class="number">1463</span>) <span class="op">/</span> <span class="number">1461</span>;
-        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> ((<span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_coptic_integers</span>(<span class="ident">year</span>, <span class="number">1</span>, <span class="number">1</span>)) <span class="op">/</span> <span class="number">30</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// &lt;= 12 &lt; u8::MAX</span>
+        <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="ident">quotient</span>(<span class="number">4</span> <span class="op">*</span> (<span class="ident">date</span> <span class="op">-</span> <span class="ident">COPTIC_EPOCH</span>) <span class="op">+</span> <span class="number">1463</span>, <span class="number">1461</span>);
+        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> (<span class="ident">quotient</span>(<span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_coptic_integers</span>(<span class="ident">year</span>, <span class="number">1</span>, <span class="number">1</span>), <span class="number">30</span>) <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// &lt;= 12 &lt; u8::MAX</span>
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> (<span class="ident">date</span> <span class="op">+</span> <span class="number">1</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_coptic_integers</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="number">1</span>)) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// &lt;= days_in_month &lt; u8::MAX</span>
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// day and month have the correct bounds</span>
@@ -647,6 +662,19 @@
             <span class="ident">number</span>: <span class="number">1</span> <span class="op">-</span> <span class="ident">year</span>,
             <span class="ident">related_iso</span>: <span class="prelude-val">None</span>,
         }
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_coptic_regression</span>() {
+        <span class="comment">// https://github.com/unicode-org/icu4x/issues/2254</span>
+        <span class="kw">let</span> <span class="ident">iso_date</span> <span class="op">=</span> <span class="ident">Date::try_new_iso_date</span>(<span class="op">-</span><span class="number">100</span>, <span class="number">3</span>, <span class="number">3</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">coptic</span> <span class="op">=</span> <span class="ident">iso_date</span>.<span class="ident">to_calendar</span>(<span class="ident">Coptic</span>);
+        <span class="kw">let</span> <span class="ident">recovered_iso</span> <span class="op">=</span> <span class="ident">coptic</span>.<span class="ident">to_iso</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">iso_date</span>, <span class="ident">recovered_iso</span>);
     }
 }
 </code></pre></div>

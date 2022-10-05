@@ -413,6 +413,16 @@
 <span id="408">408</span>
 <span id="409">409</span>
 <span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -448,6 +458,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::any_calendar::AnyCalendarKind</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::calendar_arithmetic</span>::{<span class="ident">ArithmeticDate</span>, <span class="ident">CalendarArithmetic</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helpers::quotient</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iso::Iso</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">types</span>, <span class="ident">Calendar</span>, <span class="ident">CalendarError</span>, <span class="ident">Date</span>, <span class="ident">DateDuration</span>, <span class="ident">DateDurationUnit</span>, <span class="ident">DateTime</span>};
 <span class="kw">use</span> <span class="ident">core::marker::PhantomData</span>;
@@ -631,8 +642,8 @@
         } <span class="kw">else</span> {
             <span class="ident">date</span>.<span class="ident">year</span>
         };
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fixed</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="ident">JULIAN_EPOCH</span> <span class="op">-</span> <span class="number">1</span> <span class="op">+</span> <span class="number">365</span> <span class="op">*</span> (<span class="ident">year</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> (<span class="ident">year</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">/</span> <span class="number">4</span>;
-        <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> (<span class="number">367</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">-</span> <span class="number">362</span>) <span class="op">/</span> <span class="number">12</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fixed</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="ident">JULIAN_EPOCH</span> <span class="op">-</span> <span class="number">1</span> <span class="op">+</span> <span class="number">365</span> <span class="op">*</span> (<span class="ident">year</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">+</span> <span class="ident">quotient</span>(<span class="ident">year</span> <span class="op">-</span> <span class="number">1</span>, <span class="number">4</span>);
+        <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> <span class="ident">quotient</span>(<span class="number">367</span> <span class="op">*</span> (<span class="ident">date</span>.<span class="ident">month</span> <span class="kw">as</span> <span class="ident">i32</span>) <span class="op">-</span> <span class="number">362</span>, <span class="number">12</span>);
         <span class="ident">fixed</span> <span class="op">+</span><span class="op">=</span> <span class="kw">if</span> <span class="ident">date</span>.<span class="ident">month</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">2</span> {
             <span class="number">0</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_leap_year_const</span>(<span class="ident">date</span>.<span class="ident">year</span>) {
@@ -665,7 +676,7 @@
 
     <span class="comment">// Lisp code reference: https://github.com/EdReingold/calendar-code2/blob/1ee51ecfaae6f856b0d7de3e36e9042100b4f424/calendar.l#L1711-L1738</span>
     <span class="kw">fn</span> <span class="ident">julian_from_fixed</span>(<span class="ident">date</span>: <span class="ident">i32</span>) -&gt; <span class="ident">JulianDateInner</span> {
-        <span class="kw">let</span> <span class="ident">approx</span> <span class="op">=</span> ((<span class="number">4</span> <span class="op">*</span> <span class="ident">date</span>) <span class="op">+</span> <span class="number">1464</span>) <span class="op">/</span> <span class="number">1461</span>;
+        <span class="kw">let</span> <span class="ident">approx</span> <span class="op">=</span> <span class="ident">quotient</span>((<span class="number">4</span> <span class="op">*</span> <span class="ident">date</span>) <span class="op">+</span> <span class="number">1464</span>, <span class="number">1461</span>);
         <span class="kw">let</span> <span class="ident">year</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">approx</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0</span> { <span class="ident">approx</span> <span class="op">-</span> <span class="number">1</span> } <span class="kw">else</span> { <span class="ident">approx</span> };
         <span class="kw">let</span> <span class="ident">prior_days</span> <span class="op">=</span> <span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_julian_integers</span>(<span class="ident">year</span>, <span class="number">1</span>, <span class="number">1</span>);
         <span class="kw">let</span> <span class="ident">correction</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">date</span> <span class="op">&lt;</span> <span class="ident"><span class="self">Self</span>::fixed_from_julian_integers</span>(<span class="ident">year</span>, <span class="number">3</span>, <span class="number">1</span>) {
@@ -675,7 +686,7 @@
         } <span class="kw">else</span> {
             <span class="number">2</span>
         };
-        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> ((<span class="number">12</span> <span class="op">*</span> (<span class="ident">prior_days</span> <span class="op">+</span> <span class="ident">correction</span>) <span class="op">+</span> <span class="number">373</span>) <span class="op">/</span> <span class="number">367</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// this expression is in 1..=12</span>
+        <span class="kw">let</span> <span class="ident">month</span> <span class="op">=</span> <span class="ident">quotient</span>(<span class="number">12</span> <span class="op">*</span> (<span class="ident">prior_days</span> <span class="op">+</span> <span class="ident">correction</span>) <span class="op">+</span> <span class="number">373</span>, <span class="number">367</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// this expression is in 1..=12</span>
         <span class="kw">let</span> <span class="ident">day</span> <span class="op">=</span> (<span class="ident">date</span> <span class="op">-</span> <span class="ident"><span class="self">Self</span>::fixed_from_julian_integers</span>(<span class="ident">year</span>, <span class="ident">month</span>, <span class="number">1</span>) <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>; <span class="comment">// as days_in_month is &lt; u8::MAX</span>
 
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unwrap_used</span>)]</span> <span class="comment">// day and month have the correct bounds</span>
@@ -821,6 +832,15 @@
         <span class="kw">let</span> <span class="ident">iso_date</span> <span class="op">=</span> <span class="ident">Julian</span>.<span class="ident">date_to_iso</span>(<span class="ident">julian_date</span>.<span class="ident">inner</span>());
         <span class="kw">let</span> <span class="ident">iso_expected_date</span> <span class="op">=</span> <span class="ident">Date::try_new_iso_date</span>(<span class="number">2022</span>, <span class="number">3</span>, <span class="number">1</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">iso_date</span>, <span class="ident">iso_expected_date</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_roundtrip_negative</span>() {
+        <span class="comment">// https://github.com/unicode-org/icu4x/issues/2254</span>
+        <span class="kw">let</span> <span class="ident">iso_date</span> <span class="op">=</span> <span class="ident">Date::try_new_iso_date</span>(<span class="op">-</span><span class="number">1000</span>, <span class="number">3</span>, <span class="number">3</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">julian</span> <span class="op">=</span> <span class="ident">iso_date</span>.<span class="ident">to_calendar</span>(<span class="ident">Julian::new</span>());
+        <span class="kw">let</span> <span class="ident">recovered_iso</span> <span class="op">=</span> <span class="ident">julian</span>.<span class="ident">to_iso</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">iso_date</span>, <span class="ident">recovered_iso</span>);
     }
 }
 </code></pre></div>

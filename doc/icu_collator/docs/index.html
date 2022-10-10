@@ -4,7 +4,7 @@
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../../icu_collator/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"><a href="#">Module docs</a></h2><div class="sidebar-elems"><div id="sidebar-vars" data-name="docs" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../icu_collator/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">icu_collator</a>::<wbr><a class="mod" href="#">docs</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/icu_collator/docs.rs.html#5-115">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module exists to contain implementation docs and notes for people who want to contribute.</p>
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">icu_collator</a>::<wbr><a class="mod" href="#">docs</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/icu_collator/docs.rs.html#5-151">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This module exists to contain implementation docs and notes for people who want to contribute.</p>
 <h2 id="contributor-notes"><a href="#contributor-notes">Contributor Notes</a></h2><h3 id="development-environment-on-linux-for-fuzzing-and-generating-data"><a href="#development-environment-on-linux-for-fuzzing-and-generating-data">Development environment (on Linux) for fuzzing and generating data</a></h3>
 <p>These notes assume that ICU4X itself has been cloned to <code>$PROJECTS/icu4x</code>.</p>
 <p>Clone ICU4C from <a href="https://github.com/hsivonen/icu">https://github.com/hsivonen/icu</a> to <code>$PROJECTS/icu</code> and switch
@@ -100,5 +100,33 @@ in prefix or contraction matching.</p>
 </ul>
 </li>
 </ul>
+<h2 id="notes-about-index-generation"><a href="#notes-about-index-generation">Notes about index generation</a></h2>
+<p>ICU4X currently does not have code or data for generating <a href="https://www.unicode.org/reports/tr35/tr35-collation.html#Collation_Indexes">collation
+indexes</a>.</p>
+<p>On the data side, ICU4X doesn’t have data for <code>&lt;exemplarCharacters type=&quot;index&quot;&gt;</code>
+(or when that’s missing, plain <code>&lt;exemplarCharacters&gt;</code>).</p>
+<p>Of the collations, <code>zh-u-co-pinyin</code>, <code>zh-u-co-stroke</code>, <code>zh-u-co-zhuyin</code>, and
+<code>*-u-co-unihan</code> are special: They bake a contraction of U+FDD0 and an index
+character in the collation order. ICU4X collation data already includes this.
+For <code>*-u-co-unihan</code> this index character data is repeated in all three tailorings
+instead of being in the root. If it was in the root, code for extracting the
+index characters from the collation data would need to avoid confusing the
+<code>unihan</code> index contractions (if they were in the root) and the <code>zh-u-co-pinyin</code>,
+<code>zh-u-co-stroke</code>, and <code>zh-u-co-zhuyin</code> in the tailoring. This seems feasible,
+but isn’t how CLDR and ICU4C do it. (If the index characters for
+<code>*-u-co-unihan</code> were in the root, <code>ko-u-co-unihan</code> would become a mere
+script reordering.)</p>
+<p>It’s unclear how useful it would be size-wise to have code to extract the
+index characters from the collations: For <code>zh-u-co-pinyin</code>, <code>zh-u-co-stroke</code>,
+<code>zh-u-co-zhuyin</code>, the index characters are contiguous ranges that could be
+efficiently stored as start and end. Moreover, the in-data index character
+for <code>stroke</code> isn’t the label to be rendered to the user, so special-casing
+is needed anyway.</p>
+<p>This means that there’s a tradeoff between having duplicate data (relative to
+the collation tailorings) for the <code>unihan</code> index character list vs. having
+code for extracting the list from the tailorings. It’s not at all clear that
+having the code is better for size than having the list of 238 ideographs
+itself as data (476 bytes as UTF-16).</p>
+<p>Note: Investigate <a href="https://github.com/unicode-org/icu4x/issues/2723">#2723</a></p>
 </div></details></section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="icu_collator" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.61.0 (fe5b13d68 2022-05-18)" ></div>
 </body></html>

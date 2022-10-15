@@ -513,24 +513,6 @@
 <span id="508">508</span>
 <span id="509">509</span>
 <span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -543,10 +525,10 @@
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">extensions</span>, <span class="ident">subtags</span>, <span class="ident">LanguageIdentifier</span>};
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
-<span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">core::cmp::Ordering</span>;
 <span class="kw">use</span> <span class="ident">core::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">tinystr::TinyAsciiStr</span>;
+<span class="kw">use</span> <span class="ident">writeable::Writeable</span>;
 
 <span class="doccomment">/// A core struct representing a [`Unicode Locale Identifier`].</span>
 <span class="doccomment">///</span>
@@ -561,20 +543,21 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu::locid::extensions::unicode::{Key, Value};</span>
-<span class="doccomment">/// use icu::locid::{subtags::*, Locale};</span>
+<span class="doccomment">/// use icu_locid::{</span>
+<span class="doccomment">///     extensions_unicode_key as key, extensions_unicode_value as value,</span>
+<span class="doccomment">///     locale, subtags_language as language, subtags_region as region,</span>
+<span class="doccomment">/// };</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let loc: Locale = &quot;en-US-u-ca-buddhist&quot;.parse().expect(&quot;Failed to parse.&quot;);</span>
+<span class="doccomment">/// let loc = locale!(&quot;en-US-u-ca-buddhist&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(loc.id.language, &quot;en&quot;.parse::&lt;Language&gt;().unwrap());</span>
+<span class="doccomment">/// assert_eq!(loc.id.language, language!(&quot;en&quot;));</span>
 <span class="doccomment">/// assert_eq!(loc.id.script, None);</span>
-<span class="doccomment">/// assert_eq!(loc.id.region, &quot;US&quot;.parse::&lt;Region&gt;().ok());</span>
+<span class="doccomment">/// assert_eq!(loc.id.region, Some(region!(&quot;US&quot;)));</span>
 <span class="doccomment">/// assert_eq!(loc.id.variants.len(), 0);</span>
-<span class="doccomment">/// assert_eq!(loc.to_string(), &quot;en-US-u-ca-buddhist&quot;);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let key: Key = &quot;ca&quot;.parse().expect(&quot;Parsing key failed.&quot;);</span>
-<span class="doccomment">/// let value: Value = &quot;buddhist&quot;.parse().expect(&quot;Parsing value failed.&quot;);</span>
-<span class="doccomment">/// assert_eq!(loc.extensions.unicode.keywords.get(&amp;key), Some(&amp;value));</span>
+<span class="doccomment">/// assert_eq!(</span>
+<span class="doccomment">///     loc.extensions.unicode.keywords.get(&amp;key!(&quot;ca&quot;)),</span>
+<span class="doccomment">///     Some(&amp;value!(&quot;buddhist&quot;))</span>
+<span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Parsing</span>
@@ -649,10 +632,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// use icu::locid::Locale;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let loc = Locale::try_from_bytes(&quot;en-US-u-hc-h12&quot;.as_bytes())</span>
-    <span class="doccomment">///     .expect(&quot;Parsing failed.&quot;);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// assert_eq!(loc.to_string(), &quot;en-US-u-hc-h12&quot;);</span>
+    <span class="doccomment">/// Locale::try_from_bytes(b&quot;en-US-u-hc-h12&quot;).unwrap();</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_bytes</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="ident">parse_locale</span>(<span class="ident">v</span>)
@@ -666,7 +646,6 @@
     <span class="doccomment">/// use icu::locid::Locale;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(Locale::default(), Locale::UND);</span>
-    <span class="doccomment">/// assert_eq!(&quot;und&quot;, Locale::UND.to_string());</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">UND</span>: <span class="self">Self</span> <span class="op">=</span> <span class="self">Self</span> {
         <span class="ident">id</span>: <span class="ident">LanguageIdentifier::UND</span>,
@@ -684,13 +663,13 @@
     <span class="doccomment">/// use icu::locid::Locale;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// assert_eq!(</span>
-    <span class="doccomment">///     Locale::canonicalize(&quot;pL_latn_pl-U-HC-H12&quot;),</span>
-    <span class="doccomment">///     Ok(&quot;pl-Latn-PL-u-hc-h12&quot;.to_string())</span>
+    <span class="doccomment">///     Locale::canonicalize(&quot;pL_latn_pl-U-HC-H12&quot;).as_deref(),</span>
+    <span class="doccomment">///     Ok(&quot;pl-Latn-PL-u-hc-h12&quot;)</span>
     <span class="doccomment">/// );</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">canonicalize</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::try_from_bytes</span>(<span class="ident">input</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">locale</span>.<span class="ident">to_string</span>())
+        <span class="prelude-val">Ok</span>(<span class="ident">locale</span>.<span class="ident">write_to_string</span>().<span class="ident">into_owned</span>())
     }
 
     <span class="doccomment">/// Compare this [`Locale`] with BCP-47 bytes.</span>
@@ -722,7 +701,6 @@
     <span class="doccomment">///     let b = ab[1];</span>
     <span class="doccomment">///     assert!(a.cmp(b) == Ordering::Less);</span>
     <span class="doccomment">///     let a_loc = a.parse::&lt;Locale&gt;().unwrap();</span>
-    <span class="doccomment">///     assert_eq!(a, a_loc.to_string());</span>
     <span class="doccomment">///     assert!(a_loc.strict_cmp(a.as_bytes()) == Ordering::Equal);</span>
     <span class="doccomment">///     assert!(a_loc.strict_cmp(b.as_bytes()) == Ordering::Less);</span>
     <span class="doccomment">/// }</span>
@@ -959,14 +937,10 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu::locid::subtags_language as language;</span>
 <span class="doccomment">/// use icu::locid::Locale;</span>
+<span class="doccomment">/// use icu::locid::{locale, subtags_language as language};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let language = language!(&quot;en&quot;);</span>
-<span class="doccomment">/// let loc = Locale::from(language);</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(loc.id.language, language);</span>
-<span class="doccomment">/// assert_eq!(loc.to_string(), &quot;en&quot;);</span>
+<span class="doccomment">/// assert_eq!(Locale::from(language!(&quot;en&quot;)), locale!(&quot;en&quot;));</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">subtags::Language</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Locale</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">language</span>: <span class="ident">subtags::Language</span>) -&gt; <span class="self">Self</span> {
@@ -980,14 +954,10 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu::locid::subtags_script as script;</span>
 <span class="doccomment">/// use icu::locid::Locale;</span>
+<span class="doccomment">/// use icu::locid::{locale, subtags_script as script};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let script = script!(&quot;latn&quot;);</span>
-<span class="doccomment">/// let loc = Locale::from(Some(script));</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(loc.id.script.unwrap(), script);</span>
-<span class="doccomment">/// assert_eq!(loc.to_string(), &quot;und-Latn&quot;);</span>
+<span class="doccomment">/// assert_eq!(Locale::from(Some(script!(&quot;latn&quot;))), locale!(&quot;und-Latn&quot;));</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">subtags::Script</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Locale</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">script</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">subtags::Script</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
@@ -1001,14 +971,10 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use icu::locid::subtags_region as region;</span>
 <span class="doccomment">/// use icu::locid::Locale;</span>
+<span class="doccomment">/// use icu::locid::{locale, subtags_region as region};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let region = region!(&quot;US&quot;);</span>
-<span class="doccomment">/// let loc = Locale::from(Some(region));</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(loc.id.region.unwrap(), region);</span>
-<span class="doccomment">/// assert_eq!(loc.to_string(), &quot;und-US&quot;);</span>
+<span class="doccomment">/// assert_eq!(Locale::from(Some(region!(&quot;US&quot;))), locale!(&quot;und-US&quot;));</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">subtags::Region</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Locale</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">region</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">subtags::Region</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
@@ -1024,20 +990,18 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use icu::locid::Locale;</span>
 <span class="doccomment">/// use icu::locid::{</span>
-<span class="doccomment">///     subtags_language as language, subtags_region as region,</span>
+<span class="doccomment">///     locale, subtags_language as language, subtags_region as region,</span>
 <span class="doccomment">///     subtags_script as script,</span>
 <span class="doccomment">/// };</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let lang = language!(&quot;en&quot;);</span>
-<span class="doccomment">/// let script = script!(&quot;Latn&quot;);</span>
-<span class="doccomment">/// let region = region!(&quot;US&quot;);</span>
-<span class="doccomment">/// let loc = Locale::from((lang, Some(script), Some(region)));</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// assert_eq!(loc.id.language, lang);</span>
-<span class="doccomment">/// assert_eq!(loc.id.script.unwrap(), script);</span>
-<span class="doccomment">/// assert_eq!(loc.id.region.unwrap(), region);</span>
-<span class="doccomment">/// assert_eq!(loc.id.variants.len(), 0);</span>
-<span class="doccomment">/// assert_eq!(loc.to_string(), &quot;en-Latn-US&quot;);</span>
+<span class="doccomment">/// assert_eq!(</span>
+<span class="doccomment">///     Locale::from((</span>
+<span class="doccomment">///         language!(&quot;en&quot;),</span>
+<span class="doccomment">///         Some(script!(&quot;Latn&quot;)),</span>
+<span class="doccomment">///         Some(region!(&quot;US&quot;))</span>
+<span class="doccomment">///     )),</span>
+<span class="doccomment">///     locale!(&quot;en-Latn-US&quot;)</span>
+<span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">impl</span>
     <span class="ident">From</span><span class="op">&lt;</span>(

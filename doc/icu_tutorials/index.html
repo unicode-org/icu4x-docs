@@ -438,7 +438,7 @@ int main() {
 <div class="example-wrap"><pre class="language-console"><code>$ cargo install icu_datagen --features bin</code></pre></div>
 <p>Get a coffee, this might take a while ☕.</p>
 <p>Once installed, run:</p>
-<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format blob --all-keys --all-locales</code></pre></div>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data-blob --format blob --all-keys --all-locales</code></pre></div>
 <p>Let’s dissect this invocation:</p>
 <ul>
 <li><code>--cldr-tag</code> selects the CLDR version to use</li>
@@ -447,7 +447,7 @@ int main() {
 <li><code>--format</code> sets the format of the output (we’ll discuss formats later)</li>
 <li><code>--all-keys</code> <code>--all-locales</code> specifies that we want to include all data for all locales</li>
 </ul>
-<p>This will generate a <code>my-data</code> file containing the serialized data.</p>
+<p>This will generate a <code>my-data-blob</code> file containing the serialized data.</p>
 <h2 id="3-using-the-generated-data"><a href="#3-using-the-generated-data">3. Using the generated data</a></h2>
 <p>Once we have generated some data, it needs to be loaded as a data provider. The blob format we chose can be loaded by <code>BlobDataProvider</code> from the <code>icu_provider_blob</code> crate.</p>
 <p>This provider performs deserialization, so it’s a <code>BufferProvider</code>. This means that the feature <code>&quot;serde&quot;</code> needs to be enabled on <code>icu</code>.</p>
@@ -464,7 +464,7 @@ $ cargo add icu_provider_blob</code></pre></div>
 <span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
-    <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">std::fs::read</span>(<span class="string">&quot;my-data&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to read file&quot;</span>);
+    <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">std::fs::read</span>(<span class="string">&quot;my-data-blob&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to read file&quot;</span>);
     <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> 
         <span class="ident">BlobDataProvider::try_new_from_blob</span>(<span class="ident">blob</span>.<span class="ident">into_boxed_slice</span>())
             .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize Data Provider.&quot;</span>);
@@ -485,7 +485,7 @@ $ cargo add icu_provider_blob</code></pre></div>
 <p><em>Notice:</em> We used the <code>with_buffer_provider</code> constructor (<code>DateTimeFormatter::try_new_with_buffer_provider</code>) now, instead of the <code>with_any_provider</code> constructor that we used with test data, as we now have a <code>BufferProvider</code>. </p>
 <h2 id="4-data-slicing"><a href="#4-data-slicing">4. Data slicing</a></h2>
 <p>You might have noticed that the blob we generated is a hefty 13MB. This is no surprise, as we included <code>--all-keys</code> <code>--all-locales</code>. However, our binary only uses date formatting data in Japanese. There’s room for optimization:</p>
-<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format blob --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --overwrite --cldr-tag latest --icuexport-tag latest --out my-data-blob --format blob --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
 <p>The <code>--keys-for-bin</code> argument tells <code>icu4x-datagen</code> to analyze the binary and only include keys that are used by its code. In addition, we know that we only need data for the Japanese locale. This significantly reduces the blob’s file size, to 54KB, and our program still works. Quite the improvement!</p>
 <p>But there is more to optimize. You might have noticed this in the output of the <code>icu4x-datagen</code> invocation, which lists 21 keys, including clearly irrelevant ones like <code>datetime/ethopic/datesymbols@1</code>. Remember how we had to convert our <code>DateTime&lt;Gregorian&gt;</code> into a <code>DateTime&lt;AnyCalendar&gt;</code> in order to use the <code>DateTimeFormatter</code>? Turns out, as <code>DateTimeFormatter</code> contains logic for many different calendars, datagen includes data for all of these as well.</p>
 <p>We can instead use <code>TypedDateTimeFormatter&lt;Gregorian&gt;</code>, which only supports formatting <code>DateTime&lt;Gregorian&gt;</code>s:</p>
@@ -498,7 +498,7 @@ $ cargo add icu_provider_blob</code></pre></div>
 <span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
-    <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">std::fs::read</span>(<span class="string">&quot;my-data&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to read file&quot;</span>);
+    <span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">std::fs::read</span>(<span class="string">&quot;my-data-blob&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to read file&quot;</span>);
     <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> 
         <span class="ident">BlobDataProvider::try_new_from_blob</span>(<span class="ident">blob</span>.<span class="ident">into_boxed_slice</span>())
             .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize Data Provider.&quot;</span>);
@@ -517,13 +517,13 @@ $ cargo add icu_provider_blob</code></pre></div>
 }</code></pre></div>
 <p>This has two advantages: it reduces our code size, as <code>DateTimeFormatter</code> includes much more functionality than <code>TypedDateTimeFormatter&lt;Gregorian&gt;</code>, and it reduces our data size, as static analysis can now determine that we need even fewer keys. The data size improvement could have also been achieved by manually listing the data keys we think we’ll need (there’s a <code>--keys</code> flag), but we risk a runtime error if we’re wrong.</p>
 <p>This is a common pattern in <code>ICU4X</code>, and most of our APIs are designed with data slicing in mind.</p>
-<p>Rerunning datagen awards us with a 3KB data blob, which only contains 7 data keys!</p>
+<p>Rebuilding the application and rerunning datagen awards us with a 3KB data blob, which only contains 7 data keys!</p>
 <h2 id="5-other-formats"><a href="#5-other-formats">5. Other formats</a></h2>
 <p>So far we’ve used <code>--format blob</code> and <code>BlobDataProvider</code>. This is useful if we want to ship code and data separately, but there are other options.</p>
 <h3 id="mod-and-bakeddataprovider"><a href="#mod-and-bakeddataprovider"><code>mod</code> and <code>BakedDataProvider</code></a></h3>
 <p>The <code>mod</code> format will generate a Rust module that defines a data provider. This format naturally has no deserialization overhead, and allows for compile-time optimizations (data slicing isn’t really necessary, as the compiler will do it for us), but cannot be dynamically loaded at runtime.</p>
 <p>Let’s give it a try:</p>
-<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format mod --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data-mod --format mod --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
 <p>The output might tell you additional crates that need to be installed. Don’t worry, these are transitive dependencies already anyway, but are required directly now to construct our data:</p>
 <div class="example-wrap"><pre class="language-console"><code>$ cargo add icu_provider
 $ cargo add litemap
@@ -537,7 +537,7 @@ $ cargo add zerovec</code></pre></div>
 
 <span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
 
-<span class="macro">include!</span>(<span class="string">&quot;../my-data/mod.rs&quot;</span>); <span class="comment">// defines BakedDataProvider</span>
+<span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/mod.rs&quot;</span>); <span class="comment">// defines BakedDataProvider</span>
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
     <span class="kw">let</span> <span class="ident">unstable_provider</span> <span class="op">=</span> <span class="ident">BakedDataProvider</span>;
@@ -557,13 +557,13 @@ $ cargo add zerovec</code></pre></div>
 <p>With this provider, we can use the <code>unstable</code> constructors. These are only guaranteed to work if the <code>BakedDataProvider</code> was generated with the same version of ICU4X that you are building with, but if you build the data as part of your a build pipeline, that shouldn’t be a problem.</p>
 <p>You can also make the <code>BakedDataProvider</code> implement the <code>AnyProvider</code> trait, so that it can be used with <code>_with_any_provider</code> constructors. Using these constructors is slightly less performant than the <code>unstable</code> ones, but, as the name suggests, stable across (minor) releases.</p>
 
-<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="macro">include!</span>(<span class="string">&quot;../my-data/mod.rs&quot;</span>);
-<span class="macro">include!</span>(<span class="string">&quot;../my-data/any.rs&quot;</span>);
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/mod.rs&quot;</span>);
+<span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/any.rs&quot;</span>);
 <span class="kw">let</span> <span class="ident">_any_provider</span> <span class="op">=</span> <span class="ident">BakedDataProvider</span>;</code></pre></div>
 <h3 id="dir-and-fsdataprovider"><a href="#dir-and-fsdataprovider"><code>dir</code> and <code>FsDataProvider</code></a></h3>
 <p>The <code>dir</code> format will generate a directory tree of data files in JSON (although the <code>--syntax</code> option can be used to generate <code>postcard</code> or <code>bincode</code> files, which doesn’t have many practical uses).</p>
 <p>Let’s give it a try:</p>
-<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data --format dir --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
+<div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data-dir --format dir --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
 <p>This directory can be read by the <code>FsDataProvider</code> from the <code>icu_provider_fs</code> crate. You will also need to activate the feature for the chosen syntax on the <code>icu_provider</code> crate.</p>
 <p>Same as <code>BlobDataProvider</code>, this also a buffer provider, so you will need to activate <code>icu</code>’s <code>serde</code> feature and use the <code>with_buffer_provider</code> constructors.</p>
 <div class="example-wrap"><pre class="language-console"><code>$ cargo add icu --features serde
@@ -577,7 +577,7 @@ $ cargo add icu_provider_fs</code></pre></div>
 <span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
-    <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> <span class="ident">FsDataProvider::try_new</span>(<span class="string">&quot;my-data&quot;</span>)
+    <span class="kw">let</span> <span class="ident">buffer_provider</span> <span class="op">=</span> <span class="ident">FsDataProvider::try_new</span>(<span class="string">&quot;my-data-dir&quot;</span>)
            .<span class="ident">expect</span>(<span class="string">&quot;Failed to initialize Data Provider&quot;</span>);
 
     <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);

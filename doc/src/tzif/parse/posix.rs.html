@@ -881,7 +881,7 @@
 <span class="kw">use</span> <span class="ident">combine</span>::{<span class="ident">between</span>, <span class="ident">choice</span>, <span class="ident">many</span>, <span class="ident">many1</span>, <span class="ident">optional</span>, <span class="ident">satisfy</span>, <span class="ident">value</span>, <span class="ident">ParseError</span>, <span class="ident">Parser</span>, <span class="ident">Stream</span>};
 
 <span class="doccomment">/// Parses a byte that not a digit, a comma, a plus nor a minus signs.</span>
-<span class="kw">fn</span> <span class="ident">aplhabetic_zone_variant_name_value</span><span class="op">&lt;</span><span class="ident">Input</span><span class="op">&gt;</span>() -&gt; <span class="kw">impl</span> <span class="ident">Parser</span><span class="op">&lt;</span><span class="ident">Input</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">alphabetic_zone_variant_name_value</span><span class="op">&lt;</span><span class="ident">Input</span><span class="op">&gt;</span>() -&gt; <span class="kw">impl</span> <span class="ident">Parser</span><span class="op">&lt;</span><span class="ident">Input</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">Input</span>: <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Token</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">Input::Error</span>: <span class="ident">ParseError</span><span class="op">&lt;</span><span class="ident">Input::Token</span>, <span class="ident">Input::Range</span>, <span class="ident">Input::Position</span><span class="op">&gt;</span>,
@@ -898,8 +898,8 @@
     <span class="ident">Input</span>: <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Token</span> <span class="op">=</span> <span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">Input::Error</span>: <span class="ident">ParseError</span><span class="op">&lt;</span><span class="ident">Input::Token</span>, <span class="ident">Input::Range</span>, <span class="ident">Input::Position</span><span class="op">&gt;</span>,
 {
-    <span class="ident">many</span>(<span class="ident">aplhabetic_zone_variant_name_value</span>())
-        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bytes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">|</span> <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>).<span class="ident">to_string</span>())
+    <span class="ident">many</span>(<span class="ident">alphabetic_zone_variant_name_value</span>())
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bytes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">|</span> <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>).<span class="ident">into_owned</span>())
 }
 
 <span class="doccomment">/// Parses an arbitrary time-zone variant name. This name must be enclosed in angled brackets, e.g. `&lt;name&gt;`.</span>
@@ -912,7 +912,7 @@
         <span class="ident">byte</span>(<span class="string">b&#39;&gt;&#39;</span>),
         <span class="ident">many1</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">satisfy</span>(<span class="op">|</span><span class="ident">byte</span><span class="op">|</span> <span class="ident">byte</span> <span class="op">!</span><span class="op">=</span> <span class="string">b&#39;&gt;&#39;</span>)),
     )
-    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>).<span class="ident">to_string</span>())
+    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>).<span class="ident">into_owned</span>())
 }
 
 <span class="doccomment">/// The string specifies the name of the time zone variant. It must be three or more characters</span>
@@ -1517,7 +1517,7 @@
             <span class="ident">std_variant_info</span>(),
             <span class="string">&quot;EST+5&quot;</span>,
             <span class="ident">ZoneVariantInfo</span> {
-                <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;EST&quot;</span>),
+                <span class="ident">name</span>: <span class="string">&quot;EST&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">5</span>).<span class="ident">as_seconds</span>(),
             }
         );
@@ -1525,7 +1525,7 @@
             <span class="ident">std_variant_info</span>(),
             <span class="string">&quot;IST-2&quot;</span>,
             <span class="ident">ZoneVariantInfo</span> {
-                <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;IST&quot;</span>),
+                <span class="ident">name</span>: <span class="string">&quot;IST&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="op">-</span><span class="number">2</span>).<span class="ident">as_seconds</span>(),
             }
         );
@@ -1533,7 +1533,7 @@
             <span class="ident">std_variant_info</span>(),
             <span class="string">&quot;&lt;0made+up0&gt;-24:59:59&quot;</span>,
             <span class="ident">ZoneVariantInfo</span> {
-                <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;0made+up0&quot;</span>),
+                <span class="ident">name</span>: <span class="string">&quot;0made+up0&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="op">-</span><span class="number">24</span>).<span class="ident">as_seconds</span>() <span class="op">-</span> <span class="ident">Minutes</span>(<span class="number">59</span>).<span class="ident">as_seconds</span>() <span class="op">-</span> <span class="ident">Seconds</span>(<span class="number">59</span>)
             }
         );
@@ -1564,7 +1564,7 @@
             <span class="ident">dst_variant_info</span>(<span class="ident">Hours</span>(<span class="number">5</span>).<span class="ident">as_seconds</span>()),
             <span class="string">&quot;EDT&quot;</span>,
             <span class="ident">ZoneVariantInfo</span> {
-                <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;EDT&quot;</span>),
+                <span class="ident">name</span>: <span class="string">&quot;EDT&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">4</span>).<span class="ident">as_seconds</span>(),
             }
         );
@@ -1572,7 +1572,7 @@
             <span class="ident">dst_variant_info</span>(<span class="ident">Hours</span>(<span class="op">-</span><span class="number">2</span>).<span class="ident">as_seconds</span>()),
             <span class="string">&quot;IDT&quot;</span>,
             <span class="ident">ZoneVariantInfo</span> {
-                <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;IDT&quot;</span>),
+                <span class="ident">name</span>: <span class="string">&quot;IDT&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="op">-</span><span class="number">3</span>).<span class="ident">as_seconds</span>(),
             }
         );
@@ -1580,7 +1580,7 @@
             <span class="ident">dst_variant_info</span>(<span class="ident">Seconds</span>(<span class="number">0</span>)),
             <span class="string">&quot;&lt;0made+up0&gt;-24:59:59&quot;</span>,
             <span class="ident">ZoneVariantInfo</span> {
-                <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;0made+up0&quot;</span>),
+                <span class="ident">name</span>: <span class="string">&quot;0made+up0&quot;</span>.<span class="ident">to_owned</span>(),
                 <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="op">-</span><span class="number">24</span>).<span class="ident">as_seconds</span>() <span class="op">-</span> <span class="ident">Minutes</span>(<span class="number">59</span>).<span class="ident">as_seconds</span>() <span class="op">-</span> <span class="ident">Seconds</span>(<span class="number">59</span>)
             }
         );
@@ -1648,7 +1648,7 @@
             <span class="string">&quot;WARST,J1/0,J365/25&quot;</span>,
             <span class="ident">DstTransitionInfo</span> {
                 <span class="ident">variant_info</span>: <span class="ident">ZoneVariantInfo</span> {
-                    <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;WARST&quot;</span>),
+                    <span class="ident">name</span>: <span class="string">&quot;WARST&quot;</span>.<span class="ident">to_owned</span>(),
                     <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">3</span>).<span class="ident">as_seconds</span>()
                 },
                 <span class="ident">start_date</span>: <span class="ident">TransitionDate</span> {
@@ -1666,7 +1666,7 @@
             <span class="string">&quot;IDT,M3.4.4/26,M10.5.0&quot;</span>,
             <span class="ident">DstTransitionInfo</span> {
                 <span class="ident">variant_info</span>: <span class="ident">ZoneVariantInfo</span> {
-                    <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;IDT&quot;</span>),
+                    <span class="ident">name</span>: <span class="string">&quot;IDT&quot;</span>.<span class="ident">to_owned</span>(),
                     <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="op">-</span><span class="number">3</span>).<span class="ident">as_seconds</span>()
                 },
                 <span class="ident">start_date</span>: <span class="ident">TransitionDate</span> {
@@ -1688,12 +1688,12 @@
             <span class="string">&quot;WGT3WGST,M3.5.0/-2,M10.5.0/-1&quot;</span>,
             <span class="ident">PosixTzString</span> {
                 <span class="ident">std_info</span>: <span class="ident">ZoneVariantInfo</span> {
-                    <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;WGT&quot;</span>),
+                    <span class="ident">name</span>: <span class="string">&quot;WGT&quot;</span>.<span class="ident">to_owned</span>(),
                     <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">3</span>).<span class="ident">as_seconds</span>(),
                 },
                 <span class="ident">dst_info</span>: <span class="prelude-val">Some</span>(<span class="ident">DstTransitionInfo</span> {
                     <span class="ident">variant_info</span>: <span class="ident">ZoneVariantInfo</span> {
-                        <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;WGST&quot;</span>),
+                        <span class="ident">name</span>: <span class="string">&quot;WGST&quot;</span>.<span class="ident">to_owned</span>(),
                         <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">2</span>).<span class="ident">as_seconds</span>()
                     },
                     <span class="ident">start_date</span>: <span class="ident">TransitionDate</span> {
@@ -1712,12 +1712,12 @@
             <span class="string">&quot;WART4WARST,J1/0,J365/25&quot;</span>,
             <span class="ident">PosixTzString</span> {
                 <span class="ident">std_info</span>: <span class="ident">ZoneVariantInfo</span> {
-                    <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;WART&quot;</span>),
+                    <span class="ident">name</span>: <span class="string">&quot;WART&quot;</span>.<span class="ident">to_owned</span>(),
                     <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">4</span>).<span class="ident">as_seconds</span>(),
                 },
                 <span class="ident">dst_info</span>: <span class="prelude-val">Some</span>(<span class="ident">DstTransitionInfo</span> {
                     <span class="ident">variant_info</span>: <span class="ident">ZoneVariantInfo</span> {
-                        <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="string">&quot;WARST&quot;</span>),
+                        <span class="ident">name</span>: <span class="string">&quot;WARST&quot;</span>.<span class="ident">to_owned</span>(),
                         <span class="ident">offset</span>: <span class="ident">Hours</span>(<span class="number">3</span>).<span class="ident">as_seconds</span>()
                     },
                     <span class="ident">start_date</span>: <span class="ident">TransitionDate</span> {

@@ -219,6 +219,7 @@
 <span id="214">214</span>
 <span id="215">215</span>
 <span id="216">216</span>
+<span id="217">217</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -229,6 +230,7 @@
 <span class="kw">use</span> <span class="ident">icu_provider::datagen::IterableDataProvider</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">lazy_static::lazy_static</span>;
+<span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 
 <span class="kw">fn</span> <span class="ident">load</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">KeyedDataMarker</span><span class="op">&lt;</span><span class="ident">Yokeable</span> <span class="op">=</span> <span class="ident">ListFormatterPatternsV1</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="ident">selff</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::DatagenProvider</span>,
@@ -278,7 +280,7 @@
         <span class="kw">if</span> <span class="ident">M::KEY</span> <span class="op">==</span> <span class="ident">AndListV1Marker::KEY</span> <span class="op">|</span><span class="op">|</span> <span class="ident">M::KEY</span> <span class="op">==</span> <span class="ident">UnitListV1Marker::KEY</span> {
             <span class="macro">lazy_static!</span> {
                 <span class="comment">// Starts with i or (hi but not hia/hie)</span>
-                <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">I_SOUND</span>: <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="string">&quot;i|hi([^ae]|$)&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Valid regex&quot;</span>);
+                <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">I_SOUND</span>: <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow::Borrowed</span>(<span class="string">&quot;i|hi([^ae]|$)&quot;</span>)).<span class="ident">expect</span>(<span class="string">&quot;Valid regex&quot;</span>);
             }
             <span class="comment">// Replace &quot; y &quot; with &quot; e &quot; before /i/ sounds.</span>
             <span class="comment">// https://unicode.org/reports/tr35/tr35-general.html#:~:text=important.%20For%20example%3A-,Spanish,AND,-Use%20%E2%80%98e%E2%80%99%20instead</span>
@@ -289,7 +291,7 @@
             <span class="macro">lazy_static!</span> {
                 <span class="comment">// Starts with o, ho, 8 (including 80, 800, ...), or 11 either alone or followed</span>
                 <span class="comment">// by thousand groups and/or decimals (excluding e.g. 110, 1100, ...)</span>
-                <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">O_SOUND</span>: <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="string">r&quot;o|ho|8|(11(\.?\d\d\d)*(,\d*)?([^\.,\d]|$))&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;Valid regex&quot;</span>);
+                <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">O_SOUND</span>: <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow::Borrowed</span>(<span class="string">r&quot;o|ho|8|(11(\.?\d\d\d)*(,\d*)?([^\.,\d]|$))&quot;</span>)).<span class="ident">expect</span>(<span class="string">&quot;Valid regex&quot;</span>);
             }
             <span class="comment">// Replace &quot; o &quot; with &quot; u &quot; before /o/ sound.</span>
             <span class="comment">// https://unicode.org/reports/tr35/tr35-general.html#:~:text=agua%20e%20hielo-,OR,-Use%20%E2%80%98u%E2%80%99%20instead</span>
@@ -301,7 +303,7 @@
 
     <span class="kw">if</span> <span class="ident">langid</span>.<span class="ident">language</span> <span class="op">==</span> <span class="macro">language!</span>(<span class="string">&quot;he&quot;</span>) {
         <span class="comment">// Cannot cache this because it depends on `selff`. However we don&#39;t expect many Hebrew locales.</span>
-        <span class="kw">let</span> <span class="ident">non_hebrew</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+        <span class="kw">let</span> <span class="ident">non_hebrew</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow::Owned</span>(<span class="macro">format!</span>(
             <span class="string">&quot;[^{}]&quot;</span>,
             <span class="ident">icu_properties::maps::load_script</span>(<span class="ident">selff</span>)
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::custom</span>(<span class="string">&quot;data for CodePointTrie of Script&quot;</span>)
@@ -312,7 +314,7 @@
                 .<span class="ident">iter_ranges</span>()
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">range</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">r#&quot;\u{:04x}-\u{:04x}&quot;#</span>, <span class="ident">range</span>.<span class="ident">start</span>(), <span class="ident">range</span>.<span class="ident">end</span>()))
                 .<span class="ident">fold</span>(<span class="ident">String::new</span>(), <span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span> <span class="op">+</span> <span class="kw-2">&amp;</span><span class="ident">b</span>)
-        ))
+        )))
         .<span class="ident">expect</span>(<span class="string">&quot;valid regex&quot;</span>);
 
         <span class="comment">// Add dashes between ו and non-Hebrew characters</span>

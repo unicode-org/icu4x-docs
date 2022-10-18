@@ -215,12 +215,6 @@
 <span id="210">210</span>
 <span id="211">211</span>
 <span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -232,7 +226,6 @@
 
 <span class="doccomment">/// A precompiled regex</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">yoke::Yokeable</span>, <span class="ident">zerofrom::ZeroFrom</span>)]</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::exhaustive_structs</span>)]</span> <span class="comment">// not a public API</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StringMatcher</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="comment">// Safety: These always represent a valid DFA (DFA::from_bytes(dfa_bytes).is_ok())</span>
     <span class="ident">dfa_bytes</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -292,7 +285,7 @@
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
             <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
             <span class="kw">use</span> <span class="ident">serde::de::Error</span>;
-            <span class="kw">return</span> <span class="ident">StringMatcher::new</span>(<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>)
+            <span class="kw">return</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow</span>::<span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="ident">::deserialize</span>(<span class="ident">deserializer</span>)<span class="question-mark">?</span>)
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">D::Error::custom</span>(<span class="ident">e</span>.<span class="ident">to_string</span>()));
         }
 
@@ -335,16 +328,11 @@
 
     <span class="doccomment">/// Creates a `StringMatcher` from regex.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;datagen&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde_human&quot;</span>,))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">pattern</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">icu_provider::DataError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">pattern</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">icu_provider::DataError</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">regex_automata</span>::{
             <span class="ident">dfa::dense</span>::{<span class="ident">Builder</span>, <span class="ident">Config</span>},
             <span class="ident">SyntaxConfig</span>,
         };
-
-        <span class="comment">// TODO: `pattern` should be `Cow&lt;&#39;data, str&gt; so that this allocation isn&#39;t necessary.</span>
-        <span class="comment">// However, that is a breaking change, because `new` is pub even outside datagen</span>
-        <span class="comment">// (which is probably an oversight).</span>
-        <span class="kw">let</span> <span class="ident">pattern</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span>, <span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Cow::Owned</span>(<span class="ident">pattern</span>.<span class="ident">into</span>());
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">Builder::new</span>();
         <span class="kw">let</span> <span class="ident">dfa</span> <span class="op">=</span> <span class="ident">builder</span>
@@ -384,7 +372,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_string_matcher</span>() {
-        <span class="kw">let</span> <span class="ident">matcher</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="string">&quot;abc.*&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">matcher</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow::Borrowed</span>(<span class="string">&quot;abc.*&quot;</span>)).<span class="ident">unwrap</span>();
         <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">matcher</span>.<span class="ident">test</span>(<span class="string">&quot;ab&quot;</span>));
         <span class="macro">assert!</span>(<span class="ident">matcher</span>.<span class="ident">test</span>(<span class="string">&quot;abc&quot;</span>));
         <span class="macro">assert!</span>(<span class="ident">matcher</span>.<span class="ident">test</span>(<span class="string">&quot;abcde&quot;</span>));
@@ -392,7 +380,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_postcard_serialization</span>() {
-        <span class="kw">let</span> <span class="ident">matcher</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="string">&quot;abc*&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">matcher</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow::Borrowed</span>(<span class="string">&quot;abc*&quot;</span>)).<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">postcard::to_stdvec</span>(<span class="kw-2">&amp;</span><span class="ident">matcher</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(
@@ -417,7 +405,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde_human&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">test_json_serialization</span>() {
-        <span class="kw">let</span> <span class="ident">matcher</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="string">&quot;abc*&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">matcher</span> <span class="op">=</span> <span class="ident">StringMatcher::new</span>(<span class="ident">Cow::Borrowed</span>(<span class="string">&quot;abc*&quot;</span>)).<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">json</span> <span class="op">=</span> <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">matcher</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(

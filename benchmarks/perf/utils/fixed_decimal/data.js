@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666726685663,
+  "lastUpdate": 1666743344376,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -58168,6 +58168,126 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 83,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango Cheran",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ecffce3fc5d3a2fea9fad22000dd6053c0f9e828",
+          "message": "Add documentation on CodePointTrie details and perf considerations (#2717)",
+          "timestamp": "2022-10-26T00:01:03Z",
+          "tree_id": "d1822b1e57b19ae6aaffe915105ebd304518c894",
+          "url": "https://github.com/unicode-org/icu4x/commit/ecffce3fc5d3a2fea9fad22000dd6053c0f9e828"
+        },
+        "date": 1666743207957,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 101899,
+            "range": "± 509",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22003,
+            "range": "± 510",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65950,
+            "range": "± 713",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 173,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 65,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6e748569e3c408cd5b59938d4629af9bfff32cae",
+          "message": "Add ixdtf to CI (#2786)",
+          "timestamp": "2022-10-25T17:00:41-07:00",
+          "tree_id": "1f5a94110c9ff68f999575e0b4b191cf0042657a",
+          "url": "https://github.com/unicode-org/icu4x/commit/6e748569e3c408cd5b59938d4629af9bfff32cae"
+        },
+        "date": 1666743277599,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 102011,
+            "range": "± 539",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22018,
+            "range": "± 134",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 66237,
+            "range": "± 595",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 167,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 66,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
             "range": "± 0",
             "unit": "ns/iter"
           }

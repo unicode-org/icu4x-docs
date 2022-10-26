@@ -42,6 +42,7 @@ sourcesIndex["icu_segmenter"] = {"name":"","files":["complex.rs","dictionary.rs"
 sourcesIndex["icu_testdata"] = {"name":"","files":["lib.rs","metadata.rs","paths.rs"]};
 sourcesIndex["icu_timezone"] = {"name":"","files":["error.rs","lib.rs","metazone.rs","provider.rs","time_zone.rs","types.rs"]};
 sourcesIndex["icu_tutorials"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["ixdtf"] = {"name":"","files":["lib.rs","parser.rs"]};
 sourcesIndex["litemap"] = {"name":"","dirs":[{"name":"store","files":["mod.rs","slice_impl.rs","vec_impl.rs"]}],"files":["lib.rs","map.rs","serde.rs","serde_helpers.rs","testing.rs"]};
 sourcesIndex["tinystr"] = {"name":"","files":["ascii.rs","asciibyte.rs","databake.rs","error.rs","int_ops.rs","lib.rs","macros.rs","serde.rs","ule.rs"]};
 sourcesIndex["tzif"] = {"name":"","dirs":[{"name":"data","files":["mod.rs","posix.rs","time.rs","tzif.rs"]},{"name":"parse","files":["mod.rs","posix.rs","tzif.rs"]}],"files":["error.rs","lib.rs"]};

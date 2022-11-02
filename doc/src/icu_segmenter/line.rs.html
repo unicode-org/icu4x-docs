@@ -1253,16 +1253,39 @@
 <span id="1248">1248</span>
 <span id="1249">1249</span>
 <span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
+<span id="1254">1254</span>
+<span id="1255">1255</span>
+<span id="1256">1256</span>
+<span id="1257">1257</span>
+<span id="1258">1258</span>
+<span id="1259">1259</span>
+<span id="1260">1260</span>
+<span id="1261">1261</span>
+<span id="1262">1262</span>
+<span id="1263">1263</span>
+<span id="1264">1264</span>
+<span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::complex</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme::GraphemeClusterSegmenter</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::symbols</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SegmenterError</span>;
-
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
@@ -1452,6 +1475,7 @@
     <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>,
     <span class="ident">dictionary</span>: <span class="ident">Dictionary</span>,
     <span class="ident">lstm</span>: <span class="ident">LstmPayloads</span>,
+    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">LineSegmenter</span> {
@@ -1459,7 +1483,10 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">provider</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">SegmenterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="ident"><span class="self">Self</span>::try_new_with_options_unstable</span>(<span class="ident">provider</span>, <span class="ident">Default::default</span>())
     }
@@ -1470,6 +1497,7 @@
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="ident"><span class="self">Self</span>::try_new_with_options_unstable</span>(<span class="ident">provider</span>, <span class="ident">Default::default</span>())
@@ -1484,9 +1512,13 @@
         <span class="ident">options</span>: <span class="ident">LineBreakOptions</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">SegmenterError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+        <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span> <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="ident">provider</span>).<span class="ident">ok</span>();
 
         <span class="kw">let</span> <span class="ident">burmese</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_lstm</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;my&quot;</span>)).<span class="ident">ok</span>();
         <span class="kw">let</span> <span class="ident">khmer</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_lstm</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;km&quot;</span>)).<span class="ident">ok</span>();
@@ -1503,6 +1535,7 @@
                 <span class="ident">lao</span>,
                 <span class="ident">thai</span>,
             },
+            <span class="ident">grapheme</span>,
         })
     }
 
@@ -1515,9 +1548,11 @@
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">LineBreakDataV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>
+            <span class="op">+</span> <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span>
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span> <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="ident">provider</span>).<span class="ident">ok</span>();
 
         <span class="kw">let</span> <span class="ident">khmer</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_dictionary</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;km&quot;</span>)).<span class="ident">ok</span>();
         <span class="kw">let</span> <span class="ident">lao</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_dictionary</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;lo&quot;</span>)).<span class="ident">ok</span>();
@@ -1535,6 +1570,7 @@
                 <span class="ident">cj</span>: <span class="prelude-val">None</span>,
             },
             <span class="ident">lstm</span>: <span class="ident">LstmPayloads::default</span>(),
+            <span class="ident">grapheme</span>,
         })
     }
 
@@ -1586,6 +1622,7 @@
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
             <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
         }
     }
     <span class="doccomment">/// Create a line break iterator for a potentially ill-formed UTF8 string</span>
@@ -1604,6 +1641,7 @@
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
             <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
         }
     }
     <span class="doccomment">/// Create a line break iterator for a Latin-1 (8-bit) string.</span>
@@ -1617,6 +1655,7 @@
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
             <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
         }
     }
 
@@ -1631,6 +1670,7 @@
             <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">options</span>,
             <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
             <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
         }
     }
 }
@@ -1876,6 +1916,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="ident">options</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LineBreakOptions</span>,
     <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">Dictionary</span>,
     <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">LstmPayloads</span>,
+    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">LineBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">LineBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
@@ -2146,7 +2187,7 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
     <span class="comment">// Restore iterator to move to head of complex string</span>
     <span class="ident">iter</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
     <span class="ident">iter</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
-    <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="ident">iter</span>.<span class="ident">dictionary</span>, <span class="ident">iter</span>.<span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
+    <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="ident">iter</span>.<span class="ident">dictionary</span>, <span class="ident">iter</span>.<span class="ident">lstm</span>, <span class="ident">iter</span>.<span class="ident">grapheme</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
     <span class="ident">iter</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">current_pos_data</span>.<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">len_utf8</span>();
     <span class="kw">loop</span> {
@@ -2242,7 +2283,12 @@ fn use_complex_breaking_utf32(codepoint: u32) -&gt; bool {
         <span class="comment">// Restore iterator to move to head of complex string</span>
         <span class="ident">iterator</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">start_iter</span>;
         <span class="ident">iterator</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">start_point</span>;
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_utf16</span>(<span class="ident">iterator</span>.<span class="ident">dictionary</span>, <span class="ident">iterator</span>.<span class="ident">lstm</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>);
+        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_utf16</span>(
+            <span class="ident">iterator</span>.<span class="ident">dictionary</span>,
+            <span class="ident">iterator</span>.<span class="ident">lstm</span>,
+            <span class="ident">iterator</span>.<span class="ident">grapheme</span>,
+            <span class="kw-2">&amp;</span><span class="ident">s</span>,
+        );
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="number">1</span>;
         <span class="ident">iterator</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="ident">breaks</span>;
         <span class="comment">// result_cache vector is utf-16 index that is in BMP.</span>

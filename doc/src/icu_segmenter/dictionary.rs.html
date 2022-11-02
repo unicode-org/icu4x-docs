@@ -298,25 +298,49 @@
 <span id="293">293</span>
 <span id="294">294</span>
 <span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">indices::Utf16Indices</span>, <span class="ident">SegmenterError</span>};
-
-<span class="kw">use</span> <span class="ident">core::iter::Peekable</span>;
 <span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
 <span class="kw">use</span> <span class="ident">icu_collections::char16trie</span>::{<span class="ident">Char16Trie</span>, <span class="ident">TrieResult</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-
-<span class="comment">// SpacingMark and Extend for Myanmar shouldn&#39;t be first character of segment.</span>
-<span class="comment">//</span>
-<span class="comment">// TODO:</span>
-<span class="comment">// After moving dictionary to icudata, we should get this property from DataProvider</span>
-<span class="kw">fn</span> <span class="ident">is_grapheme_extend</span>(<span class="ident">ch</span>: <span class="ident">char</span>) -&gt; <span class="ident">bool</span> {
-    <span class="macro">matches!</span>(<span class="ident">ch</span>, <span class="comment">/* Extened */</span> <span class="string">&#39;\u{102d}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1030}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1032}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1037}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1039}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{103a}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{103d}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{103e}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1058}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1059}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{105e}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1060}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1071}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1074}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1082}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1085}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1086}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{108d}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{109d}&#39;</span> <span class="op">|</span> <span class="comment">/* SpacingMark */</span> <span class="string">&#39;\u{1031}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{103b}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{103c}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1056}&#39;</span>..<span class="op">=</span><span class="string">&#39;\u{1057}&#39;</span> <span class="op">|</span> <span class="string">&#39;\u{1084}&#39;</span>)
-}
 
 <span class="doccomment">/// A trait for dictionary based iterator</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DictionaryType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
@@ -330,11 +354,16 @@
     <span class="kw">fn</span> <span class="ident">char_len</span>(<span class="ident">c</span>: <span class="ident"><span class="self">Self</span>::CharType</span>) -&gt; <span class="ident">usize</span>;
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">DictionaryType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span>
+    <span class="lifetime">&#39;l</span>,
+    <span class="lifetime">&#39;s</span>,
+    <span class="ident">Y</span>: <span class="ident">DictionaryType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+    <span class="ident">X</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">usize</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
+<span class="op">&gt;</span> {
     <span class="ident">trie</span>: <span class="ident">Char16Trie</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>,
-    <span class="ident">iter</span>: <span class="ident">Peekable</span><span class="op">&lt;</span><span class="ident">Y::IterAttr</span><span class="op">&gt;</span>,
+    <span class="ident">iter</span>: <span class="ident">Y::IterAttr</span>,
     <span class="ident">len</span>: <span class="ident">usize</span>,
+    <span class="ident">grapheme_iter</span>: <span class="ident">X</span>,
     <span class="comment">// TODO transform value for byte trie</span>
 }
 
@@ -346,7 +375,9 @@
 <span class="doccomment">/// - `&#39;s` = lifetime of the string being segmented</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`Iterator`]: core::iter::Iterator</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">DictionaryType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>: <span class="ident">DictionaryType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">X</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">usize</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Iterator</span>
+    <span class="kw">for</span> <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">Y</span>, <span class="ident">X</span><span class="op">&gt;</span>
+{
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">usize</span>;
 
     <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
@@ -354,6 +385,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">intermediate_length</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">not_match</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">previous_match</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_grapheme_offset</span> <span class="op">=</span> <span class="number">0</span>;
 
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">next</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>() {
             <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="ident">Y::to_char</span>(<span class="ident">next</span>.<span class="number">1</span>);
@@ -362,14 +394,20 @@
                     <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">next</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">Y::char_len</span>(<span class="ident">next</span>.<span class="number">1</span>));
                 }
                 <span class="ident">TrieResult::Intermediate</span>(<span class="kw">_</span>) =&gt; {
-                    {
-                        <span class="comment">// If next character doesn&#39;t allow for grapheme, we don&#39;t recognize this word as intermediate state.</span>
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">tmp_next</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">peek</span>() {
-                            <span class="kw">if</span> <span class="ident">is_grapheme_extend</span>(<span class="ident">Y::to_char</span>(<span class="ident">tmp_next</span>.<span class="number">1</span>)) {
-                                <span class="kw">continue</span>;
-                            }
+                    <span class="comment">// Dictionary has to match with grapheme cluster segment.</span>
+                    <span class="comment">// If not, we ignore it.</span>
+                    <span class="kw">while</span> <span class="ident">last_grapheme_offset</span> <span class="op">&lt;</span> <span class="ident">next</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">Y::char_len</span>(<span class="ident">next</span>.<span class="number">1</span>) {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">offset</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">grapheme_iter</span>.<span class="ident">next</span>() {
+                            <span class="ident">last_grapheme_offset</span> <span class="op">=</span> <span class="ident">offset</span>;
+                            <span class="kw">continue</span>;
                         }
+                        <span class="ident">last_grapheme_offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>;
+                        <span class="kw">break</span>;
                     }
+                    <span class="kw">if</span> <span class="ident">last_grapheme_offset</span> <span class="op">!</span><span class="op">=</span> <span class="ident">next</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">Y::char_len</span>(<span class="ident">next</span>.<span class="number">1</span>) {
+                        <span class="kw">continue</span>;
+                    }
+
                     <span class="ident">intermediate_length</span> <span class="op">=</span> <span class="ident">next</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">Y::char_len</span>(<span class="ident">next</span>.<span class="number">1</span>);
                     <span class="ident">previous_match</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">clone</span>());
                 }
@@ -434,31 +472,43 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DictionarySegmenter</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> {
     <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>,
+    <span class="ident">grapheme</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">GraphemeClusterSegmenter</span>,
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> <span class="ident">DictionarySegmenter</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span>(
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span>,
+        <span class="ident">grapheme</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">GraphemeClusterSegmenter</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">SegmenterError</span><span class="op">&gt;</span> {
         <span class="comment">// TODO: no way to verify trie data</span>
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">payload</span> })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">payload</span>, <span class="ident">grapheme</span> })
     }
 
     <span class="doccomment">/// Create a dictionary based break iterator for an `str` (a UTF-8 string).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_str</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">str</span>) -&gt; <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">char</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_str</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="self">self</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">str</span>,
+    ) -&gt; <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">char</span>, <span class="ident">GraphemeClusterBreakIteratorUtf8</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">grapheme_iter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">segment_str</span>(<span class="ident">input</span>);
         <span class="ident">DictionaryBreakIterator</span> {
             <span class="ident">trie</span>: <span class="ident">Char16Trie::new</span>(<span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">trie_data</span>.<span class="ident">clone</span>()),
-            <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>().<span class="ident">peekable</span>(),
+            <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>(),
             <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">grapheme_iter</span>,
         }
     }
 
     <span class="doccomment">/// Create a dictionary based break iterator for a UTF-16 string.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf16</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u16</span>]) -&gt; <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">u32</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">segment_utf16</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="self">self</span>,
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u16</span>],
+    ) -&gt; <span class="ident">DictionaryBreakIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span>, <span class="ident">u32</span>, <span class="ident">GraphemeClusterBreakIteratorUtf16</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">grapheme_iter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">segment_utf16</span>(<span class="ident">input</span>);
         <span class="ident">DictionaryBreakIterator</span> {
             <span class="ident">trie</span>: <span class="ident">Char16Trie::new</span>(<span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>().<span class="ident">trie_data</span>.<span class="ident">clone</span>()),
-            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>).<span class="ident">peekable</span>(),
+            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
             <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">grapheme_iter</span>,
         }
     }
 }
@@ -501,7 +551,11 @@
             <span class="ident">trie_data</span>: <span class="ident">BURMESE_DICTIONARY</span>.<span class="ident">as_zerovec</span>(),
         };
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
+            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
+                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span>
+            <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="kw-2">&amp;</span><span class="ident">grapheme</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="comment">// From css/css-text/word-break/word-break-normal-my-000.html</span>
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;မြန်မာစာမြန်မာစာမြန်မာစာ&quot;</span>;
         <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">s</span>).<span class="ident">collect</span>();
@@ -514,8 +568,12 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">cj_dictionary_test</span>() {
-        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">get_payload</span>(<span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>)).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">get_payload</span>(<span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>)).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
+            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
+                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span>
+            <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="kw-2">&amp;</span><span class="ident">grapheme</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
 
         <span class="comment">// Match case</span>
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;龟山岛龟山岛&quot;</span>;
@@ -555,7 +613,11 @@
             <span class="ident">trie_data</span>: <span class="ident">KHMER_DICTIONARY</span>.<span class="ident">as_zerovec</span>(),
         };
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
+            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
+                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span>
+            <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="kw-2">&amp;</span><span class="ident">grapheme</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;ភាសាខ្មែរភាសាខ្មែរភាសាខ្មែរ&quot;</span>;
         <span class="kw">let</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">s</span>).<span class="ident">collect</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="macro">vec!</span>[<span class="number">27</span>, <span class="number">54</span>, <span class="number">81</span>]);
@@ -583,7 +645,11 @@
             <span class="ident">trie_data</span>: <span class="ident">LAO_DICTIONARY</span>.<span class="ident">as_zerovec</span>(),
         };
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">UCharDictionaryBreakDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
+            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
+                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span>
+            <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="kw-2">&amp;</span><span class="ident">grapheme</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="string">&quot;ພາສາລາວພາສາລາວພາສາລາວ&quot;</span>;
         <span class="kw">let</span> <span class="ident">r</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">s</span>).<span class="ident">collect</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">r</span>, <span class="macro">vec!</span>[<span class="number">12</span>, <span class="number">21</span>, <span class="number">33</span>, <span class="number">42</span>, <span class="number">54</span>, <span class="number">63</span>]);

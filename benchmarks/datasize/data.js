@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1667437147378,
+  "lastUpdate": 1667615510204,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -31078,6 +31078,96 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 4022148,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango Cheran",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "86db546f2f6ad2a222b832fc8495b3ad511e8151",
+          "message": "Add API and testdata for Basic_Emoji property (#2802)",
+          "timestamp": "2022-11-03T21:02:24Z",
+          "tree_id": "831db04dd77825083d9f231f33d16682ba700025",
+          "url": "https://github.com/unicode-org/icu4x/commit/86db546f2f6ad2a222b832fc8495b3ad511e8151"
+        },
+        "date": 1667509480752,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4024569,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango Cheran",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1065865a78fd7b085dc386fca58996ab6bf7ee66",
+          "message": "Update version of ICU data via icuexportdata to release-72-1 (#2788)",
+          "timestamp": "2022-11-03T22:55:25Z",
+          "tree_id": "b9c2d9e32f44f6ca5d6a6925177714ea554bd203",
+          "url": "https://github.com/unicode-org/icu4x/commit/1065865a78fd7b085dc386fca58996ab6bf7ee66"
+        },
+        "date": 1667516242543,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4029816,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a84fa17041b112b883962f4bc61aaa328a57af52",
+          "message": "Create why_rust.md (#2811)",
+          "timestamp": "2022-11-04T19:28:42-07:00",
+          "tree_id": "480b38cc2a680a52628c33057a02e316bb314ff4",
+          "url": "https://github.com/unicode-org/icu4x/commit/a84fa17041b112b883962f4bc61aaa328a57af52"
+        },
+        "date": 1667615441803,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4029816,
             "unit": "bytes",
             "biggerIsBetter": false
           }

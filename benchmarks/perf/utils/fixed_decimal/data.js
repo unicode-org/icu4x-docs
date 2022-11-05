@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1667437819328,
+  "lastUpdate": 1667616172318,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -58709,6 +58709,186 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 71,
             "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango Cheran",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "86db546f2f6ad2a222b832fc8495b3ad511e8151",
+          "message": "Add API and testdata for Basic_Emoji property (#2802)",
+          "timestamp": "2022-11-03T21:02:24Z",
+          "tree_id": "831db04dd77825083d9f231f33d16682ba700025",
+          "url": "https://github.com/unicode-org/icu4x/commit/86db546f2f6ad2a222b832fc8495b3ad511e8151"
+        },
+        "date": 1667510122131,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 117564,
+            "range": "± 373",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24256,
+            "range": "± 94",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 62890,
+            "range": "± 881",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 189,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 78,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 82,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "elango@unicode.org",
+            "name": "Elango Cheran",
+            "username": "echeran"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1065865a78fd7b085dc386fca58996ab6bf7ee66",
+          "message": "Update version of ICU data via icuexportdata to release-72-1 (#2788)",
+          "timestamp": "2022-11-03T22:55:25Z",
+          "tree_id": "b9c2d9e32f44f6ca5d6a6925177714ea554bd203",
+          "url": "https://github.com/unicode-org/icu4x/commit/1065865a78fd7b085dc386fca58996ab6bf7ee66"
+        },
+        "date": 1667516892790,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 117285,
+            "range": "± 426",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24380,
+            "range": "± 83",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 64111,
+            "range": "± 519",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 78,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 83,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "shane@unicode.org",
+            "name": "Shane F. Carr",
+            "username": "sffc"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a84fa17041b112b883962f4bc61aaa328a57af52",
+          "message": "Create why_rust.md (#2811)",
+          "timestamp": "2022-11-04T19:28:42-07:00",
+          "tree_id": "480b38cc2a680a52628c33057a02e316bb314ff4",
+          "url": "https://github.com/unicode-org/icu4x/commit/a84fa17041b112b883962f4bc61aaa328a57af52"
+        },
+        "date": 1667616097105,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 122921,
+            "range": "± 9257",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24921,
+            "range": "± 1288",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 68608,
+            "range": "± 4087",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 192,
+            "range": "± 10",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 79,
+            "range": "± 3",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 96,
+            "range": "± 1",
             "unit": "ns/iter"
           }
         ]

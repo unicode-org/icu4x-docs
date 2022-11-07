@@ -221,7 +221,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm_bies::Lstm</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::LstmDataV1Marker</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
-<span class="kw">use</span> <span class="ident">core::char::decode_utf16</span>;
+<span class="kw">use</span> <span class="ident">core::char</span>::{<span class="ident">decode_utf16</span>, <span class="ident">REPLACEMENT_CHARACTER</span>};
 <span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">DataError</span>, <span class="ident">DataErrorKind</span>, <span class="ident">DataPayload</span>};
 
 <span class="comment">// A word break iterator using LSTM model. Input string have to be same language.</span>
@@ -239,7 +239,7 @@
     <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">ch</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bies_str</span>.<span class="ident">chars</span>().<span class="ident">nth</span>(<span class="self">self</span>.<span class="ident">pos</span>)<span class="question-mark">?</span>;
-            <span class="self">self</span>.<span class="ident">pos_utf8</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">input</span>.<span class="ident">chars</span>().<span class="ident">nth</span>(<span class="self">self</span>.<span class="ident">pos</span>).<span class="ident">unwrap</span>().<span class="ident">len_utf8</span>();
+            <span class="self">self</span>.<span class="ident">pos_utf8</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">input</span>.<span class="ident">chars</span>().<span class="ident">nth</span>(<span class="self">self</span>.<span class="ident">pos</span>)<span class="question-mark">?</span>.<span class="ident">len_utf8</span>();
             <span class="self">self</span>.<span class="ident">pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="kw">if</span> <span class="ident">ch</span> <span class="op">==</span> <span class="string">&#39;e&#39;</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">bies_str</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">pos</span> {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">pos_utf8</span>);
@@ -283,7 +283,7 @@
 <span class="kw">impl</span> <span class="ident">LstmSegmenterIteratorUtf16</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="ident">Lstm</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>]) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">input</span>: <span class="ident">String</span> <span class="op">=</span> <span class="ident">decode_utf16</span>(<span class="ident">input</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>())
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">unwrap</span>())
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">unwrap_or</span>(<span class="ident">REPLACEMENT_CHARACTER</span>))
             .<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">lstm_output</span> <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">word_segmenter</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>);
         <span class="self">Self</span> {

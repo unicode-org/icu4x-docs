@@ -221,14 +221,94 @@
 <span id="216">216</span>
 <span id="217">217</span>
 <span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::complex</span>::{<span class="ident">Dictionary</span>, <span class="ident">LstmPayloads</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme::GraphemeClusterSegmenter</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::{<span class="ident">Latin1Indices</span>, <span class="ident">Utf16Indices</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::RuleBreakDataV1</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::symbols</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">core::str::CharIndices</span>;
+<span class="kw">use</span> <span class="ident">utf8_iter::Utf8CharIndices</span>;
 
 <span class="doccomment">/// A trait allowing for RuleBreakIterator to be generalized to multiple string</span>
 <span class="doccomment">/// encoding methods and granularity such as grapheme cluster, word, etc.</span>
@@ -281,7 +361,7 @@
             <span class="kw">loop</span> {
                 <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">first_result</span> {
                     <span class="self">self</span>.<span class="ident">result_cache</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">result_cache</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span> <span class="op">-</span> <span class="ident">i</span>).<span class="ident">collect</span>();
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                    <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
                 }
                 <span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="ident">Y::get_current_position_character_len</span>(<span class="self">self</span>);
                 <span class="self">self</span>.<span class="ident">advance_iter</span>();
@@ -294,31 +374,33 @@
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_eof</span>() {
             <span class="self">self</span>.<span class="ident">advance_iter</span>();
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_eof</span>() {
-                <span class="kw">return</span> <span class="prelude-val">None</span>;
-            }
             <span class="comment">// SOT x anything</span>
-            <span class="kw">let</span> <span class="ident">right_prop</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_break_property</span>();
+            <span class="kw">let</span> <span class="ident">right_prop</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_break_property</span>()<span class="question-mark">?</span>;
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_break_from_table</span>(<span class="self">self</span>.<span class="ident">data</span>.<span class="ident">sot_property</span>, <span class="ident">right_prop</span>) {
-                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
             }
         }
 
         <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="ident">left_codepoint</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_codepoint</span>();
+            <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">is_eof</span>());
+            <span class="kw">let</span> <span class="ident">left_codepoint</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_codepoint</span>()<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">left_prop</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_break_property</span>(<span class="ident">left_codepoint</span>);
             <span class="self">self</span>.<span class="ident">advance_iter</span>();
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_eof</span>() {
+
+            <span class="comment">// Initializing right_prop can be simplified with a let-else statement in Rust 1.65.</span>
+            <span class="comment">// https://blog.rust-lang.org/2022/11/03/Rust-1.65.0.html#let-else-statements</span>
+            <span class="kw">let</span> <span class="ident">right_prop</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">right_prop</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_break_property</span>() {
+                <span class="ident">right_prop</span>
+            } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">len</span>);
-            }
-            <span class="kw">let</span> <span class="ident">right_prop</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_break_property</span>();
+            };
 
             <span class="comment">// Some segmenter rules doesn&#39;t have language-specific rules, we have to use LSTM (or dictionary) segmenter.</span>
             <span class="comment">// If property is marked as SA, use it</span>
             <span class="kw">if</span> <span class="ident">right_prop</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">complex_property</span> {
                 <span class="kw">if</span> <span class="ident">left_prop</span> <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">complex_property</span> {
                     <span class="comment">// break before SA</span>
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                    <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
                 }
                 <span class="kw">let</span> <span class="ident">break_offset</span> <span class="op">=</span> <span class="ident">Y::handle_complex_language</span>(<span class="self">self</span>, <span class="ident">left_codepoint</span>);
                 <span class="kw">if</span> <span class="ident">break_offset</span>.<span class="ident">is_some</span>() {
@@ -336,7 +418,12 @@
 
                 <span class="kw">loop</span> {
                     <span class="self">self</span>.<span class="ident">advance_iter</span>();
-                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_eof</span>() {
+
+                    <span class="comment">// Initializing prop can be simplified with a let-else statement in Rust 1.65.</span>
+                    <span class="comment">// https://blog.rust-lang.org/2022/11/03/Rust-1.65.0.html#let-else-statements</span>
+                    <span class="kw">let</span> <span class="ident">prop</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">prop</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_break_property</span>() {
+                        <span class="ident">prop</span>
+                    } <span class="kw">else</span> {
                         <span class="comment">// Reached EOF. But we are analyzing multiple characters now, so next break may be previous point.</span>
                         <span class="kw">if</span> <span class="self">self</span>
                             .<span class="ident">get_break_state_from_table</span>(<span class="ident">break_state</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">eot_property</span>)
@@ -344,14 +431,13 @@
                         {
                             <span class="self">self</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">previous_iter</span>;
                             <span class="self">self</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">previous_pos_data</span>;
-                            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                            <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
                         }
                         <span class="comment">// EOF</span>
                         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">len</span>);
-                    }
+                    };
 
                     <span class="kw">let</span> <span class="ident">previous_break_state</span> <span class="op">=</span> <span class="ident">break_state</span>;
-                    <span class="kw">let</span> <span class="ident">prop</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_current_break_property</span>();
                     <span class="ident">break_state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_break_state_from_table</span>(<span class="ident">break_state</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">prop</span>);
                     <span class="kw">if</span> <span class="ident">break_state</span> <span class="op">&lt;</span> <span class="number">0</span> {
                         <span class="kw">break</span>;
@@ -375,13 +461,13 @@
                 <span class="kw">if</span> <span class="ident">break_state</span> <span class="op">==</span> <span class="ident">NOT_MATCH_RULE</span> {
                     <span class="self">self</span>.<span class="ident">iter</span> <span class="op">=</span> <span class="ident">previous_iter</span>;
                     <span class="self">self</span>.<span class="ident">current_pos_data</span> <span class="op">=</span> <span class="ident">previous_pos_data</span>;
-                    <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                    <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
                 }
-                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
             }
 
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_break_from_table</span>(<span class="ident">left_prop</span>, <span class="ident">right_prop</span>) {
-                <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">get_current_position</span>());
+                <span class="kw">return</span> <span class="self">self</span>.<span class="ident">get_current_position</span>();
             }
         }
     }
@@ -396,24 +482,17 @@
         <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">is_none</span>()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_current_break_property</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
-        <span class="self">self</span>.<span class="ident">get_break_property</span>(<span class="self">self</span>.<span class="ident">get_current_codepoint</span>())
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_current_break_property</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">get_current_codepoint</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">get_break_property</span>(<span class="ident">c</span>))
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_current_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">is_eof</span>());
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// Caller should check is_eof() before calling this</span>
-        <span class="self">self</span>.<span class="ident">current_pos_data</span>
-            .<span class="ident">expect</span>(<span class="string">&quot;Not at the end of the string!&quot;</span>)
-            .<span class="number">0</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_current_position</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">pos</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">pos</span>)
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_current_codepoint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Y::CharType</span> {
-        <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">is_eof</span>());
-        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::expect_used</span>)]</span> <span class="comment">// Caller should check is_eof() before calling this</span>
-        <span class="self">self</span>.<span class="ident">current_pos_data</span>
-            .<span class="ident">expect</span>(<span class="string">&quot;Not at the end of the string!&quot;</span>)
-            .<span class="number">1</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_current_codepoint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Y::CharType</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">current_pos_data</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">codepoint</span>)<span class="op">|</span> <span class="ident">codepoint</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_break_property</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">codepoint</span>: <span class="ident">Y::CharType</span>) -&gt; <span class="ident">u8</span> {
@@ -437,6 +516,81 @@
             <span class="kw">return</span> <span class="bool-val">false</span>;
         }
         <span class="bool-val">true</span>
+    }
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RuleBreakTypeUtf8</span>;
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RuleBreakTypeUtf8</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">char</span>;
+
+    <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="ident">iter</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
+        <span class="ident">iter</span>.<span class="ident">get_current_codepoint</span>().<span class="ident">map_or</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>())
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_complex_language</span>(
+        <span class="kw">_</span>: <span class="kw-2">&amp;mut</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::CharType</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="macro">unreachable!</span>()
+    }
+}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RuleBreakTypePotentiallyIllFormedUtf8</span>;
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RuleBreakTypePotentiallyIllFormedUtf8</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf8CharIndices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">char</span>;
+
+    <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="ident">iter</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
+        <span class="ident">iter</span>.<span class="ident">get_current_codepoint</span>().<span class="ident">map_or</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>())
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_complex_language</span>(
+        <span class="kw">_</span>: <span class="kw-2">&amp;mut</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::CharType</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="macro">unreachable!</span>()
+    }
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RuleBreakTypeLatin1</span>;
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RuleBreakTypeLatin1</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Latin1Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">u8</span>;
+
+    <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
+        <span class="macro">unreachable!</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_complex_language</span>(
+        <span class="kw">_</span>: <span class="kw-2">&amp;mut</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::CharType</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="macro">unreachable!</span>()
+    }
+}
+
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RuleBreakTypeUtf16</span>;
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="ident">RuleBreakType</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RuleBreakTypeUtf16</span> {
+    <span class="kw">type</span> <span class="ident">IterAttr</span> <span class="op">=</span> <span class="ident">Utf16Indices</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span><span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">CharType</span> <span class="op">=</span> <span class="ident">u32</span>;
+
+    <span class="kw">fn</span> <span class="ident">get_current_position_character_len</span>(<span class="ident">iter</span>: <span class="kw-2">&amp;</span><span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident">usize</span> {
+        <span class="kw">match</span> <span class="ident">iter</span>.<span class="ident">get_current_codepoint</span>() {
+            <span class="prelude-val">None</span> =&gt; <span class="number">0</span>,
+            <span class="prelude-val">Some</span>(<span class="ident">ch</span>) <span class="kw">if</span> <span class="ident">ch</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x10000</span> =&gt; <span class="number">2</span>,
+            <span class="kw">_</span> =&gt; <span class="number">1</span>,
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_complex_language</span>(
+        <span class="kw">_</span>: <span class="kw-2">&amp;mut</span> <span class="ident">RuleBreakIterator</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>,
+        <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::CharType</span>,
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="macro">unreachable!</span>()
     }
 }
 </code></pre></div>

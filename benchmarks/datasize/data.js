@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1668468784861,
+  "lastUpdate": 1668806318515,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -31438,6 +31438,66 @@ window.BENCHMARK_DATA = {
           {
             "name": "provider/testdata/data/testdata.postcard",
             "value": 4029816,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90648681+snktd@users.noreply.github.com",
+            "name": "snktd",
+            "username": "snktd"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cec3f13a7861395aa092e1434a0da4a7242ea3a2",
+          "message": "Adding a function to get display-name for a region. (#2816)",
+          "timestamp": "2022-11-16T11:01:49-06:00",
+          "tree_id": "e695e45c56a3bd281bc1e69d747dab16e78c9a2b",
+          "url": "https://github.com/unicode-org/icu4x/commit/cec3f13a7861395aa092e1434a0da4a7242ea3a2"
+        },
+        "date": 1668618250828,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4031343,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "post@ralfj.de",
+            "name": "Ralf Jung",
+            "username": "RalfJung"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "54876538f561785449efea762411259f49e4f404",
+          "message": "FlexZeroSlize: implement Eq and PartialEq by hand (#2834)",
+          "timestamp": "2022-11-18T21:16:11Z",
+          "tree_id": "1f5f7323d81c9c3562b4f90b988ee15943bc1393",
+          "url": "https://github.com/unicode-org/icu4x/commit/54876538f561785449efea762411259f49e4f404"
+        },
+        "date": 1668806269906,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4031343,
             "unit": "bytes",
             "biggerIsBetter": false
           }

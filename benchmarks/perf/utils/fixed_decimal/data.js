@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1668469489879,
+  "lastUpdate": 1668807084458,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -59411,6 +59411,126 @@ window.BENCHMARK_DATA = {
             "name": "isize/larger",
             "value": 76281,
             "range": "± 654",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 223,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 94,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 99,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "90648681+snktd@users.noreply.github.com",
+            "name": "snktd",
+            "username": "snktd"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cec3f13a7861395aa092e1434a0da4a7242ea3a2",
+          "message": "Adding a function to get display-name for a region. (#2816)",
+          "timestamp": "2022-11-16T11:01:49-06:00",
+          "tree_id": "e695e45c56a3bd281bc1e69d747dab16e78c9a2b",
+          "url": "https://github.com/unicode-org/icu4x/commit/cec3f13a7861395aa092e1434a0da4a7242ea3a2"
+        },
+        "date": 1668619119705,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 134097,
+            "range": "± 3077",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 27869,
+            "range": "± 1072",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 75971,
+            "range": "± 2139",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 218,
+            "range": "± 6",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 90,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 94,
+            "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "post@ralfj.de",
+            "name": "Ralf Jung",
+            "username": "RalfJung"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "54876538f561785449efea762411259f49e4f404",
+          "message": "FlexZeroSlize: implement Eq and PartialEq by hand (#2834)",
+          "timestamp": "2022-11-18T21:16:11Z",
+          "tree_id": "1f5f7323d81c9c3562b4f90b988ee15943bc1393",
+          "url": "https://github.com/unicode-org/icu4x/commit/54876538f561785449efea762411259f49e4f404"
+        },
+        "date": 1668807004666,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 141007,
+            "range": "± 537",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 28921,
+            "range": "± 135",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 77884,
+            "range": "± 1924",
             "unit": "ns/iter"
           },
           {

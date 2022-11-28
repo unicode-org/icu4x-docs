@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1669651846649,
+  "lastUpdate": 1669673898166,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -59849,6 +59849,126 @@ window.BENCHMARK_DATA = {
             "name": "from_string/1000000001",
             "value": 72,
             "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "35614614+pdogr@users.noreply.github.com",
+            "name": "Pawan Dogra",
+            "username": "pdogr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d2b9a1063052daee0c07ab13fc797a3cf12b3fbb",
+          "message": "Transformer for RelativeTimeFormat component (#2822)",
+          "timestamp": "2022-11-28T18:34:02Z",
+          "tree_id": "bb53287be1ccd608b85980b68e9f8deff06148d3",
+          "url": "https://github.com/unicode-org/icu4x/commit/d2b9a1063052daee0c07ab13fc797a3cf12b3fbb"
+        },
+        "date": 1669661311532,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 113707,
+            "range": "± 8778",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22189,
+            "range": "± 1913",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 64826,
+            "range": "± 6346",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 221,
+            "range": "± 8",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 94,
+            "range": "± 4",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 88,
+            "range": "± 2",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "manishsmail@gmail.com",
+            "name": "Manish Goregaokar",
+            "username": "Manishearth"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "12311a43ddcb8a5ac04f1f36ece232c0e77926f2",
+          "message": "Don't upload stuff on schedule/triggered tasks (#2841)",
+          "timestamp": "2022-11-28T22:03:37Z",
+          "tree_id": "e0a2651a4fb77b951cdf2224fddae2fb1101bafd",
+          "url": "https://github.com/unicode-org/icu4x/commit/12311a43ddcb8a5ac04f1f36ece232c0e77926f2"
+        },
+        "date": 1669673830660,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 117450,
+            "range": "± 357",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 24191,
+            "range": "± 107",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 64152,
+            "range": "± 505",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 186,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 78,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 83,
+            "range": "± 0",
             "unit": "ns/iter"
           }
         ]

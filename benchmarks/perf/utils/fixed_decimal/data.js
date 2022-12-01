@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1669673898166,
+  "lastUpdate": 1669892369144,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Rust Benchmark": [
@@ -59968,6 +59968,186 @@ window.BENCHMARK_DATA = {
           {
             "name": "from_string/1000000001",
             "value": 83,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bd8c66d06b4d0ca0d155aaee43dd141952fbb9ae",
+          "message": "Fixing datagen invocation (#2843)",
+          "timestamp": "2022-11-29T12:47:03+01:00",
+          "tree_id": "4fa6c1feb097b143213e0502be5f65435b90068c",
+          "url": "https://github.com/unicode-org/icu4x/commit/bd8c66d06b4d0ca0d155aaee43dd141952fbb9ae"
+        },
+        "date": 1669723233106,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 100829,
+            "range": "± 361",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21668,
+            "range": "± 164",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65911,
+            "range": "± 269",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 165,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 66,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "35614614+pdogr@users.noreply.github.com",
+            "name": "Pawan Dogra",
+            "username": "pdogr"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "169f2248481fcd1d038f4ff4134f553a87d083c5",
+          "message": "populate future plural rules mapping (#2848)",
+          "timestamp": "2022-11-30T19:22:31Z",
+          "tree_id": "0b4537797293dbd263670c0e73197c41d5bc5d32",
+          "url": "https://github.com/unicode-org/icu4x/commit/169f2248481fcd1d038f4ff4134f553a87d083c5"
+        },
+        "date": 1669836992911,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 100966,
+            "range": "± 526",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 21685,
+            "range": "± 121",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65791,
+            "range": "± 288",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 168,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 66,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
+            "range": "± 0",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "robertbastian@users.noreply.github.com",
+            "name": "Robert Bastian",
+            "username": "robertbastian"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ee8f0aba420561083ce345e9979aadfc009c1983",
+          "message": "`#[no_std]` for LSTM segmenter (#2845)",
+          "timestamp": "2022-12-01T11:44:52+01:00",
+          "tree_id": "b43a14e3dc283952b5fabb38e084009f9305db2c",
+          "url": "https://github.com/unicode-org/icu4x/commit/ee8f0aba420561083ce345e9979aadfc009c1983"
+        },
+        "date": 1669892298487,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "fixed_decimal/overview",
+            "value": 100908,
+            "range": "± 3379",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/smaller",
+            "value": 22061,
+            "range": "± 111",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "isize/larger",
+            "value": 65716,
+            "range": "± 364",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/to_string/908070605040302010",
+            "value": 165,
+            "range": "± 1",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "to_string/write_to/908070605040302010",
+            "value": 66,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "from_string/1000000001",
+            "value": 71,
             "range": "± 0",
             "unit": "ns/iter"
           }

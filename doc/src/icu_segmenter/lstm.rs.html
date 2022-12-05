@@ -214,13 +214,14 @@
 <span id="209">209</span>
 <span id="210">210</span>
 <span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme::GraphemeClusterSegmenter</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm_bies::Lstm</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::LstmDataV1Marker</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::{<span class="ident">LstmDataV1Marker</span>, <span class="ident">RuleBreakDataV1</span>};
 <span class="kw">use</span> <span class="ident">alloc::borrow::ToOwned</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">core::char</span>::{<span class="ident">decode_utf16</span>, <span class="ident">REPLACEMENT_CHARACTER</span>};
@@ -302,7 +303,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> <span class="ident">LstmSegmenter</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new_unstable</span>(
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span>,
-        <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
+        <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">Lstm::try_new</span>(<span class="ident">payload</span>, <span class="ident">grapheme</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingPayload</span>.<span class="ident">with_type_context</span>::<span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span>())<span class="question-mark">?</span>;
@@ -323,7 +324,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::LstmDataV1</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::{<span class="ident">GraphemeClusterBreakDataV1Marker</span>, <span class="ident">LstmDataV1</span>};
     <span class="kw">use</span> <span class="ident">icu_locid::locale</span>;
     <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
@@ -341,7 +342,7 @@
             .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
             .<span class="ident">take_payload</span>()
             .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">12</span>, <span class="number">21</span>, <span class="number">33</span>], <span class="string">&quot;Thai test&quot;</span>);
 
@@ -363,7 +364,7 @@
             <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/testdata/json/core/segmenter_lstm@1/my.json&quot;</span>);
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">LstmDataV1</span> <span class="op">=</span> <span class="ident">serde_json::from_slice</span>(<span class="ident">BURMESE_MODEL</span>).<span class="ident">expect</span>(<span class="string">&quot;JSON syntax error&quot;</span>);
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
         <span class="comment">// LSTM model breaks more characters, but it is better to return [30].</span>
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">12</span>, <span class="number">18</span>, <span class="number">30</span>], <span class="string">&quot;Burmese test&quot;</span>);
@@ -381,7 +382,7 @@
             <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/testdata/json/core/segmenter_lstm@1/km.json&quot;</span>);
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">LstmDataV1</span> <span class="op">=</span> <span class="ident">serde_json::from_slice</span>(<span class="ident">KHMER_MODEL</span>).<span class="ident">expect</span>(<span class="string">&quot;JSON syntax error&quot;</span>);
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
         <span class="comment">// Note: This small sample matches the ICU dictionary segmenter</span>
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">39</span>, <span class="number">48</span>, <span class="number">54</span>, <span class="number">72</span>], <span class="string">&quot;Khmer test&quot;</span>);
@@ -398,7 +399,7 @@
             <span class="macro">include_bytes!</span>(<span class="string">&quot;../tests/testdata/json/core/segmenter_lstm@1/lo.json&quot;</span>);
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">LstmDataV1</span> <span class="op">=</span> <span class="ident">serde_json::from_slice</span>(<span class="ident">LAO_MODEL</span>).<span class="ident">expect</span>(<span class="string">&quot;JSON syntax error&quot;</span>);
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">None</span>).<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
         <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
         <span class="comment">// Note: LSTM finds a break at &#39;12&#39; that the dictionary does not find</span>
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">12</span>, <span class="number">21</span>, <span class="number">30</span>, <span class="number">39</span>], <span class="string">&quot;Lao test&quot;</span>);
@@ -417,10 +418,13 @@
         );
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">LstmDataV1</span> <span class="op">=</span> <span class="ident">serde_json::from_slice</span>(<span class="ident">MODEL</span>).<span class="ident">expect</span>(<span class="string">&quot;JSON syntax error&quot;</span>);
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">DataPayload</span>::<span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>(<span class="ident">data</span>);
-        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
-            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
-                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
-        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">grapheme</span>)).<span class="ident">expect</span>(<span class="string">&quot;&quot;</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">icu_testdata::buffer</span>()
+            .<span class="ident">as_deserializing</span>()
+            .<span class="ident">load</span>(<span class="ident">Default::default</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
+            .<span class="ident">take_payload</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
+        <span class="kw">let</span> <span class="ident">segmenter</span> <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>, <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>.<span class="ident">get</span>())).<span class="ident">expect</span>(<span class="string">&quot;&quot;</span>);
         <span class="kw">let</span> <span class="ident">breaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="ident">TEST_STR</span>).<span class="ident">collect</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">6</span>, <span class="number">12</span>, <span class="number">21</span>, <span class="number">27</span>, <span class="number">33</span>], <span class="string">&quot;Thai test with grapheme model&quot;</span>);
     }

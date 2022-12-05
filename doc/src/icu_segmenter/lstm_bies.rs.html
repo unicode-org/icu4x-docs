@@ -333,6 +333,9 @@
 <span id="328">328</span>
 <span id="329">329</span>
 <span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -340,7 +343,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme::GraphemeClusterSegmenter</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lstm_error::Error</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::math_helper</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::LstmDataV1Marker</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::{<span class="ident">LstmDataV1Marker</span>, <span class="ident">RuleBreakDataV1</span>};
 <span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 <span class="kw">use</span> <span class="ident">alloc::string::ToString</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
@@ -360,7 +363,7 @@
     <span class="ident">mat7</span>: <span class="ident">Array1</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>,
     <span class="ident">mat8</span>: <span class="ident">Array2</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>,
     <span class="ident">mat9</span>: <span class="ident">Array1</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>,
-    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
+    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">hunits</span>: <span class="ident">usize</span>,
     <span class="ident">backward_hunits</span>: <span class="ident">usize</span>,
 }
@@ -369,7 +372,7 @@
     <span class="doccomment">/// `try_new` is the initiator of struct `Lstm`</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(
         <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">LstmDataV1Marker</span><span class="op">&gt;</span>,
-        <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
+        <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">data</span>.<span class="ident">get</span>().<span class="ident">dic</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">core::i16::MAX</span> <span class="kw">as</span> <span class="ident">usize</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Limit</span>);
@@ -488,8 +491,7 @@
         <span class="comment">// in the embedding layer of the model.</span>
         <span class="comment">// Already checked that the name of the model is either &quot;codepoints&quot; or &quot;graphclsut&quot;</span>
         <span class="kw">let</span> <span class="ident">input_seq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">i16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">grapheme</span> {
-            <span class="ident">grapheme</span>
-                .<span class="ident">segment_str</span>(<span class="ident">input</span>)
+            <span class="ident">GraphemeClusterSegmenter::new_and_segment_str</span>(<span class="ident">input</span>, <span class="ident">grapheme</span>)
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>()
                 .<span class="ident">windows</span>(<span class="number">2</span>)
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">chunk</span><span class="op">|</span> {
@@ -572,6 +574,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider::GraphemeClusterBreakDataV1Marker</span>;
     <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
     <span class="kw">use</span> <span class="ident">std::fs::File</span>;
@@ -624,10 +627,13 @@
         <span class="kw">let</span> <span class="ident">filename</span> <span class="op">=</span>
             <span class="string">&quot;tests/testdata/Thai_graphclust_exclusive_model4_heavy/converted_weights.json&quot;</span>;
         <span class="kw">let</span> <span class="ident">lstm_data</span> <span class="op">=</span> <span class="ident">load_lstm_data</span>(<span class="ident">filename</span>);
-        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
-            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
-                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
-        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">Lstm::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">lstm_data</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">grapheme</span>)).<span class="ident">expect</span>(<span class="string">&quot;Test data is invalid&quot;</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">icu_testdata::buffer</span>()
+            .<span class="ident">as_deserializing</span>()
+            .<span class="ident">load</span>(<span class="ident">Default::default</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
+            .<span class="ident">take_payload</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
+        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">Lstm::try_new</span>(<span class="kw-2">&amp;</span><span class="ident">lstm_data</span>, <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>.<span class="ident">get</span>())).<span class="ident">expect</span>(<span class="string">&quot;Test data is invalid&quot;</span>);
         <span class="macro">assert_eq!</span>(
             <span class="ident">lstm</span>.<span class="ident">get_model_name</span>(),
             <span class="string">&quot;Thai_graphclust_exclusive_model4_heavy&quot;</span>

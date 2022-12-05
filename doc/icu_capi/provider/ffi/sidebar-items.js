@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ICU4XCreateDataProviderResult","A result type for `ICU4XDataProvider::create`."],["ICU4XDataProvider","An ICU4X data provider, capable of loading ICU4X data keys from some source."]]});
+initSidebarItems({"struct":[["ICU4XDataProvider","An ICU4X data provider, capable of loading ICU4X data keys from some source."]]});

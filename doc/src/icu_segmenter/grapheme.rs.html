@@ -164,6 +164,31 @@
 <span id="159">159</span>
 <span id="160">160</span>
 <span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -171,7 +196,6 @@
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::complex</span>::{<span class="ident">Dictionary</span>, <span class="ident">LstmPayloads</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::{<span class="ident">Latin1Indices</span>, <span class="ident">Utf16Indices</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rule_segmenter</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">provider</span>::<span class="kw-2">*</span>, <span class="ident">SegmenterError</span>};
@@ -234,8 +258,6 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GraphemeClusterSegmenter</span> {
     <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span>,
-    <span class="ident">dictionary</span>: <span class="ident">Dictionary</span>,
-    <span class="ident">lstm</span>: <span class="ident">LstmPayloads</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">GraphemeClusterSegmenter</span> {
@@ -245,13 +267,7 @@
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Dictionary::default</span>();
-        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">LstmPayloads::default</span>();
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">payload</span>,
-            <span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>,
-        })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">payload</span> })
     }
 
     <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">skip</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">SegmenterError</span>);
@@ -267,8 +283,25 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
+            <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create a grapheme cluster break iterator from grapheme cluster rule payload</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_and_segment_str</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">str</span>,
+        <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">GraphemeClusterBreakIteratorUtf8</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
+        <span class="ident">GraphemeClusterBreakIteratorUtf8</span> {
+            <span class="ident">iter</span>: <span class="ident">input</span>.<span class="ident">char_indices</span>(),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">data</span>: <span class="ident">payload</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -286,8 +319,8 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -302,8 +335,8 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -319,8 +352,25 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
+            <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="doccomment">/// Create a grapheme cluster break iterator from grapheme cluster rule payload</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_and_segment_utf16</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span>(
+        <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u16</span>],
+        <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;l</span> <span class="ident">RuleBreakDataV1</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">GraphemeClusterBreakIteratorUtf16</span><span class="op">&lt;</span><span class="lifetime">&#39;l</span>, <span class="lifetime">&#39;s</span><span class="op">&gt;</span> {
+        <span class="ident">GraphemeClusterBreakIteratorUtf16</span> {
+            <span class="ident">iter</span>: <span class="ident">Utf16Indices::new</span>(<span class="ident">input</span>),
+            <span class="ident">len</span>: <span class="ident">input</span>.<span class="ident">len</span>(),
+            <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
+            <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">data</span>: <span class="ident">payload</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }

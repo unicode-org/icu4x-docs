@@ -398,13 +398,11 @@
 <span id="393">393</span>
 <span id="394">394</span>
 <span id="395">395</span>
-<span id="396">396</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::complex</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme::GraphemeClusterSegmenter</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::{<span class="ident">Latin1Indices</span>, <span class="ident">Utf16Indices</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rule_segmenter</span>::<span class="kw-2">*</span>;
@@ -471,7 +469,7 @@
     <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">WordBreakDataV1Marker</span><span class="op">&gt;</span>,
     <span class="ident">dictionary</span>: <span class="ident">Dictionary</span>,
     <span class="ident">lstm</span>: <span class="ident">LstmPayloads</span>,
-    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
+    <span class="ident">grapheme</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">WordSegmenter</span> {
@@ -486,7 +484,7 @@
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span> <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="ident">provider</span>).<span class="ident">ok</span>();
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">cj</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_dictionary</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>)).<span class="ident">ok</span>();
 
@@ -529,7 +527,7 @@
             <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span> <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="ident">provider</span>).<span class="ident">ok</span>();
+        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>) {
             <span class="kw">let</span> <span class="ident">cj</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_dictionary</span>(<span class="ident">provider</span>, <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>)).<span class="ident">ok</span>();
@@ -598,9 +596,9 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
-            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
+            <span class="ident">dictionary</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>),
+            <span class="ident">lstm</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>),
+            <span class="ident">grapheme</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">get</span>()),
         }
     }
 
@@ -617,9 +615,9 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
-            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
+            <span class="ident">dictionary</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>),
+            <span class="ident">lstm</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>),
+            <span class="ident">grapheme</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">get</span>()),
         }
     }
 
@@ -631,9 +629,9 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
-            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
+            <span class="ident">dictionary</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>),
+            <span class="ident">lstm</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>),
+            <span class="ident">grapheme</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">get</span>()),
         }
     }
 
@@ -645,9 +643,9 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
-            <span class="ident">grapheme</span>: <span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">as_ref</span>(),
+            <span class="ident">dictionary</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>),
+            <span class="ident">lstm</span>: <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>),
+            <span class="ident">grapheme</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">grapheme</span>.<span class="ident">get</span>()),
         }
     }
 }

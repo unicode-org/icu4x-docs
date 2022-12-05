@@ -143,15 +143,6 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
-<span id="141">141</span>
-<span id="142">142</span>
-<span id="143">143</span>
-<span id="144">144</span>
-<span id="145">145</span>
-<span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -159,7 +150,6 @@
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::complex</span>::{<span class="ident">Dictionary</span>, <span class="ident">LstmPayloads</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::indices</span>::{<span class="ident">Latin1Indices</span>, <span class="ident">Utf16Indices</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rule_segmenter</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">provider</span>::<span class="kw-2">*</span>, <span class="ident">SegmenterError</span>};
@@ -217,8 +207,6 @@
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SentenceSegmenter</span> {
     <span class="ident">payload</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">SentenceBreakDataV1Marker</span><span class="op">&gt;</span>,
-    <span class="ident">dictionary</span>: <span class="ident">Dictionary</span>,
-    <span class="ident">lstm</span>: <span class="ident">LstmPayloads</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">SentenceSegmenter</span> {
@@ -228,13 +216,7 @@
         <span class="ident">D</span>: <span class="ident">DataProvider</span><span class="op">&lt;</span><span class="ident">SentenceBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">provider</span>.<span class="ident">load</span>(<span class="ident">Default::default</span>())<span class="question-mark">?</span>.<span class="ident">take_payload</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">dictionary</span> <span class="op">=</span> <span class="ident">Dictionary::default</span>();
-        <span class="kw">let</span> <span class="ident">lstm</span> <span class="op">=</span> <span class="ident">LstmPayloads::default</span>();
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
-            <span class="ident">payload</span>,
-            <span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>,
-        })
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">payload</span> })
     }
 
     <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(<span class="ident">locale</span>: <span class="ident">skip</span>, <span class="ident">options</span>: <span class="ident">skip</span>, <span class="ident">error</span>: <span class="ident">SegmenterError</span>);
@@ -247,8 +229,8 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -265,8 +247,8 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -281,8 +263,8 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -295,8 +277,8 @@
             <span class="ident">current_pos_data</span>: <span class="prelude-val">None</span>,
             <span class="ident">result_cache</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">data</span>: <span class="self">self</span>.<span class="ident">payload</span>.<span class="ident">get</span>(),
-            <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dictionary</span>,
-            <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">lstm</span>,
+            <span class="ident">dictionary</span>: <span class="prelude-val">None</span>,
+            <span class="ident">lstm</span>: <span class="prelude-val">None</span>,
             <span class="ident">grapheme</span>: <span class="prelude-val">None</span>,
         }
     }

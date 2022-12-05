@@ -204,12 +204,33 @@
 <span id="199">199</span>
 <span id="200">200</span>
 <span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::dictionary::DictionarySegmenter</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::grapheme::GraphemeClusterSegmenter</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::language</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::provider</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
@@ -266,9 +287,9 @@
 <span class="doccomment">/// Return UTF-16 segment offset array using dictionary or lstm segmenter.</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complex_language_segment_utf16</span>(
-    <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="ident">Dictionary</span>,
-    <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="ident">LstmPayloads</span>,
-    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
+    <span class="ident">dictionary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Dictionary</span><span class="op">&gt;</span>,
+    <span class="ident">lstm</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">LstmPayloads</span><span class="op">&gt;</span>,
+    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">RuleBreakDataV1</span><span class="op">&gt;</span>,
     <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>],
 ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -278,25 +299,30 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">first_ch</span>) <span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">get</span>(<span class="number">0</span>) {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>)]</span>
             {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">model</span>) <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">best</span>(<span class="kw-2">*</span><span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="ident">model</span>, <span class="ident">grapheme</span>) {
-                        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
-                        <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
-                        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">len</span>();
-                        <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">offset</span>);
-                        <span class="kw">continue</span>;
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">lstm</span>) <span class="op">=</span> <span class="ident">lstm</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">model</span>) <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">best</span>(<span class="kw-2">*</span><span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="ident">model</span>, <span class="ident">grapheme</span>) {
+                            <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
+                            <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
+                            <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">len</span>();
+                            <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">offset</span>);
+                            <span class="kw">continue</span>;
+                        }
                     }
                 }
             }
 
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">payload</span>) <span class="op">=</span> <span class="ident">dictionary</span>.<span class="ident">best</span>(<span class="kw-2">*</span><span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dictionary</span>) <span class="op">=</span> <span class="ident">dictionary</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>) <span class="op">=</span> <span class="ident">grapheme</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="ident">payload</span>, <span class="ident">grapheme</span>)
-                    {
-                        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
-                        <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
-                        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">len</span>();
-                        <span class="kw">continue</span>;
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">payload</span>) <span class="op">=</span> <span class="ident">dictionary</span>.<span class="ident">best</span>(<span class="kw-2">*</span><span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span>
+                            <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="ident">payload</span>, <span class="ident">grapheme</span>)
+                        {
+                            <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
+                            <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
+                            <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">len</span>();
+                            <span class="kw">continue</span>;
+                        }
                     }
                 }
             }
@@ -311,9 +337,9 @@
 <span class="doccomment">/// Return UTF-8 segment offset array using dictionary or lstm segmenter.</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complex_language_segment_str</span>(
-    <span class="ident">dictionary</span>: <span class="kw-2">&amp;</span><span class="ident">Dictionary</span>,
-    <span class="ident">lstm</span>: <span class="kw-2">&amp;</span><span class="ident">LstmPayloads</span>,
-    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">GraphemeClusterSegmenter</span><span class="op">&gt;</span>,
+    <span class="ident">dictionary</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Dictionary</span><span class="op">&gt;</span>,
+    <span class="ident">lstm</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">LstmPayloads</span><span class="op">&gt;</span>,
+    <span class="ident">grapheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">RuleBreakDataV1</span><span class="op">&gt;</span>,
     <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -323,25 +349,30 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">first_ch</span>) <span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">next</span>() {
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lstm&quot;</span>)]</span>
             {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">model</span>) <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">best</span>(<span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="ident">model</span>, <span class="ident">grapheme</span>) {
-                        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
-                        <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
-                        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>()).<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>();
-                        <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">offset</span>);
-                        <span class="kw">continue</span>;
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">lstm</span>) <span class="op">=</span> <span class="ident">lstm</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">model</span>) <span class="op">=</span> <span class="ident">lstm</span>.<span class="ident">best</span>(<span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">LstmSegmenter::try_new_unstable</span>(<span class="ident">model</span>, <span class="ident">grapheme</span>) {
+                            <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
+                            <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
+                            <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>()).<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>();
+                            <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">offset</span>);
+                            <span class="kw">continue</span>;
+                        }
                     }
                 }
             }
 
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">payload</span>) <span class="op">=</span> <span class="ident">dictionary</span>.<span class="ident">best</span>(<span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dictionary</span>) <span class="op">=</span> <span class="ident">dictionary</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>) <span class="op">=</span> <span class="ident">grapheme</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span> <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="ident">payload</span>, <span class="ident">grapheme</span>)
-                    {
-                        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
-                        <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
-                        <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>()).<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>();
-                        <span class="kw">continue</span>;
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">payload</span>) <span class="op">=</span> <span class="ident">dictionary</span>.<span class="ident">best</span>(<span class="ident">first_ch</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">segmenter</span>) <span class="op">=</span>
+                            <span class="ident">DictionarySegmenter::try_new_unstable</span>(<span class="ident">payload</span>, <span class="ident">grapheme</span>)
+                        {
+                            <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">segmenter</span>.<span class="ident">segment_str</span>(<span class="kw-2">&amp;</span><span class="ident">str_per_lang</span>);
+                            <span class="ident">result</span>.<span class="ident">extend</span>(<span class="ident">breaks</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">offset</span> <span class="op">+</span> <span class="ident">n</span>));
+                            <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">str_per_lang</span>.<span class="ident">chars</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">len_utf8</span>()).<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>();
+                            <span class="kw">continue</span>;
+                        }
                     }
                 }
             }
@@ -394,14 +425,27 @@
             <span class="ident">lao</span>: <span class="prelude-val">None</span>,
             <span class="ident">thai</span>: <span class="prelude-val">Some</span>(<span class="ident">payload</span>),
         };
-        <span class="kw">let</span> <span class="ident">grapheme</span> <span class="op">=</span>
-            <span class="ident">GraphemeClusterSegmenter::try_new_unstable</span>(<span class="kw-2">&amp;</span><span class="ident">icu_testdata::buffer</span>().<span class="ident">as_deserializing</span>())
-                .<span class="ident">expect</span>(<span class="string">&quot;Data exists&quot;</span>);
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(<span class="kw-2">&amp;</span><span class="ident">dictionary</span>, <span class="kw-2">&amp;</span><span class="ident">lstm</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">grapheme</span>), <span class="ident">TEST_STR</span>);
+        <span class="kw">let</span> <span class="ident">grapheme</span>: <span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">GraphemeClusterBreakDataV1Marker</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">icu_testdata::buffer</span>()
+            .<span class="ident">as_deserializing</span>()
+            .<span class="ident">load</span>(<span class="ident">Default::default</span>())
+            .<span class="ident">expect</span>(<span class="string">&quot;Loading should succeed!&quot;</span>)
+            .<span class="ident">take_payload</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Data should be present!&quot;</span>);
+        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_str</span>(
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">dictionary</span>),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">lstm</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>.<span class="ident">get</span>()),
+            <span class="ident">TEST_STR</span>,
+        );
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">12</span>, <span class="number">21</span>, <span class="number">33</span>, <span class="number">42</span>], <span class="string">&quot;Thai test by UTF-8&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">utf16</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">TEST_STR</span>.<span class="ident">encode_utf16</span>().<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_utf16</span>(<span class="kw-2">&amp;</span><span class="ident">dictionary</span>, <span class="kw-2">&amp;</span><span class="ident">lstm</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">grapheme</span>), <span class="kw-2">&amp;</span><span class="ident">utf16</span>);
+        <span class="kw">let</span> <span class="ident">breaks</span> <span class="op">=</span> <span class="ident">complex_language_segment_utf16</span>(
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">dictionary</span>),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">lstm</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">grapheme</span>.<span class="ident">get</span>()),
+            <span class="kw-2">&amp;</span><span class="ident">utf16</span>,
+        );
         <span class="macro">assert_eq!</span>(<span class="ident">breaks</span>, [<span class="number">4</span>, <span class="number">7</span>, <span class="number">11</span>, <span class="number">14</span>], <span class="string">&quot;Thai test by UTF-16&quot;</span>);
     }
 }

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Numeric","Configures whether to always use numeric formatting even when special formatting is available."]],"struct":[["RelativeTimeFormatterOptions","A bag of options for defining how to format time using `RelativeTimeFormatter`."]]});

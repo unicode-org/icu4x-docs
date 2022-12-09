@@ -355,36 +355,32 @@ Internationalization is a broad domain and there are many more components in <co
 <p><em>We are still working on improving the user experience of using ICU4X from other languages. As such, this tutorial may be a bit sparse, but we are happy to answer questions on our <a href="https://github.com/unicode-org/icu4x/discussions">discussions forum</a> and help you out</em></p>
 <h3 id="building-and-linking-icu4x"><a href="#building-and-linking-icu4x">Building and linking ICU4X</a></h3>
 <ul>
-<li>While in our examples you will see invocations like <code>cargo build -p icu_capi_staticlib --features foo</code>, neither <code>cargo install</code> nor <code>cargo build</code> work for non-local library crates (i.e. crates from <code>crates.io</code>). To work around this: 
+<li><code>cargo build</code> only supports local crates, so you have to download the published code from crates.io
 <ul>
-<li>Create a new cargo project (<code>mkdir icu; cd icu; cargo init</code>)</li>
-<li>Add <code>icu_capi_staticlib</code> as a dependency (<code>cargo add icu_capi_staticlib@1.0.0</code>)</li>
-<li>Specify features with <code>cargo add icu_capi_staticlib@1.0.0 --features ...</code>:
+<li>You can use <code>cargo clone icu_capi_staticlib@1.0.0</code> to do this (<code>cargo install cargo-clone</code> if the command is not installed)</li>
+</ul>
+</li>
+<li>Inside the crate you can use <code>cargo build</code> to build the library
+<ul>
+<li>Be sure to pass <code>--release</code> to get an optimized build</li>
+<li>Specify features with <code>--features ...</code>:
 <ul>
 <li><code>buffer_provider</code> for working with blob data providers (<code>ICU4XDataProvider::create_from_byte_slice()</code>)</li>
 <li><code>provider_test</code> to include testing data (<code>ICU4XDataProvider::create_test()</code>)</li>
-<li><code>provider_fs</code> for loading data from the file system (<code>ICU4XDataProvider::create_fs()</code>). This also requires enabling a syntax on the <code>icu_provider</code> crate: <code>cargo add icu_provider --features deserialize_{json,postcard_1,bincode_1}</code></li>
+<li><code>provider_fs</code> for loading data from the file system (<code>ICU4XDataProvider::create_fs()</code>). This also requires enabling a syntax on the <code>icu_provider</code> crate.</li>
 <li><code>logging</code> and <code>simple_logger</code> enable basic stdout logging of error metadata. Further loggers can be added on request.</li>
 <li><code>cpp_default</code> turns on a bunch of these and is useful for exploration, but should not be used in production as it enables <code>provider_test</code></li>
 </ul>
 </li>
-<li>You can now use <code>cargo build -p icu_capi_staticlib --release</code> to build the library
-<ul>
-<li>Be sure to pass <code>--release</code> to get an optimized build</li>
 <li>Set <code>CARGO_PROFILE_RELEASE_LTO=true</code> to enable link-time optimization</li>
 <li>Set <code>CARGO_PROFILE_RELEASE_OPT_LEVEL=&quot;s&quot;</code> to optimize for size</li>
 <li>See <a href="cargo-profiles">cargo profiles</a> for more options</li>
 </ul>
 </li>
-</ul>
-</li>
-<li>Copy the header files from the <code>icu_capi</code> crate’s source
+<li>Copy the header files from the <code>icu_capi</code> crate
 <ul>
-<li>Their location is <code>~/.cargo/registry/src/*/icu_capi-1.0.0/cpp/include</code>
-<ul>
-<li>The <code>*</code> in this path is some fingerprint, your shell will expand it when using e.g. <code>cp</code></li>
-</ul>
-</li>
+<li>If you’re using the default crate registry, they will be in <code>~/.cargo/registry/src/*/icu_capi-1.0.0/cpp/include</code></li>
+<li>If you cannot find the crate, download it from crates.io</li>
 <li>Make sure to use the same version as above
 <ul>
 <li>While we selected a version for <code>icu_capi_staticlib</code> before, and here we’re looking at <code>icu_capi</code>, those versions will always be in sync. You can sanity check this by running <code>cargo pkgid -p icu_capi</code>.</li>
@@ -433,7 +429,32 @@ int main() {
    }
    return 0;
 }</code></pre></div><h3 id="embedded-platforms-no_std"><a href="#embedded-platforms-no_std">Embedded platforms (<code>no_std</code>)</a></h3>
-<p>Users wishing to use ICU4X on a <code>no_std</code> platform will need to write their own crate depending on <code>icu_capi</code> that fills in an allocator and panic hooks, similar to what we do in our <a href="https://github.com/unicode-org/icu4x/blob/main/ffi/freertos/src/lib.rs#L27">freertos port</a>.</p>
+<p>Users wishing to use ICU4X on a <code>no_std</code> platform will need to write their own crate depending on <code>icu_capi</code> that fills in an allocator and panic hooks, similar to what we do in our <a href="https://github.com/unicode-org/icu4x/blob/main/ffi/diplomat/c/examples/fixeddecimal_tiny/icu_capi_staticlib_tiny/src/lib.rs">example</a>:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="attribute">#![<span class="ident">feature</span>(<span class="ident">alloc_error_handler</span>)]</span>
+
+<span class="attribute">#![<span class="ident">no_std</span>]</span>
+
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">icu_capi</span>;
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">dlmalloc</span>;
+
+<span class="kw">use</span> <span class="ident">core::alloc::Layout</span>;
+<span class="kw">use</span> <span class="ident">core::panic::PanicInfo</span>;
+<span class="kw">use</span> <span class="ident">dlmalloc::GlobalDlmalloc</span>;
+
+<span class="attribute">#[<span class="ident">global_allocator</span>]</span>
+<span class="kw">static</span> <span class="ident">ALLOCATOR</span>: <span class="ident">GlobalDlmalloc</span> <span class="op">=</span> <span class="ident">GlobalDlmalloc</span>;
+
+<span class="attribute">#[<span class="ident">alloc_error_handler</span>]</span>
+<span class="kw">fn</span> <span class="ident">alloc_error</span>(<span class="ident">_layout</span>: <span class="ident">Layout</span>) -&gt; <span class="op">!</span> {
+    <span class="kw">loop</span> {}
+}
+
+<span class="attribute">#[<span class="ident">panic_handler</span>]</span>
+<span class="kw">fn</span> <span class="ident">panic</span>(<span class="ident">_info</span>: <span class="kw-2">&amp;</span><span class="ident">PanicInfo</span>) -&gt; <span class="op">!</span> {
+    <span class="kw">loop</span> {}
+}</code></pre></div>
+<p>This can then be compiled with <code>cargo +nightly -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort</code> for a minimal build.</p>
 <h3 id="tips"><a href="#tips">Tips</a></h3>
 <p>Documentation can be found in the Sphinx docs found <a href="https://github.com/unicode-org/icu4x/tree/main/ffi/diplomat/cpp/docs"><code>ffi/diplomat/cpp/docs</code></a>. These docs mirror the Rust code in the <code>icu_capi</code> crate, which can be explored on <a href="https://docs.rs/icu_capi/latest/icu_capi/">docs.rs</a>, though the precise types used may be different.</p>
 <p>Fallible methods return <code>diplomat::result</code>, a Result type that can most commonly be converted to a <code>std::optional</code> over its Ok/Err types by calling <code>.ok()</code> or <code>.err()</code>. Most methods either use <code>ICU4XError</code> (an enum of error codes) as their error type, or <code>std::monostate</code>. Further error details can be logged by enabling a logger via <code>ICU4XLogger</code>, further loggers may be added on request.</p>

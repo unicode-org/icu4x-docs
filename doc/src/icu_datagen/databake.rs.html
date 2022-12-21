@@ -475,6 +475,64 @@
 <span id="470">470</span>
 <span id="471">471</span>
 <span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -482,8 +540,8 @@
 <span class="kw">use</span> <span class="ident">databake</span>::{<span class="ident">quote</span>, <span class="ident">CrateEnv</span>, <span class="ident">TokenStream</span>};
 <span class="kw">use</span> <span class="ident">icu_provider::datagen</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">itertools::Itertools</span>;
 <span class="kw">use</span> <span class="ident">rayon::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::collections::BTreeSet</span>;
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
@@ -511,15 +569,22 @@
     <span class="ident">use_separate_crates</span>: <span class="ident">bool</span>,
     <span class="comment">// Temporary storage for put_payload: key -&gt; (bake -&gt; [locale])</span>
     <span class="ident">data</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">DataKey</span>, <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">SyncTokenStream</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="comment">// All mod.rs files in the module tree. Because generation is parallel,</span>
-    <span class="comment">// this will be non-deterministic and have to be sorted later.</span>
-    <span class="ident">mod_files</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Triples of the data marker, the path to the DATA slice (if there&#39;s data), and the feature</span>
-    <span class="doccomment">/// that includes it. This is populated by `flush` and consumed by `close` which writes the</span>
-    <span class="doccomment">/// implementations.</span>
-    <span class="ident">marker_data_feature</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SyncTokenStream</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SyncTokenStream</span><span class="op">&gt;</span>, <span class="ident">SyncTokenStream</span>)<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="comment">// All mod.rs files in the module tree. These can only be written after the last flush.</span>
+    <span class="ident">mod_files</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PathBuf</span>, <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Information to generate implementations. This is populated by `flush` and consumed by `close`.</span>
+    <span class="ident">impl_data</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ImplData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="comment">// List of dependencies used by baking.</span>
     <span class="ident">dependencies</span>: <span class="ident">CrateEnv</span>,
+}
+
+<span class="doccomment">/// Data required to write the implementations</span>
+<span class="kw">struct</span> <span class="ident">ImplData</span> {
+    <span class="doccomment">/// The marker of the key</span>
+    <span class="ident">marker</span>: <span class="ident">SyncTokenStream</span>,
+    <span class="doccomment">/// The path to the lookup function for this marker</span>
+    <span class="ident">lookup_ident</span>: <span class="ident">SyncTokenStream</span>,
+    <span class="doccomment">/// The feature gate for the marker</span>
+    <span class="ident">feature</span>: <span class="ident">SyncTokenStream</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">BakedDataExporter</span> {
@@ -537,70 +602,116 @@
             <span class="ident">use_separate_crates</span>,
             <span class="ident">data</span>: <span class="ident">Default::default</span>(),
             <span class="ident">mod_files</span>: <span class="ident">Default::default</span>(),
-            <span class="ident">marker_data_feature</span>: <span class="ident">Default::default</span>(),
+            <span class="ident">impl_data</span>: <span class="ident">Default::default</span>(),
             <span class="ident">dependencies</span>: <span class="ident">Default::default</span>(),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">write_to_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">std::path::Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">path</span>: <span class="ident">P</span>,
+        <span class="ident">relative_path</span>: <span class="ident">P</span>,
         <span class="ident">data</span>: <span class="ident">TokenStream</span>,
+        <span class="ident">is_expr</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">mod_directory</span>.<span class="ident">join</span>(<span class="ident">path</span>).<span class="ident">with_extension</span>(<span class="string">&quot;raw&quot;</span>);
-        <span class="ident">std::fs::create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">parent</span>().<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">mod_directory</span>
+            .<span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="ident">relative_path</span>)
+            .<span class="ident">with_extension</span>(<span class="kw">if</span> <span class="ident">is_expr</span> { <span class="string">&quot;rs.data&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;rs&quot;</span> });
 
-        {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">crlify::BufWriterWithLineEndingFix::new</span>(<span class="ident">File::create</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>);
-            <span class="macro">writeln!</span>(<span class="ident">file</span>, <span class="string">&quot;// @generated&quot;</span>)<span class="question-mark">?</span>;
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">use_separate_crates</span> {
-                <span class="macro">writeln!</span>(<span class="ident">file</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">data</span>)<span class="question-mark">?</span>;
-            } <span class="kw">else</span> {
-                <span class="macro">writeln!</span>(
-                    <span class="ident">file</span>,
-                    <span class="string">&quot;{}&quot;</span>,
-                    <span class="ident">data</span>.<span class="ident">to_string</span>()
-                        .<span class="ident">replace</span>(<span class="string">&quot;icu_&quot;</span>, <span class="string">&quot;icu :: &quot;</span>)
-                        .<span class="ident">replace</span>(<span class="string">&quot;icu :: provider&quot;</span>, <span class="string">&quot;icu_provider&quot;</span>)
-                        .<span class="ident">replace</span>(<span class="string">&quot;icu :: datagen&quot;</span>, <span class="string">&quot;icu_datagen&quot;</span>)
-                )<span class="question-mark">?</span>;
-            }
-        }
-
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pretty</span> {
-            <span class="ident">std::process::Command::new</span>(<span class="string">&quot;rustfmt&quot;</span>)
-                <span class="comment">// When called on a file, rustfmt also formats all submodules.</span>
-                <span class="comment">// Because we might have massive submodules that are already</span>
-                <span class="comment">// formatted, we don&#39;t want this. Currently the only way to</span>
-                <span class="comment">// disable this behaviour seems to be to use stdin/stdout.</span>
-                .<span class="ident">stdin</span>(<span class="ident">std::process::Stdio::from</span>(<span class="ident">File::open</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>))
-                .<span class="ident">stdout</span>(<span class="ident">std::process::Stdio::from</span>(<span class="ident">File::create</span>(
-                    <span class="ident">path</span>.<span class="ident">with_extension</span>(<span class="string">&quot;rs&quot;</span>),
-                )<span class="question-mark">?</span>))
-                .<span class="ident">args</span>(<span class="kw-2">&amp;</span>[
-                    <span class="comment">// The default, &quot;auto&quot;, is meant to detect the existing line endings and preserve them.</span>
-                    <span class="comment">// However, this seems to be broken and generates Unix line endings on Windows.</span>
-                    <span class="string">&quot;--config=newline_style=native&quot;</span>,
-                    <span class="comment">// false by default, which is nice because then cargo fmt won&#39;t touch these again</span>
-                    <span class="string">&quot;--config=format_generated_files=true&quot;</span>,
-                    <span class="comment">// quote! stringifies doc comments as attributes, which is not very readable</span>
-                    <span class="string">&quot;--config=normalize_doc_attributes=true&quot;</span>,
-                    <span class="comment">// Defaults to 2015, but we&#39;re outputting 2021</span>
-                    <span class="string">&quot;--edition=2021&quot;</span>,
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">formatted</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pretty</span> {
+            <span class="kw">use</span> <span class="ident">rust_format</span>::<span class="kw-2">*</span>;
+            <span class="ident">RustFmt::from_config</span>(
+                <span class="ident">Config::new_str</span>()
+                    <span class="comment">// We deal with line encoding later</span>
+                    .<span class="ident">option</span>(<span class="string">&quot;newline_style&quot;</span>, <span class="string">&quot;unix&quot;</span>)
+                    .<span class="ident">option</span>(<span class="string">&quot;normalize_doc_attributes&quot;</span>, <span class="string">&quot;true&quot;</span>)
                     <span class="comment">// Rustfmt silently gives up if it cannot achieve the max width, which happens for the root mod.rs</span>
-                    <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">file_stem</span>().<span class="ident">and_then</span>(<span class="ident">std::ffi::OsStr::to_str</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="string">&quot;mod&quot;</span>) {
-                        <span class="string">&quot;--config=max_width=150&quot;</span>
-                    } <span class="kw">else</span> {
-                        <span class="string">&quot;--config=max_width=100&quot;</span>
-                    },
-                ])
-                .<span class="ident">spawn</span>()
-                .<span class="ident">unwrap</span>()
-                .<span class="ident">wait</span>()<span class="question-mark">?</span>;
-            <span class="ident">std::fs::remove_file</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)<span class="question-mark">?</span>;
+                    .<span class="ident">option</span>(
+                        <span class="string">&quot;max_width&quot;</span>,
+                        <span class="kw">if</span> <span class="ident">relative_path</span>.<span class="ident">as_ref</span>().<span class="ident">as_os_str</span>().<span class="ident">to_str</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="string">&quot;mod&quot;</span>) {
+                            <span class="string">&quot;150&quot;</span>
+                        } <span class="kw">else</span> {
+                            <span class="string">&quot;100&quot;</span>
+                        },
+                    ),
+            )
+            .<span class="ident">format_tokens</span>(<span class="kw">if</span> <span class="ident">is_expr</span> {
+                <span class="comment">// Rustfmt cannot format Rust expressions, only full files. We need to wrap expressions in a main function</span>
+                <span class="macro">quote!</span>(<span class="kw">fn</span> <span class="ident">main</span>() { #<span class="ident">data</span> })
+            } <span class="kw">else</span> {
+                <span class="ident">data</span>
+            })
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+                <span class="ident">DataError::custom</span>(<span class="string">&quot;Formatting error&quot;</span>)
+                    .<span class="ident">with_display_context</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>)
+                    .<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>)
+            })<span class="question-mark">?</span>
         } <span class="kw">else</span> {
-            <span class="ident">std::fs::rename</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>, <span class="ident">path</span>.<span class="ident">with_extension</span>(<span class="string">&quot;rs&quot;</span>))<span class="question-mark">?</span>
+            <span class="ident">data</span>.<span class="ident">to_string</span>()
+        };
+
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">use_separate_crates</span> {
+            <span class="ident">formatted</span> <span class="op">=</span> <span class="ident">formatted</span>
+                .<span class="ident">replace</span>(<span class="string">&quot;icu_&quot;</span>, <span class="string">&quot;icu::&quot;</span>)
+                .<span class="ident">replace</span>(<span class="string">&quot;icu::provider&quot;</span>, <span class="string">&quot;icu_provider&quot;</span>);
         }
+
+        <span class="kw">let</span> <span class="ident">formatted</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pretty</span> <span class="op">&amp;&amp;</span> <span class="ident">is_expr</span> {
+            <span class="ident">formatted</span> <span class="op">=</span> <span class="ident">formatted</span>.<span class="ident">replace</span>(<span class="string">&quot;\n    &quot;</span>, <span class="string">&quot;\n&quot;</span>);
+            <span class="ident">formatted</span>
+                .<span class="ident">strip_prefix</span>(<span class="string">&quot;fn main() {\n&quot;</span>)
+                .<span class="ident">unwrap</span>()
+                .<span class="ident">strip_suffix</span>(<span class="string">&quot;}\n&quot;</span>)
+                .<span class="ident">unwrap</span>()
+        } <span class="kw">else</span> {
+            <span class="kw-2">&amp;</span><span class="ident">formatted</span>
+        };
+        <span class="ident">std::fs::create_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">parent</span>().<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">crlify::BufWriterWithLineEndingFix::new</span>(
+            <span class="ident">File::create</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>,
+        );
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">is_expr</span> {
+            <span class="macro">writeln!</span>(<span class="ident">file</span>, <span class="string">&quot;// @generated&quot;</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
+        }
+        <span class="macro">write!</span>(<span class="ident">file</span>, <span class="string">&quot;{formatted}&quot;</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DataError::from</span>(<span class="ident">e</span>).<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))
+    }
+
+    <span class="kw">fn</span> <span class="ident">print_deps</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">deps</span> <span class="op">=</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">dependencies</span>)
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">use_separate_crates</span> {
+            <span class="ident">deps</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">krate</span><span class="op">|</span> <span class="ident">krate</span>.<span class="ident">starts_with</span>(<span class="string">&quot;icu_provider&quot;</span>) <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">krate</span>.<span class="ident">starts_with</span>(<span class="string">&quot;icu_&quot;</span>));
+            <span class="ident">deps</span>.<span class="ident">insert</span>(<span class="string">&quot;icu&quot;</span>);
+        }
+        <span class="ident">deps</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_provider&quot;</span>);
+        <span class="comment">// TODO: make locale fallback cfg&#39;ed</span>
+        <span class="ident">deps</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_provider_adapters&quot;</span>);
+
+        <span class="macro">log::info!</span>(<span class="string">&quot;The generated module requires the following crates:&quot;</span>);
+        <span class="kw">for</span> <span class="ident">crate_name</span> <span class="kw">in</span> <span class="ident">deps</span> {
+            <span class="macro">log::info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">crate_name</span>);
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">write_intermediate_mod_files</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
+        <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">mod_files</span>)
+            .<span class="ident">into_inner</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
+            .<span class="ident">into_par_iter</span>()
+            .<span class="ident">try_for_each</span>(<span class="op">|</span>(<span class="ident">path</span>, <span class="ident">mods</span>)<span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">mods</span> <span class="op">=</span> <span class="ident">mods</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>());
+                <span class="self">self</span>.<span class="ident">write_to_file</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;mod&quot;</span>),
+                    <span class="macro">quote!</span> {
+                        #(
+                            <span class="kw">pub</span> <span class="kw">mod</span> #<span class="ident">mods</span>;
+                        )<span class="op">*</span>
+                    },
+                    <span class="bool-val">false</span>,
+                )
+            })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -612,7 +723,6 @@
         <span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">DataLocale</span>,
         <span class="ident">payload</span>: <span class="kw-2">&amp;</span><span class="ident">DataPayload</span><span class="op">&lt;</span><span class="ident">ExportMarker</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">dependencies</span>.<span class="ident">insert</span>(<span class="string">&quot;litemap&quot;</span>);
         <span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">payload</span>.<span class="ident">tokenize</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dependencies</span>);
         <span class="self">self</span>.<span class="ident">data</span>
             .<span class="ident">lock</span>()
@@ -630,213 +740,246 @@
             <span class="ident">syn::parse2</span>::<span class="op">&lt;</span><span class="ident">syn::Path</span><span class="op">&gt;</span>(<span class="ident"><span class="kw">crate</span>::registry::key_to_marker_bake</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dependencies</span>))
                 .<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">feature</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">insert_feature_gates</span> {
+        <span class="kw">let</span> <span class="ident">is_datetime_skeletons</span> <span class="op">=</span>
+            <span class="ident">marker</span>.<span class="ident">segments</span>.<span class="ident">iter</span>().<span class="ident">next_back</span>().<span class="ident">unwrap</span>().<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;DateSkeletonPatternsV1Marker&quot;</span>;
+
+        <span class="kw">let</span> <span class="ident">feature</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">insert_feature_gates</span> {
+            <span class="macro">quote!</span>()
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">is_datetime_skeletons</span> {
+            <span class="macro">quote!</span> { <span class="attribute">#![<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;icu_datetime_experimental&quot;</span>)]</span> }
+        } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">feature</span> <span class="op">=</span> <span class="ident">marker</span>.<span class="ident">segments</span>.<span class="ident">iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="ident">ident</span>.<span class="ident">to_string</span>();
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">feature</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">feature</span>.<span class="ident">starts_with</span>(<span class="string">&quot;icu_provider&quot;</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">feature</span>.<span class="ident">starts_with</span>(<span class="string">&quot;icu_provider&quot;</span>) {
                 <span class="macro">quote!</span> { <span class="attribute">#![<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> #<span class="ident">feature</span>)]</span> }
             } <span class="kw">else</span> {
                 <span class="macro">quote!</span>()
-            };
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-            <span class="kw">if</span> <span class="ident">key</span> <span class="op">==</span> <span class="ident">icu_datetime::provider::calendar::DateSkeletonPatternsV1Marker::KEY</span> {
-                <span class="ident">feature</span> <span class="op">=</span> <span class="macro">quote!</span> { <span class="attribute">#![<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;icu_datetime_experimental&quot;</span>)]</span> }
             }
-            <span class="ident">feature</span>
-        } <span class="kw">else</span> {
-            <span class="macro">quote!</span>()
         };
 
-        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">raw</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">lock</span>().<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>).<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">statics</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_locales</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="comment">// Replace non-ident-allowed tokens. This can still fail if a segment starts with</span>
+        <span class="comment">// a token that is not allowed in an initial position.</span>
+        <span class="kw">let</span> <span class="ident">module_path</span> <span class="op">=</span> <span class="ident">syn::parse_str</span>::<span class="op">&lt;</span><span class="ident">syn::Path</span><span class="op">&gt;</span>(
+            <span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">path</span>()
+                .<span class="ident">to_ascii_lowercase</span>()
+                .<span class="ident">replace</span>(<span class="string">&#39;@&#39;</span>, <span class="string">&quot;_v&quot;</span>)
+                .<span class="ident">replace</span>(<span class="string">&#39;/&#39;</span>, <span class="string">&quot;::&quot;</span>),
+        )
+        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
+            <span class="ident">DataError::custom</span>(<span class="string">&quot;Key component is not a valid Rust identifier&quot;</span>).<span class="ident">with_key</span>(<span class="ident">key</span>)
+        })<span class="question-mark">?</span>;
 
-            <span class="kw">for</span> (<span class="ident">payload_bake_string</span>, <span class="kw-2">mut</span> <span class="ident">locales</span>) <span class="kw">in</span> <span class="ident">raw</span> {
-                <span class="ident">locales</span>.<span class="ident">sort</span>();
-                <span class="kw">let</span> <span class="ident">ident_string</span> <span class="op">=</span> <span class="ident">locales</span>
-                    .<span class="ident">iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">locales</span><span class="op">|</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">string</span> <span class="op">=</span> <span class="ident">locales</span>.<span class="ident">replace</span>(<span class="string">&#39;-&#39;</span>, <span class="string">&quot;_&quot;</span>);
-                        <span class="ident">string</span>.<span class="ident">make_ascii_uppercase</span>();
-                        <span class="ident">string</span>
-                    })
-                    .<span class="ident">reduce</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
-                        <span class="comment">// Cap identifier length at around 35</span>
-                        <span class="kw">if</span> <span class="ident">a</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">35</span> {
-                            <span class="ident">a</span>.<span class="ident">push</span>(<span class="string">&#39;_&#39;</span>);
-                            <span class="ident">a</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>);
-                        }
-                        <span class="ident">a</span>
-                    })
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf::new</span>();
+        <span class="kw">for</span> <span class="ident">level</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">module_path</span>.<span class="ident">segments</span> {
+            <span class="self">self</span>.<span class="ident">mod_files</span>
+                .<span class="ident">lock</span>()
+                .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
+                .<span class="ident">entry</span>(<span class="ident">path</span>.<span class="ident">clone</span>())
+                .<span class="ident">or_default</span>()
+                .<span class="ident">insert</span>(<span class="ident">level</span>.<span class="ident">ident</span>.<span class="ident">to_string</span>());
+            <span class="ident">path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">join</span>(<span class="ident">level</span>.<span class="ident">ident</span>.<span class="ident">to_string</span>());
+        }
+
+        <span class="kw">let</span> <span class="ident">struct_type</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">is_datetime_skeletons</span> {
+            <span class="macro">quote!</span> {
+                <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [(
+                    <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">::icu_datetime::fields::Field</span>],
+                    <span class="ident">::icu_datetime::pattern::runtime::PatternPlurals</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>
+                )]
+            }
+        } <span class="kw">else</span> {
+            <span class="macro">quote!</span> { <span class="op">&lt;</span>#<span class="ident">marker</span> <span class="kw">as</span> <span class="ident">::icu_provider::DataMarker</span><span class="op">&gt;</span><span class="ident">::Yokeable</span> }
+        };
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">statics</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
+
+        <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">data</span>
+            .<span class="ident">lock</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
+            .<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)
+            .<span class="ident">unwrap_or_default</span>();
+
+        <span class="kw">for</span> (<span class="ident">payload_bake_string</span>, <span class="ident">locales</span>) <span class="kw">in</span> <span class="ident">raw</span> {
+            <span class="kw">let</span> <span class="ident">file_name</span> <span class="op">=</span> <span class="ident">locales</span>.<span class="ident">iter</span>().<span class="ident">min</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span>
+                <span class="ident">syn::parse_str</span>::<span class="op">&lt;</span><span class="ident">syn::Ident</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">file_name</span>.<span class="ident">to_ascii_uppercase</span>().<span class="ident">replace</span>(<span class="string">&#39;-&#39;</span>, <span class="string">&quot;_&quot;</span>))
                     .<span class="ident">unwrap</span>();
-                <span class="ident">all_locales</span>.<span class="ident">extend</span>(<span class="ident">locales</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> (<span class="ident">l</span>, <span class="ident">ident_string</span>.<span class="ident">clone</span>())));
-                <span class="ident">statics</span>.<span class="ident">push</span>((<span class="ident">ident_string</span>, <span class="ident">payload_bake_string</span>));
-            }
-
-            <span class="ident">statics</span>.<span class="ident">sort_unstable_by</span>(<span class="op">|</span>(<span class="ident">a</span>, <span class="kw">_</span>), (<span class="ident">b</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">a</span>.<span class="ident">cmp</span>(<span class="ident">b</span>));
-
-            <span class="kw">let</span> <span class="ident">statics</span> <span class="op">=</span> <span class="ident">statics</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">ident_string</span>, <span class="ident">payload_bake_string</span>)<span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">ident_string</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
-                    <span class="kw">let</span> <span class="ident">payload_bake</span> <span class="op">=</span> <span class="ident">payload_bake_string</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
-                    <span class="macro">quote!</span> { <span class="kw">static</span> #<span class="ident">ident</span>: <span class="kw-2">&amp;</span><span class="ident">DataStruct</span> <span class="op">=</span> <span class="kw-2">&amp;</span>#<span class="ident">payload_bake</span>; }
-                });
-
-            <span class="ident">all_locales</span>.<span class="ident">sort_unstable_by</span>(<span class="op">|</span>(<span class="ident">a</span>, <span class="kw">_</span>), (<span class="ident">b</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">a</span>.<span class="ident">cmp</span>(<span class="ident">b</span>));
-            <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">all_locales</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">locale</span>, <span class="ident">ident_string</span>)<span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">ident_string</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
-                <span class="macro">quote!</span> { (#<span class="ident">locale</span>, #<span class="ident">ident</span>) }
-            });
-
-            <span class="comment">// Replace non-ident-allowed tokens. This can still fail if a segment starts with</span>
-            <span class="comment">// a token that is not allowed in an initial position.</span>
-            <span class="kw">let</span> <span class="ident">module_path</span> <span class="op">=</span> <span class="ident">syn::parse_str</span>::<span class="op">&lt;</span><span class="ident">syn::Path</span><span class="op">&gt;</span>(
-                <span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">path</span>()
-                    .<span class="ident">to_ascii_lowercase</span>()
-                    .<span class="ident">replace</span>(<span class="string">&#39;@&#39;</span>, <span class="string">&quot;_v&quot;</span>)
-                    .<span class="ident">replace</span>(<span class="string">&#39;/&#39;</span>, <span class="string">&quot;::&quot;</span>),
-            )
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-                <span class="ident">DataError::custom</span>(<span class="string">&quot;Key component is not a valid Rust identifier&quot;</span>).<span class="ident">with_key</span>(<span class="ident">key</span>)
-            })<span class="question-mark">?</span>;
-
-            <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">struct_type</span> <span class="op">=</span> <span class="macro">quote!</span> { <span class="op">&lt;</span>#<span class="ident">marker</span> <span class="kw">as</span> <span class="ident">::icu_provider::DataMarker</span><span class="op">&gt;</span><span class="ident">::Yokeable</span> };
-
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;experimental&quot;</span>)]</span>
-            <span class="kw">if</span> <span class="ident">key</span> <span class="op">==</span> <span class="ident">icu_datetime::provider::calendar::DateSkeletonPatternsV1Marker::KEY</span> {
-                <span class="ident">struct_type</span> <span class="op">=</span> <span class="macro">quote!</span> {
-                    [(
-                        <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">::icu_datetime::fields::Field</span>],
-                        <span class="ident">::icu_datetime::pattern::runtime::PatternPlurals</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>
-                    )]
-                };
-            }
-
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">PathBuf::new</span>();
-            <span class="kw">for</span> <span class="ident">level</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">module_path</span>.<span class="ident">segments</span> {
-                <span class="self">self</span>.<span class="ident">mod_files</span>
-                    .<span class="ident">lock</span>()
-                    .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
-                    .<span class="ident">entry</span>(<span class="ident">path</span>.<span class="ident">clone</span>())
-                    .<span class="ident">or_default</span>()
-                    .<span class="ident">push</span>(<span class="ident">level</span>.<span class="ident">ident</span>.<span class="ident">to_string</span>());
-                <span class="ident">path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">join</span>(<span class="ident">level</span>.<span class="ident">ident</span>.<span class="ident">to_string</span>());
-            }
-
             <span class="self">self</span>.<span class="ident">write_to_file</span>(
-                <span class="kw-2">&amp;</span><span class="ident">path</span>,
+                <span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="ident">file_name</span>),
+                <span class="ident">payload_bake_string</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>(),
+                <span class="bool-val">true</span>,
+            )<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">file_name</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{file_name}.rs.data&quot;</span>);
+            <span class="kw">let</span> <span class="ident">statik</span> <span class="op">=</span> <span class="macro">quote!</span> { <span class="kw">static</span> #<span class="ident">ident</span>: <span class="ident">DataStruct</span> <span class="op">=</span> <span class="macro">include!</span>(#<span class="ident">file_name</span>); };
+            <span class="ident">statics</span>.<span class="ident">insert</span>(<span class="ident">file_name</span>, <span class="ident">statik</span>);
+            <span class="ident">map</span>.<span class="ident">extend</span>(<span class="ident">locales</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> (<span class="ident">l</span>, <span class="ident">ident</span>.<span class="ident">clone</span>())));
+        }
+
+        <span class="kw">let</span> (<span class="ident">keys</span>, <span class="ident">values</span>): (<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>) <span class="op">=</span> <span class="ident">map</span>.<span class="ident">into_iter</span>().<span class="ident">unzip</span>();
+
+        <span class="kw">let</span> <span class="ident">lookup</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">keys</span>.<span class="ident">len</span>() {
+            <span class="number">0</span> =&gt; {
                 <span class="macro">quote!</span> {
-                    #<span class="ident">feature</span>
+                    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">lookup</span>(<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">icu_provider::DataLocale</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">DataStruct</span><span class="op">&gt;</span> {
+                        <span class="prelude-val">None</span>
+                    }
+                }
+            }
+            <span class="number">1</span> =&gt; {
+                <span class="kw">let</span> <span class="ident">locale</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">keys</span>[<span class="number">0</span>];
 
-                    <span class="kw">type</span> <span class="ident">DataStruct</span> <span class="op">=</span> #<span class="ident">struct_type</span>;
+                <span class="kw">let</span> <span class="ident">cmp</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">locale</span> <span class="op">==</span> <span class="string">&quot;und&quot;</span> {
+                    <span class="macro">quote!</span> {
+                        <span class="ident">locale</span>.<span class="ident">is_empty</span>()
+                    }
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">icu_locid::Locale::try_from_bytes_with_single_variant_single_keyword_unicode_extension</span>(<span class="ident">locale</span>.<span class="ident">as_bytes</span>()).<span class="ident">is_ok</span>() {
+                    <span class="self">self</span>.<span class="ident">dependencies</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_locid&quot;</span>);
+                    <span class="macro">quote!</span> {
+                        <span class="ident">icu_provider::DataLocale::from</span>(<span class="macro">icu_locid::locale!</span>(#<span class="ident">locale</span>)).<span class="ident">eq</span>(<span class="ident">locale</span>)
+                    }
+                } <span class="kw">else</span> {
+                    <span class="macro">quote!</span> {
+                        <span class="ident">locale</span>.<span class="ident">strict_cmp</span>(#<span class="ident">locale</span>.<span class="ident">as_bytes</span>()).<span class="ident">is_eq</span>()
+                    }
+                };
+                <span class="macro">quote!</span> {
+                    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lookup</span>(<span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">icu_provider::DataLocale</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">DataStruct</span><span class="op">&gt;</span> {
+                        <span class="comment">// This repetition is a singleton</span>
+                        #<span class="ident">cmp</span>.<span class="ident">then</span>(<span class="op">|</span><span class="op">|</span> #(<span class="kw-2">&amp;</span>#<span class="ident">values</span>)<span class="kw-2">*</span>)
+                    }
+                }
+            }
+            <span class="ident">n</span> =&gt; {
+                <span class="macro">quote!</span> {
+                    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lookup</span>(<span class="ident">locale</span>: <span class="kw-2">&amp;</span><span class="ident">icu_provider::DataLocale</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">DataStruct</span><span class="op">&gt;</span> {
+                        <span class="kw">static</span> <span class="ident">KEYS</span>: [<span class="kw-2">&amp;</span><span class="ident">str</span>; #<span class="ident">n</span>] <span class="op">=</span> [#(#<span class="ident">keys</span>),<span class="kw-2">*</span>];
+                        <span class="kw">static</span> <span class="ident">DATA</span>: [<span class="kw-2">&amp;</span><span class="ident">DataStruct</span>; #<span class="ident">n</span>] <span class="op">=</span> [#(<span class="kw-2">&amp;</span>#<span class="ident">values</span>),<span class="kw-2">*</span>];
 
-                    <span class="kw">pub</span> <span class="kw">static</span> <span class="ident">DATA</span>: <span class="ident">litemap::LiteMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">DataStruct</span>, <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">DataStruct</span>)]<span class="op">&gt;</span> <span class="op">=</span>
-                        <span class="ident">litemap::LiteMap::from_sorted_store_unchecked</span>(<span class="kw-2">&amp;</span>[#(#<span class="ident">data</span>),<span class="kw-2">*</span>]);
-
-                    #(#<span class="ident">statics</span>)<span class="op">*</span>
-                },
-            )
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))<span class="question-mark">?</span>;
-
-            <span class="prelude-val">Some</span>(<span class="macro">quote!</span>(#<span class="ident">module_path</span>).<span class="ident">to_string</span>())
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
+                        <span class="ident">KEYS</span>
+                            .<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
+                            .<span class="ident">ok</span>()
+                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">unsafe</span> {
+                                <span class="comment">// Safe because KEYS and DATA have the same length</span>
+                                <span class="kw-2">*</span><span class="ident">DATA</span>.<span class="ident">get_unchecked</span>(<span class="ident">i</span>)
+                            })
+                    }
+                }
+            }
         };
 
-        <span class="self">self</span>.<span class="ident">marker_data_feature</span>.<span class="ident">lock</span>().<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>).<span class="ident">push</span>((
-            <span class="macro">quote!</span>(#<span class="ident">marker</span>).<span class="ident">to_string</span>(),
-            <span class="ident">data</span>,
-            <span class="ident">feature</span>.<span class="ident">to_string</span>().<span class="ident">replacen</span>(<span class="string">&quot;# ! [&quot;</span>, <span class="string">&quot;# [&quot;</span>, <span class="number">1</span>),
-        ));
+        <span class="kw">let</span> <span class="ident">statics</span> <span class="op">=</span> <span class="ident">statics</span>.<span class="ident">values</span>();
+
+        <span class="self">self</span>.<span class="ident">write_to_file</span>(
+            <span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;mod&quot;</span>),
+            <span class="macro">quote!</span> {
+                #<span class="ident">feature</span>
+
+                <span class="kw">type</span> <span class="ident">DataStruct</span> <span class="op">=</span> #<span class="ident">struct_type</span>;
+
+                #<span class="ident">lookup</span>
+
+                #(#<span class="ident">statics</span>)<span class="op">*</span>
+            },
+            <span class="bool-val">false</span>,
+        )<span class="question-mark">?</span>;
+
+        <span class="self">self</span>.<span class="ident">impl_data</span>.<span class="ident">lock</span>().<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>).<span class="ident">push</span>(<span class="ident">ImplData</span> {
+            <span class="ident">marker</span>: <span class="macro">quote!</span>(#<span class="ident">marker</span>).<span class="ident">to_string</span>(),
+            <span class="ident">lookup_ident</span>: <span class="macro">quote!</span>(#<span class="ident">module_path</span> :: <span class="ident">lookup</span>).<span class="ident">to_string</span>(),
+            <span class="ident">feature</span>: <span class="ident">feature</span>.<span class="ident">to_string</span>().<span class="ident">replacen</span>(<span class="string">&quot;# ! [&quot;</span>, <span class="string">&quot;# [&quot;</span>, <span class="number">1</span>),
+        });
+
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DataError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">dependencies</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_provider&quot;</span>);
-        <span class="comment">// TODO: make locale fallback cfg&#39;ed</span>
-        <span class="self">self</span>.<span class="ident">dependencies</span>.<span class="ident">insert</span>(<span class="string">&quot;icu_provider_adapters&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">deps</span> <span class="op">=</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">dependencies</span>)
+        <span class="comment">// These are BTreeMaps keyed on the marker to keep the output sorted and stable</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data_impls</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">any_consts</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">any_cases</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
+
+        <span class="kw">for</span> <span class="ident">data</span> <span class="kw">in</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">impl_data</span>)
+            .<span class="ident">into_inner</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
             .<span class="ident">into_iter</span>()
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">use_separate_crates</span> {
-            <span class="ident">deps</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">krate</span><span class="op">|</span> <span class="ident">krate</span> <span class="op">==</span> <span class="string">&quot;icu_provider&quot;</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">krate</span>.<span class="ident">starts_with</span>(<span class="string">&quot;icu_&quot;</span>));
-            <span class="ident">deps</span>.<span class="ident">insert</span>(<span class="string">&quot;icu&quot;</span>);
-        }
-        <span class="macro">log::info!</span>(<span class="string">&quot;The generated module requires the following crates:&quot;</span>);
-        <span class="kw">for</span> <span class="ident">crate_name</span> <span class="kw">in</span> <span class="ident">deps</span> {
-            <span class="macro">log::info!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">crate_name</span>);
+        {
+            <span class="kw">let</span> <span class="ident">feature</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">feature</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">marker</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">marker</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">lookup_ident</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">lookup_ident</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
+
+            <span class="ident">data_impls</span>.<span class="ident">insert</span>(<span class="ident">data</span>.<span class="ident">marker</span>.<span class="ident">clone</span>(),
+                <span class="macro">quote!</span> {
+                    #<span class="ident">feature</span>
+                    <span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
+                        <span class="kw">fn</span> <span class="ident">load</span>(
+                            <span class="kw-2">&amp;</span><span class="self">self</span>,
+                            <span class="ident">req</span>: <span class="ident">DataRequest</span>,
+                        ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+                            #<span class="ident">lookup_ident</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">locale</span>)
+                                .<span class="ident">map</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>)
+                                .<span class="ident">map</span>(<span class="ident">DataPayload::from_owned</span>)
+                                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">payload</span><span class="op">|</span> {
+                                    <span class="ident">DataResponse</span> {
+                                        <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                                        <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">payload</span>),
+                                    }
+                                })
+                                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(#<span class="ident">marker::KEY</span>, <span class="ident">req</span>))
+                        }
+                    }
+                });
+
+            <span class="kw">let</span> <span class="ident">hash_ident</span> <span class="op">=</span> <span class="ident">data</span>
+                .<span class="ident">marker</span>
+                .<span class="ident">split</span>(<span class="string">&#39; &#39;</span>)
+                .<span class="ident">next_back</span>()
+                .<span class="ident">unwrap</span>()
+                .<span class="ident">to_ascii_uppercase</span>()
+                .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>()
+                .<span class="ident">unwrap</span>();
+            <span class="ident">any_consts</span>.<span class="ident">insert</span>(
+                <span class="ident">data</span>.<span class="ident">marker</span>.<span class="ident">clone</span>(),
+                <span class="macro">quote!</span> {
+                    #<span class="ident">feature</span>
+                    <span class="kw">const</span> #<span class="ident">hash_ident</span>: <span class="ident">::icu_provider::DataKeyHash</span> <span class="op">=</span> #<span class="ident">marker::KEY</span>.<span class="ident">hashed</span>();
+                },
+            );
+            <span class="ident">any_cases</span>.<span class="ident">insert</span>(
+                <span class="ident">data</span>.<span class="ident">marker</span>.<span class="ident">clone</span>(),
+                <span class="kw">if</span> <span class="ident">data</span>.<span class="ident">marker</span>
+                    <span class="op">==</span> <span class="string">&quot;:: icu_datetime :: provider :: calendar :: DateSkeletonPatternsV1Marker&quot;</span>
+                {
+                    <span class="macro">quote!</span> {
+                        #<span class="ident">feature</span>
+                        #<span class="ident">hash_ident</span> =&gt; {
+                            #<span class="ident">lookup_ident</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">locale</span>)
+                                .<span class="ident">map</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>)
+                                .<span class="ident">map</span>(<span class="ident">DataPayload</span>::<span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>)
+                                .<span class="ident">map</span>(<span class="ident">DataPayload::wrap_into_any_payload</span>)
+                        }
+                    }
+                } <span class="kw">else</span> {
+                    <span class="macro">quote!</span> {
+                        #<span class="ident">feature</span>
+                        #<span class="ident">hash_ident</span> =&gt; #<span class="ident">lookup_ident</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">locale</span>).<span class="ident">map</span>(<span class="ident">AnyPayload::from_static_ref</span>),
+                    }
+                },
+            );
         }
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mod_files</span> <span class="op">=</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">mod_files</span>).<span class="ident">into_inner</span>().<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>);
-        <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">mods</span>) <span class="kw">in</span> <span class="ident">mod_files</span>.<span class="ident">iter_mut</span>() {
-            <span class="ident">mods</span>.<span class="ident">sort</span>();
-        }
-
-        <span class="kw">let</span> <span class="ident">mods</span> <span class="op">=</span> <span class="ident">mod_files</span>
+        <span class="kw">let</span> <span class="ident">mods</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">mod_files</span>
+            .<span class="ident">get_mut</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>)
             .<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf::new</span>())
             .<span class="ident">unwrap_or_default</span>()
             .<span class="ident">into_iter</span>()
-            .<span class="ident">dedup</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">marker_data_feature</span> <span class="op">=</span> <span class="macro">move_out!</span>(<span class="self">self</span>.<span class="ident">marker_data_feature</span>)
-            .<span class="ident">into_inner</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;poison&quot;</span>);
-        <span class="ident">marker_data_feature</span>.<span class="ident">sort</span>();
-        <span class="kw">let</span> <span class="ident">marker_data_feature_ident</span> <span class="op">=</span> <span class="ident">marker_data_feature</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker_str</span>, <span class="ident">data_str</span>, <span class="ident">feature_str</span>)<span class="op">|</span> {
-                (
-                    <span class="ident">marker_str</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">data_str</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>()),
-                    <span class="ident">feature_str</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>(),
-                    <span class="ident">marker_str</span>
-                        .<span class="ident">split</span>(<span class="string">&#39; &#39;</span>)
-                        .<span class="ident">next_back</span>()
-                        .<span class="ident">unwrap</span>()
-                        .<span class="ident">to_ascii_uppercase</span>()
-                        .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>()
-                        .<span class="ident">unwrap</span>(),
-                )
-            })
-            .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-
-        <span class="kw">let</span> <span class="ident">resource_impls</span> <span class="op">=</span> <span class="ident">marker_data_feature_ident</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="ident">data</span>, <span class="ident">feature</span>, <span class="kw">_</span>)<span class="op">|</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span> <span class="ident">data</span> {
-                <span class="macro">quote!</span> {
-                    #<span class="ident">feature</span>
-                    <span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BakedDataProvider</span> {
-                        <span class="kw">fn</span> <span class="ident">load</span>(
-                            <span class="kw-2">&amp;</span><span class="self">self</span>,
-                            <span class="ident">req</span>: <span class="ident">DataRequest</span>,
-                        ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                            <span class="prelude-val">Ok</span>(<span class="ident">DataResponse</span> {
-                                <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                                <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">DataPayload::from_owned</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>(
-                                    <span class="kw-2">*</span>#<span class="ident">data::DATA</span>
-                                        .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
-                                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(#<span class="ident">marker::KEY</span>, <span class="ident">req</span>))<span class="question-mark">?</span>
-                                ))),
-                            })
-                        }
-                    }
-                }
-            } <span class="kw">else</span> {
-                <span class="macro">quote!</span> {
-                    #<span class="ident">feature</span>
-                    <span class="kw">impl</span> <span class="ident">DataProvider</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BakedDataProvider</span> {
-                        <span class="kw">fn</span> <span class="ident">load</span>(
-                            <span class="kw-2">&amp;</span><span class="self">self</span>,
-                            <span class="ident">req</span>: <span class="ident">DataRequest</span>,
-                        ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DataResponse</span><span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                            <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(#<span class="ident">marker::KEY</span>, <span class="ident">req</span>))
-                        }
-                    }
-                }
-            }
-        });
+        <span class="kw">let</span> <span class="ident">data_impls</span> <span class="op">=</span> <span class="ident">data_impls</span>.<span class="ident">values</span>();
+        <span class="kw">let</span> <span class="ident">any_consts</span> <span class="op">=</span> <span class="ident">any_consts</span>.<span class="ident">values</span>();
+        <span class="kw">let</span> <span class="ident">any_cases</span> <span class="op">=</span> <span class="ident">any_cases</span>.<span class="ident">values</span>();
 
         <span class="self">self</span>.<span class="ident">write_to_file</span>(
             <span class="ident">PathBuf::from</span>(<span class="string">&quot;mod&quot;</span>),
@@ -845,104 +988,77 @@
                     <span class="kw">mod</span> #<span class="ident">mods</span>;
                 )<span class="op">*</span>
 
-                <span class="doccomment">/// This data provider was programmatically generated by [`icu_datagen`](</span>
-                <span class="doccomment">/// https://unicode-org.github.io/icu4x-docs/doc/icu_datagen/enum.Out.html#variant.Module).</span>
-                <span class="attribute">#[<span class="ident">non_exhaustive</span>]</span>
-                <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BakedDataProvider</span>;
                 <span class="kw">use</span> <span class="ident">::icu_provider::prelude</span>::<span class="kw-2">*</span>;
 
-                #(#<span class="ident">resource_impls</span>)<span class="op">*</span>
+                <span class="doccomment">/// Implement [`DataProvider&lt;M&gt;`] on the given struct using the data</span>
+                <span class="doccomment">/// hardcoded in this module. This allows the struct to be used with</span>
+                <span class="doccomment">/// `icu`&#39;s `_unstable` constructors.</span>
+                <span class="doccomment">///</span>
+                <span class="doccomment">/// This macro can only be called from its definition-site, i.e. right</span>
+                <span class="doccomment">/// after `include!`-ing the generated module.</span>
+                <span class="doccomment">///</span>
+                <span class="doccomment">/// ```compile_fail</span>
+                <span class="doccomment">/// struct MyDataProvider;</span>
+                <span class="doccomment">/// include!(&quot;/path/to/generated/mod.rs&quot;);</span>
+                <span class="doccomment">/// impl_data_provider(MyDataProvider);</span>
+                <span class="doccomment">/// ```</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_macros</span>)]</span>
+                <span class="macro">macro_rules!</span> <span class="ident">impl_data_provider</span> {
+                    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">path</span>) =&gt; {
+                        #(#<span class="ident">data_impls</span>)<span class="op">*</span>
+                    }
+                }
+
+                <span class="doccomment">/// Implement [`AnyProvider`] on the given struct using the data</span>
+                <span class="doccomment">/// hardcoded in this module. This allows the struct to be used with</span>
+                <span class="doccomment">/// `icu`&#39;s `_any` constructors.</span>
+                <span class="doccomment">///</span>
+                <span class="doccomment">/// This macro can only be called from its definition-site, i.e. right</span>
+                <span class="doccomment">/// after `include!`-ing the generated module.</span>
+                <span class="doccomment">/// </span>
+                <span class="doccomment">/// ```compile_fail</span>
+                <span class="doccomment">/// struct MyAnyProvider;</span>
+                <span class="doccomment">/// include!(&quot;/path/to/generated/mod.rs&quot;);</span>
+                <span class="doccomment">/// impl_any_provider(MyAnyProvider);</span>
+                <span class="doccomment">/// ```</span>
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_macros</span>)]</span>
+                <span class="macro">macro_rules!</span> <span class="ident">impl_any_provider</span> {
+                    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span>:<span class="ident">path</span>) =&gt; {
+                        <span class="kw">impl</span> <span class="ident">AnyProvider</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">provider</span> {
+                            <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
+                                #(#<span class="ident">any_consts</span>)<span class="op">*</span>
+                                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::match_single_binding</span>)]</span>
+                                <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">hashed</span>() {
+                                    #(#<span class="ident">any_cases</span>)<span class="op">*</span>
+                                    <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>)),
+                                }
+                                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">payload</span><span class="op">|</span> <span class="ident">AnyResponse</span> {
+                                    <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">payload</span>),
+                                    <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
+                                })
+                                .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DataErrorKind::MissingLocale</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
+                            }
+                        }
+                    }
+                }
+
+                <span class="kw">struct</span> <span class="ident">BakedDataProvider</span>;
+                <span class="macro">impl_data_provider!</span>(<span class="ident">BakedDataProvider</span>);
             },
-        )
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf::from</span>(<span class="string">&quot;mod.rs&quot;</span>)))<span class="question-mark">?</span>;
-
-        <span class="kw">let</span> <span class="ident">any_consts</span> <span class="op">=</span> <span class="ident">marker_data_feature_ident</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="kw">_</span>, <span class="ident">feature</span>, <span class="ident">ident</span>)<span class="op">|</span> {
-                <span class="macro">quote!</span> {
-                    #<span class="ident">feature</span>
-                    <span class="kw">const</span> #<span class="ident">ident</span>: <span class="ident">::icu_provider::DataKeyHash</span> <span class="op">=</span> #<span class="ident">marker::KEY</span>.<span class="ident">hashed</span>();
-                }
-            });
-
-        <span class="kw">let</span> <span class="ident">any_cases</span> <span class="op">=</span> <span class="ident">marker_data_feature_ident</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">marker</span>, <span class="ident">data</span>, <span class="ident">feature</span>, <span class="ident">ident</span>)<span class="op">|</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span> <span class="ident">data</span> {
-                    <span class="comment">// TODO(#1678): Remove the special case</span>
-                    <span class="kw">if</span> <span class="ident">marker</span>.<span class="ident">to_string</span>()
-                        <span class="op">==</span> <span class="string">&quot;:: icu_datetime :: provider :: calendar :: DateSkeletonPatternsV1Marker&quot;</span>
-                    {
-                        <span class="macro">quote!</span> {
-                            #<span class="ident">feature</span>
-                            #<span class="ident">ident</span> =&gt; {
-                                #<span class="ident">data::DATA</span>
-                                    .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
-                                    .<span class="ident">copied</span>()
-                                    .<span class="ident">map</span>(<span class="ident">zerofrom::ZeroFrom::zero_from</span>)
-                                    .<span class="ident">map</span>(<span class="ident">DataPayload</span>::<span class="op">&lt;</span>#<span class="ident">marker</span><span class="op">&gt;</span><span class="ident">::from_owned</span>)
-                                    .<span class="ident">map</span>(<span class="ident">DataPayload::wrap_into_any_payload</span>)
-                                    .<span class="ident">ok_or</span>(<span class="ident">DataErrorKind::MissingLocale</span>)
-                            }
-                        }
-                    } <span class="kw">else</span> {
-                        <span class="macro">quote!</span> {
-                            #<span class="ident">feature</span>
-                            #<span class="ident">ident</span> =&gt; {
-                                #<span class="ident">data::DATA</span>
-                                    .<span class="ident">get_by</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">req</span>.<span class="ident">locale</span>.<span class="ident">strict_cmp</span>(<span class="ident">k</span>.<span class="ident">as_bytes</span>()).<span class="ident">reverse</span>())
-                                    .<span class="ident">copied</span>()
-                                    .<span class="ident">map</span>(<span class="ident">AnyPayload::from_static_ref</span>)
-                                    .<span class="ident">ok_or</span>(<span class="ident">DataErrorKind::MissingLocale</span>)
-                            }
-                        }
-                    }
-                } <span class="kw">else</span> {
-                    <span class="macro">quote!</span> {
-                        #<span class="ident">feature</span>
-                        #<span class="ident">ident</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingLocale</span>),
-                    }
-                }
-            });
+            <span class="bool-val">false</span>,
+        )<span class="question-mark">?</span>;
 
         <span class="self">self</span>.<span class="ident">write_to_file</span>(
             <span class="ident">PathBuf::from</span>(<span class="string">&quot;any&quot;</span>),
             <span class="macro">quote!</span> {
-                <span class="kw">impl</span> <span class="ident">AnyProvider</span> <span class="kw">for</span> <span class="ident">BakedDataProvider</span> {
-                    <span class="kw">fn</span> <span class="ident">load_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">DataKey</span>, <span class="ident">req</span>: <span class="ident">DataRequest</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnyResponse</span>, <span class="ident">DataError</span><span class="op">&gt;</span> {
-                        #(#<span class="ident">any_consts</span>)<span class="op">*</span>
-                        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::match_single_binding</span>)]</span>
-                        <span class="kw">match</span> <span class="ident">key</span>.<span class="ident">hashed</span>() {
-                            #(#<span class="ident">any_cases</span>)<span class="op">*</span>
-                            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DataErrorKind::MissingDataKey</span>),
-                        }
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_req</span>(<span class="ident">key</span>, <span class="ident">req</span>))
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">payload</span><span class="op">|</span> <span class="ident">AnyResponse</span> {
-                            <span class="ident">payload</span>: <span class="prelude-val">Some</span>(<span class="ident">payload</span>),
-                            <span class="ident">metadata</span>: <span class="ident">Default::default</span>(),
-                        })
-                    }
-                }
-            }
-        )
-        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">PathBuf::from</span>(<span class="string">&quot;any.rs&quot;</span>)))<span class="question-mark">?</span>;
+                <span class="macro">impl_any_provider!</span>(<span class="ident">BakedDataProvider</span>);
+            },
+            <span class="bool-val">false</span>,
+        )<span class="question-mark">?</span>;
 
-        <span class="ident">mod_files</span>.<span class="ident">into_par_iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span>(<span class="ident">path</span>, <span class="kw-2">mut</span> <span class="ident">mods</span>)<span class="op">|</span> {
-            <span class="ident">mods</span>.<span class="ident">sort</span>();
-            <span class="kw">let</span> <span class="ident">mods</span> <span class="op">=</span> <span class="ident">mods</span>
-                .<span class="ident">into_iter</span>()
-                .<span class="ident">dedup</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>());
-            <span class="self">self</span>.<span class="ident">write_to_file</span>(
-                <span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;mod&quot;</span>),
-                <span class="macro">quote!</span> {
-                    #(
-                        <span class="kw">pub</span> <span class="kw">mod</span> #<span class="ident">mods</span>;
-                    )<span class="op">*</span>
-                },
-            )
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">with_path_context</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>.<span class="ident">join</span>(<span class="string">&quot;mod.rs&quot;</span>)))
-        })<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">write_intermediate_mod_files</span>()<span class="question-mark">?</span>;
+
+        <span class="self">self</span>.<span class="ident">print_deps</span>();
 
         <span class="prelude-val">Ok</span>(())
     }

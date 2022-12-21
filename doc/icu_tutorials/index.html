@@ -554,8 +554,8 @@ $ cargo add icu_provider_blob</code></pre></div>
 <p>Rebuilding the application and rerunning datagen awards us with a 3KB data blob, which only contains 7 data keys!</p>
 <h2 id="5-other-formats"><a href="#5-other-formats">5. Other formats</a></h2>
 <p>So far we’ve used <code>--format blob</code> and <code>BlobDataProvider</code>. This is useful if we want to ship code and data separately, but there are other options.</p>
-<h3 id="mod-and-bakeddataprovider"><a href="#mod-and-bakeddataprovider"><code>mod</code> and <code>BakedDataProvider</code></a></h3>
-<p>The <code>mod</code> format will generate a Rust module that defines a data provider. This format naturally has no deserialization overhead, and allows for compile-time optimizations (data slicing isn’t really necessary, as the compiler will do it for us), but cannot be dynamically loaded at runtime.</p>
+<h3 id="mod-and-baked-data"><a href="#mod-and-baked-data"><code>mod</code> and baked data</a></h3>
+<p>The <code>mod</code> format will generate a Rust module that contains all the required data directly as Rust code. This format naturally has no deserialization overhead, and allows for compile-time optimizations (data slicing isn’t really necessary, as the compiler will do it for us), but cannot be dynamically loaded at runtime.</p>
 <p>Let’s give it a try:</p>
 <div class="example-wrap"><pre class="language-console"><code>$ icu4x-datagen --cldr-tag latest --icuexport-tag latest --out my-data-mod --format mod --keys-for-bin target/debug/myapp --locales ja</code></pre></div>
 <p>The output might tell you additional crates that need to be installed. Don’t worry, these are transitive dependencies already anyway, but are required directly now to construct our data:</p>
@@ -564,17 +564,19 @@ $ cargo add litemap
 $ cargo add zerovec</code></pre></div>
 <p>We can then use the data by directly including the source with the <code>include!</code> macro.</p>
 
-<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>; <span class="comment">// required as BakedDataProvider is written for #[no_std]</span>
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">alloc</span>; <span class="comment">// required as my-data-mod is written for #[no_std]</span>
 <span class="kw">use</span> <span class="ident">icu::locid</span>::{<span class="ident">locale</span>, <span class="ident">Locale</span>};
 <span class="kw">use</span> <span class="ident">icu::calendar::DateTime</span>;
 <span class="kw">use</span> <span class="ident">icu::datetime</span>::{<span class="ident">TypedDateTimeFormatter</span>, <span class="ident">options::length</span>};
 
 <span class="kw">const</span> <span class="ident">LOCALE</span>: <span class="ident">Locale</span> <span class="op">=</span> <span class="macro">locale!</span>(<span class="string">&quot;ja&quot;</span>);
 
-<span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/mod.rs&quot;</span>); <span class="comment">// defines BakedDataProvider</span>
+<span class="kw">struct</span> <span class="ident">UnstableProvider</span>;
+<span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/mod.rs&quot;</span>);
+<span class="macro">impl_data_provider!</span>(<span class="ident">UnstableProvider</span>);
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
-    <span class="kw">let</span> <span class="ident">unstable_provider</span> <span class="op">=</span> <span class="ident">BakedDataProvider</span>;
+    <span class="kw">let</span> <span class="ident">unstable_provider</span> <span class="op">=</span> <span class="ident">UnstableProvider</span>;
 
     <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">length::Bag::from_date_time_style</span>(<span class="ident">length::Date::Long</span>, <span class="ident">length::Time::Medium</span>);
 
@@ -588,12 +590,10 @@ $ cargo add zerovec</code></pre></div>
 
     <span class="macro">println!</span>(<span class="string">&quot;📅: {}&quot;</span>, <span class="ident">formatted_date</span>);
 }</code></pre></div>
-<p>With this provider, we can use the <code>unstable</code> constructors. These are only guaranteed to work if the <code>BakedDataProvider</code> was generated with the same version of ICU4X that you are building with, but if you build the data as part of your a build pipeline, that shouldn’t be a problem.</p>
-<p>You can also make the <code>BakedDataProvider</code> implement the <code>AnyProvider</code> trait, so that it can be used with <code>_with_any_provider</code> constructors. Using these constructors is slightly less performant than the <code>unstable</code> ones, but, as the name suggests, stable across (minor) releases.</p>
+<p>With this provider, we can use the <code>unstable</code> constructors. These are only guaranteed to work if the data was generated with the same version of ICU4X that you are building with, but if you build the data as part of your a build pipeline, that shouldn’t be a problem.</p>
+<p>You can also implement the <code>AnyProvider</code> trait, so that it can be used with <code>_with_any_provider</code> constructors. Using these constructors is slightly less performant than the <code>unstable</code> ones, but, as the name suggests, stable across (minor) releases.</p>
 
-<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/mod.rs&quot;</span>);
-<span class="macro">include!</span>(<span class="string">&quot;../my-data-mod/any.rs&quot;</span>);
-<span class="kw">let</span> <span class="ident">_any_provider</span> <span class="op">=</span> <span class="ident">BakedDataProvider</span>;</code></pre></div>
+<div class='information'><div class='tooltip compile_fail'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail"><code><span class="macro">impl_any_provider!</span>(<span class="ident">MyProvider</span>);</code></pre></div>
 <h3 id="dir-and-fsdataprovider"><a href="#dir-and-fsdataprovider"><code>dir</code> and <code>FsDataProvider</code></a></h3>
 <p>The <code>dir</code> format will generate a directory tree of data files in JSON (although the <code>--syntax</code> option can be used to generate <code>postcard</code> or <code>bincode</code> files, which doesn’t have many practical uses).</p>
 <p>Let’s give it a try:</p>

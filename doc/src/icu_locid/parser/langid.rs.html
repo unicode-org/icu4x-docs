@@ -272,6 +272,20 @@
 <span id="267">267</span>
 <span id="268">268</span>
 <span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -279,7 +293,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::errors::ParserError</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::extensions::unicode</span>::{<span class="ident">Attribute</span>, <span class="ident">Key</span>, <span class="ident">Value</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::extensions::ExtensionType</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser</span>::{<span class="ident">get_subtag_iterator</span>, <span class="ident">SubtagIterator</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser::SubtagIterator</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::LanguageIdentifier</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">extensions</span>, <span class="ident">subtags</span>};
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
@@ -377,7 +391,7 @@
     <span class="ident">t</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
     <span class="ident">mode</span>: <span class="ident">ParserMode</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">LanguageIdentifier</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">get_subtag_iterator</span>(<span class="ident">t</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">t</span>)<span class="question-mark">?</span>;
     <span class="ident">parse_language_identifier_from_iter</span>(<span class="kw-2">&amp;mut</span> <span class="ident">iter</span>, <span class="ident">mode</span>)
 }
 
@@ -401,9 +415,9 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">variant</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keyword</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
-    <span class="kw">if</span> <span class="kw">let</span> (<span class="ident">i</span>, <span class="prelude-val">Some</span>((<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>))) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next_manual</span>() {
+    <span class="kw">if</span> <span class="kw">let</span> (<span class="ident">i</span>, <span class="prelude-val">Some</span>((<span class="ident">start</span>, <span class="ident">end</span>))) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next_manual</span>() {
         <span class="ident">iter</span> <span class="op">=</span> <span class="ident">i</span>;
-        <span class="kw">match</span> <span class="ident">subtags::Language::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+        <span class="kw">match</span> <span class="ident">subtags::Language::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">l</span>) =&gt; <span class="ident">language</span> <span class="op">=</span> <span class="ident">l</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
         }
@@ -413,19 +427,23 @@
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">position</span> <span class="op">=</span> <span class="ident">ParserPosition::Script</span>;
 
-    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
+    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
         <span class="kw">if</span> <span class="op">!</span><span class="macro">matches!</span>(<span class="ident">mode</span>, <span class="ident">ParserMode::LanguageIdentifier</span>) <span class="op">&amp;&amp;</span> <span class="ident">end</span> <span class="op">-</span> <span class="ident">start</span> <span class="op">==</span> <span class="number">1</span> {
             <span class="kw">break</span>;
         }
 
         <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">position</span>, <span class="ident">ParserPosition::Script</span>) {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">subtags::Script::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">subtags::Script::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
                 <span class="ident">script</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>);
                 <span class="ident">position</span> <span class="op">=</span> <span class="ident">ParserPosition::Region</span>;
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span> <span class="ident">subtags::Region::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span>
+                <span class="ident">subtags::Region::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>)
+            {
                 <span class="ident">region</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>);
                 <span class="ident">position</span> <span class="op">=</span> <span class="ident">ParserPosition::Variant</span>;
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">subtags::Variant::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span>
+                <span class="ident">subtags::Variant::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>)
+            {
                 <span class="comment">// We cannot handle multiple variants in a const context</span>
                 <span class="macro">debug_assert!</span>(<span class="ident">variant</span>.<span class="ident">is_none</span>());
                 <span class="ident">variant</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>);
@@ -436,10 +454,12 @@
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidSubtag</span>);
             }
         } <span class="kw">else</span> <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">position</span>, <span class="ident">ParserPosition::Region</span>) {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">subtags::Region::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">subtags::Region::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
                 <span class="ident">region</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>);
                 <span class="ident">position</span> <span class="op">=</span> <span class="ident">ParserPosition::Variant</span>;
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">subtags::Variant::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span>
+                <span class="ident">subtags::Variant::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>)
+            {
                 <span class="comment">// We cannot handle multiple variants in a const context</span>
                 <span class="macro">debug_assert!</span>(<span class="ident">variant</span>.<span class="ident">is_none</span>());
                 <span class="ident">variant</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>);
@@ -449,7 +469,8 @@
             } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidSubtag</span>);
             }
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">subtags::Variant::try_from_bytes_manual_slice</span>(<span class="ident">t</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">subtags::Variant::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>)
+        {
             <span class="macro">debug_assert!</span>(<span class="macro">matches!</span>(<span class="ident">position</span>, <span class="ident">ParserPosition::Variant</span>));
             <span class="kw">if</span> <span class="ident">variant</span>.<span class="ident">is_some</span>() {
                 <span class="comment">// We cannot handle multiple variants in a const context</span>
@@ -466,12 +487,12 @@
     }
 
     <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">mode</span>, <span class="ident">ParserMode::Locale</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
-            <span class="kw">match</span> <span class="ident">ExtensionType::try_from_bytes_manual_slice</span>(<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
+            <span class="kw">match</span> <span class="ident">ExtensionType::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
                 <span class="prelude-val">Ok</span>(<span class="ident">ExtensionType::Unicode</span>) =&gt; {
                     <span class="ident">iter</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next_manual</span>().<span class="number">0</span>;
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
-                        <span class="kw">if</span> <span class="ident">Attribute::try_from_bytes_manual_slice</span>(<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>).<span class="ident">is_ok</span>() {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
+                        <span class="kw">if</span> <span class="ident">Attribute::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>).<span class="ident">is_ok</span>() {
                             <span class="comment">// We cannot handle Attributes in a const context</span>
                             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidSubtag</span>);
                         }
@@ -480,19 +501,21 @@
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">key</span> <span class="op">=</span> <span class="prelude-val">None</span>;
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">current_type</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
-                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
+                    <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">peek_manual</span>() {
                         <span class="kw">let</span> <span class="ident">slen</span> <span class="op">=</span> <span class="ident">end</span> <span class="op">-</span> <span class="ident">start</span>;
                         <span class="kw">if</span> <span class="ident">slen</span> <span class="op">==</span> <span class="number">2</span> {
                             <span class="kw">if</span> <span class="ident">key</span>.<span class="ident">is_some</span>() {
                                 <span class="comment">// We cannot handle more than one Key in a const context</span>
                                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidSubtag</span>);
                             }
-                            <span class="kw">match</span> <span class="ident">Key::try_from_bytes_manual_slice</span>(<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+                            <span class="kw">match</span> <span class="ident">Key::try_from_bytes_manual_slice</span>(<span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
                                 <span class="prelude-val">Ok</span>(<span class="ident">k</span>) =&gt; <span class="ident">key</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">k</span>),
                                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
                             };
                         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">key</span>.<span class="ident">is_some</span>() {
-                            <span class="kw">match</span> <span class="ident">Value::parse_subtag_from_bytes_manual_slice</span>(<span class="ident">bytes</span>, <span class="ident">start</span>, <span class="ident">end</span>) {
+                            <span class="kw">match</span> <span class="ident">Value::parse_subtag_from_bytes_manual_slice</span>(
+                                <span class="ident">iter</span>.<span class="ident">slice</span>, <span class="ident">start</span>, <span class="ident">end</span>,
+                            ) {
                                 <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">t</span>)) =&gt; {
                                     <span class="kw">if</span> <span class="ident">current_type</span>.<span class="ident">is_some</span>() {
                                         <span class="comment">// We cannot handle more than one type in a const context</span>
@@ -535,7 +558,12 @@
     ),
     <span class="ident">ParserError</span>,
 <span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">get_subtag_iterator</span>(<span class="ident">t</span>);
+    <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">t</span>) {
+        <span class="prelude-val">Ok</span>(<span class="ident">iter</span>) =&gt; <span class="ident">iter</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>);
+        }
+    };
     <span class="kw">match</span> <span class="ident">parse_locale_with_single_variant_single_keyword_unicode_extension_from_iter</span>(<span class="ident">iter</span>, <span class="ident">mode</span>) {
         <span class="prelude-val">Ok</span>((<span class="ident">l</span>, <span class="ident">s</span>, <span class="ident">r</span>, <span class="ident">v</span>, <span class="kw">_</span>)) =&gt; <span class="prelude-val">Ok</span>((<span class="ident">l</span>, <span class="ident">s</span>, <span class="ident">r</span>, <span class="ident">v</span>)),
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),

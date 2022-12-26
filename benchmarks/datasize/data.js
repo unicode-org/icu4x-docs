@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1672038939652,
+  "lastUpdate": 1672051302456,
   "repoUrl": "https://github.com/unicode-org/icu4x",
   "entries": {
     "Benchmark": [
@@ -33023,6 +33023,66 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/unicode-org/icu4x/commit/92e5d5970d8db1559ede339860e6887bf9e6559e"
         },
         "date": 1672038856555,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4303051,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "striezel-dev@web.de",
+            "name": "Dirk Stolle",
+            "username": "striezel"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6814087b8ee3cf5239e0adfa24b65ebd491be509",
+          "message": "Update actions/cache in GitHub Actions workflows to v3 (#2927)",
+          "timestamp": "2022-12-26T11:38:48+01:00",
+          "tree_id": "730db93e3f787765daa05bcc5b4b58e052e2fdeb",
+          "url": "https://github.com/unicode-org/icu4x/commit/6814087b8ee3cf5239e0adfa24b65ebd491be509"
+        },
+        "date": 1672051189758,
+        "tool": "ndjson",
+        "benches": [
+          {
+            "name": "provider/testdata/data/testdata.postcard",
+            "value": 4303051,
+            "unit": "bytes",
+            "biggerIsBetter": false
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "zibi@unicode.org",
+            "name": "Zibi Braniecki",
+            "username": "zbraniecki"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b9a0221c397c5d8f714656ffe777fb8f81ceabcc",
+          "message": "[locid] Make SubtagIterator::new infallible. (#2930)",
+          "timestamp": "2022-12-26T11:39:26+01:00",
+          "tree_id": "e7a6fa020ab917319d9251897d11c991957a9c12",
+          "url": "https://github.com/unicode-org/icu4x/commit/b9a0221c397c5d8f714656ffe777fb8f81ceabcc"
+        },
+        "date": 1672051228051,
         "tool": "ndjson",
         "benches": [
           {

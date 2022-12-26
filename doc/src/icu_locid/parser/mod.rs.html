@@ -224,6 +224,16 @@
 <span id="219">219</span>
 <span id="220">220</span>
 <span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -293,16 +303,18 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SubtagIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">ParserError</span><span class="op">&gt;</span> {
-        <span class="comment">// This returns early for slices like `&quot;-en&quot;` or `&quot;-&quot;`</span>
-        <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">is_separator</span>(<span class="ident">slice</span>, <span class="number">0</span>) {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParserError::InvalidLanguage</span>);
-        }
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">subtag</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">slice</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">is_separator</span>(<span class="ident">slice</span>, <span class="number">0</span>) {
+            <span class="comment">// This returns (0, 0) which returns Some(b&quot;&quot;) for slices like `&quot;-en&quot;` or `&quot;-&quot;`</span>
+            (<span class="number">0</span>, <span class="number">0</span>)
+        } <span class="kw">else</span> {
+            <span class="ident">get_current_subtag</span>(<span class="ident">slice</span>, <span class="number">0</span>)
+        };
+        <span class="self">Self</span> {
             <span class="ident">slice</span>,
             <span class="ident">done</span>: <span class="bool-val">false</span>,
-            <span class="ident">subtag</span>: <span class="ident">get_current_subtag</span>(<span class="ident">slice</span>, <span class="number">0</span>),
-        })
+            <span class="ident">subtag</span>,
+        }
     }
 
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">next_manual</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">usize</span>)<span class="op">&gt;</span>) {
@@ -353,7 +365,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">subtag_iterator_peek_test</span>() {
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;de_at-u-ca-foobar&quot;</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
 
         <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">peek</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;de&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">peek</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;de&quot;</span>));
@@ -367,35 +379,43 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">subtag_iterator_test</span>() {
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
-        <span class="macro">assert!</span>(<span class="ident">si</span>.<span class="ident">is_err</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;-&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
-        <span class="macro">assert!</span>(<span class="ident">si</span>.<span class="ident">is_err</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;-en&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
-        <span class="macro">assert!</span>(<span class="ident">si</span>.<span class="ident">is_err</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;en&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">map</span>(<span class="ident">slice_to_str</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(), <span class="macro">vec!</span>[<span class="string">&quot;en&quot;</span>,]);
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;en-&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">map</span>(<span class="ident">slice_to_str</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(), <span class="macro">vec!</span>[<span class="string">&quot;en&quot;</span>, <span class="string">&quot;&quot;</span>,]);
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;--&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
-        <span class="macro">assert!</span>(<span class="ident">si</span>.<span class="ident">is_err</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;-en-&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
-        <span class="macro">assert!</span>(<span class="ident">si</span>.<span class="ident">is_err</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;en&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="ident">slice_to_str</span>), <span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">si</span>.<span class="ident">next</span>(), <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="string">&quot;de_at-u-ca-foobar&quot;</span>;
-        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::try_new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">si</span> <span class="op">=</span> <span class="ident">SubtagIterator::new</span>(<span class="ident">slice</span>.<span class="ident">as_bytes</span>());
         <span class="macro">assert_eq!</span>(
             <span class="ident">si</span>.<span class="ident">map</span>(<span class="ident">slice_to_str</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
             <span class="macro">vec!</span>[<span class="string">&quot;de&quot;</span>, <span class="string">&quot;at&quot;</span>, <span class="string">&quot;u&quot;</span>, <span class="string">&quot;ca&quot;</span>, <span class="string">&quot;foobar&quot;</span>,]

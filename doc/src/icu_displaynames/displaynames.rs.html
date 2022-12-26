@@ -79,6 +79,15 @@
 <span id="74">74</span>
 <span id="75">75</span>
 <span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of ICU4X. For terms of use, please see the file</span>
 <span class="comment">// called LICENSE at the top level of the ICU4X source tree</span>
 <span class="comment">// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).</span>
@@ -90,7 +99,6 @@
 <span class="kw">use</span> <span class="ident">icu_provider::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">icu_provider</span>::{<span class="ident">DataError</span>, <span class="ident">DataPayload</span>};
 <span class="kw">use</span> <span class="ident">tinystr::TinyAsciiStr</span>;
-<span class="kw">use</span> <span class="ident">tinystr::TinyStrError</span>;
 
 <span class="doccomment">/// Lookup of the terrritory display names by region code.</span>
 <span class="doccomment">///</span>
@@ -111,7 +119,7 @@
 <span class="doccomment">/// .expect(&quot;Data should load successfully&quot;);</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let region_code = &quot;AE&quot;;</span>
-<span class="doccomment">/// assert_eq!(display_name.of(&amp;region_code), Ok(&quot;United Arab Emirates&quot;));</span>
+<span class="doccomment">/// assert_eq!(display_name.of(&amp;region_code), Some(&quot;United Arab Emirates&quot;));</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayNames</span> {
     <span class="ident">options</span>: <span class="ident">DisplayNamesOptions</span>,
@@ -139,19 +147,29 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">options</span>, <span class="ident">data</span> })
     }
 
+    <span class="macro">icu_provider::gen_any_buffer_constructors!</span>(
+        <span class="ident">locale</span>: <span class="ident">include</span>,
+        <span class="ident">options</span>: <span class="ident">DisplayNamesOptions</span>,
+        <span class="ident">error</span>: <span class="ident">DataError</span>,
+        <span class="ident">functions</span>: [
+            <span class="ident"><span class="self">Self</span>::try_new_region_unstable</span>,
+            <span class="ident">try_new_region_with_any_provider</span>,
+            <span class="ident">try_new_region_with_buffer_provider</span>
+        ]
+    );
+
     <span class="doccomment">/// Returns the display name of the region for a given string.</span>
     <span class="doccomment">/// This function is locale-sensitive.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">region_code</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">TinyStrError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">region_code</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="op">&lt;</span><span class="ident">TinyAsciiStr</span><span class="op">&lt;</span><span class="number">3</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from_str</span>(<span class="ident">region_code</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">key</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">get</span>();
-                <span class="kw">let</span> <span class="ident">display_name_result</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">style</span> {
+                <span class="kw">match</span> <span class="self">self</span>.<span class="ident">options</span>.<span class="ident">style</span> {
                     <span class="ident">Style::Short</span> =&gt; <span class="ident">data</span>.<span class="ident">short_names</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>),
                     <span class="kw">_</span> =&gt; <span class="ident">data</span>.<span class="ident">names</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>),
-                };
-                <span class="prelude-val">Ok</span>(<span class="ident">display_name_result</span>.<span class="ident">unwrap</span>())
+                }
             }
-            <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
 }

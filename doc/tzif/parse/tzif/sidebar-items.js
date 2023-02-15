@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["tzif","Parses a `TZif` binary file according to the following specification: https://datatracker.ietf.org/doc/html/rfc8536"]]});

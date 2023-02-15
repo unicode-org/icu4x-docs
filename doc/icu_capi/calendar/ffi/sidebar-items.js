@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XAnyCalendarKind","The various calendar types currently supported by [`ICU4XCalendar`]"]],"struct":[["ICU4XCalendar",""]]});

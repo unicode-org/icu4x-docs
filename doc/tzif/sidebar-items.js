@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["parse_posix_tz_string","Parses a POSIX time-zone string from the given bytes."],["parse_tzif_file","Parses a `TZif` file at the provided `path`."]],"mod":[["data","The parsed data representations."],["error","Error types an implementations."],["parse","The parser implementations."]]});

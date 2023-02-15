@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["EmptyDataProvider","A data provider that always returns an error."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ICU4XScriptExtensionsSet","An object that represents the Script_Extensions property for a single character"],["ICU4XScriptWithExtensions","An ICU4X ScriptWithExtensions map object, capable of holding a map of codepoints to scriptextensions values"],["ICU4XScriptWithExtensionsBorrowed","A slightly faster ICU4XScriptWithExtensions object"]]});

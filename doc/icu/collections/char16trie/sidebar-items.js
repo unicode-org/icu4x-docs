@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["TrieResult","An enum representing the return value from a lookup in [`Char16Trie`]."]],"struct":[["Char16Trie","This struct represents a de-serialized Char16Trie that was exported from ICU binary data."],["Char16TrieIterator","This struct represents an iterator over a [`Char16Trie`]."]]});

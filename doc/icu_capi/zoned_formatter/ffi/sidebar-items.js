@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ICU4XGregorianZonedDateTimeFormatter","An object capable of formatting a date time with time zone to a string."],["ICU4XZonedDateTimeFormatter","An object capable of formatting a date time with time zone to a string."]]});

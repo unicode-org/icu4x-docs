@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["export","Utilities for dumping data to an ICU4X filesystem tree."]],"struct":[["FsDataProvider","A data provider that reads ICU4X data from a filesystem directory."]]});

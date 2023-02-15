@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Store","Trait to enable pluggable backends for LiteMap."],["StoreConstEmpty","Trait to enable const construction of empty store."],["StoreFromIterator","A store that can be built from a tuple iterator."],["StoreIterable","Iterator methods for the LiteMap store."],["StoreIterableMut",""],["StoreMut",""]]});

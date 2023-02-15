@@ -1,1 +1,0 @@
-initSidebarItems({"derive":[["Bake","This custom derive auto-implements the `Bake` trait on any given type that has public fields that also implement `Bake`."]]});

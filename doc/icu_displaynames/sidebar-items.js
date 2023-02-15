@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["displaynames","This module contains types and implementations for the Displaynames component."],["options","Options for `DisplayNames`."],["provider","Data provider struct definitions for this ICU4X component."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"macro":[["main_setup",""],["static_setup",""]]});

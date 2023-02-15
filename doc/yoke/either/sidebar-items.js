@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["EitherCart","A cart that can be one type or the other. Enables ergonomic polymorphic carts."]]});

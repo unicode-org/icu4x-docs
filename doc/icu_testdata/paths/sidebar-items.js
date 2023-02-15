@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["cldr_json_root","Returns the absolute path to the CLDR JSON root directory."],["coll_toml_root","Returns the absolute path to the collation tailoring TOML root directory."],["data_root","Returns the absolute path to the top-level data directory."],["icuexport_toml_root","Returns the absolute path to the icuexport TOML root directory."]]});

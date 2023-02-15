@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["BidiClassAdapter","An adapter to convert from icu4x `BidiClass` to `unicode_bidi::BidiClass`."]]});

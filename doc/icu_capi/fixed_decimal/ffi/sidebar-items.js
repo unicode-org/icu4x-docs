@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XFixedDecimalSign","The sign of a FixedDecimal, as shown in formatting."],["ICU4XFixedDecimalSignDisplay","ECMA-402 compatible sign display preference."]],"struct":[["ICU4XFixedDecimal",""]]});

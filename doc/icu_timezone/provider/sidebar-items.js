@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MetazoneId","Metazone ID in a compact format"],["MetazonePeriodV1","An ICU4X mapping to the metazones at a given period. See CLDR-JSON metaZones.json for more context."],["MetazonePeriodV1Marker","Marker type for [`MetazonePeriodV1`]: “time_zone/metazone_period@1”"],["TimeZoneBcp47Id","TimeZone ID in BCP47 format"]]});

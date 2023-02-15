@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["check_store","Tests that a litemap that uses the given store as backend has behavior consistent with the reference impl."],["check_store_full","Similar to [`check_store`] function, but also checks the validitiy of [`StoreIterableMut`] trait."]]});

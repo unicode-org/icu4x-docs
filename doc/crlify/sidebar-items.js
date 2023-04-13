@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["BufWriterWithLineEndingFix","A small helper class to convert LF to CRLF on Windows. Workaround for https://github.com/serde-rs/json/issues/535"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["CodePointInversionListError","Custom Errors for [`CodePointInversionList`]."],["Error","Custom Errors for [`CodePointInversionList`]."]],"struct":[["CodePointInversionList","A membership wrapper for [`CodePointInversionList`]."],["CodePointInversionListBuilder","A builder for [`CodePointInversionList`]."]]});

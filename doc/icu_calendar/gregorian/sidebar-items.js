@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Gregorian","The Gregorian Calendar"],["GregorianDateInner","The inner date type used for representing [`Date`]s of [`Gregorian`]. See [`Date`] and [`Gregorian`] for more details."]]});

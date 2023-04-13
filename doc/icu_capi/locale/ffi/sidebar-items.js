@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ICU4XLocale","An ICU4X Locale, capable of representing strings like `\"en-US\"`."]]});

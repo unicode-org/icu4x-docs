@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["CompactDecimalError","A list of error outcomes for various operations in the `icu_compactdecimal` crate."]],"mod":[["provider","Data provider struct definitions for this ICU4X component."]],"struct":[["CompactDecimalFormatter","A formatter that renders locale-sensitive compact numbers."]]});

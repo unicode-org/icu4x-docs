@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["export","Data generation for `BlobDataProvider` data. See the `icu_datagen` crate."]],"struct":[["BlobDataProvider","A data provider that reads from serialized blobs of data."]]});

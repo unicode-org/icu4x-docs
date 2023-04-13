@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XPluralCategory","FFI version of `PluralCategory`."]],"struct":[["ICU4XPluralCategories","FFI version of `PluralRules::categories()` data."],["ICU4XPluralOperands","FFI version of `PluralOperands`."],["ICU4XPluralRules","FFI version of `PluralRules`."]]});

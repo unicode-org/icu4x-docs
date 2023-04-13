@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["icu_properties"] = [{"text":"impl&lt;'a&gt; BidiDataSource for <a class=\"struct\" href=\"icu_properties/bidi/struct.BidiClassAdapter.html\" title=\"struct icu_properties::bidi::BidiClassAdapter\">BidiClassAdapter</a>&lt;'a&gt;","synthetic":false,"types":["icu_properties::bidi::BidiClassAdapter"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

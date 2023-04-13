@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XWeekRelativeUnit",""]],"struct":[["ICU4XWeekCalculator","A Week calculator, useful to be passed in to `week_of_year()` on Date and DateTime types"],["ICU4XWeekOf",""]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XBidiDirection",""]],"struct":[["ICU4XBidi","An ICU4X Bidi object, containing loaded bidi data"],["ICU4XBidiInfo","An object containing bidi information for a given string, produced by `for_text()` on `ICU4XBidi`"],["ICU4XBidiParagraph","Bidi information for a single processed paragraph"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XIsoTimeZoneFormat",""],["ICU4XIsoTimeZoneMinuteDisplay",""],["ICU4XIsoTimeZoneSecondDisplay",""]],"struct":[["ICU4XIsoTimeZoneOptions",""],["ICU4XTimeZoneFormatter","An ICU4X TimeZoneFormatter object capable of formatting an [`ICU4XCustomTimeZone`] type (and others) as a string"]]});

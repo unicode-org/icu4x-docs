@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ICU4XLineBreakRule",""],["ICU4XWordBreakRule",""]],"struct":[["ICU4XLineBreakIteratorLatin1",""],["ICU4XLineBreakIteratorUtf16",""],["ICU4XLineBreakIteratorUtf8",""],["ICU4XLineBreakOptionsV1",""],["ICU4XLineSegmenter","An ICU4X line-break segmenter, capable of finding breakpoints in strings."]]});

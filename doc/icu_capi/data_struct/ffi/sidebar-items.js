@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ICU4XDataStruct","A generic data struct to be used by ICU4X"]]});

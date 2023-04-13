@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["DeserializingBufferProvider","A [`BufferProvider`] that deserializes its data using Serde."]],"trait":[["AsDeserializingBufferProvider","Blanket-implemented trait adding the [`Self::as_deserializing()`] function."]]});

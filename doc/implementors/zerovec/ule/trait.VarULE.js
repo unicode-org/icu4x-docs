@@ -1,5 +1,0 @@
-(function() {var implementors = {};
-implementors["icu_compactdecimal"] = [{"text":"impl <a class=\"trait\" href=\"zerovec/ule/trait.VarULE.html\" title=\"trait zerovec::ule::VarULE\">VarULE</a> for <a class=\"struct\" href=\"icu_compactdecimal/provider/struct.PatternULE.html\" title=\"struct icu_compactdecimal::provider::PatternULE\">PatternULE</a>","synthetic":false,"types":["icu_compactdecimal::provider::PatternULE"]}];
-implementors["icu_locid_transform"] = [{"text":"impl <a class=\"trait\" href=\"zerovec/ule/trait.VarULE.html\" title=\"trait zerovec::ule::VarULE\">VarULE</a> for <a class=\"struct\" href=\"icu_locid_transform/provider/struct.StrStrPairVarULE.html\" title=\"struct icu_locid_transform::provider::StrStrPairVarULE\">StrStrPairVarULE</a>","synthetic":false,"types":["icu_locid_transform::provider::StrStrPairVarULE"]}];
-implementors["zerovec"] = [];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

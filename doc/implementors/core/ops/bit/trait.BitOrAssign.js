@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["writeable"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.61.0/core/ops/bit/trait.BitOrAssign.html\" title=\"trait core::ops::bit::BitOrAssign\">BitOrAssign</a>&lt;<a class=\"struct\" href=\"writeable/struct.LengthHint.html\" title=\"struct writeable::LengthHint\">LengthHint</a>&gt; for <a class=\"struct\" href=\"writeable/struct.LengthHint.html\" title=\"struct writeable::LengthHint\">LengthHint</a>","synthetic":false,"types":["writeable::LengthHint"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

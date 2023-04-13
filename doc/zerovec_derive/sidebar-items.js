@@ -1,1 +1,0 @@
-initSidebarItems({"attr":[["make_ule","Full docs for this proc macro can be found on the `zerovec` crate."],["make_varule","Full docs for this proc macro can be found on the `zerovec` crate."]],"derive":[["ULE","Full docs for this proc macro can be found on the `zerovec` crate."],["VarULE","Full docs for this proc macro can be found on the `zerovec` crate."]]});

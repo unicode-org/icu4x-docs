@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["calendar","Data structs for calendar-specific symbols and patterns."],["time_zones","Data provider structs for time zones."]]});

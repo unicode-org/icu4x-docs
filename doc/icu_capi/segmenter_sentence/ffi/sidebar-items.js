@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ICU4XSentenceBreakIteratorLatin1",""],["ICU4XSentenceBreakIteratorUtf16",""],["ICU4XSentenceBreakIteratorUtf8",""],["ICU4XSentenceSegmenter","An ICU4X sentence-break segmenter, capable of finding sentence breakpoints in strings."]]});

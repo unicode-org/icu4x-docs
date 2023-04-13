@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["CodePointTrieBuilderData","Wrapper over the data to be encoded into a CodePointTrie."]],"struct":[["CodePointTrieBuilder","Settings for building a CodePointTrie."]]});

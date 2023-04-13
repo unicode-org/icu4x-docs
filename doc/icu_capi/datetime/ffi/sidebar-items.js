@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["ICU4XDateTime","An ICU4X DateTime object capable of containing a date and time for any calendar."],["ICU4XIsoDateTime","An ICU4X DateTime object capable of containing a ISO-8601 date and time."]]});

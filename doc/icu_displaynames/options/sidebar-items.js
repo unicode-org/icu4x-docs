@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Fallback","An enum for fallback return when the system does not have the requested display name."],["LanguageDisplay","An enum for the language display kind."],["Style","An enum for formatting style."]],"struct":[["DisplayNamesOptions","A bag of options defining how region codes will be translated by `DisplayNames`."]]});

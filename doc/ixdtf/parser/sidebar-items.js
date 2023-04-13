@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ParseError",""]],"struct":[["DateTimeParser","[`DateTimeParser`] is the parser to parse IXDTF bytes."],["ParsedDateTime","[`ParsedDateTime`] is the parsed result from the DateTimeParser."]]});

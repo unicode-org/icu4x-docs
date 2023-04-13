@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["collect_public_types",""],["main",""]],"struct":[["IGNORED_ASSOCIATED_ITEMS",""],["IGNORED_PATHS",""],["IGNORED_SUBSTRINGS",""],["IGNORED_TRAITS",""],["RustLinkInfo","RustLink but without display information"]]});

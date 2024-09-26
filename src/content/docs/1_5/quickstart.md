@@ -156,7 +156,7 @@ The way `ICU4X` handles data is one of its novelties, aimed at making the data m
 
 `ICU4X` by default contains data for a a wide range of CLDR locales[^1], meaning that for most languages, the constructors can be considered infallible and you can `expect` or `unwrap` them, as we did above.
 
-However, shipping the library with all locales will have a size impact on your binary. It also requires you to update your binary whenever CLDR data changes, which happens twice a year. To learn how to solve these problems, see our data management tutorial.
+However, shipping the library with all locales will have a size impact on your binary. It also requires you to update your binary whenever CLDR data changes, which happens twice a year. To learn how to solve these problems, see our [data management](../tutorials/data_management) tutorial.
 
 [^1]: All locales with coverage level `basic`, `moderate`, or `modern` in [`CLDR`](https://github.com/unicode-org/cldr-json/blob/main/cldr-json/cldr-core/coverageLevels.json)
 
@@ -165,3 +165,7 @@ However, shipping the library with all locales will have a size impact on your b
 This concludes this introduction tutorial. With the help of `DateTimeFormat`, `Locale` and `DataProvider` we formatted a date to Japanese, but that's just the start. 
 
 Internationalization is a broad domain and there are many more components in `ICU4X`.
+
+Next, learn how to [generate optimized data for your binary](../tutorials/data_management), [configure your Cargo.toml file](../tutorials/rust), or continue exploring by reading [the docs](https://docs.rs/icu/latest/).
+
+

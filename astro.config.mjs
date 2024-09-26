@@ -11,15 +11,24 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'Start Here',
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						'overview'
 					],
 				},
 				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
+					label: 'Version 1.5',
+					autogenerate: { directory: '1.5'},
+				},
+				{
+					label: 'Previous Versions',
+					collapsed: true,
+					items: [
+						{
+							label: 'Version 1.2',
+							autogenerate: { directory: '1.2'},
+						}
+					],
 				},
 			],
 		}),

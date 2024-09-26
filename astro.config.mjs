@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	redirects: {
-		"/current/[...slug]": "/15/[...slug]"
+		"/current/quickstart": "/1_5/quickstart"
 	},
 	integrations: [
 		starlight({
@@ -21,7 +21,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Version 1.5',
-					autogenerate: { directory: '1.5'},
+					autogenerate: { directory: '1_5'},
 				},
 				{
 					label: 'Previous Versions',
@@ -29,7 +29,7 @@ export default defineConfig({
 					items: [
 						{
 							label: 'Version 1.2',
-							autogenerate: { directory: '1.2'},
+							autogenerate: { directory: '1_2'},
 						}
 					],
 				},

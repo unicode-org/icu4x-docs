@@ -3,6 +3,9 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+	redirects: {
+		"/current/[...slug]": "/15/[...slug]"
+	},
 	integrations: [
 		starlight({
 			title: 'ICU4X',

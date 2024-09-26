@@ -6,6 +6,8 @@ export default defineConfig({
 	redirects: {
 		"/current/quickstart": "/1_5/quickstart"
 	},
+	site: 'https://unicode-org.github.io',
+	base: 'icu4x-docs',
 	integrations: [
 		starlight({
 			title: 'ICU4X',

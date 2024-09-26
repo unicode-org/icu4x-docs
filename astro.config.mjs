@@ -5,9 +5,9 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
+			title: 'ICU4X',
 			social: {
-				github: 'https://github.com/withastro/starlight',
+				github: 'https://github.com/unicode-org/icu4x',
 			},
 			sidebar: [
 				{

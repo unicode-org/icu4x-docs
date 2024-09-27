@@ -27,11 +27,12 @@ export default defineConfig({
 				},
 				{
 					label: 'Previous Versions',
-					collapsed: true,
+					collapsed: false,
 					items: [
 						{
 							label: 'Version 1.2',
 							autogenerate: { directory: '1_2'},
+							collapsed: true,
 						}
 					],
 				},

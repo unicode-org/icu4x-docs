@@ -1,5 +1,10 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightUtils from "@lorenzo_lewis/starlight-utils";
+
+// !! UPDATE LATEST VERSION HERE !!
+// format semver with underscores to make it look like a semver would in a URL
+var latest_ver_str = '1_5';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,7 +19,21 @@ export default defineConfig({
 			social: {
 				github: 'https://github.com/unicode-org/icu4x',
 			},
+			plugins: [
+				starlightUtils({
+					navLinks: {
+						leading: { useSidebarLabelled: "leadingNavLinks" },
+					},
+				})
+			],
 			sidebar: [
+				{
+					label: "leadingNavLinks",
+					items: [
+						{ label: "Overview", link: "/overview" },
+						{ label: "Dev Guide", link: "/" + latest_ver_str + "/quickstart" }
+					]
+				},
 				{
 					label: 'Start Here',
 					items: [

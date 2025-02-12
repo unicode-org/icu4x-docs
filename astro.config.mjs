@@ -4,13 +4,11 @@ import starlightUtils from "@lorenzo_lewis/starlight-utils";
 
 // !! UPDATE LATEST VERSION HERE !!
 // format semver with underscores to make it look like a semver would in a URL
-var latest_ver_str = '1_5';
+var latest_semver_str = '1.5';
+var latest_ver_display_str = '1_5';
 
 // https://astro.build/config
 export default defineConfig({
-	redirects: {
-		"/current/quickstart": "/1_5/quickstart"
-	},
 	site: 'https://unicode-org.github.io',
 	base: 'icu4x-docs',
 	integrations: [
@@ -31,7 +29,7 @@ export default defineConfig({
 					label: "leadingNavLinks",
 					items: [
 						{ label: "Overview", link: "/overview" },
-						{ label: "Dev Guide", link: "/" + latest_ver_str + "/quickstart" }
+						{ label: "Dev Guide", link: "/" + latest_ver_display_str + "/quickstart" }
 					]
 				},
 				{
@@ -41,8 +39,8 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Version 1.5',
-					autogenerate: { directory: '1_5'},
+					label: 'Version ' + latest_semver_str,
+					autogenerate: { directory: latest_ver_display_str},
 				},
 				{
 					label: 'Previous Versions',

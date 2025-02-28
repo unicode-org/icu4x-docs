@@ -37,6 +37,27 @@ Images can be added to `src/assets/` and embedded in Markdown with a relative li
 
 Static assets, like favicons, can be placed in the `public/` directory.
 
+## ICU4X Docs Additional Setup
+
+### Installing dependencies for ICU4X customizations
+
+The following commands must be run to install additional plugins, etc. that are needed for ICU4X customizations to the Starlight theme:
+
+1. Install [Starlight Utils](https://starlight-utils.pages.dev/) to enable a top page bar for persistent quick [navigation links](https://starlight-utils.pages.dev/utilities/nav-links/):
+    ```
+    npm i @lorenzo_lewis/starlight-utils
+    ```
+1. Install [Starlight Links Validator](https://starlight-links-validator.vercel.app/) to enable automatic checking of internal links
+    ```
+    npm i starlight-links-validator@0.14.0
+    ```
+
+    Note: using version 0.14.0 gives you a report of which links are broken when running the production build. But later versions like 0.14.2 and 0.14.3 may not.
+
+    Note: You may want/need to run `npm audit fix` to fix dependency problems in the npm installation.
+
+1. Thereafter, production builds (ex: via `npm run build`) will automatically check the validity of internal links.
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:

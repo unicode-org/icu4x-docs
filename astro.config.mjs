@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightUtils from "@lorenzo_lewis/starlight-utils";
+import starlightLinksValidator from 'starlight-links-validator'
+
 
 // !! UPDATE LATEST VERSION HERE !!
 // format semver with underscores to make it look like a semver would in a URL
@@ -22,7 +24,8 @@ export default defineConfig({
 					navLinks: {
 						leading: { useSidebarLabelled: "leadingNavLinks" },
 					},
-				})
+				}),
+				starlightLinksValidator()
 			],
 			sidebar: [
 				{

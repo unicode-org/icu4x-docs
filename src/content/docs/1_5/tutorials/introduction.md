@@ -17,14 +17,14 @@ Installing dependencies is always your first step.
 
 Verify that Rust is installed. If it's not, you can install it in a few seconds from [https://rustup.rs/](https://rustup.rs/).
 
-```console
+```shell
 cargo --version
 # cargo 1.71.1 (7f1d04c00 2023-07-29)
 ```
 
 Create a new Rust binary crate with icu4x as a dependency:
 
-```console
+```shell
 cargo new --bin tutorial
 cd tutorial
 cargo add icu
@@ -63,7 +63,7 @@ Here, we will accept a locale string from the user and parse it into an ICU4X Lo
 
 First, we will use Rust APIs to accept a string from user input on the command line. Then we can parse the input string as an ICU4X `Locale`. Add the following to your `fn main()`:
 
-```rust,no_run
+```rust
 // At the top of the file:
 use icu::locale::Locale;
 
@@ -140,7 +140,7 @@ Now we will use built-in locale data to produce a formatted date.
 
 We would like to format today's date. We will get this from the `time` crate, which you need to add:
 
-```console
+```shell
 $ cargo add time --features local-offset
 ```
 

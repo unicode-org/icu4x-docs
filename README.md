@@ -39,7 +39,7 @@ Static assets, like favicons, can be placed in the `public/` directory.
 
 ## ICU4X Docs Additional Setup
 
-### Installing dependencies for ICU4X customizations
+### Installing integration plugins for ICU4X customizations
 
 The following commands must be run to install additional plugins, etc. that are needed for ICU4X customizations to the Starlight theme:
 
@@ -61,6 +61,35 @@ The following commands must be run to install additional plugins, etc. that are 
     Note: if you configure the plugin to allow relative URLs, its behavior will then change to *ignore* the validation of relative links.
     In this way, it appears that the plugin is opinionated on not fully supporting relative links.
 
+### Install MDX and plugins for AstroJS
+
+To get the AstroJS [component Steps](https://starlight.astro.build/components/steps/) that does nice formatting of step-by-step instructions,
+installation the AstroJS integration for either of its Markdown-extension formats,
+[MDX](https://docs.astro.build/en/guides/integrations-guide/mdx/) or [Markdoc](https://docs.astro.build/en/guides/integrations-guide/markdoc/),
+is required.
+
+Since MDX looks most like Markdown, we will use that.
+
+Both file formats require renaming the file extension from `.md` -- ex: to either `.mdoc` or `.mdx`.
+
+#### Install MDX
+
+To install MDX:
+
+```
+npm install @astrojs/mdx@<appropriate-version>
+```
+
+Judging by the [different versions listed for `@astrojs/mdx` listed on npm](https://www.npmjs.com/package/@astrojs/mdx/v/4.1.0?activeTab=versions),
+and by inspecting the `package.json` for each version,
+the version 3.x series of `@astrojs/mdx` is compatible with versions of Astro in the 4.x range,
+whereas the version 4.x series of `@astrojsx/mdx` is compatible only with Astro 5.x and up.
+
+So if you have Astro 4.15.3, then after finding an appropriate corresopnding version, the command would look like:
+
+```
+npm install @astrojs/mdx@3.1.9
+```
 
 ## 🧞 Commands
 

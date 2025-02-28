@@ -32,7 +32,7 @@ export default defineConfig({
 					label: "leadingNavLinks",
 					items: [
 						{ label: "Overview", link: "/overview" },
-						{ label: "User Guide", link: "/" + latest_ver_display_str + "/quickstart" }
+						{ label: "Quickstart", link: "/" + latest_ver_display_str + "/quickstart" }
 					]
 				},
 				{

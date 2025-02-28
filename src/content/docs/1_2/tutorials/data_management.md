@@ -8,7 +8,7 @@ If you're happy shipping your app with the recommended set of locales included i
 
 # 1. Prerequisites
 
-This tutorial assumes you have finished the [introductory tutorial](introduction.md) and continues where that tutorial left off. In particular, you should still have the latest version of code for `myapp`.
+This tutorial assumes you have finished the [introductory tutorial](/icu4x-docs/1_2/tutorials/introduction) and continues where that tutorial left off. In particular, you should still have the latest version of code for `myapp`.
 
 # 2. Generating data
 

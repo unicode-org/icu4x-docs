@@ -52,11 +52,15 @@ The following commands must be run to install additional plugins, etc. that are 
     npm i starlight-links-validator@0.14.0
     ```
 
+    Thereafter, production builds (ex: via `npm run build`) will automatically check the validity of internal links.
+
     Note: using version 0.14.0 gives you a report of which links are broken when running the production build. But later versions like 0.14.2 and 0.14.3 may not.
 
     Note: You may want/need to run `npm audit fix` to fix dependency problems in the npm installation.
 
-1. Thereafter, production builds (ex: via `npm run build`) will automatically check the validity of internal links.
+    Note: if you configure the plugin to allow relative URLs, its behavior will then change to *ignore* the validation of relative links.
+    In this way, it appears that the plugin is opinionated on not fully supporting relative links.
+
 
 ## 🧞 Commands
 

@@ -1,5 +1,6 @@
 ---
 title: Overview
+prev: false
 ---
 
 These principles are not cast in stone, but are strong guidelines for developers.

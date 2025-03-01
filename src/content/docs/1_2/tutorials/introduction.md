@@ -1,8 +1,6 @@
 ---
 title: "Introduction"
 description: "Building an Interactive Date Picker with ICU4X"
-sidebar:
-    order: 10200320
 ---
 
 `ICU4X` is an implementation of [Internationalization Components of Unicode](http://site.icu-project.org/) (ICU) intended to be modular, performant and flexible.

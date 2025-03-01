@@ -1,5 +1,5 @@
 ---
-title: Setting up your Cargo.toml file for ICU4X
+title: Configuring Cargo.toml
 ---
 
 ICU4X makes heavy use of small crates and Cargo features in order to be highly modular. This tutorial is intended to help you set up a Cargo.toml file to download what you need for ICU4X.

@@ -1,5 +1,5 @@
 ---
-title: Data management in ICU4X
+title: Data management
 ---
 
 This tutorial introduces data providers as well as the `icu4x-datagen` tool.

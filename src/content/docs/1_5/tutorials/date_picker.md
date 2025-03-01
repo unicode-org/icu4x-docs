@@ -1,8 +1,6 @@
 ---
-title: "Introduction"
+title: "Interactive Date Picker"
 description: "Building an Interactive Date Picker with ICU4X"
-sidebar:
-    order: 10500320
 ---
 
 In this tutorial, you will learn how to build an end-to-end application using ICU4X to format a date and time with some default locales and additional locales loaded dynamically.

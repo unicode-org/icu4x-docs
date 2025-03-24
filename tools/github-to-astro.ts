@@ -1,5 +1,4 @@
-import fs from 'fs';
-import { Transform, pipeline } from 'node:stream';
+import fs from 'node:fs';
 import { parseArgs } from "node:util";
 
 const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: string}> = [
@@ -7,29 +6,32 @@ const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: strin
   {pattern: /```rust.*/, replacement: "```rust"},
 ];
 
-const icu4xGfmToAstroMdTransform = new Transform({
-  decodeStrings: false,
-  transform(chunk, encoding, callback) {
-    console.log(chunk);
-    let replacementChunk = chunk;
-    for (let {pattern, replacement} of ICU4X_MD_REPLACEMENTS) {
-      replacementChunk = replacementChunk.replace(pattern, replacement);
-    }
-    callback(null, replacementChunk);
-  },
-});
+function icu4xGfmToAstroMd(chunk: string, inFilePath: string) {
+  let replacementChunk = chunk;
+  for (let {pattern, replacement} of ICU4X_MD_REPLACEMENTS) {
+    replacementChunk = replacementChunk.replace(pattern, replacement);
+  }
+  return replacementChunk;
+}
 
-async function readFile(inFilePath: string, outFilePath: string) {
-  const readStream = fs.createReadStream(inFilePath, { encoding: 'utf8' });
-  const writeStream = fs.createWriteStream(outFilePath);
+function readConvertWrite(inFilePath: string, outFilePath: string) {
+  let data: string = "";
 
-  pipeline(readStream, icu4xGfmToAstroMdTransform, writeStream, (err) => {
-    if (err) {
-      console.error('Pipeline failed.', err);
-    } else {
-      console.log('Pipeline succeeded.');
-    }
-  });
+  try {
+    data = fs.readFileSync(inFilePath, { encoding: 'utf8' });
+    console.log(data);
+  } catch (err) {
+    console.error('Could not read file: ' + inFilePath, err);
+  }
+
+  const transformedData = icu4xGfmToAstroMd(data, inFilePath);
+
+  try {
+    fs.writeFileSync(outFilePath, transformedData);
+    // file written successfully
+  } catch (err) {
+    console.error('Could not write to file: ' + outFilePath, err);
+  }
   return;
 }
 
@@ -82,7 +84,7 @@ try {
   const inputFileName: string = values["inFile"];
   var outputFileName = values["outFile"];
 
-  await readFile(inputFileName, outputFileName);
+  await readConvertWrite(inputFileName, outputFileName);
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(`Error: ${error.message}`);

@@ -2,6 +2,19 @@ import fs from 'node:fs';
 import { parseArgs } from "node:util";
 import path from 'node:path';
 
+class Context {
+  versionStr: string;
+  sitePrefix: string;
+
+  constructor(argsMap: {
+    versionStr: string;
+    sitePrefix: string
+  }) {
+    this.versionStr = argsMap["versionStr"];
+    this.sitePrefix = argsMap["sitePrefix"];
+  }
+}
+
 // site prefix, as used by static site generator tools.
 // if this were hosted on Github pages,
 const URI_SITE_PREFIX = "/icu4x-docs";
@@ -23,7 +36,7 @@ const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: strin
   {pattern: /^# .*/g, replacement: ""},
 ];
 
-function transformMdBody(body: string, ctx: {versionStr: string, sitePrefix: string}) {
+function transformMdBody(body: string, ctx: Context) {
   let replacementBody = body;
   for (let {pattern, replacement} of ICU4X_MD_REPLACEMENTS) {
     replacementBody = replacementBody.replace(pattern, replacement);
@@ -56,7 +69,7 @@ function getUriVersionStr(version: string) {
   return version.replace(/\./g, "_");
 }
 
-function readConvertWrite(inFilePath: string, outFilePath: string, ctx: {versionStr: string, sitePrefix: string}) {
+function readConvertWriteFile(inFilePath: string, outFilePath: string, ctx: Context) {
   let data: string = "";
 
   try {
@@ -139,7 +152,9 @@ try {
   
   const versionStr = getUriVersionStr(version);
 
-  await readConvertWrite(inputFileName, outputFileName, {versionStr: versionStr, sitePrefix: sitePrefix});
+  const context = new Context({versionStr, sitePrefix});
+
+  await readConvertWriteFile(inputFileName, outputFileName, context);
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(`Error: ${error.message}`);

@@ -3,7 +3,6 @@ import { parseArgs } from "node:util";
 import path from 'node:path';
 import { dir } from 'node:console';
 import { get } from 'node:https';
-import { Octokit, App } from "octokit";
 import { release } from 'node:os';
 
 // Hard code the tutorial names that are not version specific,
@@ -19,18 +18,15 @@ const ICU4X_NON_VERSION_SPECIFIC_FILES = [
 class Context {
   icu4xVersion: string;
   icu4xVersionStr: string;
-  icu4xVersionReleaseCommitSha: string;
   sitePrefix: string;
 
   constructor(argsMap: {
     icu4xVersion: string;
     icu4xVersionStr: string;
-    icu4xVersionReleaseCommitSha: string;
     sitePrefix: string
   }) {
     this.icu4xVersion = argsMap["icu4xVersion"];
     this.icu4xVersionStr = argsMap["icu4xVersionStr"];
-    this.icu4xVersionReleaseCommitSha = argsMap["icu4xVersionReleaseCommitSha"];
     this.sitePrefix = argsMap["sitePrefix"];
   }
 }
@@ -64,30 +60,6 @@ const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: strin
   {pattern: /^(💡 )?Note: ([\s\S]*?)(?:\n\n)/gm, replacement: ":::note\n$2\n:::\n\n"}
 ];
 
-async function getIcu4xVersionCommitSha(icu4xVersion: string) {
-
-  // Octokit.js
-  // https://github.com/octokit/core.js#readme
-  const octokit = new Octokit({})
-
-  const tag = "icu@" + icu4xVersion;
-  const releaseResp = await octokit.request('GET /repos/unicode-org/icu4x/releases/tags/' + tag, {
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  const release = releaseResp.data;
-  let getCommitResp = await octokit.request('GET /repos/unicode-org/icu4x/commits/' + release.tag_name, {
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  const commit = getCommitResp.data;
-  const commitSha = commit.sha;
-
-  return commitSha;
-}
-
 /**
  * Convert the Github Markdown file contents string into the string of the AstroJS Markdown file body,
  * where "body" is the AstroJS Markdown content that comes after the front matter.
@@ -106,17 +78,17 @@ function transformMdBody(body: string, ctx: Context) {
 
   // convert Markdown links that work in Github (relative paths) into full URIs
   // that Astro JS needs, including the ICU4X prefix
-  let { icu4xVersionStr, sitePrefix } = ctx;
+  let { icu4xVersion, icu4xVersionStr, sitePrefix } = ctx;
 
   // replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
 
   // in a relative link to a Markdown file, get rid of the trailing `.md`
   replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
+  
   // in a relative link to any other file, format the URL to the Github blob
-  const { icu4xVersionReleaseCommitSha } = ctx;
   replacementBody = replacementBody.replace(
     /\]\((?!http)([^\)]*)(?<!.md)\)/g,
-    "](" + "https://github.com/unicode-org/icu4x/blob/" + icu4xVersionReleaseCommitSha + "/tutorials/$1)"
+    "](" + "https://github.com/unicode-org/icu4x/tree/icu%40" + icu4xVersion + "/tutorials/$1)"
   );
 
   return replacementBody;
@@ -264,9 +236,8 @@ try {
   const sitePrefix = values["sitePrefix"];
   
   const icu4xVersionStr = getUriVersionStr(icu4xVersion);
-  const icu4xVersionReleaseCommitSha = await getIcu4xVersionCommitSha(icu4xVersion);
 
-  const context = new Context({icu4xVersion, icu4xVersionStr, icu4xVersionReleaseCommitSha, sitePrefix});
+  const context = new Context({icu4xVersion, icu4xVersionStr, sitePrefix});
 
   await convertDirFiles(inputDirPath, outputDirPath, context);
 

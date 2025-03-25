@@ -2,6 +2,9 @@ import fs from 'node:fs';
 import { parseArgs } from "node:util";
 import path from 'node:path';
 import { dir } from 'node:console';
+import { get } from 'node:https';
+import { Octokit, App } from "octokit";
+import { release } from 'node:os';
 
 // Hard code the tutorial names that are not version specific,
 // So that they are not being transformed by this script
@@ -75,8 +78,10 @@ function transformMdBody(body: string, ctx: Context) {
   // that Astro JS needs, including the ICU4X prefix
   let { versionStr, sitePrefix } = ctx;
   replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\)/g, "$1(" + sitePrefix + "/" + versionStr + "/$2)");
-  // get rid of the trailing `.md` in a Markdown link
+  // in a relative link to a Markdown file, get rid of the trailing `.md`
   replacementBody = replacementBody.replace(/(\[.*\])\((.*)\.md\)/g, "$1(" + sitePrefix + "/" + versionStr + "/$2)");
+  // in a relative link to any other file, format the URL to the Github blob
+  replacementBody = replacementBody.replace(/(\[.*\])\((.*)(?<!.md)\)/g, "$1(" + "https://github.com/unicode-org/icu4x/blob/main/tutorials/$2)");
 
   return replacementBody;
 }
@@ -227,6 +232,30 @@ try {
   const context = new Context({versionStr, sitePrefix});
 
   await convertDirFiles(inputDirPath, outputDirPath, context);
+
+  // Octokit.js
+  // https://github.com/octokit/core.js#readme
+  const octokit = new Octokit({})
+
+  const tag = "icu@" + "1.5.0";
+  const release = await octokit.request('GET /repos/unicode-org/icu4x/releases/tags/' + tag, {
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+
+  // for (let release of listReleasesResp.data) {
+    console.log("name = " + release.name);
+    console.log("tag_name = " + release.tag_name);
+
+    let getCommitResp = await octokit.request('GET /repos/unicode-org/icu4x/commits/' + release.tag_name, {
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    })
+    console.log(getCommitResp);
+  // }
+
 
   console.log("Markdown conversion finished successfully");
 } catch (error: unknown) {

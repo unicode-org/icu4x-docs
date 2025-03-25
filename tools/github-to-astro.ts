@@ -50,6 +50,9 @@ const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: strin
   // remove H1 titles from MD pages in Github (because Front Matter is the way to 
   // specify page titles in most static site generator tools including Astro)
   {pattern: /^# .*/g, replacement: ""},
+
+  // convert asides/notes from an ICU4X convention into the Astro syntax for Asides
+  {pattern: /^(💡 )?Note: ([\s\S]*?)(?:\n\n)/gm, replacement: ":::note\n$2\n:::\n\n"}
 ];
 
 /**

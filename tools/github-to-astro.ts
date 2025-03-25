@@ -17,14 +17,14 @@ const ICU4X_NON_VERSION_SPECIFIC_FILES = [
  * class to represent the values passed from the CLI through to the helper methods
  */
 class Context {
-  versionStr: string;
+  icu4xVersionStr: string;
   sitePrefix: string;
 
   constructor(argsMap: {
-    versionStr: string;
+    icu4xVersionStr: string;
     sitePrefix: string
   }) {
-    this.versionStr = argsMap["versionStr"];
+    this.icu4xVersionStr = argsMap["icu4xVersionStr"];
     this.sitePrefix = argsMap["sitePrefix"];
   }
 }
@@ -58,6 +58,32 @@ const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: strin
   {pattern: /^(💡 )?Note: ([\s\S]*?)(?:\n\n)/gm, replacement: ":::note\n$2\n:::\n\n"}
 ];
 
+async function getIcu4xVersionCommitSha(ctx: Context) {
+
+  // Octokit.js
+  // https://github.com/octokit/core.js#readme
+  const octokit = new Octokit({})
+
+  const { icu4xVersionStr } = ctx;
+  const tag = "icu@" + icu4xVersionStr;
+  const releaseResp = await octokit.request('GET /repos/unicode-org/icu4x/releases/tags/' + tag, {
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+  const release = releaseResp.data;
+  console.log(release);
+  let getCommitResp = await octokit.request('GET /repos/unicode-org/icu4x/commits/' + release.tag_name, {
+    headers: {
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  })
+  const commit = getCommitResp.data;
+  const commitSha = commit.sha;
+
+  return commitSha;
+}
+
 /**
  * Convert the Github Markdown file contents string into the string of the AstroJS Markdown file body,
  * where "body" is the AstroJS Markdown content that comes after the front matter.
@@ -76,10 +102,10 @@ function transformMdBody(body: string, ctx: Context) {
 
   // convert Markdown links that work in Github (relative paths) into full URIs
   // that Astro JS needs, including the ICU4X prefix
-  let { versionStr, sitePrefix } = ctx;
-  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\)/g, "$1(" + sitePrefix + "/" + versionStr + "/$2)");
+  let { icu4xVersionStr, sitePrefix } = ctx;
+  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
   // in a relative link to a Markdown file, get rid of the trailing `.md`
-  replacementBody = replacementBody.replace(/(\[.*\])\((.*)\.md\)/g, "$1(" + sitePrefix + "/" + versionStr + "/$2)");
+  replacementBody = replacementBody.replace(/(\[.*\])\((.*)\.md\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
   // in a relative link to any other file, format the URL to the Github blob
   replacementBody = replacementBody.replace(/(\[.*\])\((.*)(?<!.md)\)/g, "$1(" + "https://github.com/unicode-org/icu4x/blob/main/tutorials/$2)");
 
@@ -182,7 +208,7 @@ function parseCLIArgs() {
         type: "string",
         short: "o",
       },
-      icu4xTag: {
+      icu4xVersion: {
         type: "string",
       },
       // site prefix, as used by static site generator tools.
@@ -202,7 +228,7 @@ function parseCLIArgs() {
       values: {
         inDir: values["inDir"] ?? (() => {throw new Error("Need inDir")})(),
         outDir: values["outDir"] ?? (() => {throw new Error("Need outDir")})(),
-        version: values["icu4xTag"] ?? (() => {throw new Error("Need icu4xTag")})(),
+        icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
         sitePrefix: values["sitePrefix"] ?? (() => {throw new Error("Need sitePrefix")})(),
         astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
       }
@@ -224,42 +250,14 @@ try {
 
   const inputDirPath: string = values["inDir"];
   const outputDirPath = values["outDir"];
-  const version = values["version"];
+  const icu4xVersion = values["icu4xVersion"];
   const sitePrefix = values["sitePrefix"];
   
-  const versionStr = getUriVersionStr(version);
+  const icu4xVersionStr = getUriVersionStr(icu4xVersion);
 
-  const context = new Context({versionStr, sitePrefix});
+  const context = new Context({icu4xVersionStr, sitePrefix});
 
   await convertDirFiles(inputDirPath, outputDirPath, context);
-
-  // Octokit.js
-  // https://github.com/octokit/core.js#readme
-  const octokit = new Octokit({})
-
-  const tag = "icu@" + "1.5.0";
-  const releaseResp = await octokit.request('GET /repos/unicode-org/icu4x/releases/tags/' + tag, {
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28'
-    }
-  })
-  const release = releaseResp.data;
-  console.log(release);
-
-  // for (let release of listReleasesResp.data) {
-    console.log("name = " + release.name);
-    console.log("tag_name = " + release.tag_name);
-
-    let getCommitResp = await octokit.request('GET /repos/unicode-org/icu4x/commits/' + release.tag_name, {
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28'
-      }
-    })
-    const commit = getCommitResp.data;
-    console.log(commit);
-    console.log("commit hash = " + commit.sha);
-  // }
-
 
   console.log("Markdown conversion finished successfully");
 } catch (error: unknown) {

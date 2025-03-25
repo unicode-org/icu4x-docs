@@ -238,11 +238,13 @@ try {
   const octokit = new Octokit({})
 
   const tag = "icu@" + "1.5.0";
-  const release = await octokit.request('GET /repos/unicode-org/icu4x/releases/tags/' + tag, {
+  const releaseResp = await octokit.request('GET /repos/unicode-org/icu4x/releases/tags/' + tag, {
     headers: {
       'X-GitHub-Api-Version': '2022-11-28'
     }
   })
+  const release = releaseResp.data;
+  console.log(release);
 
   // for (let release of listReleasesResp.data) {
     console.log("name = " + release.name);
@@ -253,7 +255,9 @@ try {
         'X-GitHub-Api-Version': '2022-11-28'
       }
     })
-    console.log(getCommitResp);
+    const commit = getCommitResp.data;
+    console.log(commit);
+    console.log("commit hash = " + commit.sha);
   // }
 
 

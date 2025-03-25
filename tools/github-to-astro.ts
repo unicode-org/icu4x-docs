@@ -1,6 +1,14 @@
 import fs from 'node:fs';
 import { parseArgs } from "node:util";
 import path from 'node:path';
+import { dir } from 'node:console';
+
+// Hard code the tutorial names that are not version specific,
+// So that they are not being transformed by this script
+const ICU4X_NON_VERSION_SPECIFIC_FILES = [
+  "README.md",
+  "quickstart.md"
+];
 
 /**
  * class to represent the values passed from the CLI through to the helper methods
@@ -17,10 +25,6 @@ class Context {
     this.sitePrefix = argsMap["sitePrefix"];
   }
 }
-
-// site prefix, as used by static site generator tools.
-// if this were hosted on Github pages,
-const URI_SITE_PREFIX = "/icu4x-docs";
 
 /**
  * Return the string of the AstroJS markdown "frontmatter"
@@ -132,6 +136,19 @@ function readConvertWriteFile(inFilePath: string, outFilePath: string, ctx: Cont
   return;
 }
 
+function convertDirFiles(inDirPath: string, outDirPath: string, ctx: Context) {
+  const dirEntries = fs.readdirSync(inDirPath, {withFileTypes: true});
+  const fileOnlyEntries = dirEntries.filter((e) => e.isFile());
+  const mdFileEntries = fileOnlyEntries.filter((e) => e.name.endsWith(".md"));
+  const versionSpecificMdFileEntries = mdFileEntries.filter((e) => (!(ICU4X_NON_VERSION_SPECIFIC_FILES.includes(e.name))));
+  for (let file of versionSpecificMdFileEntries) {
+    const fileBaseName = file.name;
+    const inFilePath = path.join(inDirPath, fileBaseName);
+    const outFilePath = path.join(outDirPath, fileBaseName);
+    readConvertWriteFile(inFilePath, outFilePath, ctx);
+  }
+}
+
 /**
  * Print CLI usage
  */
@@ -139,7 +156,7 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpx tsx -- --inFile=<input-file> --outFile=<output-file> --icu4xTag=<ICU4X-semver> --sitePrefx=<site-prefix-str-else-emptystr>");
+  console.log("\tnpx tsx -- --inDir=<input-dir> --outDir=<output-dir> --icu4xTag=<ICU4X-semver> --sitePrefx=<site-prefix-str-else-emptystr>");
 }
 
 /**
@@ -149,17 +166,19 @@ function printHelp() {
 function parseCLIArgs() {
   let parsedArgs = parseArgs({
     options: {
-      inFile: {
+      inDir: {
         type: "string",
         short: "i",
       },
-      outFile: {
+      outDir: {
         type: "string",
         short: "o",
       },
       icu4xTag: {
         type: "string",
       },
+      // site prefix, as used by static site generator tools.
+      // if this were hosted on Github pages,
       sitePrefix: {
         type: "string",
       },
@@ -173,8 +192,8 @@ function parseCLIArgs() {
     let returnVal = {
       positionals: positionals,
       values: {
-        inFile: values["inFile"] ?? (() => {throw new Error("Need inFile")})(),
-        outFile: values["outFile"] ?? (() => {throw new Error("Need outFile")})(),
+        inDir: values["inDir"] ?? (() => {throw new Error("Need inDir")})(),
+        outDir: values["outDir"] ?? (() => {throw new Error("Need outDir")})(),
         version: values["icu4xTag"] ?? (() => {throw new Error("Need icu4xTag")})(),
         sitePrefix: values["sitePrefix"] ?? (() => {throw new Error("Need sitePrefix")})(),
         astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
@@ -195,8 +214,8 @@ try {
   console.log("argv", process.argv);
   let {values, positionals} = parsedArgs;
 
-  const inputFileName: string = values["inFile"];
-  const outputFileName = values["outFile"];
+  const inputDirPath: string = values["inDir"];
+  const outputDirPath = values["outDir"];
   const version = values["version"];
   const sitePrefix = values["sitePrefix"];
   
@@ -204,7 +223,9 @@ try {
 
   const context = new Context({versionStr, sitePrefix});
 
-  await readConvertWriteFile(inputFileName, outputFileName, context);
+  await convertDirFiles(inputDirPath, outputDirPath, context);
+
+  console.log("Markdown conversion finished successfully");
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(`Error: ${error.message}`);

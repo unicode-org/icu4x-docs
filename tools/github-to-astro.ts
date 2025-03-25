@@ -6,34 +6,11 @@ import path from 'node:path';
 // if this were hosted on Github pages,
 const URI_SITE_PREFIX = "/icu4x-docs";
 
-
-const ICU4X_MD_TITLES: Array<{basename: string; title: string}> = [
-  {basename: "cargo.md", title: "Configuring Cargo.toml"},
-  {basename: "data-management.md", title: "Data management"},
-  {basename: "data-provider-runtime.md", title: "Loading Additional Data at Runtime"},
-  {basename: "date-picker-data.md", title: "Interactive Date Picker - Custom Data"},
-  {basename: "date-picker.md", title: "Interactive Date Picker"},
-  {basename: "using-from-cpp.md", title: "Using from C++"},
-  {basename: "using-from-js.md", title: "Using from JavaScript and TypeScript"},
-];
-
-function icu4xAstroMdFrontMatter(inFileBaseName: string) {
-  let isBaseNameFound: boolean = false;
-  let foundTitle: string = "";
-  for (let {basename, title} of ICU4X_MD_TITLES) {
-    if (basename == inFileBaseName) {
-      isBaseNameFound = true;
-      foundTitle = title;
-    }
-  }
-  if (!isBaseNameFound) {
-    console.error('File with name ' + inFileBaseName + ' has no MD title configured');
-  } else {
-    let frontMatterStr = "---" + "\n"
-      + "title: " + foundTitle + "\n"
-      + "---" + "\n";
-    return frontMatterStr;
-  }
+function icu4xAstroMdFrontMatter(foundTitle: string) {
+  let frontMatterStr = "---" + "\n"
+    + "title: " + foundTitle + "\n"
+    + "---" + "\n";
+  return frontMatterStr;
 }
 
 const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: string}> = [
@@ -63,8 +40,12 @@ function transformMdBody(body: string, ctx: {versionStr: string, sitePrefix: str
 }
 
 function icu4xGfmToAstroMd(content: string, inFilePath: string, ctx: {versionStr: string, sitePrefix: string}) {
-  const inFileBasename = path.basename(inFilePath);
-  const frontMatter = icu4xAstroMdFrontMatter(inFileBasename);
+  // JS regex appears to match (.*) only to the end of the line, and JS regex does
+  // not behave well when putting the EOL $ symbol at the end of the regex.
+  const titleHeadingRegexMatch = /^# (.*)/.exec(content);
+  // get page title from first H1 heading. if not existent, then throw exception
+  const foundTitle = titleHeadingRegexMatch![1];
+  const frontMatter = icu4xAstroMdFrontMatter(foundTitle);
 
   let replacementContent = transformMdBody(content, ctx);
 
@@ -82,6 +63,7 @@ function readConvertWrite(inFilePath: string, outFilePath: string, ctx: {version
     data = fs.readFileSync(inFilePath, { encoding: 'utf8' });
   } catch (err) {
     console.error('Could not read file: ' + inFilePath, err);
+    process.exit(1);
   }
 
   const transformedData = icu4xGfmToAstroMd(data, inFilePath, ctx);
@@ -91,6 +73,7 @@ function readConvertWrite(inFilePath: string, outFilePath: string, ctx: {version
     // file written successfully
   } catch (err) {
     console.error('Could not write to file: ' + outFilePath, err);
+    process.exit(1);
   }
   return;
 }
@@ -119,6 +102,9 @@ function parseCLIArgs() {
       sitePrefix: {
         type: "string",
       },
+      astroVersion: {
+        type: "string",
+      },
     }
   });
   let {values, positionals} = parsedArgs;
@@ -130,6 +116,7 @@ function parseCLIArgs() {
         outFile: values["outFile"] ?? (() => {throw new Error("Need outFile")})(),
         version: values["icu4xTag"] ?? (() => {throw new Error("Need icu4xTag")})(),
         sitePrefix: values["sitePrefix"] ?? (() => {throw new Error("Need sitePrefix")})(),
+        astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
       }
     };
     return returnVal;
@@ -156,6 +143,7 @@ try {
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(`Error: ${error.message}`);
+    process.exit(1);
   }
 }
 

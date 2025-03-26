@@ -9,24 +9,25 @@ import { release } from 'node:os';
 // So that they are not being transformed by this script
 const ICU4X_NON_VERSION_SPECIFIC_FILES = [
   "README.md",
-  "quickstart.md"
+  "quickstart.md",
+  "index.md"
 ];
 
 /**
  * class to represent the values passed from the CLI through to the helper methods
  */
 class Context {
-  icu4xVersion: string;
-  icu4xVersionStr: string;
+  icu4xRef: string;
+  webDirName: string;
   sitePrefix: string;
 
   constructor(argsMap: {
-    icu4xVersion: string;
-    icu4xVersionStr: string;
+    icu4xRef: string;
+    webDirName: string;
     sitePrefix: string
   }) {
-    this.icu4xVersion = argsMap["icu4xVersion"];
-    this.icu4xVersionStr = argsMap["icu4xVersionStr"];
+    this.icu4xRef = argsMap["icu4xRef"];
+    this.webDirName = argsMap["webDirName"];
     this.sitePrefix = argsMap["sitePrefix"];
   }
 }
@@ -78,16 +79,16 @@ function transformMdBody(body: string, ctx: Context) {
 
   // convert Markdown links that work in Github (relative paths) into full URIs
   // that Astro JS needs, including the ICU4X prefix
-  let { icu4xVersion, icu4xVersionStr, sitePrefix } = ctx;
+  let { icu4xRef, webDirName, sitePrefix } = ctx;
   
   // in a relative link to any other file, format the URL to the Github blob
   replacementBody = replacementBody.replace(
     /\]\((?!http)([^\)]*)(?<!.md)\)/g,
-    "](" + "https://github.com/unicode-org/icu4x/tree/icu%40" + icu4xVersion + "/tutorials/$1)"
+    "](" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$1)"
   );
 
   // in a relative link to a Markdown file, get rid of the trailing `.md`
-  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
+  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/tutorials" + "/$2)");
 
   return replacementBody;
 }
@@ -110,15 +111,6 @@ function icu4xGfmToAstroMd(content: string, inFilePath: string, ctx: Context) {
   let replacementContent = transformMdBody(content, ctx);
 
   return frontMatter + "\n" + replacementContent;
-}
-
-/**
- * Convert a semver string into a string necessary for URIs within the URL
- * @param version Semantic version string
- * @returns The semantic version string, with dots replaced with underscores
- */
-function getUriVersionStr(version: string) {
-  return version.replace(/\./g, "_");
 }
 
 /**
@@ -170,7 +162,7 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpx tsx -- --inDir=<input-dir> --outDir=<output-dir> --icu4xTag=<ICU4X-semver> --sitePrefx=<site-prefix-str-else-emptystr>");
+  console.log("\tnpx tsx -- --inDir=<input-dir> --outDir=<output-dir> --icu4xRef=<ICU4X-git-ref> --webDirName=<version-based-dir-name> --sitePrefix=<site-prefix-str-else-emptystr> --astroVersion=<semver>");
 }
 
 /**
@@ -188,7 +180,10 @@ function parseCLIArgs() {
         type: "string",
         short: "o",
       },
-      icu4xVersion: {
+      icu4xRef: {
+        type: "string",
+      },
+      webDirName: {
         type: "string",
       },
       // site prefix, as used by static site generator tools.
@@ -208,7 +203,8 @@ function parseCLIArgs() {
       values: {
         inDir: values["inDir"] ?? (() => {throw new Error("Need inDir")})(),
         outDir: values["outDir"] ?? (() => {throw new Error("Need outDir")})(),
-        icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
+        icu4xRef: values["icu4xRef"] ?? (() => {throw new Error("Need icu4xRef")})(),
+        webDirName: values["webDirName"] ?? (() => {throw new Error("Need webDirName")})(),
         sitePrefix: values["sitePrefix"] ?? (() => {throw new Error("Need sitePrefix")})(),
         astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
       }
@@ -230,12 +226,11 @@ try {
 
   const inputDirPath: string = values["inDir"];
   const outputDirPath = values["outDir"];
-  const icu4xVersion = values["icu4xVersion"];
+  const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
-  
-  const icu4xVersionStr = getUriVersionStr(icu4xVersion);
+  const webDirName = values["webDirName"];
 
-  const context = new Context({icu4xVersion, icu4xVersionStr, sitePrefix});
+  const context = new Context({icu4xRef, webDirName, sitePrefix});
 
   await convertDirFiles(inputDirPath, outputDirPath, context);
 

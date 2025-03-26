@@ -79,17 +79,15 @@ function transformMdBody(body: string, ctx: Context) {
   // convert Markdown links that work in Github (relative paths) into full URIs
   // that Astro JS needs, including the ICU4X prefix
   let { icu4xVersion, icu4xVersionStr, sitePrefix } = ctx;
-
-  // replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
-
-  // in a relative link to a Markdown file, get rid of the trailing `.md`
-  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
   
   // in a relative link to any other file, format the URL to the Github blob
   replacementBody = replacementBody.replace(
     /\]\((?!http)([^\)]*)(?<!.md)\)/g,
     "](" + "https://github.com/unicode-org/icu4x/tree/icu%40" + icu4xVersion + "/tutorials/$1)"
   );
+
+  // in a relative link to a Markdown file, get rid of the trailing `.md`
+  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + icu4xVersionStr + "/$2)");
 
   return replacementBody;
 }

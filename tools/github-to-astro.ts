@@ -17,15 +17,18 @@ const ICU4X_NON_VERSION_SPECIFIC_FILES = [
  * class to represent the values passed from the CLI through to the helper methods
  */
 class Context {
+  icu4xVersion: string;
   icu4xRef: string;
   webDirName: string;
   sitePrefix: string;
 
   constructor(argsMap: {
+    icu4xVersion: string;
     icu4xRef: string;
     webDirName: string;
     sitePrefix: string
   }) {
+    this.icu4xVersion = argsMap["icu4xVersion"];
     this.icu4xRef = argsMap["icu4xRef"];
     this.webDirName = argsMap["webDirName"];
     this.sitePrefix = argsMap["sitePrefix"];
@@ -79,7 +82,7 @@ function transformMdBody(body: string, ctx: Context) {
 
   // convert Markdown links that work in Github (relative paths) into full URIs
   // that Astro JS needs, including the ICU4X prefix
-  let { icu4xRef, webDirName, sitePrefix } = ctx;
+  let { icu4xVersion, icu4xRef, webDirName, sitePrefix } = ctx;
   
   // in a relative link to any non-Markdown file, format the URL to the Github blob
   replacementBody = replacementBody.replace(
@@ -98,6 +101,12 @@ function transformMdBody(body: string, ctx: Context) {
     /(\[.*\])\((?!http)(\.\.)(.*)\.md\)/g,
     "$1(" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$2)"
   );
+
+  // changes docs.rs links from `latest` version to the specific ICU4X version
+  replacementBody = replacementBody.replace(
+    /https:\/\/docs.rs\/([^\/]*)\/latest/g,
+    "https://docs.rs/$1/" + icu4xVersion
+  )
 
   return replacementBody;
 }
@@ -171,7 +180,9 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpx tsx -- --inDir=<input-dir> --outDir=<output-dir> --icu4xRef=<ICU4X-git-ref> --webDirName=<version-based-dir-name> --sitePrefix=<site-prefix-str-else-emptystr> --astroVersion=<semver>");
+  console.log("\tnpm run icu4x-convert -- --inDir=<input-dir> --outDir=<output-dir> --icu4xRef=<ICU4X-git-ref> --webDirName=<version-based-dir-name> --sitePrefix=<site-prefix-str-else-emptystr> --astroVersion=<semver>");
+  console.log();
+  console.log("Example: npm run icu4x-convert -- --inDir=/tmp/1.5-tutorials/ --outDir=/tmp/1.5-output/ --icu4xVersion=1.5.0 --icu4xRef=release/1.5 --webDirName=1_5 --sitePrefix=/icu4x-docs --astroVersion=4.16.18")
 }
 
 /**
@@ -188,6 +199,9 @@ function parseCLIArgs() {
       outDir: {
         type: "string",
         short: "o",
+      },
+      icu4xVersion: {
+        type: "string",
       },
       icu4xRef: {
         type: "string",
@@ -212,6 +226,7 @@ function parseCLIArgs() {
       values: {
         inDir: values["inDir"] ?? (() => {throw new Error("Need inDir")})(),
         outDir: values["outDir"] ?? (() => {throw new Error("Need outDir")})(),
+        icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
         icu4xRef: values["icu4xRef"] ?? (() => {throw new Error("Need icu4xRef")})(),
         webDirName: values["webDirName"] ?? (() => {throw new Error("Need webDirName")})(),
         sitePrefix: values["sitePrefix"] ?? (() => {throw new Error("Need sitePrefix")})(),
@@ -235,11 +250,12 @@ try {
 
   const inputDirPath: string = values["inDir"];
   const outputDirPath = values["outDir"];
+  const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
   const webDirName = values["webDirName"];
 
-  const context = new Context({icu4xRef, webDirName, sitePrefix});
+  const context = new Context({icu4xVersion, icu4xRef, webDirName, sitePrefix});
 
   await convertDirFiles(inputDirPath, outputDirPath, context);
 

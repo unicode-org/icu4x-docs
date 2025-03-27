@@ -1,7 +1,8 @@
 ---
-title: "Interactive Date Picker - Custom Data"
-description: "Building Custom Data for the ICU4X Date picker"
+title: Interactive Date Picker - Custom Data
 ---
+
+
 
 In this tutorial, we will add additional locale data to your app. ICU4X compiled data contains data for hundreds of languages, but there are languages that have data in CLDR that are not included (generally because they don't have comprehensive coverage). For example, if you try using the locale `ccp` (Chakma) in your app, you will get output like `2023 M11 7`. Believe it or not, but this is not actually correct output for Chakma. Instead ICU4X fell back to the "root locale", which tries to be as neutral as possible. Note how it avoided calling the month by name by using `M11`, even though we requested a format with a non-numeric month name.
 
@@ -15,13 +16,13 @@ Verify that Rust is installed. If it's not, you can install it in a few seconds 
 
 ```shell
 $ cargo --version
-cargo 1.81.0 (2dbb1af80 2024-08-20)
+cargo 1.71.1 (7f1d04c00 2023-07-29)
 ```
 
 Now you can run
 
 ```shell
-cargo install icu4x-datagen
+cargo install icu_datagen
 ```
 
 ## 2. Generating the data pack
@@ -29,15 +30,18 @@ cargo install icu4x-datagen
 We're ready to generate the data. We will use the blob format, and create a blob that will contain just Chakma data. At runtime we can then load it as needed.
 
 ```shell
-$ icu4x-datagen --markers all --locales ccp --format blob --out ccp.blob
+$ icu4x-datagen --keys all --locales ccp --format blob2 --out ccp.blob
 ```
 
 This will generate a `ccp.blob` file containing data for Chakma.
 
 :::note
-If you're having technical difficulties, this file is available [here](https://storage.googleapis.com/static-493776/icu4x_2023-11-03/ccp.blob).
+if you're having technical difficulties, this file is available [here](https://storage.googleapis.com/static-493776/icu4x_2023-11-03/ccp.blob).
 :::
 
+:::note
+`--format blob2` generates version 2 of the blob format. Alternatively, `--format blob` produces an older blob format which works with ICU4X prior to 1.4 but is not as optimized.
+:::
 
 ## 3. Using the data pack
 
@@ -60,7 +64,7 @@ locale is Chakma:
 
 ```rust
 // At the top of the file:
-use icu::locale::locale;
+use icu::locid::locale;
 use icu_provider_blob::BlobDataProvider;
 
 // Just below the imports (fill in the path):
@@ -134,17 +138,21 @@ Try using `ccp` now!
 
 ## 4. Slimming the data pack
 
-Note: the following steps are currently only possible in Rust. 🤷
+:::note
+the following steps are currently only possible in Rust. 🤷
+:::
 
-When we ran `icu4x-datagen`, we passed `--markers all`, which make it generate *all* data for the Chakma locale, even though we only need date formatting. We can make `icu4x-datagen` analyze our binary to figure out which markers are needed:
+When we ran `icu4x-datagen`, we passed `--keys all`, which make it generate *all* data for the Chakma locale, even though we only need date formatting. We can make `icu4x-datagen` analyze our binary to figure out which keys are needed:
 
 ```shell
-$ icu4x-datagen --markers-for-bin target/debug/tutorial --locales ccp --format blob --out ccp_smaller.blob
+$ icu4x-datagen --keys-for-bin target/debug/tutorial --locales ccp --format blob2 --out ccp_smaller.blob
 ```
 
-Note: you usually want to build with the `--release` flag, and analyze that binary, but we don't have all day.
+:::note
+you usually want to build with the `--release` flag, and analyze that binary, but we don't have all day.
+:::
 
-This should generate a lot fewer markers!
+This should generate a lot fewer keys!
 
 Let's look at the sizes:
 
@@ -158,9 +166,9 @@ This is much better! Rerun your app with `ccp_smaller.blob` to make sure it stil
 
 ## 5. Slimming the data pack ... again
 
-The last datagen invocation still produced a lot of markers, as you saw in its output. This is because we used the `DateFormatter` API, which can format dates for a lot of different calendars. However, if we are only using it with an Gregorian calendar date, so we don't need Coptic, Indian, etc. date formatting data.
+The last datagen invocation still produced a lot of keys, as you saw in its output. This is because we used the `DateFormatter` API, which can format dates for a lot of different calendars. However, if we are only using it with an Gregorian calendar date, so we don't need Coptic, Indian, etc. date formatting data.
 
-We've seen that `DateFormatter` pulls in a lot of data. It would be nice if we could tell it that we'll only ever use it with Gregorian dates. Turns out we can! `icu::datetime` also exposes a `TypedDateFormatter<C>`, which is generic in a single calendar type. If you use this API instead (instantiated as `TypedDateFormatter<Gregorian>`), `--markers-for-bin` will give you exactly the markers we manually selected in the last section. However, now you can be sure that you didn't make a mistake selecting the markers (which would be an awkward runtime error), and that you will never accidentally pass a non-Gregorian date into the formatter (which would an awkward runtime error with `DateFormatter`, but is a compile-time error with `TypeDateFormatter`).
+We've seen that `DateFormatter` pulls in a lot of data. It would be nice if we could tell it that we'll only ever use it with Gregorian dates. Turns out we can! `icu::datetime` also exposes a `TypedDateFormatter<C>`, which is generic in a single calendar type. If you use this API instead (instantiated as `TypedDateFormatter<Gregorian>`), `--keys-for-bin` will give you exactly the keys we manually selected in the last section. However, now you can be sure that you didn't make a mistake selecting the keys (which would be an awkward runtime error), and that you will never accidentally pass a non-Gregorian date into the formatter (which would an awkward runtime error with `DateFormatter`, but is a compile-time error with `TypeDateFormatter`).
 
 ```rust
 let date_formatter = TypedDateFormatter::<Gregorian>::try_new_with_length(
@@ -178,21 +186,21 @@ println!(
 );
 ```
 
-Now we can run datagen with `--markers-for-bin` again:
+Now we can run datagen with `--keys-for-bin` again:
 
 ```shell
 $ cargo build
-$ icu4x-datagen --markers-for-bin target/debug/tutorial --locales ccp --format blob --out ccp_smallest.blob
+$ icu4x-datagen --keys-for-bin target/debug/tutorial --locales ccp --format blob2 --out ccp_smallest.blob
 ```
 
 The output will be much shorter:
 
 ```shell
-INFO  [icu_provider_export::export_impl] Generating marker datetime/gregory/datelengths@1
-INFO  [icu_provider_export::export_impl] Generating marker datetime/gregory/datesymbols@1
-INFO  [icu_provider_export::export_impl] Generating marker datetime/week_data@1
-INFO  [icu_provider_export::export_impl] Generating marker decimal/symbols@2
-INFO  [icu_provider_export::export_impl] Generating marker plurals/ordinal@1
+INFO  [icu_datagen] Generating key datetime/gregory/datelengths@1
+INFO  [icu_datagen] Generating key datetime/gregory/datesymbols@1
+INFO  [icu_datagen] Generating key datetime/week_data@1
+INFO  [icu_datagen] Generating key decimal/symbols@1
+INFO  [icu_datagen] Generating key plurals/ordinal@1
 ```
 
 And the blob will also be much smaller at the sizes:

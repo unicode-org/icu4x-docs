@@ -1,7 +1,8 @@
 ---
-title: "Interactive Date Picker"
-description: "Building an Interactive Date Picker with ICU4X"
+title: Interactive Date Picker
 ---
+
+
 
 In this tutorial, you will learn how to build an end-to-end application using ICU4X to format a date and time with some default locales and additional locales loaded dynamically.
 
@@ -63,7 +64,7 @@ First, we will use Rust APIs to accept a string from user input on the command l
 
 ```rust
 // At the top of the file:
-use icu::locale::Locale;
+use icu::locid::Locale;
 
 // In the main() function:
 print!("Enter your locale: ");
@@ -150,7 +151,7 @@ use icu::calendar::{Date, Iso};
 use icu::datetime::options::length;
 use icu::datetime::DateFormatter;
 
-let locale = icu::locale::Locale::UND; // to make this example compile
+let locale = icu::locid::Locale::UND; // to make this example compile
 
 /// Helper function to create an ICU4X DateTime for the current local time:
 fn get_current_date() -> Date<Iso> {

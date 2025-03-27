@@ -87,6 +87,9 @@ function transformMdBody(body: string, ctx: Context) {
     "](" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$1)"
   );
 
+  // in a relative link specifically to quickstart.md
+  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)quickstart.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/quickstart)");
+
   // in a relative link to a Markdown file, get rid of the trailing `.md`
   replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/tutorials" + "/$2)");
 

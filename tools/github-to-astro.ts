@@ -53,6 +53,7 @@ function icu4xAstroMdFrontMatter(foundTitle: string) {
 const ICU4X_MD_REPLACEMENTS: Array<{pattern: string | RegExp; replacement: string}> = [
   // fix the code fence syntax highlighting language identifers
   {pattern: /```console.*/g, replacement: "```shell"},
+  {pattern: /```command.*/g, replacement: "```shell"},
   {pattern: /```rust.*/g, replacement: "```rust"},
 
   // remove H1 titles from MD pages in Github (because Front Matter is the way to 

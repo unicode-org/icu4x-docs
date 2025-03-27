@@ -54,7 +54,7 @@ If you check in the generated data, it is recommended that you configure a job i
 
 Once we have generated the data, we need to instruct `ICU4X` to use it. To do this, set the `ICU4X_DATA_DIR` during the compilation of your app:
 
-```command
+```shell
 ICU4X_DATA_DIR=$(pwd)/my_data cargo run
 ```
 

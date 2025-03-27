@@ -1,10 +1,8 @@
 ---
-title: "Quickstart"
-description: "Introduction to ICU4X for Rust"
-sidebar:
-    order: 10500200
-next: false
+title: Introduction to ICU4X for Rust
 ---
+
+
 
 `ICU4X` is an implementation of [Internationalization Components of Unicode](http://site.icu-project.org/) (ICU) intended to be modular, performant and flexible.
 
@@ -47,14 +45,14 @@ $ cargo add icu
 
 Most of those features depend on the selection of a `Locale` which is a particular combination of language, script, region with optional variants. An examples of such locales are `en-US` (American English), `sr-Cyrl` (Serbian with Cyrillic script) or `ar-EG-u-nu-latn` (Egyptian Arabic with ASCII numerals).
 
-In `ICU4X` `Locale` is a part of the `locale_core` component. If the user needs just this one feature, they can use `icu_locale_core` crate as a dependency, but since here we already added a dependency on `icu`, we can refer to it via `icu::locale`.
+In `ICU4X` `Locale` is a part of the `locid` component. If the user needs just this one feature, they can use `icu_locid` crate as a dependency, but since here we already added a dependency on `icu`, we can refer to it via `icu::locid`.
 
 Let's use this in our application.
 
 Open `src/main.rs` and edit it to:
 
 ```rust
-use icu::locale::Locale;
+use icu::locid::Locale;
 
 fn main() {
     let loc: Locale = "ES-AR".parse()
@@ -75,9 +73,7 @@ After saving it, call `cargo run` and it should display:
 You are using: es-AR
 ```
 
-:::note
-Here, `ICU4X` canonicalized the locales's syntax which uses lowercase letters for the language portion.
-:::
+*Notice:* Here, `ICU4X` canonicalized the locales's syntax which uses lowercase letters for the language portion.
 
 Congratulations! `ICU4X` has been used to semantically operate on a locale!
 
@@ -90,7 +86,7 @@ It's a bit unergonomic to have to parse them at runtime and handle a parser erro
 For that purpose, ICU4X provides a macro one can use to parse it at compilation time:
 
 ```rust
-use icu::locale::{Locale, locale};
+use icu::locid::{Locale, locale};
 
 const LOCALE: Locale = locale!("ES-AR");
 
@@ -113,7 +109,7 @@ We're going to extend our app to use the `icu::datetime` component to format a d
 which is exposed through constructors such as `try_new`.
 
 ```rust
-use icu::locale::{Locale, locale};
+use icu::locid::{Locale, locale};
 use icu::calendar::DateTime;
 use icu::datetime::{DateTimeFormatter, options::length};
 
@@ -146,9 +142,7 @@ If all went well, running the app with `cargo run` should display:
 
 Here's an internationalized date!
 
-:::note
-By default, `cargo run` builds and runs a `debug` mode of the binary. If you want to evaluate performance, memory or size of this example, use `cargo run --release`.
-:::
+*Notice:* By default, `cargo run` builds and runs a `debug` mode of the binary. If you want to evaluate performance, memory or size of this example, use `cargo run --release`.
 
 
 ## 5. Data Management
@@ -161,7 +155,7 @@ The way `ICU4X` handles data is one of its novelties, aimed at making the data m
 
 `ICU4X` by default contains data for a a wide range of CLDR locales[^1], meaning that for most languages, the constructors can be considered infallible and you can `expect` or `unwrap` them, as we did above.
 
-However, shipping the library with all locales will have a size impact on your binary. It also requires you to update your binary whenever CLDR data changes, which happens twice a year. To learn how to solve these problems, see our [Data management](/icu4x-docs/1_5/tutorials/data-management) tutorial.
+However, shipping the library with all locales will have a size impact on your binary. It also requires you to update your binary whenever CLDR data changes, which happens twice a year. To learn how to solve these problems, see our [data management](/icu4x-docs/1_5/tutorials/data-management) tutorial.
 
 [^1]: All locales with coverage level `basic`, `moderate`, or `modern` in [`CLDR`](https://github.com/unicode-org/cldr-json/blob/main/cldr-json/cldr-core/coverageLevels.json)
 
@@ -171,6 +165,7 @@ This concludes this introduction tutorial. With the help of `DateTimeFormat`, `L
 
 Internationalization is a broad domain and there are many more components in `ICU4X`.
 
-Next, learn how to [generate optimized data for your binary](/icu4x-docs/1_5/tutorials/data-management), [configure your Cargo.toml file](/icu4x-docs/1_5/tutorials/cargo), or continue exploring by reading [the docs](https://docs.rs/icu/latest/).
+Next, learn how to [generate optimized data for your binary](data-management.md), [configure your Cargo.toml file](/icu4x-docs/1_5/tutorials/rust), or continue exploring by reading [the docs](https://docs.rs/icu/1.5.0/).
+
 
 

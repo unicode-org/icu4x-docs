@@ -9,7 +9,6 @@ import { release } from 'node:os';
 // So that they are not being transformed by this script
 const ICU4X_NON_VERSION_SPECIFIC_FILES = [
   "README.md",
-  "quickstart.md",
   "index.md"
 ];
 
@@ -165,10 +164,21 @@ function convertDirFiles(inDirPath: string, outDirPath: string, ctx: Context) {
   const fileOnlyEntries = dirEntries.filter((e) => e.isFile());
   const mdFileEntries = fileOnlyEntries.filter((e) => e.name.endsWith(".md"));
   const versionSpecificMdFileEntries = mdFileEntries.filter((e) => (!(ICU4X_NON_VERSION_SPECIFIC_FILES.includes(e.name))));
+
+  fs.mkdirSync(path.join(outDirPath, "tutorials"), {recursive: true});
+
   for (let file of versionSpecificMdFileEntries) {
     const fileBaseName = file.name;
     const inFilePath = path.join(inDirPath, fileBaseName);
-    const outFilePath = path.join(outDirPath, fileBaseName);
+    let outFilePath = "";
+
+    // put quickstart.md in the root dir, all other files go into the `tutorials` dir
+    if (fileBaseName == "quickstart.md") {
+      outFilePath = path.join(outDirPath, fileBaseName);
+    } else {
+      outFilePath = path.join(outDirPath, "tutorials", fileBaseName);
+    }
+
     readConvertWriteFile(inFilePath, outFilePath, ctx);
   }
 }

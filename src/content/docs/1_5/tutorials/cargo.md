@@ -24,7 +24,7 @@ In your main.rs, you can use all stable ICU4X components for the recommended set
 If you wish to use custom compiled data for ICU4X, no changes to Cargo.toml are required. Instead, set the `ICU4X_DATA_DIR` environment variable to the
 datagen output during your build:
 
-```command
+```shell
 icu4x-datagen --format mod --keys all --locales ru --out baked_data
 ICU4X_DATA_DIR=$(pwd)/baked_data cargo build --release
 ```

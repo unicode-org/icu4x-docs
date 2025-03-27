@@ -81,7 +81,7 @@ function transformMdBody(body: string, ctx: Context) {
   // that Astro JS needs, including the ICU4X prefix
   let { icu4xRef, webDirName, sitePrefix } = ctx;
   
-  // in a relative link to any other file, format the URL to the Github blob
+  // in a relative link to any non-Markdown file, format the URL to the Github blob
   replacementBody = replacementBody.replace(
     /\]\((?!http)([^\)]*)(?<!.md)\)/g,
     "](" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$1)"
@@ -90,8 +90,14 @@ function transformMdBody(body: string, ctx: Context) {
   // in a relative link specifically to quickstart.md
   replacementBody = replacementBody.replace(/(\[.*\])\((?!http)quickstart.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/quickstart)");
 
-  // in a relative link to a Markdown file, get rid of the trailing `.md`
-  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(.*)\.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/tutorials" + "/$2)");
+  // in a relative link to a Markdown file, that optionally starts with "./", but not "..", get rid of the trailing `.md`
+  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(?!\.\.)(\.\/)?(.*)\.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/tutorials" + "/$3)");
+
+  // in a relative link to a Markdown file, that starts with "..", format the URL to the Github blob
+  replacementBody = replacementBody.replace(
+    /(\[.*\])\((?!http)(\.\.)(.*)\.md\)/g,
+    "$1(" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$2)"
+  );
 
   return replacementBody;
 }

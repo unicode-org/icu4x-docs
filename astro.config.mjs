@@ -11,8 +11,8 @@ var latest_ver_display_str = '1_5';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://unicode-org.github.io',
-	base: 'icu4x-docs',
+	site: 'https://icu4x.unicode.org',
+	base: '',
 	integrations: [
 		starlight({
 			title: 'ICU4X',

@@ -196,7 +196,7 @@ function printHelp() {
   console.log("Usage:");
   console.log("\tnpm run icu4x-convert -- --inDir=<input-dir> --outDir=<output-dir> --icu4xRef=<ICU4X-git-ref> --webDirName=<version-based-dir-name> --sitePrefix=<site-prefix-str-else-emptystr> --astroVersion=<semver>");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --inDir=/tmp/1.5-tutorials/ --outDir=/tmp/1.5-output/ --icu4xVersion=1.5.0 --icu4xRef=release/1.5 --webDirName=1_5 --sitePrefix=/icu4x-docs --astroVersion=4.16.18")
+  console.log("Example: npm run icu4x-convert -- --inDir=/tmp/1.5-tutorials/ --outDir=/tmp/1.5-output/ --icu4xVersion=1.5.0 --icu4xRef=release/1.5 --webDirName=1_5 --sitePrefix= --astroVersion=4.16.18")
 }
 
 /**

@@ -55,7 +55,7 @@ icu = { version = "1.5", features = ["serde"] }
 icu_provider_blob = "1.5"
 ```
 
-To learn about building ICU4X data, including whether to check in the data blob file to your repository, see [data-management.md](/icu4x-docs/1_5/tutorials/data-management).
+To learn about building ICU4X data, including whether to check in the data blob file to your repository, see [data-management.md](/1_5/tutorials/data-management).
 
 [« Fully Working Example »](https://github.com/unicode-org/icu4x/tree/release%2F1.5/tutorials/./crates/buffer)
 

@@ -93,17 +93,20 @@ function transformMdBody(body: string, ctx: Context) {
   replacementBody = replacementBody.replace(/(\[.*\])\((?!http)quickstart.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/quickstart)");
 
   // in a relative link to a Markdown file, that optionally starts with "./", but not "..", get rid of the trailing `.md`
-  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)(?!\.\.)(\.\/)?(.*)\.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/tutorials" + "/$3)");
+  replacementBody = replacementBody.replace(
+    /(\[.*?\])\((?!http)(?!\.\.)(\.\/)?(.*?)\.md\)/g,
+    "$1(" + sitePrefix + "/" + webDirName + "/tutorials" + "/$3)"
+  );
 
   // in a relative link to a Markdown file, that starts with "..", format the URL to the Github blob
   replacementBody = replacementBody.replace(
-    /(\[.*\])\((?!http)(\.\.)(.*)\.md\)/g,
+    /(\[.*?\])\((?!http)(\.\.)(.*?)\.md\)/g,
     "$1(" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$2)"
   );
 
   // changes docs.rs links from `latest` version to the specific ICU4X version
   replacementBody = replacementBody.replace(
-    /https:\/\/docs.rs\/([^\/]*)\/latest/g,
+    /https:\/\/docs.rs\/(.*?)\/latest/g,
     "https://docs.rs/$1/" + icu4xVersion
   )
 

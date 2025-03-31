@@ -6,8 +6,8 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 // !! UPDATE LATEST VERSION HERE !!
 // format semver with underscores to make it look like a semver would in a URL
-var latest_semver_str = '1.5';
-var latest_ver_display_str = '1_5';
+var latest_display_name = 'Version 2.0 Beta';
+var latest_dir_name = '2_0_beta';
 
 // https://astro.build/config
 export default defineConfig({
@@ -32,7 +32,7 @@ export default defineConfig({
 					label: "leadingNavLinks",
 					items: [
 						{ label: "Overview", link: "/overview" },
-						{ label: "Quickstart", link: "/" + latest_ver_display_str + "/quickstart" }
+						{ label: "Quickstart", link: "/" + latest_dir_name + "/quickstart" }
 					]
 				},
 				{
@@ -42,13 +42,18 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Version ' + latest_semver_str,
-					autogenerate: { directory: latest_ver_display_str},
+					label: latest_display_name,
+					autogenerate: { directory: latest_dir_name},
 				},
 				{
 					label: 'Previous Versions',
 					collapsed: false,
 					items: [
+						{
+							label: 'Version 1.5',
+							autogenerate: { directory: '1_5'},
+							collapsed: true,
+						},
 						{
 							label: 'Version 1.2',
 							autogenerate: { directory: '1_2'},

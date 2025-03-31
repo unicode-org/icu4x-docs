@@ -53,11 +53,6 @@ export default defineConfig({
 							label: 'Version 1.5',
 							autogenerate: { directory: '1_5'},
 							collapsed: true,
-						},
-						{
-							label: 'Version 1.2',
-							autogenerate: { directory: '1_2'},
-							collapsed: true,
 						}
 					],
 				},

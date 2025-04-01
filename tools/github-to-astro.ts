@@ -40,8 +40,11 @@ class Context {
  * @returns the string of the AstroJS markdown "frontmatter"
  */
 function icu4xAstroMdFrontMatter(foundTitle: string) {
+  // special case for the quickstart tutorial title in ICU4X
+  let title = foundTitle.replace(/Introduction to ICU4X for Rust/g, "Quickstart" );
+
   let frontMatterStr = "---" + "\n"
-    + "title: " + foundTitle + "\n"
+    + "title: " + title + "\n"
     + "---" + "\n";
   return frontMatterStr;
 }
@@ -196,7 +199,7 @@ function printHelp() {
   console.log("Usage:");
   console.log("\tnpm run icu4x-convert -- --inDir=<input-dir> --outDir=<output-dir> --icu4xRef=<ICU4X-git-ref> --webDirName=<version-based-dir-name> --sitePrefix=<site-prefix-str-else-emptystr> --astroVersion=<semver>");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --inDir=/tmp/1.5-tutorials/ --outDir=/tmp/1.5-output/ --icu4xVersion=1.5.0 --icu4xRef=release/1.5 --webDirName=1_5 --sitePrefix= --astroVersion=4.16.18")
+  console.log("Example: npm run icu4x-convert -- --inDir=/path/to/icu4x/tutorials/ --outDir=/path/to/icu4x-docs/src/content/docs/ --icu4xVersion=1.5.0 --icu4xRef=release/1.5 --webDirName=1_5 [--sitePrefix=/uriPrefix] --astroVersion=4.16.18")
 }
 
 /**
@@ -243,7 +246,9 @@ function parseCLIArgs() {
         icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
         icu4xRef: values["icu4xRef"] ?? (() => {throw new Error("Need icu4xRef")})(),
         webDirName: values["webDirName"] ?? (() => {throw new Error("Need webDirName")})(),
-        sitePrefix: values["sitePrefix"] ?? (() => {throw new Error("Need sitePrefix")})(),
+        sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
+                                                 // URIs for base site icu4x.unicode.org do not need
+                                                 // a prefix, unlike hosting on Github Pages
         astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
       }
     };
@@ -263,11 +268,11 @@ try {
   let {values, positionals} = parsedArgs;
 
   const inputDirPath: string = values["inDir"];
-  const outputDirPath = values["outDir"];
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
   const webDirName = values["webDirName"];
+  const outputDirPath = path.join(values["outDir"], webDirName);
 
   const context = new Context({icu4xVersion, icu4xRef, webDirName, sitePrefix});
 

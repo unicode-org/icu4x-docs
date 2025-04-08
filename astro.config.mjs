@@ -27,6 +27,14 @@ export default defineConfig({
 				}),
 				starlightLinksValidator()
 			],
+			components: {
+				Footer: './src/components/UnicodeFooter.astro',
+			},
+			logo: {
+				alt: 'Unicode',
+				src: './src/assets/unicode.svg',
+			},
+			credits: false,
 			sidebar: [
 				{
 					label: "leadingNavLinks",

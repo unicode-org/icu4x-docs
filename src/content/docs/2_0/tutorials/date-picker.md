@@ -148,9 +148,9 @@ Now we can write the Rust code:
 ```rust
 // At the top of the file:
 use icu::calendar::{Date, Iso};
-use icu::datetime::{DateTimeFormatter, Length, fieldsets::YMD};
+use icu::datetime::{DateTimeFormatter, fieldsets::YMD};
 
-let locale = icu::locale::Locale::default(); // to make this example compile
+let locale = icu::locale::Locale::UNKNOWN; // to make this example compile
 
 /// Helper function to create an ICU4X DateTime for the current local time:
 fn get_current_date() -> Date<Iso> {
@@ -228,7 +228,7 @@ Now we would also like to format the current time.
 
 ### Rust Part 4
 
-Use the API documentation for [`icu::time::DateTime`](https://docs.rs/icu/2.0.0-beta2/icu/timezone/struct.DateTime.html) and [`icu::datetime::DateTimeFormatter`](https://docs.rs/icu/2.0.0-beta2/icu/datetime/struct.DateTimeFormatter.html) to expand your app to format both date and time.
+Use the API documentation for [`icu::time::DateTime`](https://docs.rs/icu/2.0.0/icu/timezone/struct.DateTime.html) and [`icu::datetime::DateTimeFormatter`](https://docs.rs/icu/2.0.0/icu/datetime/struct.DateTimeFormatter.html) to expand your app to format both date and time.
 
 Hint: You can use `Default::default()` for the `DateTimeFormatterOptions` argument.
 

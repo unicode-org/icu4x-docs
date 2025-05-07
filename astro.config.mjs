@@ -6,8 +6,8 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 // !! UPDATE LATEST VERSION HERE !!
 // format semver with underscores to make it look like a semver would in a URL
-var latest_display_name = 'Version 2.0 Beta';
-var latest_dir_name = '2_0_beta';
+var latest_display_name = 'Version 2.0';
+var latest_dir_name = '2_0';
 
 // https://astro.build/config
 export default defineConfig({

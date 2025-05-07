@@ -10,7 +10,7 @@ If you're happy shipping your app with the recommended set of locales included i
 
 ## 1. Prerequisites
 
-This tutorial assumes you have finished the [introductory tutorial](/2_0_beta/quickstart) and continues where that tutorial left off. In particular, you should still have the latest version of code for `myapp`.
+This tutorial assumes you have finished the [introductory tutorial](/2_0/quickstart) and continues where that tutorial left off. In particular, you should still have the latest version of code for `myapp`.
 
 ## 2. Generating data
 
@@ -100,7 +100,7 @@ We can include the generate code with the `include!` macro. The `impl_data_provi
 extern crate alloc; // required as my-data is written for #[no_std]
 use icu::locale::{locale, Locale};
 use icu::calendar::Date;
-use icu::datetime::{DateTimeFormatter, Length};
+use icu::datetime::{DateTimeFormatter, fieldsets::YMD};
 
 const LOCALE: Locale = locale!("ja");
 
@@ -111,8 +111,12 @@ impl_data_provider!(MyDataProvider);
 fn main() {
     let baked_provider = MyDataProvider;
 
-    let dtf = DateTimeFormatter::try_new_unstable(&baked_provider, &LOCALE.into(), Length::Medium.into())
-        .expect("ja data should be available");
+    let dtf = DateTimeFormatter::try_new_unstable(
+        &baked_provider,
+        LOCALE.into(),
+        YMD::medium()
+    )
+    .expect("ja data should be available");
 
     let date = Date::try_new_iso(2020, 10, 14)
         .expect("date should be valid");
@@ -149,14 +153,14 @@ This will generate a `my_data_blob.postcard` file containing the serialized data
 
 Unlike `BakedDataProvider`, `BlobDataProvider` (and `FsDataProvider`) does not perform locale fallbacking. For example, if `en-US` is requested but only `en` data is available, then the data request will fail. To enable fallback, we can wrap the provider in a `LocaleFallbackProvider`.
 
-Note that fallback comes at a cost, as fallbacking code and data has to be included and executed on every request. If you don't need fallback (disclaimer: you probably do), you can use the `BlobDataProvider` directly (for baked data, see [`Options::skip_internal_fallback`](https://docs.rs/icu_provider_baked/2.0.0-beta2/icu_provider_baked/export/struct.Options.html)).
+Note that fallback comes at a cost, as fallbacking code and data has to be included and executed on every request. If you don't need fallback (disclaimer: you probably do), you can use the `BlobDataProvider` directly (for baked data, see [`Options::skip_internal_fallback`](https://docs.rs/icu_provider_baked/2.0.0/icu_provider_baked/export/struct.Options.html)).
 
 We can then use the provider in our code:
 
 ```rust
 use icu::locale::{locale, Locale, fallback::LocaleFallbacker};
 use icu::calendar::Date;
-use icu::datetime::{DateTimeFormatter, Length, fieldsets::YMD};
+use icu::datetime::{DateTimeFormatter, fieldsets::YMD};
 use icu_provider_adapters::fallback::LocaleFallbackProvider;
 use icu_provider_blob::BlobDataProvider;
 
@@ -209,7 +213,7 @@ We can instead use `FixedCalendarDateTimeFormatter<Gregorian>`, which only suppo
 ```rust
 use icu::locale::{locale, Locale, fallback::LocaleFallbacker};
 use icu::calendar::{Date, Gregorian};
-use icu::datetime::{FixedCalendarDateTimeFormatter, fieldsets::YMD, Length};
+use icu::datetime::{FixedCalendarDateTimeFormatter, fieldsets::YMD};
 use icu_provider_adapters::fallback::LocaleFallbackProvider;
 use icu_provider_blob::BlobDataProvider;
 
@@ -256,4 +260,4 @@ We have learned how to generate data and load it into our programs, optimize dat
 
 For a deeper dive into configuring your data providers in code, see [data-provider-runtime.md].
 
-You can learn more about datagen, including the Rust API which we have not used in this tutorial, by reading [the docs](https://docs.rs/icu_provider_export/2.0.0-beta2/).
+You can learn more about datagen, including the Rust API which we have not used in this tutorial, by reading [the docs](https://docs.rs/icu_provider_export/2.0.0/).

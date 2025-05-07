@@ -8,7 +8,7 @@ ICU4X's core functionality is completely available from C++, with headers genera
 
 Typically C++ users can build ICU4X by building the `icu_capi` Rust crate, and linking the resultant static library to their C++ application. This crate contains all of the relevant [Diplomat]-generated `extern "C"` declarations, as well as an idiomatic C++ wrapper using these functions.
 
-Using ICU4X in C++ is best demonstrated via the [examples](https://github.com/unicode-org/icu4x/tree/main/tutorials/cpp). For example, [here's an example showing off decimal formatting in ICU4X](https://github.com/unicode-org/icu4x/tree/main/tutorials/cpp/fixeddecimal.cpp), built with [this Makefile](https://github.com/unicode-org/icu4x/tree/main/tutorials/cpp/Makefile).
+Using ICU4X in C++ is best demonstrated via the [examples](https://github.com/unicode-org/icu4x/tree/release%2F2.0/tutorials/cpp). For example, [here's an example showing off decimal formatting in ICU4X](https://github.com/unicode-org/icu4x/tree/release%2F2.0/tutorials/cpp/fixeddecimal.cpp), built with [this Makefile](https://github.com/unicode-org/icu4x/tree/release%2F2.0/tutorials/cpp/Makefile).
 
 _We are still working on improving the user experience of using ICU4X from other languages. As such, this tutorial may be a bit sparse, but we are happy to answer questions on our [discussions forum] and help you out_
 
@@ -30,7 +30,7 @@ resolver = "2"
 path = "unused"
 
 [dependencies]
-icu_capi = { version = "2.0.0-dev", default-features = false, features = [] }
+icu_capi = { version = "2.0.0", default-features = false, features = [] }
 ```
 
 Some of the keys are required by the parser, but won't be used by us. 
@@ -47,7 +47,7 @@ Some of the keys are required by the parser, but won't be used by us.
 You can now set features by updating the `features` key in `Cargo.toml`:
 
 ```toml
-icu_capi = { version = "2.0.0-dev", default-features = false, features = ["default", "buffer_provider"] }
+icu_capi = { version = "2.0.0", default-features = false, features = ["default", "buffer_provider"] }
 
 ```
 
@@ -124,7 +124,7 @@ C++ versions beyond C++17 are supported, as are other C++ compilers.
 Users wishing to use ICU4X on a `no_std` platform will need to provide an allocator and a panic hook in order to build a linkable library. The `icu_capi` crate can provide a looping panic handler, and a `malloc`-backed allocator, under the `looping_panic_handler` and `libc_alloc` features, respectively.
 
 ```toml
-icu_capi = { version = "2.0.0-dev", default-features = false, features = ["default_components", "buffer_provider", "looping_panic_handler", "libc_alloc"] }
+icu_capi = { version = "2.0.0", default-features = false, features = ["default_components", "buffer_provider", "looping_panic_handler", "libc_alloc"] }
 
 ```
 

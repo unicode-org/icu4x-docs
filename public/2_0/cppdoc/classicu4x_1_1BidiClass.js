@@ -1,0 +1,37 @@
+var classicu4x_1_1BidiClass =
+[
+    [ "Value", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688", [
+      [ "LeftToRight", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688adafe3c22255950cad3885d7078555139", null ],
+      [ "RightToLeft", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a245c0197742f317250e341b519207e7f", null ],
+      [ "EuropeanNumber", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a0f7871bf52a3fd185f182c4ba74b2bb3", null ],
+      [ "EuropeanSeparator", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688ae3d095703fca6226c0ea59540d828e69", null ],
+      [ "EuropeanTerminator", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a74b02f1a693a27b961200e834d0fd100", null ],
+      [ "ArabicNumber", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688af8f609d38f78c2e02d7d897959fd909c", null ],
+      [ "CommonSeparator", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688ab8b0e95fb35478449db9ef37dadd921f", null ],
+      [ "ParagraphSeparator", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a5d4f9154a7d97fdb620be94b21cc9ba6", null ],
+      [ "SegmentSeparator", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a4bd0fcd8ab01861bedb569b125a4c5c4", null ],
+      [ "WhiteSpace", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a3c1cd67d09a7151d0b938560b7e6c9a8", null ],
+      [ "OtherNeutral", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a23c6eaf8ef0836c1d2334d399d2dd7ef", null ],
+      [ "LeftToRightEmbedding", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a56d795e557d09bb9b61843e6ffce4229", null ],
+      [ "LeftToRightOverride", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a7da6ac258f3ffc392039e7698315b3b9", null ],
+      [ "ArabicLetter", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a55a61de19cf9da610c1a2ebc0e1d3241", null ],
+      [ "RightToLeftEmbedding", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688ad809beef6753d731fe4f77eb30136818", null ],
+      [ "RightToLeftOverride", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688ac400594e754baeec2cdde81d13a67c66", null ],
+      [ "PopDirectionalFormat", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a8aa9639c74bc2f30272c22d648996eaf", null ],
+      [ "NonspacingMark", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a612750908de95bcf6789b01a58e62fe4", null ],
+      [ "BoundaryNeutral", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a2a7bc3fb54a75a36ddcd191083816d9a", null ],
+      [ "FirstStrongIsolate", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a554c0df5d22bca26474a80de302e40d1", null ],
+      [ "LeftToRightIsolate", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a5657288472b37ddce57c4e5638339487", null ],
+      [ "RightToLeftIsolate", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688aa5d3611b115d62a52eb7d21a38853129", null ],
+      [ "PopDirectionalIsolate", "classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a50c080719f751aef396d8f12c9f31682", null ]
+    ] ],
+    [ "BidiClass", "classicu4x_1_1BidiClass.html#a46e526241a88b1b346166be8a8274c26", null ],
+    [ "BidiClass", "classicu4x_1_1BidiClass.html#a22cfe4a4c78e0c7a3369a7d3fb9df251", null ],
+    [ "for_char", "classicu4x_1_1BidiClass.html#a3897586981312d34f67944a18c65427a", null ],
+    [ "from_integer_value", "classicu4x_1_1BidiClass.html#aafef1921a079946dde67e7b32fb0a1ee", null ],
+    [ "long_name", "classicu4x_1_1BidiClass.html#a9fab3c72ae71da782e6d0290c7d20631", null ],
+    [ "operator bool", "classicu4x_1_1BidiClass.html#a3f0fb7e07f867b0797e70edf78fb27d4", null ],
+    [ "operator Value", "classicu4x_1_1BidiClass.html#a6e72f73467a476f0af23fef4a474174b", null ],
+    [ "short_name", "classicu4x_1_1BidiClass.html#a9e97082b92ccfe959d055e2e5a9929e2", null ],
+    [ "to_integer_value", "classicu4x_1_1BidiClass.html#a7e92eb6da44082c8b92622eeb5ab2fe2", null ]
+];

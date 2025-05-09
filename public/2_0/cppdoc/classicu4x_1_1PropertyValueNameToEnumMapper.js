@@ -1,0 +1,28 @@
+var classicu4x_1_1PropertyValueNameToEnumMapper =
+[
+    [ "create_bidi_class", "classicu4x_1_1PropertyValueNameToEnumMapper.html#acc14129df5096d873c34fcf3af9c1dcd", null ],
+    [ "create_bidi_class_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a0ba95be0916b1d3b8683f207c2ad7a84", null ],
+    [ "create_east_asian_width", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a75ca3b83c5bd2979575fea2c71ef21c6", null ],
+    [ "create_east_asian_width_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a2d291eaf3c045e9f1d704ec99675d396", null ],
+    [ "create_general_category", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a963f3186faf76f2e0f136723e592b494", null ],
+    [ "create_general_category_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a8f3046e140d78accbd031e2c9623ab76", null ],
+    [ "create_grapheme_cluster_break", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a5ef282209b027a746e5efa9eba187500", null ],
+    [ "create_grapheme_cluster_break_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#abefa1d7c191c257a188620ebd608ff87", null ],
+    [ "create_hangul_syllable_type", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a91618e6cced9d69ed639c299ccfa496a", null ],
+    [ "create_hangul_syllable_type_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#aa952a61b39a3123b040e5b3e4d51dc47", null ],
+    [ "create_indic_syllabic_category", "classicu4x_1_1PropertyValueNameToEnumMapper.html#ae14f0a33759ca375bad6d309e9cd54d6", null ],
+    [ "create_indic_syllabic_category_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#affac35a1dfbf9fb662acd89b10b8c0af", null ],
+    [ "create_line_break", "classicu4x_1_1PropertyValueNameToEnumMapper.html#ac11e1aa16508e9070fcaee8a7b5bc742", null ],
+    [ "create_line_break_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#abeac2931d244672d4efbe236a74d60c1", null ],
+    [ "create_script", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a0fe3957dff8ba3eda4454c12bc540d31", null ],
+    [ "create_script_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#af9d78880c164ee91b54acd7d07e68261", null ],
+    [ "create_sentence_break", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a86a37fe243db99bfaedc261172d10a86", null ],
+    [ "create_sentence_break_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a7f8c715fd0bbfe001973d56d503b8513", null ],
+    [ "create_vertical_orientation", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a95790ff3e1cdb3673058d42438390605", null ],
+    [ "create_vertical_orientation_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a705ead0daf352b4c11d5e62d855d52ca", null ],
+    [ "create_word_break", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a6f82127d6e9dc8c7cb66551b99afe58a", null ],
+    [ "create_word_break_with_provider", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a81be130d78d87a8763d04e2509dd4920", null ],
+    [ "get_loose", "classicu4x_1_1PropertyValueNameToEnumMapper.html#ab9a116e151a5d8f02e361428cef512bb", null ],
+    [ "get_strict", "classicu4x_1_1PropertyValueNameToEnumMapper.html#a3c61eae10dd6759c991ef77bc4fde9cb", null ],
+    [ "operator delete", "classicu4x_1_1PropertyValueNameToEnumMapper.html#aeb16e0b0b4025ed0f01e7919f4ea46a2", null ]
+];

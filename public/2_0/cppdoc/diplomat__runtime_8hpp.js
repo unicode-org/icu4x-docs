@@ -1,0 +1,26 @@
+var diplomat__runtime_8hpp =
+[
+    [ "diplomat::Ok< T >", "structdiplomat_1_1Ok.html", "structdiplomat_1_1Ok" ],
+    [ "diplomat::Err< T >", "structdiplomat_1_1Err.html", "structdiplomat_1_1Err" ],
+    [ "diplomat::result< T, E >", "classdiplomat_1_1result.html", "classdiplomat_1_1result" ],
+    [ "diplomat::Utf8Error", "classdiplomat_1_1Utf8Error.html", null ],
+    [ "diplomat::span< T, Extent >", "classdiplomat_1_1span.html", "classdiplomat_1_1span" ],
+    [ "diplomat::as_ffi< T, typename >", "structdiplomat_1_1as__ffi.html", "structdiplomat_1_1as__ffi" ],
+    [ "diplomat::fn_traits< std::function< Ret(Args...)> >", "structdiplomat_1_1fn__traits_3_01std_1_1function_3_01Ret_07Args_8_8_8_08_4_01_4.html", "structdiplomat_1_1fn__traits_3_01std_1_1function_3_01Ret_07Args_8_8_8_08_4_01_4" ],
+    [ "diplomat::inner< T >", "structdiplomat_1_1inner.html", "structdiplomat_1_1inner" ],
+    [ "diplomat::inner< std::unique_ptr< T > >", "structdiplomat_1_1inner_3_01std_1_1unique__ptr_3_01T_01_4_01_4.html", "structdiplomat_1_1inner_3_01std_1_1unique__ptr_3_01T_01_4_01_4" ],
+    [ "diplomat::inner< std::optional< T > >", "structdiplomat_1_1inner_3_01std_1_1optional_3_01T_01_4_01_4.html", "structdiplomat_1_1inner_3_01std_1_1optional_3_01T_01_4_01_4" ],
+    [ "diplomat::has_next< T, U >", "structdiplomat_1_1has__next.html", null ],
+    [ "diplomat::has_next< T, std::void_t< decltype(std::declval< T >().next())> >", "structdiplomat_1_1has__next_3_01T_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01T_01_4_07_08_8next_07_08_08_4_01_4.html", null ],
+    [ "diplomat::next_to_iter_helper< T >", "structdiplomat_1_1next__to__iter__helper.html", "structdiplomat_1_1next__to__iter__helper" ],
+    [ "MAKE_SLICES", "diplomat__runtime_8hpp.html#a686e385559fc8176166fb8978fc6ea69", null ],
+    [ "MAKE_SLICES_AND_OPTIONS", "diplomat__runtime_8hpp.html#aab93544be56e890cba552b2196dc7562", null ],
+    [ "as_ffi_t", "diplomat__runtime_8hpp.html#acc6167a6caaf68adfeb7548dc811b9ba", null ],
+    [ "replace_fn_t", "diplomat__runtime_8hpp.html#ab5257ee9fccab8b2d7dc6602c0db5615", null ],
+    [ "replace_ref_with_ptr_t", "diplomat__runtime_8hpp.html#a1247de30a7aad3690034682402e9219e", null ],
+    [ "replace_string_view_t", "diplomat__runtime_8hpp.html#abbce4025e42d06d18dc734ec918e82b6", null ],
+    [ "fn_traits", "diplomat__runtime_8hpp.html#ae85564ac7d14790048e4f69904a560fd", null ],
+    [ "get_inner_if_present", "diplomat__runtime_8hpp.html#aa1cb903608dfae7735abd9d9c94ff9b5", null ],
+    [ "dynamic_extent", "diplomat__runtime_8hpp.html#aa34dd939882dbdd365512a8baeac5074", null ],
+    [ "has_next_v", "diplomat__runtime_8hpp.html#a3c92b478bb82afc239501fd1372875a2", null ]
+];

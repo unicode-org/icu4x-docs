@@ -40,7 +40,7 @@ export default defineConfig({
 					label: "leadingNavLinks",
 					items: [
 						{ label: "Overview", link: "/overview" },
-						{ label: "Quickstart", link: "/" + latest_dir_name + "/quickstart" }
+						{ label: "Quickstart", link: "/" + latest_dir_name + "/tutorials/quickstart" }
 					]
 				},
 				{
@@ -55,7 +55,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Previous Versions',
-					collapsed: false,
+					collapsed: true,
 					items: [
 						{
 							label: 'Version 1.5',

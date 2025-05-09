@@ -1,0 +1,25 @@
+var classicu4x_1_1Date =
+[
+    [ "calendar", "classicu4x_1_1Date.html#ae4cb01548e8a8e5910fa3ea44ebae934", null ],
+    [ "day_of_month", "classicu4x_1_1Date.html#a551c88461752720c36381c2fa483c1c6", null ],
+    [ "day_of_week", "classicu4x_1_1Date.html#a07125eaae4d7e5b5d58123c7e627f30b", null ],
+    [ "day_of_year", "classicu4x_1_1Date.html#ada54dad944cad1d488bd61e1d5a30e08", null ],
+    [ "days_in_month", "classicu4x_1_1Date.html#a0b5777841a828a6f2efa278aaf41e496", null ],
+    [ "days_in_year", "classicu4x_1_1Date.html#ac22215e965eef2809f63aaa35dbceb8b", null ],
+    [ "era", "classicu4x_1_1Date.html#a4a0d49a3160c9840bdaa113c75dc87fe", null ],
+    [ "era_year_or_related_iso", "classicu4x_1_1Date.html#acd4f92e5829754147e271a72c5561baa", null ],
+    [ "extended_year", "classicu4x_1_1Date.html#acf95a01b8a4a75112e059abda4fde932", null ],
+    [ "from_codes_in_calendar", "classicu4x_1_1Date.html#ac61981de66adc7f786f916f261a5f608", null ],
+    [ "from_iso_in_calendar", "classicu4x_1_1Date.html#a99081c21aba2a5a44520eeb935ae9a04", null ],
+    [ "from_rata_die", "classicu4x_1_1Date.html#a5a2b9bb2f307820900dc6d7bb140e309", null ],
+    [ "from_string", "classicu4x_1_1Date.html#ab340f9cc464a7b8605a1281c7a5fe95a", null ],
+    [ "month_code", "classicu4x_1_1Date.html#af130b36203767cb3afd38054640348bb", null ],
+    [ "month_is_leap", "classicu4x_1_1Date.html#a9980cd223340f5eb4e00195d7983bcfe", null ],
+    [ "month_number", "classicu4x_1_1Date.html#a4fc8aa619d3151d532efe1145738bbeb", null ],
+    [ "months_in_year", "classicu4x_1_1Date.html#a588ae380d8efe4172b727a536ba655a6", null ],
+    [ "operator delete", "classicu4x_1_1Date.html#ad24b94e8436a4384f9d176272ccc4038", null ],
+    [ "ordinal_month", "classicu4x_1_1Date.html#a9e215c22dc71bf82275bfff95d1b599f", null ],
+    [ "to_calendar", "classicu4x_1_1Date.html#aac583c49c4f4274ce5fac89564971a29", null ],
+    [ "to_iso", "classicu4x_1_1Date.html#a09a72f981fb2d66961fc6bbb93cf1c1a", null ],
+    [ "to_rata_die", "classicu4x_1_1Date.html#a2e4e1153234cff33dff912fecbff8bb2", null ]
+];

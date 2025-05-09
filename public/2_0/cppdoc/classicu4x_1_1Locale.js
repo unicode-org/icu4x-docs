@@ -1,0 +1,26 @@
+var classicu4x_1_1Locale =
+[
+    [ "basename", "classicu4x_1_1Locale.html#a48babb6a0b389dac8e87b543689cb939", null ],
+    [ "clone", "classicu4x_1_1Locale.html#a1b345f832693deecd7627f0ab842cd3d", null ],
+    [ "compare_to", "classicu4x_1_1Locale.html#a0d82cad3e9ef8e1b00e533a63a2c7709", null ],
+    [ "compare_to_string", "classicu4x_1_1Locale.html#aefc32932b7f6bed5b922f5034b1a11d1", null ],
+    [ "from_string", "classicu4x_1_1Locale.html#a65957310c9147e0c92ea6e6843675836", null ],
+    [ "get_unicode_extension", "classicu4x_1_1Locale.html#a7a77be76a31f8f60fff780a9224f10f2", null ],
+    [ "language", "classicu4x_1_1Locale.html#ae24f4494f6946d3a4574ef47ca01c4c1", null ],
+    [ "normalize", "classicu4x_1_1Locale.html#af1258cccd4fdf7b7547e0738cba13658", null ],
+    [ "normalizing_eq", "classicu4x_1_1Locale.html#a7a4365cfc504f2b26383df410b92c511", null ],
+    [ "operator delete", "classicu4x_1_1Locale.html#a16d3d5e99c99350a906b1414f99d2980", null ],
+    [ "operator!=", "classicu4x_1_1Locale.html#ac31e6be4ad443ba22dd9862785dfbed7", null ],
+    [ "operator<", "classicu4x_1_1Locale.html#a84b3f819155bba67f5919508448ad953", null ],
+    [ "operator<=", "classicu4x_1_1Locale.html#a7c90f47a7e94dbf9ed72c5db8dd10fc6", null ],
+    [ "operator==", "classicu4x_1_1Locale.html#adad7d64ceb1868dbfb262342b82144ee", null ],
+    [ "operator>", "classicu4x_1_1Locale.html#a6e580943279ff42f5c0a81564277ce89", null ],
+    [ "operator>=", "classicu4x_1_1Locale.html#a50eda2442699e5f81291d7796581798c", null ],
+    [ "region", "classicu4x_1_1Locale.html#ad978304ad36bba568489478897695cc4", null ],
+    [ "script", "classicu4x_1_1Locale.html#a0155e96398294608c53c5593d81fb431", null ],
+    [ "set_language", "classicu4x_1_1Locale.html#a211c2c022c411dad66168a6d692a652e", null ],
+    [ "set_region", "classicu4x_1_1Locale.html#a2eccc3215465da87e76e6937dd1cdeff", null ],
+    [ "set_script", "classicu4x_1_1Locale.html#a129d1fcf33104a1f7ea9239f746d9d01", null ],
+    [ "to_string", "classicu4x_1_1Locale.html#a72ecb4d75b8955de8279d73ebcafe1c2", null ],
+    [ "unknown", "classicu4x_1_1Locale.html#a50f10611bbde92ce372aae816b02ff6c", null ]
+];

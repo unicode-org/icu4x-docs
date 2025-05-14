@@ -1,5 +1,7 @@
 ---
 title: Quickstart
+sidebar:
+    order: 0
 ---
 
 
@@ -167,7 +169,7 @@ This concludes this introduction tutorial. With the help of `DateTimeFormat`, `L
 
 Internationalization is a broad domain and there are many more components in `ICU4X`.
 
-Next, learn how to [generate optimized data for your binary](/2_0/tutorials/data-management), [configure your Cargo.toml file](/2_0/tutorials/cargo), or continue exploring by reading [the docs](https://docs.rs/icu/2.0.0/).
+Next, learn how to [generate optimized data for your binary](/2_0/tutorials/data-management), or continue exploring by reading [the docs](https://docs.rs/icu/2.0.0/).
 
 
 

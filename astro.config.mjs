@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightUtils from "@lorenzo_lewis/starlight-utils";
+import starlightUtils from '@lorenzo_lewis/starlight-utils';
 import starlightLinksValidator from 'starlight-links-validator'
 
 
@@ -22,7 +22,7 @@ export default defineConfig({
 			plugins: [
 				starlightUtils({
 					navLinks: {
-						leading: { useSidebarLabelled: "leadingNavLinks" },
+						leading: { useSidebarLabelled: 'leadingNavLinks' },
 					},
 				}),
 				starlightLinksValidator()
@@ -37,32 +37,75 @@ export default defineConfig({
 			credits: false,
 			sidebar: [
 				{
-					label: "leadingNavLinks",
+					label: 'leadingNavLinks',
 					items: [
-						{ label: "Overview", link: "/overview" },
-						{ label: "Quickstart", link: "/" + latest_dir_name + "/tutorials/quickstart" }
+						{ label: 'Quickstart', link: '/' + latest_dir_name + '/tutorials/quickstart' },
+						{ label: 'Web Demo', link: '/' + latest_dir_name + '/wasmdemo' },
 					]
 				},
 				{
 					label: 'Start Here',
 					items: [
-						'overview'
+						'principles'
 					],
 				},
 				{
 					label: latest_display_name,
-					autogenerate: { directory: latest_dir_name},
-				},
-				{
-					label: 'Previous Versions',
-					collapsed: true,
+					badge: {
+						text: 'New',
+						variant: 'success',
+					},
 					items: [
 						{
-							label: 'Version 1.5',
-							autogenerate: { directory: '1_5'},
-							collapsed: true,
-						}
-					],
+							label: 'Code examples',
+							link: 'https://github.com/unicode-org/icu4x/tree/release/2.0/examples',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'Web demo',
+							slug: '2_0/wasmdemo',
+						},
+						{
+							label: 'API documentation',
+							items: [
+								{
+									label: 'Rust',
+									link: 'https://docs.rs/icu/2.0.0',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+
+								},
+								{
+									label: 'C++',
+									link: '/2_0/cppdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'Dart',
+									link: '/2_0/dartdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'TypeScript',
+									link: '/2_0/tsdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+							],
+						},
+						{
+							label: 'Tutorials',
+							autogenerate: { directory: '2_0/tutorials' },
+						},
+					]
+				},
+				{
+					label: 'Version 1.5',
+					autogenerate: { directory: '1_5'},
+					collapsed: true,
 				},
 			],
 		}),

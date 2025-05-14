@@ -1,5 +1,5 @@
 ---
-title: WASM demo
+title: Web demo
 ---
 
 This uses Rust-to-WASM compilation to run ICU4X in the browser.

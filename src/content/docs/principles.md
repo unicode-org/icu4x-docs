@@ -9,11 +9,11 @@ These principles are not cast in stone, but are strong guidelines for developers
 
 Above all, ICU4X must provide modern, standards-compliant APIs that encourage best internationalization practices and produce correct results for all languages and locales. No language or locale should be at a structural disadvantage.
 
-## Code practices
+## Code Style
 
 All ICU4X code must conform to the style guide, including the following:
 
-## Safety
+### Safety
 
 *What:* All standard Rust practices regarding mutability, lifetimes and safety must be followed. Unsafe code should be avoided in the core library; if it must be used, it must be reviewed by a Rust expert and have an appropriate safety comment.
 

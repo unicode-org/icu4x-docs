@@ -84,7 +84,7 @@ export default defineConfig({
 								},
 								{
 									label: 'Dart',
-									link: '/2_0/dartdoc/',
+									link: '/2_0/dartdoc/icu',
 									badge: { text: '↗', variant: 'tip' },
 									attrs: { target: '_blank' },
 								},

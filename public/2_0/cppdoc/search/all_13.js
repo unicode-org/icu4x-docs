@@ -18,8 +18,8 @@ var searchData=
   ['scriptwithextensionsborrowed_15',['ScriptWithExtensionsBorrowed',['../classicu4x_1_1ScriptWithExtensionsBorrowed.html',1,'icu4x']]],
   ['scriptwithextensionsborrowed_2ed_2ehpp_16',['ScriptWithExtensionsBorrowed.d.hpp',['../ScriptWithExtensionsBorrowed_8d_8hpp.html',1,'']]],
   ['scriptwithextensionsborrowed_2ehpp_17',['ScriptWithExtensionsBorrowed.hpp',['../ScriptWithExtensionsBorrowed_8hpp.html',1,'']]],
-  ['second_18',['second',['../classicu4x_1_1Time.html#a1cc7da6021988b12bfd4b0ce141d915c',1,'icu4x::Time::second()'],['../structicu4x_1_1Decomposed.html#a22f85c96d920159a1cf210d833cd7f74',1,'icu4x::Decomposed::second()']]],
-  ['second_19',['Second',['../classicu4x_1_1TimePrecision.html#a592fe2a81ede64f88e747cc2d5dd4173a9a25c63a31e052dac509a5fb7e3ce1f7',1,'icu4x::TimePrecision']]],
+  ['second_18',['Second',['../classicu4x_1_1TimePrecision.html#a592fe2a81ede64f88e747cc2d5dd4173a9a25c63a31e052dac509a5fb7e3ce1f7',1,'icu4x::TimePrecision']]],
+  ['second_19',['second',['../classicu4x_1_1Time.html#a1cc7da6021988b12bfd4b0ce141d915c',1,'icu4x::Time::second()'],['../structicu4x_1_1Decomposed.html#a22f85c96d920159a1cf210d833cd7f74',1,'icu4x::Decomposed::second()']]],
   ['secondary_20',['Secondary',['../classicu4x_1_1CollatorStrength.html#a53b03d515b37da584ab70f12987c0c1fafde8476789b5247152f3df97f777b63e',1,'icu4x::CollatorStrength']]],
   ['seconds_21',['seconds',['../classicu4x_1_1UtcOffset.html#a336079cd96e622752419ca29a34ef511',1,'icu4x::UtcOffset']]],
   ['seconds_5fpart_22',['seconds_part',['../classicu4x_1_1UtcOffset.html#acf1a6dc233d2d31473f732c22a39ca13',1,'icu4x::UtcOffset']]],
@@ -107,8 +107,8 @@ var searchData=
   ['surrogate_104',['Surrogate',['../classicu4x_1_1GeneralCategory.html#aa340792cb4c9a55533f81ff61067b355a1c77a9c08380a763406760a8ecefe7c6',1,'icu4x::GeneralCategory::Surrogate()'],['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a75f594160ebe42365f6e1934e9a3b5d3',1,'icu4x::LineBreak::Surrogate()']]],
   ['syllablemodifier_105',['SyllableModifier',['../classicu4x_1_1IndicSyllabicCategory.html#a59a0ee28dee104c40b344ef35b1897bfaacfd795a75037e8fc30f4b524ea821db',1,'icu4x::IndicSyllabicCategory']]],
   ['sylotinagri_106',['SylotiNagri',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4abad2d9f304ac95cd400bb04b023109e2',1,'icu4x::Script']]],
-  ['symbol_107',['symbol',['../structicu4x_1_1GeneralCategoryGroup.html#a11e2f5b6ea99b5722161e94e03b6f100',1,'icu4x::GeneralCategoryGroup']]],
-  ['symbol_108',['Symbol',['../classicu4x_1_1CollatorMaxVariable.html#a5f835dd70a18053d8c33290b8d9575d4aab8e7ab6bfec63b51c8de0b802b79080',1,'icu4x::CollatorMaxVariable']]],
+  ['symbol_107',['Symbol',['../classicu4x_1_1CollatorMaxVariable.html#a5f835dd70a18053d8c33290b8d9575d4aab8e7ab6bfec63b51c8de0b802b79080',1,'icu4x::CollatorMaxVariable']]],
+  ['symbol_108',['symbol',['../structicu4x_1_1GeneralCategoryGroup.html#a11e2f5b6ea99b5722161e94e03b6f100',1,'icu4x::GeneralCategoryGroup']]],
   ['syntax_109',['Syntax',['../classicu4x_1_1DecimalParseError.html#a386ba54f87a73d77d738b325fb207c35aa308d2e4eb0201a645f6ccc22fe595d5',1,'icu4x::DecimalParseError']]],
   ['syriac_110',['Syriac',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a9a4eb294b71a91878d2950b0a994aec1',1,'icu4x::Script']]]
 ];

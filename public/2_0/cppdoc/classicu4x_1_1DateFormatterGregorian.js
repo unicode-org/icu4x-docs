@@ -20,6 +20,6 @@ var classicu4x_1_1DateFormatterGregorian =
     [ "create_ymd_with_provider", "classicu4x_1_1DateFormatterGregorian.html#a92d1a7d6c4e1f874f7d15ff11626001f", null ],
     [ "create_ymde", "classicu4x_1_1DateFormatterGregorian.html#aa57733a9e96a6010c22709b8c5c24583", null ],
     [ "create_ymde_with_provider", "classicu4x_1_1DateFormatterGregorian.html#a85674c729b6483c7ce317774f7955d03", null ],
-    [ "format_iso", "classicu4x_1_1DateFormatterGregorian.html#aee62d7366391d2eb8cb22e5baadb407b", null ],
+    [ "format_iso", "classicu4x_1_1DateFormatterGregorian.html#a0cf8d2c56e23df967cdea202a2ecfed5", null ],
     [ "operator delete", "classicu4x_1_1DateFormatterGregorian.html#a30595fd8b37aec2fd6eb1468ec751927", null ]
 ];

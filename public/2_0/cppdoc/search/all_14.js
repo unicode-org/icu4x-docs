@@ -96,10 +96,10 @@ var searchData=
   ['trim_5fend_93',['trim_end',['../classicu4x_1_1Decimal.html#ae3c2dd46659dee56e1c2652a4b1e1b9a',1,'icu4x::Decimal']]],
   ['trim_5fend_5fif_5finteger_94',['trim_end_if_integer',['../classicu4x_1_1Decimal.html#a7398ee49db93b071fd8db60535e4a5b2',1,'icu4x::Decimal']]],
   ['trim_5fstart_95',['trim_start',['../classicu4x_1_1Decimal.html#a6eea3494272ab3e2dd44eaeecb140cde',1,'icu4x::Decimal']]],
-  ['trunc_96',['trunc',['../classicu4x_1_1Decimal.html#aec506cabdba510d678fa041e775eedde',1,'icu4x::Decimal']]],
-  ['trunc_97',['Trunc',['../classicu4x_1_1DecimalSignedRoundingMode.html#a0a04f8cef45189954e2be7a7baef6871ae885072f476de8ff66fa7a5bc463c840',1,'icu4x::DecimalSignedRoundingMode']]],
+  ['trunc_96',['Trunc',['../classicu4x_1_1DecimalSignedRoundingMode.html#a0a04f8cef45189954e2be7a7baef6871ae885072f476de8ff66fa7a5bc463c840',1,'icu4x::DecimalSignedRoundingMode']]],
+  ['trunc_97',['trunc',['../classicu4x_1_1Decimal.html#aec506cabdba510d678fa041e775eedde',1,'icu4x::Decimal']]],
   ['tuesday_98',['Tuesday',['../classicu4x_1_1Weekday.html#ac2d828ae99345e7ea0b542f4899a86b5adf3bd2cad9931b9a34a1bd9e51b6e665',1,'icu4x::Weekday']]],
-  ['two_99',['Two',['../classicu4x_1_1PluralCategory.html#ae60ec8df05298ce5ff42858272517e3ba1a5099bc04a16ce11ddf7d32dc47ee90',1,'icu4x::PluralCategory']]],
-  ['two_100',['two',['../structicu4x_1_1PluralCategories.html#aab73e59d76f0e6ca5d49a336e9a78444',1,'icu4x::PluralCategories']]],
+  ['two_99',['two',['../structicu4x_1_1PluralCategories.html#aab73e59d76f0e6ca5d49a336e9a78444',1,'icu4x::PluralCategories']]],
+  ['two_100',['Two',['../classicu4x_1_1PluralCategory.html#ae60ec8df05298ce5ff42858272517e3ba1a5099bc04a16ce11ddf7d32dc47ee90',1,'icu4x::PluralCategory']]],
   ['type_101',['type',['../structdiplomat_1_1as__ffi.html#af85169f084ab8f82cda5a8436b5051b8',1,'diplomat::as_ffi::type()'],['../structdiplomat_1_1inner.html#aa2cd0771f29ea63d1f57b265415f06bc',1,'diplomat::inner::type()'],['../structdiplomat_1_1inner_3_01std_1_1unique__ptr_3_01T_01_4_01_4.html#ab1ec3e8225bfc2011a3d7900da52357d',1,'diplomat::inner&lt; std::unique_ptr&lt; T &gt; &gt;::type()'],['../structdiplomat_1_1inner_3_01std_1_1optional_3_01T_01_4_01_4.html#a4fe8b8891e4bbc1fdbc0b88611701482',1,'diplomat::inner&lt; std::optional&lt; T &gt; &gt;::type()']]]
 ];

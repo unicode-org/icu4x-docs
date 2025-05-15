@@ -10,7 +10,7 @@ var classicu4x_1_1Date =
     [ "era_year_or_related_iso", "classicu4x_1_1Date.html#acd4f92e5829754147e271a72c5561baa", null ],
     [ "extended_year", "classicu4x_1_1Date.html#acf95a01b8a4a75112e059abda4fde932", null ],
     [ "from_codes_in_calendar", "classicu4x_1_1Date.html#ac61981de66adc7f786f916f261a5f608", null ],
-    [ "from_iso_in_calendar", "classicu4x_1_1Date.html#a99081c21aba2a5a44520eeb935ae9a04", null ],
+    [ "from_iso_in_calendar", "classicu4x_1_1Date.html#a24c0dd7696c5249b655ce58508c2c009", null ],
     [ "from_rata_die", "classicu4x_1_1Date.html#a5a2b9bb2f307820900dc6d7bb140e309", null ],
     [ "from_string", "classicu4x_1_1Date.html#ab340f9cc464a7b8605a1281c7a5fe95a", null ],
     [ "month_code", "classicu4x_1_1Date.html#af130b36203767cb3afd38054640348bb", null ],

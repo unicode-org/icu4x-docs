@@ -74,7 +74,7 @@ var NAVTREEINDEX =
 "classicu4x_1_1CodePointSetBuilder.html#a194e3a1cd082ef7c756b4033d7efcc53",
 "classicu4x_1_1CodePointSetData.html#a9031f5d75f0be81573f3b4a3990a16dd",
 "classicu4x_1_1CollatorMaxVariable.html#a1c688aa71d7cafda70dc0d244f794887",
-"classicu4x_1_1DateFormatterGregorian.html#ab52d89f327bdc12702bd3ea34e3dc706",
+"classicu4x_1_1DateFormatterGregorian.html#aa94ee6cc72b5df6ef0ce2fbf207eef74",
 "classicu4x_1_1DecimalFormatter.html#af1cf70ed1305dadbe7df2c410aaf43ef",
 "classicu4x_1_1ExemplarCharacters.html#ac114466c04c06cef326f86557c0dff22",
 "classicu4x_1_1IndicSyllabicCategory.html",
@@ -85,7 +85,7 @@ var NAVTREEINDEX =
 "classicu4x_1_1SentenceBreak.html#aa440b52026864d58734105a90b93ffdeae84eb5c8b7e1ba28f9c27b324d6a9908",
 "classicu4x_1_1TransformResult.html#a59d0d64f8e1324e69126200f68aeb87b",
 "classicu4x_1_1WordSegmenter.html#a2ba54e711336b1d6d91c64863d765394",
-"functions_d.html",
+"functions_c.html",
 "structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae"
 ];
 

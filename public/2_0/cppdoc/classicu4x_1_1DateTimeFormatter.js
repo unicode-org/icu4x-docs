@@ -14,7 +14,7 @@ var classicu4x_1_1DateTimeFormatter =
     [ "create_ymdet_with_provider", "classicu4x_1_1DateTimeFormatter.html#abc6a888c7d5dfb4f784f955a09083d2b", null ],
     [ "create_ymdt", "classicu4x_1_1DateTimeFormatter.html#a9b5d700dd038a71c9fa9fed08f40399b", null ],
     [ "create_ymdt_with_provider", "classicu4x_1_1DateTimeFormatter.html#a4e5b471011dbf5a28f451c7ca8381df3", null ],
-    [ "format_iso", "classicu4x_1_1DateTimeFormatter.html#a22a7f1ea8689ebee98593cf3552826d6", null ],
+    [ "format_iso", "classicu4x_1_1DateTimeFormatter.html#abc6099c5900201e7844dbde525a7c784", null ],
     [ "format_same_calendar", "classicu4x_1_1DateTimeFormatter.html#a4237af4b0fc020cd49bf98040ffcdf97", null ],
     [ "operator delete", "classicu4x_1_1DateTimeFormatter.html#a97fee9cec820d75a058c2da826c2a40f", null ]
 ];

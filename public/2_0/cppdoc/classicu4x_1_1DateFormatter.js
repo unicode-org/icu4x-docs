@@ -20,7 +20,7 @@ var classicu4x_1_1DateFormatter =
     [ "create_ymd_with_provider", "classicu4x_1_1DateFormatter.html#a9f992eacf3558ab896bc8987cb6f4848", null ],
     [ "create_ymde", "classicu4x_1_1DateFormatter.html#a6ac533600685c03aeb70d9432409653a", null ],
     [ "create_ymde_with_provider", "classicu4x_1_1DateFormatter.html#ade467a750d04f621565f7c9cffe6bbe4", null ],
-    [ "format_iso", "classicu4x_1_1DateFormatter.html#a93ab92c7a5bb832dd2c4721068ef8489", null ],
+    [ "format_iso", "classicu4x_1_1DateFormatter.html#a7865cd9171b6f048e550ce9822e8fde5", null ],
     [ "format_same_calendar", "classicu4x_1_1DateFormatter.html#aa5476f4f61dcb2b4f4cb8841f12be5fa", null ],
     [ "operator delete", "classicu4x_1_1DateFormatter.html#a7aa51387fbc57b1cd1d000e83534e314", null ]
 ];

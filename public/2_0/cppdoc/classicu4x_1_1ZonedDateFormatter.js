@@ -16,6 +16,6 @@ var classicu4x_1_1ZonedDateFormatter =
     [ "create_specific_long_with_provider", "classicu4x_1_1ZonedDateFormatter.html#a04b9b3542e9c18e3a437933337ccaa36", null ],
     [ "create_specific_short", "classicu4x_1_1ZonedDateFormatter.html#a9d53b9f19803570dd8c363b1ac07b62c", null ],
     [ "create_specific_short_with_provider", "classicu4x_1_1ZonedDateFormatter.html#aa0ac10ab8f5c6c162ab7e6d2ec9593f4", null ],
-    [ "format_iso", "classicu4x_1_1ZonedDateFormatter.html#aa10a1b42bea729498eb3817d8af8cec5", null ],
+    [ "format_iso", "classicu4x_1_1ZonedDateFormatter.html#ae6d744dce67736658e4b7bea809db107", null ],
     [ "operator delete", "classicu4x_1_1ZonedDateFormatter.html#a66efaf8b4afdbe589a8e5b07fdd10781", null ]
 ];

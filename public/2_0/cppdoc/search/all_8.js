@@ -29,8 +29,8 @@ var searchData=
   ['hijritabulartypeiithursday_26',['HijriTabularTypeIIThursday',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07aab7d6ebbe226144d442f3e57c8f8657c',1,'icu4x::CalendarKind']]],
   ['hijriummalqura_27',['HijriUmmAlQura',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07aabbe7bd2f28e67c69d1287999ecdd376',1,'icu4x::CalendarKind']]],
   ['hiragana_28',['Hiragana',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a476d903caf249c1190e02dbbf960f181',1,'icu4x::Script']]],
-  ['hour_29',['hour',['../classicu4x_1_1Time.html#a2819aaa8a9d038884e3176b791c7cafa',1,'icu4x::Time']]],
-  ['hour_30',['Hour',['../classicu4x_1_1TimePrecision.html#a592fe2a81ede64f88e747cc2d5dd4173a167890a27d0d72e56348bcd7757ff7ca',1,'icu4x::TimePrecision']]],
+  ['hour_29',['Hour',['../classicu4x_1_1TimePrecision.html#a592fe2a81ede64f88e747cc2d5dd4173a167890a27d0d72e56348bcd7757ff7ca',1,'icu4x::TimePrecision']]],
+  ['hour_30',['hour',['../classicu4x_1_1Time.html#a2819aaa8a9d038884e3176b791c7cafa',1,'icu4x::Time']]],
   ['hours_5fpart_31',['hours_part',['../classicu4x_1_1UtcOffset.html#a2aa86444b166bd7330a533623e29e611',1,'icu4x::UtcOffset']]],
   ['hyphen_32',['Hyphen',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a6ed9e4e2a3ed1d44b089f1491ec79711',1,'icu4x::LineBreak']]],
   ['hyphen_5ffor_5fchar_33',['hyphen_for_char',['../classicu4x_1_1CodePointSetData.html#ac00efa0d2e006ceb8e3340a2fa52e2e5',1,'icu4x::CodePointSetData']]]

@@ -1,5 +1,6 @@
 var NAVTREEINDEX20 =
 {
+"structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae":[2,0,1,29,0],
 "structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae":[1,0,1,29,0],
 "structicu4x_1_1DateTime.html":[2,0,1,37],
 "structicu4x_1_1DateTime.html":[1,0,1,37],

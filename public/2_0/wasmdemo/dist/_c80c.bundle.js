@@ -6,7 +6,7 @@
  * or disable the default devtool with "devtool: false".
  * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
  */
-(self["webpackChunkicu4x_web_demo"] = self["webpackChunkicu4x_web_demo"] || []).push([["_c80c"],{
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["_c80c"],{
 
 /***/ "?c80c":
 /*!********************!*\
@@ -14,7 +14,7 @@
   \********************/
 /***/ (() => {
 
-eval("/* (ignored) */\n\n//# sourceURL=webpack://icu4x-web-demo/fs_(ignored)?");
+eval("/* (ignored) */\n\n//# sourceURL=webpack:///fs_(ignored)?");
 
 /***/ })
 

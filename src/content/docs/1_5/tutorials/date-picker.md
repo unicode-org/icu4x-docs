@@ -1,5 +1,7 @@
 ---
 title: Interactive Date Picker
+sidebar:
+    order: 10
 ---
 
 
@@ -228,7 +230,7 @@ Now we would also like to format the current time.
 
 ### Rust Part 4
 
-Use the API documentation for [`icu::calendar::DateTime`](https://docs.rs/icu/1.5.0/icu/calendar/struct.DateTime.html) and [`icu::datetime::DateTimeFormatter`](https://docs.rs/icu/1.5.0/icu/datetime/struct.DateTimeFormatter.html) to expand your app to format both date and time.
+Use the API documentation for [`icu::calendar::DateTime`](https://docs.rs/icu/1.5/icu/calendar/struct.DateTime.html) and [`icu::datetime::DateTimeFormatter`](https://docs.rs/icu/1.5/icu/datetime/struct.DateTimeFormatter.html) to expand your app to format both date and time.
 
 Hint: You can use `Default::default()` for the `DateTimeFormatterOptions` argument.
 

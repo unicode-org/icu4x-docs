@@ -123,7 +123,42 @@ export default defineConfig({
 				},
 				{
 					label: 'Version 1.5',
-					autogenerate: { directory: '1_5' },
+					items: [
+						{
+							label: 'API documentation',
+							items: [
+								{
+									label: 'Rust',
+									link: 'https://docs.rs/icu/1.5',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+
+								},
+								{
+									label: 'C++',
+									link: '/1_5/cppdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'Dart',
+									link: '/1_5/dartdoc/icu',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'TypeScript',
+									link: '/1_5/tsdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+							],
+						},
+						{
+							label: 'Tutorials',
+							autogenerate: { directory: '1_5/tutorials' },
+						},
+					],
 					collapsed: latest_dir_name != '1_5',
 				},
 			],

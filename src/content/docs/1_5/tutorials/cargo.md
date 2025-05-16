@@ -1,5 +1,7 @@
 ---
 title: Configuring Cargo.toml
+sidebar:
+    order: 20
 ---
 
 
@@ -93,7 +95,7 @@ This example has an additional section for auto-generating the data in build.rs.
 The build.rs approach has several downsides and should only be used if Cargo is the only build system you can use, and you cannot check in your data:
 * The build script with the whole of `icu_datagen` in it is slow to build
 * If you're using networking features of `icu_datagen` (behind the `networking` Cargo feature), the build script will access the network
-* Using the data requires ICU4X's [`_unstable`](https://docs.rs/icu_provider/1.5.0/icu_provider/constructors/index.html) APIs with a custom data provider, and that `icu_datagen` is the same *minor* version as the `icu` crate.
+* Using the data requires ICU4X's [`_unstable`](https://docs.rs/icu_provider/1.5/icu_provider/constructors/index.html) APIs with a custom data provider, and that `icu_datagen` is the same *minor* version as the `icu` crate.
 * `build.rs` output is not written to the console so it will appear that the build is hanging
 
 [« Fully Working Example »](https://github.com/unicode-org/icu4x/tree/release%2F1.5/tutorials/./crates/baked)

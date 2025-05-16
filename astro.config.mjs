@@ -7,7 +7,7 @@ import starlightLinksValidator from 'starlight-links-validator'
 // !! UPDATE LATEST VERSION HERE !!
 let latest_version = '2.0';
 
-let latest_dir_name = latest_version.replace('.', '-');
+let latest_dir_name = latest_version.replace('.', '_');
 
 // https://astro.build/config
 export default defineConfig({

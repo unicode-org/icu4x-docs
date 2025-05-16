@@ -4,7 +4,7 @@ var searchData=
   ['georgian_1',['Georgian',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a01bb3cb8d7894880557fe1b4d9cfbca1',1,'icu4x::Script']]],
   ['glagolitic_2',['Glagolitic',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ab78bf1710b926774086afbefd3325800',1,'icu4x::Script']]],
   ['glue_3',['Glue',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a88a0c2a2cb5664be880ea93ca5d013a5',1,'icu4x::LineBreak']]],
-  ['glueafterzwj_4',['GlueAfterZwj',['../classicu4x_1_1GraphemeClusterBreak.html#a6a546d1b6f25d0ca0bd2311c19c3e2e4afeb0902553e0a89f6d0087b02b082891',1,'icu4x::GraphemeClusterBreak::GlueAfterZwj()'],['../classicu4x_1_1WordBreak.html#abacdff404e46ea946a9625b970513c67af3f71b070c5d78c83f58c1247d4e9ac7',1,'icu4x::WordBreak::GlueAfterZwj()']]],
+  ['glueafterzwj_4',['GlueAfterZwj',['../classicu4x_1_1GraphemeClusterBreak.html#a6a546d1b6f25d0ca0bd2311c19c3e2e4afeb0902553e0a89f6d0087b02b082891',1,'icu4x::GraphemeClusterBreak::GlueAfterZwj'],['../classicu4x_1_1WordBreak.html#abacdff404e46ea946a9625b970513c67af3f71b070c5d78c83f58c1247d4e9ac7',1,'icu4x::WordBreak::GlueAfterZwj']]],
   ['gothic_5',['Gothic',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a87652a6f9047f27cc4a511684627a186',1,'icu4x::Script']]],
   ['grantha_6',['Grantha',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4af0e5ca533c0d773da3fbc2d32409c4d0',1,'icu4x::Script']]],
   ['greek_7',['Greek',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a5f284f85c251a106de32e8120789e877',1,'icu4x::Script']]],

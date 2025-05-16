@@ -65,6 +65,7 @@ var hierarchy =
     [ "diplomat::Err< T >", "structdiplomat_1_1Err.html", null ],
     [ "icu4x::ExemplarCharacters", "classicu4x_1_1ExemplarCharacters.html", null ],
     [ "std::false_type", null, [
+      [ "diplomat::has_next< T, std::void_t< decltype(std::declval< T >().next())> >", "structdiplomat_1_1has__next_3_01T_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01T_01_4_07_08_8next_07_08_08_4_01_4.html", null ],
       [ "diplomat::has_next< T, U >", "structdiplomat_1_1has__next.html", null ]
     ] ],
     [ "diplomat::fn_traits< T >", "structdiplomat_1_1fn__traits.html", null ],

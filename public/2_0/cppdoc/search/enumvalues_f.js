@@ -2,7 +2,7 @@ var searchData=
 [
   ['pahawhhmong_0',['PahawhHmong',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a26949e2fbe01259c6ad491510c179463',1,'icu4x::Script']]],
   ['palmyrene_1',['Palmyrene',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a649adb10f86315892723f0d9529dd055',1,'icu4x::Script']]],
-  ['paragraphseparator_2',['ParagraphSeparator',['../classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a5d4f9154a7d97fdb620be94b21cc9ba6',1,'icu4x::BidiClass::ParagraphSeparator()'],['../classicu4x_1_1GeneralCategory.html#aa340792cb4c9a55533f81ff61067b355a790d8f8add66fbf8cbb6c095a142993e',1,'icu4x::GeneralCategory::ParagraphSeparator()']]],
+  ['paragraphseparator_2',['ParagraphSeparator',['../classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a5d4f9154a7d97fdb620be94b21cc9ba6',1,'icu4x::BidiClass::ParagraphSeparator'],['../classicu4x_1_1GeneralCategory.html#aa340792cb4c9a55533f81ff61067b355a790d8f8add66fbf8cbb6c095a142993e',1,'icu4x::GeneralCategory::ParagraphSeparator']]],
   ['paucinhau_3',['PauCinHau',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a74b1910e9ff4a8f2a69e0607b8264dbf',1,'icu4x::Script']]],
   ['persian_4',['Persian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a66b0578c70f8543853679f1c17c9ce14',1,'icu4x::CalendarKind']]],
   ['phagspa_5',['PhagsPa',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a8539b5065951685ee27f64d1256e30e6',1,'icu4x::Script']]],

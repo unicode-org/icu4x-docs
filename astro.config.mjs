@@ -5,9 +5,9 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 
 // !! UPDATE LATEST VERSION HERE !!
-// format semver with underscores to make it look like a semver would in a URL
-var latest_display_name = 'Version 2.0';
-var latest_dir_name = '2_0';
+let latest_version = '2.0';
+
+let latest_dir_name = latest_version.replace('.', '-');
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,6 +16,24 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'ICU4X',
+			head: [
+				{
+					tag: 'link',
+					attrs: {
+						rel: "icon",
+						href: "/icon_black.png",
+						media: "(prefers-color-scheme: light)",
+					}
+				},
+				{
+					tag: 'link',
+					attrs: {
+						rel: "icon",
+						href: "/icon_white.png",
+						media: "(prefers-color-scheme: dark)",
+					}
+				},
+			],
 			social: {
 				github: 'https://github.com/unicode-org/icu4x',
 			},
@@ -50,7 +68,7 @@ export default defineConfig({
 					],
 				},
 				{
-					label: latest_display_name,
+					label: 'Version 2.0',
 					badge: {
 						text: 'New',
 						variant: 'success',
@@ -71,7 +89,7 @@ export default defineConfig({
 							items: [
 								{
 									label: 'Rust',
-									link: 'https://docs.rs/icu/2.0.0',
+									link: 'https://docs.rs/icu/2.0',
 									badge: { text: '↗', variant: 'tip' },
 									attrs: { target: '_blank' },
 

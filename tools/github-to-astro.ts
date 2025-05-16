@@ -138,8 +138,6 @@ function icu4xGfmToAstroMd(content: string, inFilePath: string, ctx: Context) {
 
   const order = TUTORIAL_ORDER.get(inFilePath.split('/')[inFilePath.split('/').length - 1]);
 
-  console.log(inFilePath);
-
   const frontMatter = icu4xAstroMdFrontMatter(foundTitle, order);
 
   let replacementContent = transformMdBody(content, ctx);
@@ -202,9 +200,9 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpm run icu4x-convert -- --inDir=<input-dir> --outDir=<output-dir> --icu4xRef=<ICU4X-git-ref> --webDirName=<version-based-dir-name> --sitePrefix=<site-prefix-str-else-emptystr> --astroVersion=<semver>");
+  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>] --astroVersion=<semver>");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --inDir=/path/to/icu4x/tutorials/ --outDir=/path/to/icu4x-docs/src/content/docs/ --icu4xVersion=1.5.0 --icu4xRef=release/1.5 --webDirName=1_5 [--sitePrefix=/uriPrefix] --astroVersion=4.16.18")
+  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] --astroVersion=4.16.18")
 }
 
 /**
@@ -214,21 +212,14 @@ function printHelp() {
 function parseCLIArgs() {
   let parsedArgs = parseArgs({
     options: {
-      inDir: {
+      icu4xDir: {
         type: "string",
         short: "i",
-      },
-      outDir: {
-        type: "string",
-        short: "o",
       },
       icu4xVersion: {
         type: "string",
       },
       icu4xRef: {
-        type: "string",
-      },
-      webDirName: {
         type: "string",
       },
       // site prefix, as used by static site generator tools.
@@ -246,17 +237,20 @@ function parseCLIArgs() {
     let returnVal = {
       positionals: positionals,
       values: {
-        inDir: values["inDir"] ?? (() => {throw new Error("Need inDir")})(),
-        outDir: values["outDir"] ?? (() => {throw new Error("Need outDir")})(),
+        icu4xDir: values["icu4xDir"] ?? (() => {throw new Error("Need icu4xDir")})(),
         icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
-        icu4xRef: values["icu4xRef"] ?? (() => {throw new Error("Need icu4xRef")})(),
-        webDirName: values["webDirName"] ?? (() => {throw new Error("Need webDirName")})(),
+        icu4xRef: values["icu4xRef"] ?? `release/${values["icu4xVersion"]}`,
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
         astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
       }
     };
+
+    if ((values.icu4xVersion.match(/\./g) || []).length > 1) {
+      console.log("use only a minor version, e.g. 2.1")
+      process.exit(1);
+    }
     return returnVal;
   } catch (err) {
     console.error('Missing CLI options.', err);
@@ -265,31 +259,29 @@ function parseCLIArgs() {
   }
 }
 
-function genConfigEntry(icu4xRef, webDirName, icu4xVersion) {
-  
-}
-
 // "main"
 
 try {
+  process.chdir(path.join(import.meta.dirname, '..'));
+
   const parsedArgs = parseCLIArgs();
   console.log("argv", process.argv);
   let {values, positionals} = parsedArgs;
 
-  const inputDirPath: string = values["inDir"];
+  const icu4xDir: string = values["icu4xDir"];
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
-  const webDirName = values["webDirName"];
-  const outputDirPath = path.join(values["outDir"], webDirName);
+  const webDirName = icu4xVersion.replace('.', '_');
+  const outputDirPath = path.join('src/content/docs', webDirName);
 
   const context = new Context({icu4xVersion, icu4xRef, webDirName, sitePrefix});
 
-  await convertDirFiles(inputDirPath, outputDirPath, context);
+  await convertDirFiles(path.join(icu4xDir, 'tutorials'), outputDirPath, context);
 
   console.log(
     `{
-    label: latest_display_name,
+    label: 'Version ${icu4xVersion}',
     badge: {
       text: 'New',
       variant: 'success',
@@ -347,7 +339,7 @@ try {
 
 
   console.log("Markdown conversion finished successfully");
-  console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet, set the previous version to collapsed: true");
+  console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet");
   console.log(`Task: Make sure to dump artifacts in public/${webDirName}`);
 
 } catch (error: unknown) {

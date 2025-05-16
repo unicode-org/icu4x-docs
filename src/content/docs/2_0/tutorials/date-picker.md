@@ -218,7 +218,7 @@ Now we would also like to format the current time.
 
 ### Rust Part 4
 
-Use the API documentation for [`icu::time::DateTime`](https://docs.rs/icu/2.0.0/icu/time/struct.DateTime.html) and [`icu::datetime::fieldsets`](https://docs.rs/icu/2.0.0/icu/datetime/fieldsets/index.html) to expand your app to format both date and time.
+Use the API documentation for [`icu::time::DateTime`](https://docs.rs/icu/2.0/icu/time/struct.DateTime.html) and [`icu::datetime::fieldsets`](https://docs.rs/icu/2.0/icu/datetime/fieldsets/index.html) to expand your app to format both date and time.
 
 ### JavaScript Part 4
 

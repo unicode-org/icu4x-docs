@@ -16,6 +16,24 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'ICU4X',
+			head: [
+				{
+					tag: 'link',
+					attrs: {
+						rel: "icon",
+						href: "/icon_black.png",
+						media: "(prefers-color-scheme: light)",
+					}
+				},
+				{
+					tag: 'link',
+					attrs: {
+						rel: "icon",
+						href: "/icon_white.png",
+						media: "(prefers-color-scheme: dark)",
+					}
+				},
+			],
 			social: {
 				github: 'https://github.com/unicode-org/icu4x',
 			},

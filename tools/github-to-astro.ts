@@ -9,8 +9,15 @@ import { release } from 'node:os';
 // So that they are not being transformed by this script
 const ICU4X_NON_VERSION_SPECIFIC_FILES = [
   "README.md",
-  "index.md"
 ];
+
+const TUTORIAL_ORDER = new Map<string, number>([
+  ["quickstart.md", 0],
+  ["data-management.md", 1],
+  ["date-picker.md", 10], 
+  ["date-picker-data.md", 11],
+  ["data-provider-runtime.md", 50], 
+]);
 
 /**
  * class to represent the values passed from the CLI through to the helper methods
@@ -39,12 +46,13 @@ class Context {
  * @param foundTitle The page title string found from the H1 heading of the GH Markdown content
  * @returns the string of the AstroJS markdown "frontmatter"
  */
-function icu4xAstroMdFrontMatter(foundTitle: string) {
+function icu4xAstroMdFrontMatter(foundTitle: string, order: number | undefined) {
   // special case for the quickstart tutorial title in ICU4X
   let title = foundTitle.replace(/Introduction to ICU4X for Rust/g, "Quickstart" );
 
   let frontMatterStr = "---" + "\n"
     + "title: " + title + "\n"
+    + (order !== undefined ? "sidebar:\n    order: " + order + "\n" : "")
     + "---" + "\n";
   return frontMatterStr;
 }
@@ -93,9 +101,6 @@ function transformMdBody(body: string, ctx: Context) {
     "](" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$1)"
   );
 
-  // in a relative link specifically to quickstart.md
-  replacementBody = replacementBody.replace(/(\[.*\])\((?!http)quickstart.md\)/g, "$1(" + sitePrefix + "/" + webDirName + "/quickstart)");
-
   // in a relative link to a Markdown file, that optionally starts with "./", but not "..", get rid of the trailing `.md`
   replacementBody = replacementBody.replace(
     /(\[.*?\])\((?!http)(?!\.\.)(\.\/)?(.*?)\.md\)/g,
@@ -105,7 +110,7 @@ function transformMdBody(body: string, ctx: Context) {
   // in a relative link to a Markdown file, that starts with "..", format the URL to the Github blob
   replacementBody = replacementBody.replace(
     /(\[.*?\])\((?!http)(\.\.)(.*?)\.md\)/g,
-    "$1(" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$2)"
+    "$1(" + "https://github.com/unicode-org/icu4x/tree/" + encodeURIComponent(icu4xRef) + "/tutorials/$2$3.md)"
   );
 
   // changes docs.rs links from `latest` version to the specific ICU4X version
@@ -130,7 +135,12 @@ function icu4xGfmToAstroMd(content: string, inFilePath: string, ctx: Context) {
   const titleHeadingRegexMatch = /^# (.*)/.exec(content);
   // get page title from first H1 heading. if not existent, then throw exception
   const foundTitle = titleHeadingRegexMatch![1];
-  const frontMatter = icu4xAstroMdFrontMatter(foundTitle);
+
+  const order = TUTORIAL_ORDER.get(inFilePath.split('/')[inFilePath.split('/').length - 1]);
+
+  console.log(inFilePath);
+
+  const frontMatter = icu4xAstroMdFrontMatter(foundTitle, order);
 
   let replacementContent = transformMdBody(content, ctx);
 
@@ -179,12 +189,7 @@ function convertDirFiles(inDirPath: string, outDirPath: string, ctx: Context) {
     const inFilePath = path.join(inDirPath, fileBaseName);
     let outFilePath = "";
 
-    // put quickstart.md in the root dir, all other files go into the `tutorials` dir
-    if (fileBaseName == "quickstart.md") {
-      outFilePath = path.join(outDirPath, fileBaseName);
-    } else {
-      outFilePath = path.join(outDirPath, "tutorials", fileBaseName);
-    }
+    outFilePath = path.join(outDirPath, "tutorials", fileBaseName);
 
     readConvertWriteFile(inFilePath, outFilePath, ctx);
   }
@@ -260,6 +265,10 @@ function parseCLIArgs() {
   }
 }
 
+function genConfigEntry(icu4xRef, webDirName, icu4xVersion) {
+  
+}
+
 // "main"
 
 try {
@@ -278,7 +287,69 @@ try {
 
   await convertDirFiles(inputDirPath, outputDirPath, context);
 
+  console.log(
+    `{
+    label: latest_display_name,
+    badge: {
+      text: 'New',
+      variant: 'success',
+    },
+    items: [
+      {
+        label: 'Code examples',
+        link: 'https://github.com/unicode-org/icu4x/tree/${icu4xRef}/examples',
+        badge: { text: '↗', variant: 'tip' },
+        attrs: { target: '_blank' },
+      },
+      {
+        label: 'Interactive Demo',
+        slug: '${webDirName}/demo',
+      },
+      {
+        label: 'API documentation',
+        items: [
+          {
+            label: 'Rust',
+            link: 'https://docs.rs/icu/${icu4xVersion}',
+            badge: { text: '↗', variant: 'tip' },
+            attrs: { target: '_blank' },
+
+          },
+          {
+            label: 'C++',
+            link: '/${webDirName}/cppdoc/',
+            badge: { text: '↗', variant: 'tip' },
+            attrs: { target: '_blank' },
+          },
+          {
+            label: 'Dart',
+            link: '/${webDirName}/dartdoc/icu',
+            badge: { text: '↗', variant: 'tip' },
+            attrs: { target: '_blank' },
+          },
+          {
+            label: 'TypeScript',
+            link: '/${webDirName}/tsdoc/',
+            badge: { text: '↗', variant: 'tip' },
+            attrs: { target: '_blank' },
+          },
+        ],
+      },
+      {
+        label: 'Tutorials',
+        autogenerate: { directory: '${webDirName}/tutorials' },
+      },
+    ],
+    collapsed: latest_dir_name != '${webDirName}',
+  },
+    `
+  );
+
+
   console.log("Markdown conversion finished successfully");
+  console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet, set the previous version to collapsed: true");
+  console.log(`Task: Make sure to dump artifacts in public/${webDirName}`);
+
 } catch (error: unknown) {
   if (error instanceof Error) {
     console.error(`Error: ${error.message}`);

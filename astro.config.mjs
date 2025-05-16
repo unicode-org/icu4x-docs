@@ -40,7 +40,7 @@ export default defineConfig({
 					label: 'leadingNavLinks',
 					items: [
 						{ label: 'Quickstart', link: '/' + latest_dir_name + '/tutorials/quickstart' },
-						{ label: 'Web Demo', link: '/' + latest_dir_name + '/wasmdemo' },
+						{ label: 'Interactive Demo', link: '/' + latest_dir_name + '/demo' },
 					]
 				},
 				{
@@ -63,8 +63,8 @@ export default defineConfig({
 							attrs: { target: '_blank' },
 						},
 						{
-							label: 'Web demo',
-							slug: '2_0/wasmdemo',
+							label: 'Interactive Demo',
+							slug: '2_0/demo',
 						},
 						{
 							label: 'API documentation',
@@ -100,12 +100,13 @@ export default defineConfig({
 							label: 'Tutorials',
 							autogenerate: { directory: '2_0/tutorials' },
 						},
-					]
+					],
+					collapsed: latest_dir_name != '2_0',
 				},
 				{
 					label: 'Version 1.5',
-					autogenerate: { directory: '1_5'},
-					collapsed: true,
+					autogenerate: { directory: '1_5' },
+					collapsed: latest_dir_name != '1_5',
 				},
 			],
 		}),

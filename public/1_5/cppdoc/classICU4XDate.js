@@ -1,0 +1,26 @@
+var classICU4XDate =
+[
+    [ "ICU4XDate", "classICU4XDate.html#a78bd3f7bd15f63418802ec4b29cf239c", null ],
+    [ "ICU4XDate", "classICU4XDate.html#a1b5906c5a67212db2573cfa817eb7af3", null ],
+    [ "ICU4XDate", "classICU4XDate.html#a1dfc71be2bbd3bd02a15d5b681acdf1b", null ],
+    [ "calendar", "classICU4XDate.html#aa75af21f403934b268baad61709fb577", null ],
+    [ "create_from_codes_in_calendar", "classICU4XDate.html#aa3dfbc8eacb0a9db2b5c84ab9035fb3d", null ],
+    [ "create_from_iso_in_calendar", "classICU4XDate.html#ae55f6070cd4904386fb70bbe21e41086", null ],
+    [ "day_of_month", "classICU4XDate.html#a2892082287842ba76a4d4498ba75beaa", null ],
+    [ "day_of_week", "classICU4XDate.html#adba83ae87002d5af7cc772a7a8d5231e", null ],
+    [ "day_of_year", "classICU4XDate.html#aaf8824b0fdaef08686702e9756552453", null ],
+    [ "days_in_month", "classICU4XDate.html#aa01c6aede38a1961d481c97f6ca52598", null ],
+    [ "days_in_year", "classICU4XDate.html#ae2e45380c390175cf941cd745338915d", null ],
+    [ "era", "classICU4XDate.html#aac2e58748dd3e338550ed6313a0d3610", null ],
+    [ "era_to_writeable", "classICU4XDate.html#a7b1df05d05c58298352772ab1b094693", null ],
+    [ "month_code", "classICU4XDate.html#ae1e4fe432ad61dde78d53125aedce714", null ],
+    [ "month_code_to_writeable", "classICU4XDate.html#af9c80613ac3ac76af334d70ec5c04a4c", null ],
+    [ "months_in_year", "classICU4XDate.html#a303f96eaae641c87b63b54d8626baf0b", null ],
+    [ "operator=", "classICU4XDate.html#a479d1b2c9978e876ca89877c6a01ab95", null ],
+    [ "ordinal_month", "classICU4XDate.html#a6c87e7ecb808a3649b4514a7438dcb84", null ],
+    [ "to_calendar", "classICU4XDate.html#a7a3bbb377740217ff09bc5d45b89170c", null ],
+    [ "to_iso", "classICU4XDate.html#a0809b47bd9eac7725ddad1104d5377f0", null ],
+    [ "week_of_month", "classICU4XDate.html#a1052a5f38bd6c1e6f5652abf9ee720cd", null ],
+    [ "week_of_year", "classICU4XDate.html#a94cbd87153404fdd9abeb4a7c7973e54", null ],
+    [ "year_in_era", "classICU4XDate.html#abdeededbd1f0ba70cec3716da751c341", null ]
+];

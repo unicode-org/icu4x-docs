@@ -1,5 +1,7 @@
 ---
 title: Loading Additional Data at Runtime
+sidebar:
+    order: 50
 ---
 
 

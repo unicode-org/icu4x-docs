@@ -1,5 +1,7 @@
 ---
 title: Data management
+sidebar:
+    order: 1
 ---
 
 
@@ -10,7 +12,7 @@ If you're happy shipping your app with the recommended set of locales included i
 
 ## 1. Prerequisites
 
-This tutorial assumes you have finished the [introductory tutorial](/1_5/quickstart) and continues where that tutorial left off. In particular, you should still have the latest version of code for `myapp`.
+This tutorial assumes you have finished the [introductory tutorial](/1_5/tutorials/quickstart) and continues where that tutorial left off. In particular, you should still have the latest version of code for `myapp`.
 
 ## 2. Generating data
 
@@ -155,7 +157,7 @@ This will generate a `my_data_blob.postcard` file containing the serialized data
 
 Unlike `BakedDataProvider`, `BlobDataProvider` (and `FsDataProvider`) does not perform locale fallbacking. For example, if `en-US` is requested but only `en` data is available, then the data request will fail. To enable fallback, we can wrap the provider in a `LocaleFallbackProvider`.
 
-Note that fallback comes at a cost, as fallbacking code and data has to be included and executed on every request. If you don't need fallback (disclaimer: you probably do), you can use the `BlobDataProvider` directly (for `BakedDataProvider`, see [`FallbackMode::Preresolved`](https://docs.rs/icu_datagen/1.5.0/icu_datagen/enum.FallbackMode.html)).
+Note that fallback comes at a cost, as fallbacking code and data has to be included and executed on every request. If you don't need fallback (disclaimer: you probably do), you can use the `BlobDataProvider` directly (for `BakedDataProvider`, see [`FallbackMode::Preresolved`](https://docs.rs/icu_datagen/1.5/icu_datagen/enum.FallbackMode.html)).
 
 We can then use the provider in our code:
 
@@ -254,4 +256,4 @@ We have learned how to generate data and load it into our programs, optimize dat
 
 For a deeper dive into configuring your data providers in code, see [data-provider-runtime.md].
 
-You can learn more about datagen, including the Rust API which we have not used in this tutorial, by reading [the docs](https://docs.rs/icu_datagen/1.5.0/).
+You can learn more about datagen, including the Rust API which we have not used in this tutorial, by reading [the docs](https://docs.rs/icu_datagen/1.5/).

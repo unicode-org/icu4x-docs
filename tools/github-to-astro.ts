@@ -262,22 +262,26 @@ function parseCLIArgs() {
 // "main"
 
 try {
-  process.chdir(path.join(import.meta.dirname, '..'));
+  let root = path.join(import.meta.dirname, '..');
 
   const parsedArgs = parseCLIArgs();
   console.log("argv", process.argv);
   let {values, positionals} = parsedArgs;
 
-  const icu4xDir: string = values["icu4xDir"];
+  const icu4xDir = path.join(root, values["icu4xDir"]);
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
   const webDirName = icu4xVersion.replace('.', '_');
-  const outputDirPath = path.join('src/content/docs', webDirName);
+  const artifactsDir = path.join(root, 'public', webDirName);
+  const outputDirPath = path.join(root, 'src/content/docs', webDirName);
 
   const context = new Context({icu4xVersion, icu4xRef, webDirName, sitePrefix});
 
   await convertDirFiles(path.join(icu4xDir, 'tutorials'), outputDirPath, context);
+  
+  console.log("Markdown conversion finished successfully");
+  console.log();
 
   console.log(
     `{
@@ -337,10 +341,17 @@ try {
     `
   );
 
-
-  console.log("Markdown conversion finished successfully");
   console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet");
-  console.log(`Task: Make sure to dump artifacts in public/${webDirName}`);
+  console.log();
+
+  console.log(`Task: Make sure to dump artifacts in ${artifactsDir}:`);
+  console.log("You will need dart, typedoc, doxygen, doxygen-awesomecss installed")
+  console.log();
+  console.log(`mkdir ${artifactsDir}`);
+  console.log(`pushd ${icu4xDir} && doxygen tools/config.doxy && mv html/ ${artifactsDir}/cppdoc; popd`);
+  console.log(`pushd ${icu4xDir}/ffi/dart && dart pub get && dart doc -o ${artifactsDir}/dartdoc; popd`);
+  console.log(`pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`);
+  console.log(`pushd ${icu4xDir}/tools/web-demo && npm run build && mkdir ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`);
 
 } catch (error: unknown) {
   if (error instanceof Error) {

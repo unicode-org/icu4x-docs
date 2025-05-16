@@ -15,12 +15,12 @@ var diplomat__runtime_8hpp =
     [ "diplomat::next_to_iter_helper< T >", "structdiplomat_1_1next__to__iter__helper.html", "structdiplomat_1_1next__to__iter__helper" ],
     [ "MAKE_SLICES", "diplomat__runtime_8hpp.html#a686e385559fc8176166fb8978fc6ea69", null ],
     [ "MAKE_SLICES_AND_OPTIONS", "diplomat__runtime_8hpp.html#aab93544be56e890cba552b2196dc7562", null ],
-    [ "as_ffi_t", "diplomat__runtime_8hpp.html#acc6167a6caaf68adfeb7548dc811b9ba", null ],
-    [ "replace_fn_t", "diplomat__runtime_8hpp.html#ab5257ee9fccab8b2d7dc6602c0db5615", null ],
-    [ "replace_ref_with_ptr_t", "diplomat__runtime_8hpp.html#a1247de30a7aad3690034682402e9219e", null ],
-    [ "replace_string_view_t", "diplomat__runtime_8hpp.html#abbce4025e42d06d18dc734ec918e82b6", null ],
-    [ "fn_traits", "diplomat__runtime_8hpp.html#ae85564ac7d14790048e4f69904a560fd", null ],
-    [ "get_inner_if_present", "diplomat__runtime_8hpp.html#aa1cb903608dfae7735abd9d9c94ff9b5", null ],
-    [ "dynamic_extent", "diplomat__runtime_8hpp.html#aa34dd939882dbdd365512a8baeac5074", null ],
-    [ "has_next_v", "diplomat__runtime_8hpp.html#a3c92b478bb82afc239501fd1372875a2", null ]
+    [ "diplomat::as_ffi_t", "namespacediplomat.html#ad46dcf6ca2f483983da853a02651d37a", null ],
+    [ "diplomat::replace_fn_t", "namespacediplomat.html#a9c149196633c4b8dceb970d37912f505", null ],
+    [ "diplomat::replace_ref_with_ptr_t", "namespacediplomat.html#a4a902f7db52d4d13b4ea2eb2dd18bd93", null ],
+    [ "diplomat::replace_string_view_t", "namespacediplomat.html#a6b72a5cd55d76913a1c265d99bd6258d", null ],
+    [ "diplomat::fn_traits", "namespacediplomat.html#ae85564ac7d14790048e4f69904a560fd", null ],
+    [ "diplomat::get_inner_if_present", "namespacediplomat.html#aa1cb903608dfae7735abd9d9c94ff9b5", null ],
+    [ "diplomat::dynamic_extent", "namespacediplomat.html#aa34dd939882dbdd365512a8baeac5074", null ],
+    [ "diplomat::has_next_v", "namespacediplomat.html#a3c92b478bb82afc239501fd1372875a2", null ]
 ];

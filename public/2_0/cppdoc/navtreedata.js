@@ -25,13 +25,7 @@
 var NAVTREE =
 [
   [ "ICU4X", "index.html", [
-    [ "Using from C++", "index.html", [
-      [ "Building ICU4X", "index.html#autotoc_md1", null ],
-      [ "Using ICU4X from C++", "index.html#autotoc_md2", null ],
-      [ "Compiling with the ICU4X header files", "index.html#autotoc_md3", null ],
-      [ "Embedded platforms (<tt>no_std</tt>)", "index.html#autotoc_md4", null ],
-      [ "Tips", "index.html#autotoc_md5", null ]
-    ] ],
+    [ "Using from C++", "index.html", "index" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
@@ -85,9 +79,9 @@ var NAVTREEINDEX =
 "classicu4x_1_1SentenceBreak.html#aa440b52026864d58734105a90b93ffdeae84eb5c8b7e1ba28f9c27b324d6a9908",
 "classicu4x_1_1TransformResult.html#a59d0d64f8e1324e69126200f68aeb87b",
 "classicu4x_1_1WordSegmenter.html#a2ba54e711336b1d6d91c64863d765394",
-"functions_c.html",
-"structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae"
+"functions_eval_d.html",
+"structicu4x_1_1DateTime.html#a1ef24fa8a6ce7a0f0cad6967ef7d0889"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';

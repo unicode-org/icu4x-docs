@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['generalcategory_0',['GeneralCategory',['../classicu4x_1_1GeneralCategory.html#ad1caab001e8d5078f55ee112820f3d97',1,'icu4x::GeneralCategory::GeneralCategory(Value v)'],['../classicu4x_1_1GeneralCategory.html#ab0dca6822e7cd0bd108a0a40fd6ff353',1,'icu4x::GeneralCategory::GeneralCategory()=default']]],
+  ['generalcategory_0',['GeneralCategory',['../classicu4x_1_1GeneralCategory.html#ab0dca6822e7cd0bd108a0a40fd6ff353',1,'icu4x::GeneralCategory::GeneralCategory()=default'],['../classicu4x_1_1GeneralCategory.html#ad1caab001e8d5078f55ee112820f3d97',1,'icu4x::GeneralCategory::GeneralCategory(Value v)']]],
   ['get_5ffor_5fcldr_5fstring_1',['get_for_cldr_string',['../classicu4x_1_1PluralCategory.html#ad85de57f21a5b9f0890e098147412032',1,'icu4x::PluralCategory']]],
   ['get_5finner_5fif_5fpresent_2',['get_inner_if_present',['../namespacediplomat.html#aa1cb903608dfae7735abd9d9c94ff9b5',1,'diplomat']]],
-  ['get_5floose_3',['get_loose',['../classicu4x_1_1PropertyValueNameToEnumMapper.html#ab9a116e151a5d8f02e361428cef512bb',1,'icu4x::PropertyValueNameToEnumMapper::get_loose()'],['../classicu4x_1_1GeneralCategoryNameToGroupMapper.html#ac61976598bef352b1ca7aec44c11ada0',1,'icu4x::GeneralCategoryNameToGroupMapper::get_loose()']]],
+  ['get_5floose_3',['get_loose',['../classicu4x_1_1GeneralCategoryNameToGroupMapper.html#ac61976598bef352b1ca7aec44c11ada0',1,'icu4x::GeneralCategoryNameToGroupMapper::get_loose()'],['../classicu4x_1_1PropertyValueNameToEnumMapper.html#ab9a116e151a5d8f02e361428cef512bb',1,'icu4x::PropertyValueNameToEnumMapper::get_loose()']]],
   ['get_5fscript_5fextensions_5fset_4',['get_script_extensions_set',['../classicu4x_1_1ScriptWithExtensionsBorrowed.html#ac263a2c8d86d3e7e6052274b89fe380d',1,'icu4x::ScriptWithExtensionsBorrowed']]],
   ['get_5fscript_5fextensions_5fval_5',['get_script_extensions_val',['../classicu4x_1_1ScriptWithExtensionsBorrowed.html#a95a3ee443ac0130afa25b0f9e873966e',1,'icu4x::ScriptWithExtensionsBorrowed']]],
   ['get_5fscript_5fval_6',['get_script_val',['../classicu4x_1_1ScriptWithExtensions.html#af3fd612e94ff0b45cf32b437daba558a',1,'icu4x::ScriptWithExtensions::get_script_val()'],['../classicu4x_1_1ScriptWithExtensionsBorrowed.html#a00af60afb9288d2f05542a61a6ebb6eb',1,'icu4x::ScriptWithExtensionsBorrowed::get_script_val()']]],

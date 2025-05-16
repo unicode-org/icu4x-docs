@@ -16,10 +16,10 @@ var searchData=
   ['bidi_2ehpp_13',['Bidi.hpp',['../Bidi_8hpp.html',1,'']]],
   ['bidi_5fcontrol_5ffor_5fchar_14',['bidi_control_for_char',['../classicu4x_1_1CodePointSetData.html#a1fda24295b29b620cdf71ce508312cc0',1,'icu4x::CodePointSetData']]],
   ['bidi_5fmirrored_5ffor_5fchar_15',['bidi_mirrored_for_char',['../classicu4x_1_1CodePointSetData.html#accbbd4411afe7d5c05901f7a806749b7',1,'icu4x::CodePointSetData']]],
-  ['bidiclass_16',['BidiClass',['../classicu4x_1_1BidiClass.html#a46e526241a88b1b346166be8a8274c26',1,'icu4x::BidiClass::BidiClass()=default'],['../classicu4x_1_1BidiClass.html#a22cfe4a4c78e0c7a3369a7d3fb9df251',1,'icu4x::BidiClass::BidiClass(Value v)'],['../classicu4x_1_1BidiClass.html',1,'icu4x::BidiClass']]],
+  ['bidiclass_16',['BidiClass',['../classicu4x_1_1BidiClass.html',1,'icu4x::BidiClass'],['../classicu4x_1_1BidiClass.html#a46e526241a88b1b346166be8a8274c26',1,'icu4x::BidiClass::BidiClass()=default'],['../classicu4x_1_1BidiClass.html#a22cfe4a4c78e0c7a3369a7d3fb9df251',1,'icu4x::BidiClass::BidiClass(Value v)']]],
   ['bidiclass_2ed_2ehpp_17',['BidiClass.d.hpp',['../BidiClass_8d_8hpp.html',1,'']]],
   ['bidiclass_2ehpp_18',['BidiClass.hpp',['../BidiClass_8hpp.html',1,'']]],
-  ['bididirection_19',['BidiDirection',['../classicu4x_1_1BidiDirection.html#ab7a566065e88045f794c77a7c1d97447',1,'icu4x::BidiDirection::BidiDirection(Value v)'],['../classicu4x_1_1BidiDirection.html#a26d8129fc868296df1ed58d9598e162f',1,'icu4x::BidiDirection::BidiDirection()=default'],['../classicu4x_1_1BidiDirection.html',1,'icu4x::BidiDirection']]],
+  ['bididirection_19',['BidiDirection',['../classicu4x_1_1BidiDirection.html',1,'icu4x::BidiDirection'],['../classicu4x_1_1BidiDirection.html#a26d8129fc868296df1ed58d9598e162f',1,'icu4x::BidiDirection::BidiDirection()=default'],['../classicu4x_1_1BidiDirection.html#ab7a566065e88045f794c77a7c1d97447',1,'icu4x::BidiDirection::BidiDirection(Value v)']]],
   ['bididirection_2ed_2ehpp_20',['BidiDirection.d.hpp',['../BidiDirection_8d_8hpp.html',1,'']]],
   ['bididirection_2ehpp_21',['BidiDirection.hpp',['../BidiDirection_8hpp.html',1,'']]],
   ['bidiinfo_22',['BidiInfo',['../classicu4x_1_1BidiInfo.html',1,'icu4x']]],
@@ -28,7 +28,7 @@ var searchData=
   ['bidimirroringglyph_25',['BidiMirroringGlyph',['../structicu4x_1_1BidiMirroringGlyph.html',1,'icu4x']]],
   ['bidimirroringglyph_2ed_2ehpp_26',['BidiMirroringGlyph.d.hpp',['../BidiMirroringGlyph_8d_8hpp.html',1,'']]],
   ['bidimirroringglyph_2ehpp_27',['BidiMirroringGlyph.hpp',['../BidiMirroringGlyph_8hpp.html',1,'']]],
-  ['bidipairedbrackettype_28',['BidiPairedBracketType',['../classicu4x_1_1BidiPairedBracketType.html#a03ae69a0baf70c7bed785a24ffe08352',1,'icu4x::BidiPairedBracketType::BidiPairedBracketType(Value v)'],['../classicu4x_1_1BidiPairedBracketType.html#a4c7ffd73b25f8c722c069001b770254f',1,'icu4x::BidiPairedBracketType::BidiPairedBracketType()=default'],['../classicu4x_1_1BidiPairedBracketType.html',1,'icu4x::BidiPairedBracketType']]],
+  ['bidipairedbrackettype_28',['BidiPairedBracketType',['../classicu4x_1_1BidiPairedBracketType.html',1,'icu4x::BidiPairedBracketType'],['../classicu4x_1_1BidiPairedBracketType.html#a4c7ffd73b25f8c722c069001b770254f',1,'icu4x::BidiPairedBracketType::BidiPairedBracketType()=default'],['../classicu4x_1_1BidiPairedBracketType.html#a03ae69a0baf70c7bed785a24ffe08352',1,'icu4x::BidiPairedBracketType::BidiPairedBracketType(Value v)']]],
   ['bidipairedbrackettype_2ed_2ehpp_29',['BidiPairedBracketType.d.hpp',['../BidiPairedBracketType_8d_8hpp.html',1,'']]],
   ['bidipairedbrackettype_2ehpp_30',['BidiPairedBracketType.hpp',['../BidiPairedBracketType_8hpp.html',1,'']]],
   ['bidiparagraph_31',['BidiParagraph',['../classicu4x_1_1BidiParagraph.html',1,'icu4x']]],
@@ -49,5 +49,6 @@ var searchData=
   ['buddhist_46',['Buddhist',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07ad026bf4d35da10b0b1edd03dfa411f43',1,'icu4x::CalendarKind']]],
   ['buginese_47',['Buginese',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a1167e347b32f1d4fa7a5ca8bb2a0d5d0',1,'icu4x::Script']]],
   ['buhid_48',['Buhid',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a17a03df60285ef729b78216eb1ca22be',1,'icu4x::Script']]],
-  ['build_49',['build',['../classicu4x_1_1CodePointSetBuilder.html#a6325e55d1127b97a036aed881a75538a',1,'icu4x::CodePointSetBuilder']]]
+  ['build_49',['build',['../classicu4x_1_1CodePointSetBuilder.html#a6325e55d1127b97a036aed881a75538a',1,'icu4x::CodePointSetBuilder']]],
+  ['building_20icu4x_50',['Building ICU4X',['../index.html#autotoc_md1',1,'']]]
 ];

@@ -13,6 +13,12 @@ export const latest_dir_name = latest_version.replace('.', '_');
 export default defineConfig({
 	site: 'https://icu4x.unicode.org',
 	base: '',
+	redirects: {
+		"/1_5": "/1_5/tutorials/quickstart",
+		'/1_5/tutorials': '/1_5/tutorials/quickstart',
+		"/2_0": "/2_0/tutorials/quickstart",
+		'/2_0/tutorials': '/2_0/tutorials/quickstart',
+	},
 	integrations: [
 		starlight({
 			title: 'ICU4X',

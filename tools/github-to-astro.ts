@@ -345,13 +345,13 @@ try {
   console.log();
 
   console.log(`Task: Make sure to dump artifacts in ${artifactsDir}:`);
-  console.log("You will need dart, typedoc, doxygen, doxygen-awesomecss installed")
+  console.log("You will need dart, typedoc, doxygen installed")
   console.log();
   console.log(`mkdir ${artifactsDir}`);
-  console.log(`pushd ${icu4xDir} && doxygen tools/config.doxy && mv html/ ${artifactsDir}/cppdoc; popd`);
+  console.log(`pushd ${icu4xDir} && git submodule init && git submodule update && doxygen tools/doxygen/config.doxy && mv tools/doxygen/html/ ${artifactsDir}/cppdoc; popd`);
   console.log(`pushd ${icu4xDir}/ffi/dart && dart pub get && dart doc -o ${artifactsDir}/dartdoc; popd`);
   console.log(`pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`);
-  console.log(`pushd ${icu4xDir}/tools/web-demo && npm run build && mkdir ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`);
+  console.log(`pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`);
 
 } catch (error: unknown) {
   if (error instanceof Error) {

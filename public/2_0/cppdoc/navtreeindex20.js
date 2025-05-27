@@ -1,5 +1,7 @@
 var NAVTREEINDEX20 =
 {
+"structicu4x_1_1DateTime.html":[1,0,1,37],
+"structicu4x_1_1DateTime.html":[2,0,1,37],
 "structicu4x_1_1DateTime.html#a1ef24fa8a6ce7a0f0cad6967ef7d0889":[1,0,1,37,0],
 "structicu4x_1_1DateTime.html#a1ef24fa8a6ce7a0f0cad6967ef7d0889":[2,0,1,37,0],
 "structicu4x_1_1DateTime.html#a866764b859f5a88c44ff01fc4cf57a12":[1,0,1,37,1],

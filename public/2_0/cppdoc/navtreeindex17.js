@@ -1,5 +1,7 @@
 var NAVTREEINDEX17 =
 {
+"classicu4x_1_1TransformResult.html#a3d636b2724bd8f44fa8d0ab604aafa60":[1,0,1,139,2],
+"classicu4x_1_1TransformResult.html#a3d636b2724bd8f44fa8d0ab604aafa60":[2,0,1,139,2],
 "classicu4x_1_1TransformResult.html#a59d0d64f8e1324e69126200f68aeb87b":[1,0,1,139,3],
 "classicu4x_1_1TransformResult.html#a59d0d64f8e1324e69126200f68aeb87b":[2,0,1,139,3],
 "classicu4x_1_1TransformResult.html#af20e73dc84f092967964080a65f64959":[1,0,1,139,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX17 =
 "classicu4x_1_1WordSegmenter.html#a0e95097b1b1d0b98822320f57b71515c":[1,0,1,154,3],
 "classicu4x_1_1WordSegmenter.html#a0e95097b1b1d0b98822320f57b71515c":[2,0,1,154,3],
 "classicu4x_1_1WordSegmenter.html#a1f5fc682b1ad752550a0a271d531a5fc":[1,0,1,154,10],
-"classicu4x_1_1WordSegmenter.html#a1f5fc682b1ad752550a0a271d531a5fc":[2,0,1,154,10],
-"classicu4x_1_1WordSegmenter.html#a22f3de17915264e8076e0d6e97fca886":[1,0,1,154,11],
-"classicu4x_1_1WordSegmenter.html#a22f3de17915264e8076e0d6e97fca886":[2,0,1,154,11]
+"classicu4x_1_1WordSegmenter.html#a1f5fc682b1ad752550a0a271d531a5fc":[2,0,1,154,10]
 };

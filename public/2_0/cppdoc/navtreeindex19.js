@@ -1,5 +1,7 @@
 var NAVTREEINDEX19 =
 {
+"functions_eval_b.html":[2,3,5,1],
+"functions_eval_c.html":[2,3,5,2],
 "functions_eval_d.html":[2,3,5,3],
 "functions_eval_e.html":[2,3,5,4],
 "functions_eval_f.html":[2,3,5,5],
@@ -247,7 +249,5 @@ var NAVTREEINDEX19 =
 "structicu4x_1_1CollatorResolvedOptionsV1.html#ad55fcc07718e0ac1686cfa57343f800f":[1,0,1,29,5],
 "structicu4x_1_1CollatorResolvedOptionsV1.html#ad55fcc07718e0ac1686cfa57343f800f":[2,0,1,29,5],
 "structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae":[1,0,1,29,0],
-"structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae":[2,0,1,29,0],
-"structicu4x_1_1DateTime.html":[1,0,1,37],
-"structicu4x_1_1DateTime.html":[2,0,1,37]
+"structicu4x_1_1CollatorResolvedOptionsV1.html#adf261cbd09e764c876314b564d2c57ae":[2,0,1,29,0]
 };

@@ -21,6 +21,7 @@ var classicu4x_1_1Locale =
     [ "set_language", "classicu4x_1_1Locale.html#a211c2c022c411dad66168a6d692a652e", null ],
     [ "set_region", "classicu4x_1_1Locale.html#a2eccc3215465da87e76e6937dd1cdeff", null ],
     [ "set_script", "classicu4x_1_1Locale.html#a129d1fcf33104a1f7ea9239f746d9d01", null ],
+    [ "set_unicode_extension", "classicu4x_1_1Locale.html#a9f528a4079050da2511be94cab2e6766", null ],
     [ "to_string", "classicu4x_1_1Locale.html#a72ecb4d75b8955de8279d73ebcafe1c2", null ],
     [ "unknown", "classicu4x_1_1Locale.html#a50f10611bbde92ce372aae816b02ff6c", null ]
 ];

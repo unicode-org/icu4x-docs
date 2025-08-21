@@ -319,7 +319,7 @@ try {
           },
           {
             label: 'Dart',
-            link: '/${webDirName}/dartdoc/icu',
+            link: 'https://pub.dev/documentation/icu4x/${icu4xVersion}/icu4x/',
             badge: { text: '↗', variant: 'tip' },
             attrs: { target: '_blank' },
           },
@@ -349,7 +349,6 @@ try {
   console.log();
   console.log(`mkdir ${artifactsDir}`);
   console.log(`pushd ${icu4xDir} && doxygen tools/doxygen/config.doxy && mv tools/doxygen/html/ ${artifactsDir}/cppdoc; popd`);
-  console.log(`pushd ${icu4xDir}/ffi/dart && dart pub get && dart doc -o ${artifactsDir}/dartdoc; popd`);
   console.log(`pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`);
   console.log(`pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`);
 

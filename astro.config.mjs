@@ -108,7 +108,7 @@ export default defineConfig({
 								},
 								{
 									label: 'Dart',
-									link: '/2_0/dartdoc/icu',
+									link: 'https://pub.dev/documentation/icu4x/2.0.0-dev.0/icu4x/',
 									badge: { text: '↗', variant: 'tip' },
 									attrs: { target: '_blank' },
 								},

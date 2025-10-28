@@ -1,0 +1,5 @@
+var searchData=
+[
+  ['traits_5ftype_0',['traits_type',['../classicu4x_1_1diplomat_1_1basic__string__view__for__slice.html#a822cc0818bce76e017505ce6aed74698',1,'icu4x::diplomat::basic_string_view_for_slice']]],
+  ['type_1',['type',['../structicu4x_1_1diplomat_1_1as__ffi.html#af2a60f19e3e55cbdf6fecc84d22ca88c',1,'icu4x::diplomat::as_ffi::type'],['../structicu4x_1_1diplomat_1_1diplomat__c__span__convert.html#ac0d1e71d1cda8737d0fa5166a05769cb',1,'icu4x::diplomat::diplomat_c_span_convert::type'],['../structicu4x_1_1diplomat_1_1inner_3_01T_01_5_01_4.html#a38317d3ec9ef17a9d563aab5c4df09cd',1,'icu4x::diplomat::inner&lt; T * &gt;::type'],['../structicu4x_1_1diplomat_1_1inner_3_01std_1_1unique__ptr_3_01T_01_4_01_4.html#a9e83c37b36dbdd73f141abee0470bf0b',1,'icu4x::diplomat::inner&lt; std::unique_ptr&lt; T &gt; &gt;::type'],['../structicu4x_1_1diplomat_1_1inner_3_01std_1_1optional_3_01T_01_4_01_4.html#a731795a944e2fb5ea3fc50d9a361c998',1,'icu4x::diplomat::inner&lt; std::optional&lt; T &gt; &gt;::type']]]
+];

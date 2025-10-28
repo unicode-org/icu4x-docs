@@ -5,7 +5,7 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 
 // !! UPDATE LATEST VERSION HERE !!
-const latest_version = '2.0';
+const latest_version = '2.1';
 
 export const latest_dir_name = latest_version.replace('.', '_');
 
@@ -18,6 +18,8 @@ export default defineConfig({
 		'/1_5/tutorials': '/1_5/tutorials/quickstart',
 		"/2_0": "/2_0/tutorials/quickstart",
 		'/2_0/tutorials': '/2_0/tutorials/quickstart',
+		"/2_1": "/2_1/tutorials/quickstart",
+		'/2_1/tutorials': '/2_1/tutorials/quickstart',
 	},
 	integrations: [
 		starlight({
@@ -40,9 +42,9 @@ export default defineConfig({
 					}
 				},
 			],
-			social: {
-				github: 'https://github.com/unicode-org/icu4x',
-			},
+			social: [
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/unicode-org/icu4x' }
+			],
 			plugins: [
 				starlightUtils({
 					navLinks: {
@@ -74,11 +76,61 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Version 2.0',
+					label: 'Version 2.1',
 					badge: {
 						text: 'New',
 						variant: 'success',
 					},
+					items: [
+						{
+							label: 'Code examples',
+							link: 'https://github.com/unicode-org/icu4x/tree/release/2.1/examples',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'Interactive Demo',
+							slug: '2_1/demo',
+						},
+						{
+							label: 'API documentation',
+							items: [
+								{
+									label: 'Rust',
+									link: 'https://docs.rs/icu/2.1',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+
+								},
+								{
+									label: 'C++',
+									link: '/2_1/cppdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'Dart',
+									link: 'https://pub.dev/documentation/icu4x/2.1.0-dev.0/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'TypeScript',
+									link: '/2_1/tsdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+							],
+						},
+						{
+							label: 'Tutorials',
+							autogenerate: { directory: '2_1/tutorials' },
+						},
+					],
+					collapsed: latest_dir_name != '2_1',
+				},
+				{
+					label: 'Version 2.0',
 					items: [
 						{
 							label: 'Code examples',

@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['identical_0',['Identical',['../classicu4x_1_1CollatorStrength.html#a53b03d515b37da584ab70f12987c0c1fa287d1a56ca89c6a3d89efd1f91824c99',1,'icu4x::CollatorStrength']]],
+  ['identifiernotfound_1',['IdentifierNotFound',['../classicu4x_1_1DataError.html#ad0d32df339daa2d5dbed18801a4f2e42a540d867a6d14a0e6118c935d9772ebb9',1,'icu4x::DataError']]],
+  ['ideographic_2',['Ideographic',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347ad736bdb32a5f573308e4f25d29fa1036',1,'icu4x::LineBreak']]],
+  ['imperialaramaic_3',['ImperialAramaic',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4aeb393c9f32d43f43037c6c7a6c4d7242',1,'icu4x::Script']]],
+  ['inconsistentdata_4',['InconsistentData',['../classicu4x_1_1DataError.html#ad0d32df339daa2d5dbed18801a4f2e42a5a1a92476209078733245f2a55c8abdb',1,'icu4x::DataError']]],
+  ['inconsistentmonth_5',['InconsistentMonth',['../classicu4x_1_1CalendarDateFromFieldsError.html#a2a88f8a1b906b84f4abe2b808cb5ee0ba64fc00bd5d573d1d8f86c6b881ac12a1',1,'icu4x::CalendarDateFromFieldsError']]],
+  ['inconsistentyear_6',['InconsistentYear',['../classicu4x_1_1CalendarDateFromFieldsError.html#a2a88f8a1b906b84f4abe2b808cb5ee0ba6105a06476e7465ee5f24cb119603102',1,'icu4x::CalendarDateFromFieldsError']]],
+  ['indian_7',['Indian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a74ad8fbc865d01f12413ebf1017e5d68',1,'icu4x::CalendarKind']]],
+  ['infixnumeric_8',['InfixNumeric',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347aa03bb2355e2d03e7a656d3954afc2bde',1,'icu4x::LineBreak']]],
+  ['inherited_9',['Inherited',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a8f160f9de2448d69d69b2e0dd2819b75',1,'icu4x::Script']]],
+  ['initialpunctuation_10',['InitialPunctuation',['../classicu4x_1_1GeneralCategory.html#aa340792cb4c9a55533f81ff61067b355a1b5be83f4e9ebf64c2813db491e1db5d',1,'icu4x::GeneralCategory']]],
+  ['inscriptionalpahlavi_11',['InscriptionalPahlavi',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4abfa9a39e555c2269ea163206a8b8437e',1,'icu4x::Script']]],
+  ['inscriptionalparthian_12',['InscriptionalParthian',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4aca7d1869cab9fa72968013792d47cfce',1,'icu4x::Script']]],
+  ['inseparable_13',['Inseparable',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347add50fdebca0f375e65ed523dced3701e',1,'icu4x::LineBreak']]],
+  ['invaliddatefields_14',['InvalidDateFields',['../classicu4x_1_1DateTimeFormatterLoadError.html#afdb3ba2e045df7893400e8fa12c729b9a9fc5f41301b1652603826f6e7c6658b2',1,'icu4x::DateTimeFormatterLoadError']]],
+  ['invalidrequest_15',['InvalidRequest',['../classicu4x_1_1DataError.html#ad0d32df339daa2d5dbed18801a4f2e42a996f3bcda9f1cee4e94cb0327a6c0400',1,'icu4x::DataError']]],
+  ['invalidsyntax_16',['InvalidSyntax',['../classicu4x_1_1Rfc9557ParseError.html#a86f473a4029924f146122b72fc599696ad52cf141dbe39d10d49c45767f039cea',1,'icu4x::Rfc9557ParseError']]],
+  ['invisiblestacker_17',['InvisibleStacker',['../classicu4x_1_1IndicSyllabicCategory.html#a59a0ee28dee104c40b344ef35b1897bfa20cf76d1fa9c391593e402c6228d02ae',1,'icu4x::IndicSyllabicCategory']]],
+  ['io_18',['Io',['../classicu4x_1_1DataError.html#ad0d32df339daa2d5dbed18801a4f2e42a7e9df25070cc164bceb78922e45f9ec3',1,'icu4x::DataError']]],
+  ['iotasubscript_19',['IotaSubscript',['../classicu4x_1_1CanonicalCombiningClass.html#ab7e1ea7ecca8ad8f8196697cd99cd078a137fbfd78d9862a34c56a71aaac742d0',1,'icu4x::CanonicalCombiningClass']]],
+  ['iso_20',['Iso',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a3490212ad0791ad64a6e64d1791712bf',1,'icu4x::CalendarKind']]]
+];

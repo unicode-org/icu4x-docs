@@ -319,7 +319,7 @@ try {
           },
           {
             label: 'Dart',
-            link: 'https://pub.dev/documentation/icu4x/${icu4xVersion}/icu4x/',
+            link: 'https://pub.dev/documentation/icu4x/${icu4xVersion}/',
             badge: { text: '↗', variant: 'tip' },
             attrs: { target: '_blank' },
           },

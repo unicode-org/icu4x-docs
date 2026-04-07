@@ -5,7 +5,7 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 
 // !! UPDATE LATEST VERSION HERE !!
-const latest_version = '2.1';
+const latest_version = '2.2';
 
 export const latest_dir_name = latest_version.replace('.', '_');
 
@@ -20,6 +20,8 @@ export default defineConfig({
 		'/2_0/tutorials': '/2_0/tutorials/quickstart',
 		"/2_1": "/2_1/tutorials/quickstart",
 		'/2_1/tutorials': '/2_1/tutorials/quickstart',
+		"/2_2": "/2_2/tutorials/quickstart",
+		'/2_2/tutorials': '/2_2/tutorials/quickstart',
 	},
 	integrations: [
 		starlight({
@@ -76,11 +78,61 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Version 2.1',
+					label: 'Version 2.2',
 					badge: {
-						text: 'New',
-						variant: 'success',
+					text: 'New',
+					variant: 'success',
 					},
+					items: [
+					{
+						label: 'Code examples',
+						link: 'https://github.com/unicode-org/icu4x/tree/release/2.2/examples',
+						badge: { text: '↗', variant: 'tip' },
+						attrs: { target: '_blank' },
+					},
+					{
+						label: 'Interactive Demo',
+						slug: '2_2/demo',
+					},
+					{
+						label: 'API documentation',
+						items: [
+						{
+							label: 'Rust',
+							link: 'https://docs.rs/icu/2.2',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+
+						},
+						{
+							label: 'C++',
+							link: '/2_2/cppdoc/',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'Dart',
+							link: 'https://pub.dev/documentation/icu4x/2.2.0-dev.1/icu4x/',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'TypeScript',
+							link: '/2_2/tsdoc/',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						],
+					},
+					{
+						label: 'Tutorials',
+						autogenerate: { directory: '2_2/tutorials' },
+					},
+					],
+					collapsed: latest_dir_name != '2_2',
+				},
+				{
+					label: 'Version 2.1',
 					items: [
 						{
 							label: 'Code examples',

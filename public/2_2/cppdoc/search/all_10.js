@@ -16,7 +16,7 @@ var searchData=
   ['persian_13',['Persian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a66b0578c70f8543853679f1c17c9ce14',1,'icu4x::CalendarKind']]],
   ['phagspa_14',['PhagsPa',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a8539b5065951685ee27f64d1256e30e6',1,'icu4x::Script']]],
   ['phoenician_15',['Phoenician',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ad7175f50483e228c5cb5d88aee43885f',1,'icu4x::Script']]],
-  ['platforms_20no_5fstd_16',['Embedded platforms (&lt;span class=&quot;tt&quot;&gt;no_std&lt;/span&gt;)',['../index.html#autotoc_md4',1,'']]],
+  ['platforms_20tt_20no_5fstd_20tt_16',['Embedded platforms (&lt;tt&gt;no_std&lt;/tt&gt;)',['../index.html#autotoc_md4',1,'']]],
   ['pluralcategories_17',['PluralCategories',['../structicu4x_1_1PluralCategories.html',1,'icu4x']]],
   ['pluralcategories_2ed_2ehpp_18',['PluralCategories.d.hpp',['../PluralCategories_8d_8hpp.html',1,'']]],
   ['pluralcategories_2ehpp_19',['PluralCategories.hpp',['../PluralCategories_8hpp.html',1,'']]],

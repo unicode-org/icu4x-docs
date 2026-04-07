@@ -21,7 +21,7 @@ var searchData=
   ['nfkd_5finert_5ffor_5fchar_18',['nfkd_inert_for_char',['../classicu4x_1_1CodePointSetData.html#a1a7a947e662408a83f863990c5ffcb9c',1,'icu4x::CodePointSetData']]],
   ['nko_19',['Nko',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4aa430278dcfebea50cbef90a690f4d4ee',1,'icu4x::Script']]],
   ['nl_20',['nl',['../classicu4x_1_1CaseMapLocales.html#a2fd0c66031fc0055ed2e18604626237a',1,'icu4x::CaseMapLocales']]],
-  ['no_5fstd_21',['Embedded platforms (&lt;span class=&quot;tt&quot;&gt;no_std&lt;/span&gt;)',['../index.html#autotoc_md4',1,'']]],
+  ['no_5fstd_20tt_21',['Embedded platforms (&lt;tt&gt;no_std&lt;/tt&gt;)',['../index.html#autotoc_md4',1,'']]],
   ['noera_22',['NoEra',['../classicu4x_1_1YearStyle.html#a8b01eb75700a6dfac6b483484a37b1f1abec07285edaba63b3286c01217cf0607',1,'icu4x::YearStyle']]],
   ['nojoininggroup_23',['NoJoiningGroup',['../classicu4x_1_1JoiningGroup.html#a778c641b194b2e4ac3d9d9be619f080ca53008484749fd48a645a488c3585a2f0',1,'icu4x::JoiningGroup']]],
   ['noncharacter_5fcode_5fpoint_5ffor_5fchar_24',['noncharacter_code_point_for_char',['../classicu4x_1_1CodePointSetData.html#ad95c94cfdbca91d4cdcc1ca4b513ad03',1,'icu4x::CodePointSetData']]],

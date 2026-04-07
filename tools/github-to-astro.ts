@@ -202,7 +202,7 @@ function printHelp() {
   console.log("Usage:");
   console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>] --astroVersion=<semver>");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] --astroVersion=4.16.18")
+  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] [--astroVersion=4.16.18]")
 }
 
 /**
@@ -243,7 +243,7 @@ function parseCLIArgs() {
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
-        astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
+        astroVersion: values["astroVersion"] ?? "4.16.18",
       }
     };
 
@@ -268,7 +268,7 @@ try {
   console.log("argv", process.argv);
   let {values, positionals} = parsedArgs;
 
-  const icu4xDir = path.join(root, values["icu4xDir"]);
+  const icu4xDir = path.resolve(root, values["icu4xDir"]);
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];

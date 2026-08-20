@@ -200,9 +200,9 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>]");
+  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>] [--overwrite]");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix]")
+  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] [--overwrite]")
 }
 
 /**
@@ -227,6 +227,10 @@ function parseCLIArgs() {
       sitePrefix: {
         type: "string",
       },
+      overwrite: {
+        type: "boolean",
+        default: false,
+      },
     }
   });
   let {values, positionals} = parsedArgs;
@@ -240,6 +244,7 @@ function parseCLIArgs() {
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
+        overwrite: values["overwrite"] ?? false,
       }
     };
 
@@ -268,6 +273,7 @@ try {
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
+  const overwrite = values["overwrite"];
   const webDirName = icu4xVersion.replace('.', '_');
   const artifactsDir = path.join(root, 'public', webDirName);
   const outputDirPath = path.join(root, 'src/content/docs', webDirName);
@@ -279,66 +285,86 @@ try {
   console.log("Markdown conversion finished successfully");
   console.log();
 
-  console.log(
-    `{
-    label: 'Version ${icu4xVersion}',
-    badge: {
-      text: 'New',
-      variant: 'success',
-    },
-    items: [
-      {
-        label: 'Code examples',
-        link: 'https://github.com/unicode-org/icu4x/tree/${icu4xRef}/examples',
-        badge: { text: '↗', variant: 'tip' },
-        attrs: { target: '_blank' },
-      },
-      {
-        label: 'Interactive Demo',
-        slug: '${webDirName}/demo',
-      },
-      {
-        label: 'API documentation',
-        items: [
-          {
-            label: 'Rust',
-            link: 'https://docs.rs/icu/${icu4xVersion}',
-            badge: { text: '↗', variant: 'tip' },
-            attrs: { target: '_blank' },
+  const versionConfigSnippet = `{
+					label: 'Version ${icu4xVersion}',
+					badge: {
+						text: 'New',
+						variant: 'success',
+					},
+					items: [
+						{
+							label: 'Code examples',
+							link: 'https://github.com/unicode-org/icu4x/tree/${icu4xRef}/examples',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'Interactive Demo',
+							slug: '${webDirName}/demo',
+						},
+						{
+							label: 'API documentation',
+							items: [
+								{
+									label: 'Rust',
+									link: 'https://docs.rs/icu/${icu4xVersion}',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'C++',
+									link: '/${webDirName}/cppdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'Dart',
+									link: 'https://pub.dev/documentation/icu4x/${icu4xVersion}/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'TypeScript',
+									link: '/${webDirName}/tsdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+							],
+						},
+						{
+							label: 'Tutorials',
+							autogenerate: { directory: '${webDirName}/tutorials' },
+						},
+					],
+					collapsed: latest_dir_name != '${webDirName}',
+				},`;
 
-          },
-          {
-            label: 'C++',
-            link: '/${webDirName}/cppdoc/',
-            badge: { text: '↗', variant: 'tip' },
-            attrs: { target: '_blank' },
-          },
-          {
-            label: 'Dart',
-            link: 'https://pub.dev/documentation/icu4x/${icu4xVersion}/',
-            badge: { text: '↗', variant: 'tip' },
-            attrs: { target: '_blank' },
-          },
-          {
-            label: 'TypeScript',
-            link: '/${webDirName}/tsdoc/',
-            badge: { text: '↗', variant: 'tip' },
-            attrs: { target: '_blank' },
-          },
-        ],
-      },
-      {
-        label: 'Tutorials',
-        autogenerate: { directory: '${webDirName}/tutorials' },
-      },
-    ],
-    collapsed: latest_dir_name != '${webDirName}',
-  },
-    `
-  );
+  if (overwrite) {
+    const astroConfigPath = path.join(root, 'astro.config.mjs');
+    let configContent = fs.readFileSync(astroConfigPath, { encoding: 'utf8' });
+    const marker = '// DO NOT DELETE: INSERT NEW VERSIONS HERE';
+    
+    if (!configContent.includes(marker)) {
+      console.error(`Error: Could not find marker "${marker}" in astro.config.mjs`);
+      process.exit(1);
+    }
 
-  console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet");
-  console.log();
+    configContent = configContent.replace(
+      /const latest_version = '.*?';/,
+      `const latest_version = '${icu4xVersion}';`
+    );
+
+    const replacement = `${marker}\n\t\t\t\t${versionConfigSnippet.trim()}`;
+    configContent = configContent.replace(marker, replacement);
+
+    fs.writeFileSync(astroConfigPath, configContent, { encoding: 'utf8' });
+    console.log("Updated astro.config.mjs with new version configuration.");
+    console.log();
+  } else {
+    console.log(versionConfigSnippet);
+    console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet");
+    console.log();
+  }
 
   console.log(`Task: Make sure to dump artifacts in ${artifactsDir}:`);
   console.log("You will need dart, typedoc, doxygen, doxygen-awesomecss installed")

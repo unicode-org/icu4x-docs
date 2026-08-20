@@ -77,6 +77,7 @@ export default defineConfig({
 						'principles'
 					],
 				},
+				// DO NOT DELETE: INSERT NEW VERSIONS HERE
 				{
 					label: 'Version 2.2',
 					badge: {

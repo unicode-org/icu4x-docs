@@ -1,9 +1,6 @@
 import fs from 'node:fs';
 import { parseArgs } from "node:util";
 import path from 'node:path';
-import { dir } from 'node:console';
-import { get } from 'node:https';
-import { release } from 'node:os';
 
 // Hard code the tutorial names that are not version specific,
 // So that they are not being transformed by this script
@@ -200,9 +197,9 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>] [--overwrite]");
+  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>] [--overwrite] [--outputScriptPath=<path>]");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] [--overwrite]")
+  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] [--overwrite] [--outputScriptPath=build-artifacts.sh]")
 }
 
 /**
@@ -231,6 +228,9 @@ function parseCLIArgs() {
         type: "boolean",
         default: false,
       },
+      outputScriptPath: {
+        type: "string",
+      },
     }
   });
   let {values, positionals} = parsedArgs;
@@ -245,6 +245,7 @@ function parseCLIArgs() {
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
         overwrite: values["overwrite"] ?? false,
+        outputScriptPath: values["outputScriptPath"],
       }
     };
 
@@ -274,6 +275,7 @@ try {
   const icu4xRef = values["icu4xRef"];
   const sitePrefix = values["sitePrefix"];
   const overwrite = values["overwrite"];
+  const outputScriptPath = values["outputScriptPath"];
   const webDirName = icu4xVersion.replace('.', '_');
   const artifactsDir = path.join(root, 'public', webDirName);
   const outputDirPath = path.join(root, 'src/content/docs', webDirName);
@@ -366,13 +368,33 @@ try {
     console.log();
   }
 
+  const commands = [
+    `mkdir -p ${artifactsDir}`,
+    `pushd ${icu4xDir} && doxygen tools/doxygen/config.doxy && mv tools/doxygen/html/ ${artifactsDir}/cppdoc; popd`,
+    `pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`,
+    `pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir -p ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`,
+  ];
+
+  const scriptContent = `#!/usr/bin/env bash
+set -euo pipefail
+
+${commands.join('\n')}
+`;
+
+  if (outputScriptPath) {
+    const resolvedScriptPath = path.resolve(process.cwd(), outputScriptPath);
+    fs.writeFileSync(resolvedScriptPath, scriptContent, { encoding: 'utf8', mode: 0o755 });
+    fs.chmodSync(resolvedScriptPath, 0o755);
+    console.log(`Saved artifact generation commands to ${resolvedScriptPath}`);
+    console.log();
+  }
+
   console.log(`Task: Make sure to dump artifacts in ${artifactsDir}:`);
   console.log("You will need dart, typedoc, doxygen, doxygen-awesomecss installed")
   console.log();
-  console.log(`mkdir ${artifactsDir}`);
-  console.log(`pushd ${icu4xDir} && doxygen tools/doxygen/config.doxy && mv tools/doxygen/html/ ${artifactsDir}/cppdoc; popd`);
-  console.log(`pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`);
-  console.log(`pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`);
+  for (const cmd of commands) {
+    console.log(cmd);
+  }
 
 } catch (error: unknown) {
   if (error instanceof Error) {

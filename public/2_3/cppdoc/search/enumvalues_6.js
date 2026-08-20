@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['gaf_0',['Gaf',['../classicu4x_1_1JoiningGroup.html#a778c641b194b2e4ac3d9d9be619f080caaf661bc1a9a9a0ae9f9ea2f9d127c41e',1,'icu4x::JoiningGroup']]],
+  ['gamal_1',['Gamal',['../classicu4x_1_1JoiningGroup.html#a778c641b194b2e4ac3d9d9be619f080ca38f0b1a12bd5d00079b92644843b0139',1,'icu4x::JoiningGroup']]],
+  ['garay_2',['Garay',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ae421e8b1414afdc3f992d211865f7100',1,'icu4x::Script']]],
+  ['geminationmark_3',['GeminationMark',['../classicu4x_1_1IndicSyllabicCategory.html#a59a0ee28dee104c40b344ef35b1897bfa050ddd1b4448e17e46b76258990fe3ba',1,'icu4x::IndicSyllabicCategory']]],
+  ['georgian_4',['Georgian',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a01bb3cb8d7894880557fe1b4d9cfbca1',1,'icu4x::Script']]],
+  ['glagolitic_5',['Glagolitic',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ab78bf1710b926774086afbefd3325800',1,'icu4x::Script']]],
+  ['glue_6',['Glue',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a88a0c2a2cb5664be880ea93ca5d013a5',1,'icu4x::LineBreak']]],
+  ['glueafterzwj_7',['GlueAfterZwj',['../classicu4x_1_1GraphemeClusterBreak.html#a6a546d1b6f25d0ca0bd2311c19c3e2e4afeb0902553e0a89f6d0087b02b082891',1,'icu4x::GraphemeClusterBreak::GlueAfterZwj'],['../classicu4x_1_1WordBreak.html#abacdff404e46ea946a9625b970513c67af3f71b070c5d78c83f58c1247d4e9ac7',1,'icu4x::WordBreak::GlueAfterZwj']]],
+  ['gothic_8',['Gothic',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a87652a6f9047f27cc4a511684627a186',1,'icu4x::Script']]],
+  ['grantha_9',['Grantha',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4af0e5ca533c0d773da3fbc2d32409c4d0',1,'icu4x::Script']]],
+  ['greek_10',['Greek',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a5f284f85c251a106de32e8120789e877',1,'icu4x::Script']]],
+  ['gregorian_11',['Gregorian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a418e3d891ce258ee3e40ab0175113edf',1,'icu4x::CalendarKind']]],
+  ['gujarati_12',['Gujarati',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a70a56d80f2e3a322c38f8a9e85259e71',1,'icu4x::Script']]],
+  ['gunjalagondi_13',['GunjalaGondi',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4adf535d2b803e36e5c891af5d047233c8',1,'icu4x::Script']]],
+  ['gurmukhi_14',['Gurmukhi',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a1191a0b10463afd8ab78ba6b2dcd7e28',1,'icu4x::Script']]],
+  ['gurungkhema_15',['GurungKhema',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ad96fd64cec6769acaac57eaf13aeb2df',1,'icu4x::Script']]]
+];

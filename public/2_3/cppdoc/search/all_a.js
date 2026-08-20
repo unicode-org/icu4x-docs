@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['jamo_0',['Jamo',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4adb2ea69cf0b0b4dd1f10b05ff06836b6',1,'icu4x::Script']]],
+  ['japanese_1',['Japanese',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07ab010852d6521e74806265cabbac81828',1,'icu4x::CalendarKind::Japanese'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a8b5c110e46f9d0928f92cdf1873a4eaf',1,'icu4x::Script::Japanese']]],
+  ['japaneseextended_2',['JapaneseExtended',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07ab9b5c3367c75f6980e438c216f05e975',1,'icu4x::CalendarKind']]],
+  ['javanese_3',['Javanese',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a3df48f93e880e447916062cb149b1ecc',1,'icu4x::Script']]],
+  ['jl_4',['JL',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a72b88bfdf7ff8db7ffef5784178a5954',1,'icu4x::LineBreak']]],
+  ['join_5fcontrol_5ffor_5fchar_5',['join_control_for_char',['../classicu4x_1_1CodePointSetData.html#a2605e6be6f9822fdbb461e42d50f7ea5',1,'icu4x::CodePointSetData']]],
+  ['joincausing_6',['JoinCausing',['../classicu4x_1_1JoiningType.html#a82f3d5c350da10f817220356492c4a09a0a1c33e99a3477ccf3d468e718b741f5',1,'icu4x::JoiningType']]],
+  ['joiner_7',['Joiner',['../classicu4x_1_1IndicSyllabicCategory.html#a59a0ee28dee104c40b344ef35b1897bfa9e8b2ff2681919773dc0fec671bd32e0',1,'icu4x::IndicSyllabicCategory']]],
+  ['joininggroup_8',['JoiningGroup',['../classicu4x_1_1JoiningGroup.html',1,'icu4x::JoiningGroup'],['../classicu4x_1_1JoiningGroup.html#ac59d0482455ac53f0cb420efe9e6f1b8',1,'icu4x::JoiningGroup::JoiningGroup()'],['../classicu4x_1_1JoiningGroup.html#afc94d733cecd4add06245c480a2b30e8',1,'icu4x::JoiningGroup::JoiningGroup(Value v)']]],
+  ['joininggroup_2ed_2ehpp_9',['JoiningGroup.d.hpp',['../JoiningGroup_8d_8hpp.html',1,'']]],
+  ['joininggroup_2ehpp_10',['JoiningGroup.hpp',['../JoiningGroup_8hpp.html',1,'']]],
+  ['joiningtype_11',['JoiningType',['../classicu4x_1_1JoiningType.html',1,'icu4x::JoiningType'],['../classicu4x_1_1JoiningType.html#ade5e23eb896fabb9309346c3d19e515a',1,'icu4x::JoiningType::JoiningType()'],['../classicu4x_1_1JoiningType.html#ac43eb4287240ff140e72faa5777b4ad3',1,'icu4x::JoiningType::JoiningType(Value v)']]],
+  ['joiningtype_2ed_2ehpp_12',['JoiningType.d.hpp',['../JoiningType_8d_8hpp.html',1,'']]],
+  ['joiningtype_2ehpp_13',['JoiningType.hpp',['../JoiningType_8hpp.html',1,'']]],
+  ['jt_14',['JT',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347ad7a91bf8b4d9df03bf3af36d74c0e1a1',1,'icu4x::LineBreak']]],
+  ['julian_15',['Julian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07ad9108d2858040981a11face3b7ef02bb',1,'icu4x::CalendarKind']]],
+  ['jurchen_16',['Jurchen',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a6e70e79a0f63883417347f754276ccfd',1,'icu4x::Script']]],
+  ['jv_17',['JV',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347acee498bb18132704576411961d8029cf',1,'icu4x::LineBreak']]]
+];

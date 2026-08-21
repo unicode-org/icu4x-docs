@@ -304,7 +304,7 @@ try {
   console.log("argv", process.argv);
   let {values, positionals} = parsedArgs;
 
-  const icu4xDir = path.join(root, values["icu4xDir"]);
+  const icu4xDir = path.resolve(root, values["icu4xDir"]);
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const dartVersion = values["dartVersion"];

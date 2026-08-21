@@ -375,6 +375,8 @@ try {
 					collapsed: latest_dir_name != '${webDirName}',
 				},`;
 
+  const redirectEntriesSnippet = `\t\t"/${webDirName}": "/${webDirName}/tutorials/quickstart",\n\t\t'/${webDirName}/tutorials': '/${webDirName}/tutorials/quickstart',`;
+
   if (overwrite) {
     const astroConfigPath = path.join(root, 'astro.config.mjs');
     let configContent = fs.readFileSync(astroConfigPath, { encoding: 'utf8' });
@@ -393,12 +395,24 @@ try {
     const replacement = `${marker}\n\t\t\t\t${versionConfigSnippet.trim()}`;
     configContent = configContent.replace(marker, replacement);
 
+    const redirectMarker = '// DO NOT DELETE: INSERT REDIRECTS HERE';
+
+    if (configContent.includes(redirectMarker) && !configContent.includes(`"/${webDirName}":`)) {
+      configContent = configContent.replace(
+        redirectMarker,
+        `${redirectEntriesSnippet}\n\t\t${redirectMarker}`
+      );
+    }
+
     fs.writeFileSync(astroConfigPath, configContent, { encoding: 'utf8' });
-    console.log("Updated astro.config.mjs with new version configuration.");
+    console.log("Updated astro.config.mjs with new version configuration and redirects.");
     console.log();
   } else {
     console.log(versionConfigSnippet);
     console.log("Task: Add the above JSON to astro.config.mjs if it doesn't exist yet");
+    console.log();
+    console.log(redirectEntriesSnippet);
+    console.log("Task: Add the above redirects to astro.config.mjs if they don't exist yet");
     console.log();
   }
 

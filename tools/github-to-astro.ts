@@ -323,10 +323,7 @@ try {
 
   const versionConfigSnippet = `{
 					label: 'Version ${icu4xVersion}',
-					badge: {
-						text: 'New',
-						variant: 'success',
-					},
+					badge: latest_dir_name == '${webDirName}' ? { text: 'New', variant: 'success' } : undefined,
 					items: [
 						{
 							label: 'Code examples',

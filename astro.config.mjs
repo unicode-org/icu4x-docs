@@ -81,10 +81,7 @@ export default defineConfig({
 				// DO NOT DELETE: INSERT NEW VERSIONS HERE
 				{
 					label: 'Version 2.2',
-					badge: {
-					text: 'New',
-					variant: 'success',
-					},
+					badge: latest_dir_name == '2_2' ? { text: 'New', variant: 'success' } : undefined,
 					items: [
 					{
 						label: 'Code examples',

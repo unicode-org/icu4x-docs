@@ -200,9 +200,9 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>] --astroVersion=<semver>");
+  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>]");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix] --astroVersion=4.16.18")
+  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix]")
 }
 
 /**
@@ -227,9 +227,6 @@ function parseCLIArgs() {
       sitePrefix: {
         type: "string",
       },
-      astroVersion: {
-        type: "string",
-      },
     }
   });
   let {values, positionals} = parsedArgs;
@@ -243,7 +240,6 @@ function parseCLIArgs() {
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
-        astroVersion: values["astroVersion"] ?? (() => {throw new Error("Need astroVersion")})(),
       }
     };
 

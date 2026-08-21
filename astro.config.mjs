@@ -22,6 +22,7 @@ export default defineConfig({
 		'/2_1/tutorials': '/2_1/tutorials/quickstart',
 		"/2_2": "/2_2/tutorials/quickstart",
 		'/2_2/tutorials': '/2_2/tutorials/quickstart',
+		// DO NOT DELETE: INSERT REDIRECTS HERE
 	},
 	integrations: [
 		starlight({

@@ -227,9 +227,12 @@ function printHelp() {
   console.log("Convert ICU4X Github repo Markdown tutorials to Astro MDX files");
   console.log();
   console.log("Usage:");
-  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--sitePrefix=<site-prefix-str-else-emptystr>]");
+  console.log("\tnpm run icu4x-convert -- --icu4xDir=<input-dir> --icu4xVersion=<minor version> [--icu4xRef=<ICU4X-git-ref>] [--dartVersion=<dart-version>] [--sitePrefix=<site-prefix-str-else-emptystr>]");
   console.log();
-  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--sitePrefix=/uriPrefix]")
+  console.log("Options:");
+  console.log("\t--dartVersion=<dart-version>\tDart version for pub.dev documentation link (default: <icu4xVersion>.0)");
+  console.log();
+  console.log("Example: npm run icu4x-convert -- --icu4xDir=../path/to/icu4x/ --icu4xVersion=2.1 [--icu4xRef=release/2.1-draft] [--dartVersion=2.1.0] [--sitePrefix=/uriPrefix]");
 }
 
 /**
@@ -249,6 +252,9 @@ function parseCLIArgs() {
       icu4xRef: {
         type: "string",
       },
+      dartVersion: {
+        type: "string",
+      },
       // site prefix, as used by static site generator tools.
       // if this were hosted on Github pages,
       sitePrefix: {
@@ -264,6 +270,7 @@ function parseCLIArgs() {
         icu4xDir: values["icu4xDir"] ?? (() => {throw new Error("Need icu4xDir")})(),
         icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
         icu4xRef: values["icu4xRef"] ?? `release/${values["icu4xVersion"]}`,
+        dartVersion: values["dartVersion"] ?? `${values["icu4xVersion"]}.0`,
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
@@ -294,6 +301,7 @@ try {
   const icu4xDir = path.join(root, values["icu4xDir"]);
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
+  const dartVersion = values["dartVersion"];
   const sitePrefix = values["sitePrefix"];
   const webDirName = icu4xVersion.replace('.', '_');
   const artifactsDir = path.join(root, 'public', webDirName);
@@ -343,7 +351,7 @@ try {
           },
           {
             label: 'Dart',
-            link: 'https://pub.dev/documentation/icu4x/${icu4xVersion}/',
+            link: 'https://pub.dev/documentation/icu4x/${dartVersion}/',
             badge: { text: '↗', variant: 'tip' },
             attrs: { target: '_blank' },
           },

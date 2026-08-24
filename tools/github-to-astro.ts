@@ -419,7 +419,7 @@ try {
     `mkdir -p ${artifactsDir}`,
     `pushd ${icu4xDir} && doxygen tools/doxygen/config.doxy && mv tools/doxygen/html/ ${artifactsDir}/cppdoc; popd`,
     `pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`,
-    `pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir -p ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`,
+    `pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir -p ${artifactsDir}/wasmdemo && cp -r public/. ${artifactsDir}/wasmdemo; popd`,
   ];
 
   const scriptContent = `#!/usr/bin/env bash

@@ -273,8 +273,8 @@ function parseCLIArgs() {
       values: {
         icu4xDir: values["icu4xDir"] ?? (() => {throw new Error("Need icu4xDir")})(),
         icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
-        icu4xRef: values["icu4xRef"] ?? `release/${values["icu4xVersion"]}`,
-        dartVersion: values["dartVersion"] ?? `${values["icu4xVersion"]}.0`,
+        icu4xRef: values["icu4xRef"] || `release/${values["icu4xVersion"]}`,
+        dartVersion: values["dartVersion"] || `${values["icu4xVersion"]}.0`,
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages

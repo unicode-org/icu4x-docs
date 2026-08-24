@@ -5,7 +5,7 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 
 // !! UPDATE LATEST VERSION HERE !!
-const latest_version = '2.2';
+const latest_version = '2.3';
 
 export const latest_dir_name = latest_version.replace('.', '_');
 
@@ -22,6 +22,8 @@ export default defineConfig({
 		'/2_1/tutorials': '/2_1/tutorials/quickstart',
 		"/2_2": "/2_2/tutorials/quickstart",
 		'/2_2/tutorials': '/2_2/tutorials/quickstart',
+				"/2_3": "/2_3/tutorials/quickstart",
+		'/2_3/tutorials': '/2_3/tutorials/quickstart',
 		// DO NOT DELETE: INSERT REDIRECTS HERE
 	},
 	integrations: [
@@ -79,6 +81,56 @@ export default defineConfig({
 					],
 				},
 				// DO NOT DELETE: INSERT NEW VERSIONS HERE
+				{
+					label: 'Version 2.3',
+					badge: latest_dir_name == '2_3' ? { text: 'New', variant: 'success' } : undefined,
+					items: [
+						{
+							label: 'Code examples',
+							link: 'https://github.com/unicode-org/icu4x/tree/release/2.3/examples',
+							badge: { text: '↗', variant: 'tip' },
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'Interactive Demo',
+							slug: '2_3/demo',
+						},
+						{
+							label: 'API documentation',
+							items: [
+								{
+									label: 'Rust',
+									link: 'https://docs.rs/icu/2.3',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'C++',
+									link: '/2_3/cppdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'Dart',
+									link: 'https://pub.dev/documentation/icu4x/2.3.1/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+								{
+									label: 'TypeScript',
+									link: '/2_3/tsdoc/',
+									badge: { text: '↗', variant: 'tip' },
+									attrs: { target: '_blank' },
+								},
+							],
+						},
+						{
+							label: 'Tutorials',
+							autogenerate: { directory: '2_3/tutorials' },
+						},
+					],
+					collapsed: latest_dir_name != '2_3',
+				},
 				{
 					label: 'Version 2.2',
 					badge: latest_dir_name == '2_2' ? { text: 'New', variant: 'success' } : undefined,

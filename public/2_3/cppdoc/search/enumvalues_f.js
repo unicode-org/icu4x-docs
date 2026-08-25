@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['pahawhhmong_0',['PahawhHmong',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a26949e2fbe01259c6ad491510c179463',1,'icu4x::Script']]],
+  ['palmyrene_1',['Palmyrene',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a649adb10f86315892723f0d9529dd055',1,'icu4x::Script']]],
+  ['paragraphseparator_2',['paragraphseparator',['../classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a5d4f9154a7d97fdb620be94b21cc9ba6',1,'icu4x::BidiClass::ParagraphSeparator'],['../classicu4x_1_1GeneralCategory.html#aa340792cb4c9a55533f81ff61067b355a790d8f8add66fbf8cbb6c095a142993e',1,'icu4x::GeneralCategory::ParagraphSeparator']]],
+  ['paucinhau_3',['PauCinHau',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a74b1910e9ff4a8f2a69e0607b8264dbf',1,'icu4x::Script']]],
+  ['pe_4',['Pe',['../classicu4x_1_1JoiningGroup.html#a778c641b194b2e4ac3d9d9be619f080cab93b5d3037e3f8a6488f32077654bde0',1,'icu4x::JoiningGroup']]],
+  ['persian_5',['Persian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a66b0578c70f8543853679f1c17c9ce14',1,'icu4x::CalendarKind']]],
+  ['phagspa_6',['PhagsPa',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a8539b5065951685ee27f64d1256e30e6',1,'icu4x::Script']]],
+  ['phoenician_7',['Phoenician',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ad7175f50483e228c5cb5d88aee43885f',1,'icu4x::Script']]],
+  ['plusnotallowed_8',['PlusNotAllowed',['../classicu4x_1_1DateDurationParseError.html#aea026f5fd535c3ac38299063477306a2add7555a07f47e8249b7d3d569acc2fc3',1,'icu4x::DateDurationParseError']]],
+  ['popdirectionalformat_9',['PopDirectionalFormat',['../classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a8aa9639c74bc2f30272c22d648996eaf',1,'icu4x::BidiClass']]],
+  ['popdirectionalisolate_10',['PopDirectionalIsolate',['../classicu4x_1_1BidiClass.html#ab8cfd56285c78a1dfd1430389f2a8688a50c080719f751aef396d8f12c9f31682',1,'icu4x::BidiClass']]],
+  ['positive_11',['Positive',['../classicu4x_1_1DecimalSign.html#a4d9e6f11bf947abcc411a0e344d1919da7f21388ea548bf6fc64d826d77e22554',1,'icu4x::DecimalSign']]],
+  ['postfixnumeric_12',['PostfixNumeric',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a773de96ec896362899bb78a6a56bfbbb',1,'icu4x::LineBreak']]],
+  ['prefixnumeric_13',['PrefixNumeric',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347aa6da34728103f288a8ae11c50d3db275',1,'icu4x::LineBreak']]],
+  ['prepend_14',['Prepend',['../classicu4x_1_1GraphemeClusterBreak.html#a6a546d1b6f25d0ca0bd2311c19c3e2e4aefd59a906ea755ac6a4bd2f1f478c371',1,'icu4x::GraphemeClusterBreak']]],
+  ['primary_15',['Primary',['../classicu4x_1_1CollatorStrength.html#a53b03d515b37da584ab70f12987c0c1fa9e3e2216eea4ec9829e8d302a0b4681d',1,'icu4x::CollatorStrength']]],
+  ['privateuse_16',['PrivateUse',['../classicu4x_1_1GeneralCategory.html#aa340792cb4c9a55533f81ff61067b355aa44d1304be16786e4829e40a118cfbb9',1,'icu4x::GeneralCategory']]],
+  ['psalterpahlavi_17',['PsalterPahlavi',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4aa11e244880d457524c2f44a276e1ca08',1,'icu4x::Script']]],
+  ['punctuation_18',['Punctuation',['../classicu4x_1_1CollatorMaxVariable.html#a5f835dd70a18053d8c33290b8d9575d4a3eabc23581063eeb5e4ee6b6cce04978',1,'icu4x::CollatorMaxVariable']]],
+  ['purekiller_19',['PureKiller',['../classicu4x_1_1IndicSyllabicCategory.html#a59a0ee28dee104c40b344ef35b1897bfaa8561c5a677b02395bcc06804d8ebf8f',1,'icu4x::IndicSyllabicCategory']]]
+];

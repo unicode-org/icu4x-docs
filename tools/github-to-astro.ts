@@ -273,8 +273,8 @@ function parseCLIArgs() {
       values: {
         icu4xDir: values["icu4xDir"] ?? (() => {throw new Error("Need icu4xDir")})(),
         icu4xVersion: values["icu4xVersion"] ?? (() => {throw new Error("Need icu4xVersion")})(),
-        icu4xRef: values["icu4xRef"] ?? `release/${values["icu4xVersion"]}`,
-        dartVersion: values["dartVersion"] ?? `${values["icu4xVersion"]}.0`,
+        icu4xRef: values["icu4xRef"] || `release/${values["icu4xVersion"]}`,
+        dartVersion: values["dartVersion"] || `${values["icu4xVersion"]}.0`,
         sitePrefix: values["sitePrefix"] ?? "",  // default value for sitePrefix is "" because
                                                  // URIs for base site icu4x.unicode.org do not need
                                                  // a prefix, unlike hosting on Github Pages
@@ -304,7 +304,7 @@ try {
   console.log("argv", process.argv);
   let {values, positionals} = parsedArgs;
 
-  const icu4xDir = path.join(root, values["icu4xDir"]);
+  const icu4xDir = path.resolve(root, values["icu4xDir"]);
   const icu4xVersion = values["icu4xVersion"];
   const icu4xRef = values["icu4xRef"];
   const dartVersion = values["dartVersion"];
@@ -419,7 +419,7 @@ try {
     `mkdir -p ${artifactsDir}`,
     `pushd ${icu4xDir} && doxygen tools/doxygen/config.doxy && mv tools/doxygen/html/ ${artifactsDir}/cppdoc; popd`,
     `pushd ${icu4xDir}/ffi/npm && make lib/index.mjs && typedoc --out ${artifactsDir}/tsdoc; popd`,
-    `pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir -p ${artifactsDir}/wasmdemo && cp -r public/ ${artifactsDir}/wasmdemo; popd`,
+    `pushd ${icu4xDir}/tools/web-demo && npm install && npm run build && mkdir -p ${artifactsDir}/wasmdemo && cp -r public/. ${artifactsDir}/wasmdemo; popd`,
   ];
 
   const scriptContent = `#!/usr/bin/env bash

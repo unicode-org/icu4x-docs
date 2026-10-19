@@ -77,7 +77,8 @@ export default defineConfig({
 				{
 					label: 'Start Here',
 					items: [
-						'principles'
+						'principles',
+						'presentations'
 					],
 				},
 				// DO NOT DELETE: INSERT NEW VERSIONS HERE

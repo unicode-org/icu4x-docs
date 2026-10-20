@@ -116,6 +116,18 @@ function transformMdBody(body: string, ctx: Context) {
     "https://docs.rs/$1/" + icu4xVersion
   )
 
+  // changes jsDelivr icu links to the specific ICU4X version
+  replacementBody = replacementBody.replace(
+    /https:\/\/cdn\.jsdelivr\.net\/npm\/icu@[0-9.]+\/lib\/index\.mjs/g,
+    "https://cdn.jsdelivr.net/npm/icu@" + icu4xVersion + ".0/lib/index.mjs"
+  )
+
+  // changes tsdoc links to the specific ICU4X version
+  replacementBody = replacementBody.replace(
+    /https:\/\/icu4x\.unicode\.org\/[0-9_]+\/tsdoc/g,
+    "https://icu4x.unicode.org/" + webDirName + "/tsdoc"
+  )
+
   return replacementBody;
 }
 

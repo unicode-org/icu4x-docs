@@ -36,7 +36,7 @@ cargo add icu
 We recommend using [CodePen](https://codepen.io/pen/?editors=1011) to follow along. To load ICU4X into CodePen, you can use this snippet in the JavaScript editor:
 
 ```javascript
-import { Locale, DateFormatter, IsoDate, DateTimeLength } from "https://unpkg.com/icu@2.0.0";
+import { Locale, DateFormatter, IsoDate, DateTimeLength } from "https://cdn.jsdelivr.net/npm/icu@2.1.0/lib/index.mjs";
 ```
 
 This loads the full ICU4X WebAssembly file. Since it may take a few seconds to load on slow connections, we'll create a loading div. Add this to your HTML:
@@ -222,7 +222,7 @@ Use the API documentation for [`icu::time::DateTime`](https://docs.rs/icu/2.1/ic
 
 ### JavaScript Part 4
 
-Use the API documentation for [`Time`](https://icu4x.unicode.org/2_0/tsdoc/classes/Time.html) and [`DateTimeFormatter`](https://icu4x.unicode.org/2_0/tsdoc/classes/DateTimeFormatter.html) to expand your app to format both a date and a time.
+Use the API documentation for [`Time`](https://icu4x.unicode.org/2_1/tsdoc/classes/Time.html) and [`DateTimeFormatter`](https://icu4x.unicode.org/2_1/tsdoc/classes/DateTimeFormatter.html) to expand your app to format both a date and a time.
 
 Hint: You can create an HTML time picker with
 

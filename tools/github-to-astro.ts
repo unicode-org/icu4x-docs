@@ -116,15 +116,15 @@ function transformMdBody(body: string, ctx: Context) {
     "https://docs.rs/$1/" + icu4xVersion
   )
 
-  // changes unpkg.com/icu links to jsDelivr with the specific ICU4X version
+  // changes jsDelivr icu links to the specific ICU4X version
   replacementBody = replacementBody.replace(
-    /https:\/\/unpkg\.com\/icu@[0-9.]+/g,
+    /https:\/\/cdn\.jsdelivr\.net\/npm\/icu@[0-9.]+\/lib\/index\.mjs/g,
     "https://cdn.jsdelivr.net/npm/icu@" + icu4xVersion + ".0/lib/index.mjs"
   )
 
   // changes tsdoc links to the specific ICU4X version
   replacementBody = replacementBody.replace(
-    /https:\/\/icu4x\.unicode\.org\/2_0\/tsdoc/g,
+    /https:\/\/icu4x\.unicode\.org\/[0-9_]+\/tsdoc/g,
     "https://icu4x.unicode.org/" + webDirName + "/tsdoc"
   )
 

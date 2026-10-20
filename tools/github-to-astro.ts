@@ -387,8 +387,8 @@ try {
     }
 
     configContent = configContent.replace(
-      /const latest_version = '.*?';/,
-      `const latest_version = '${icu4xVersion}';`
+      /(export )?const latest_version = '.*?';/,
+      `export const latest_version = '${icu4xVersion}';`
     );
 
     const replacement = `${marker}\n\t\t\t\t${versionConfigSnippet.trim()}`;

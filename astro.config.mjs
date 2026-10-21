@@ -5,7 +5,7 @@ import starlightLinksValidator from 'starlight-links-validator'
 
 
 // !! UPDATE LATEST VERSION HERE !!
-const latest_version = '2.3';
+export const latest_version = '2.3';
 
 export const latest_dir_name = latest_version.replace('.', '_');
 
@@ -60,6 +60,7 @@ export default defineConfig({
 			],
 			components: {
 				Footer: './src/components/UnicodeFooter.astro',
+				Hero: './src/components/Hero.astro',
 			},
 			logo: {
 				alt: 'Unicode',

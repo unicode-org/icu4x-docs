@@ -38,7 +38,7 @@ icu4x-datagen --markers all --locales ccp --format blob --out ccp.blob
 This will generate a `ccp.blob` file containing data for Chakma.
 
 :::note
-if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/2_3/tutorials/ccp.blob) (generated with icu4x 2.3).
+if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp.blob) (generated with icu4x 2.3).
 :::
 
 
@@ -107,7 +107,7 @@ function load_blob(url, callback) {
 }
 
 if (localeStr == "ccp") {
-    load_blob("https://icu4x.unicode.org/2_3/tutorials/ccp.blob", (blob) => {
+    load_blob("https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp.blob", (blob) => {
         let dateTimeFormatter = DateTimeFormatter.createYmdtWithProvider(
             DataProvider.fromByteSlice(blob),
             locale,
@@ -156,7 +156,7 @@ wc -c *.blob
 This is much better! Rerun your app with `ccp_smaller.blob` to make sure it still works!
 
 :::note
-if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/2_3/tutorials/ccp_smaller.blob) (generated with icu4x 2.3).
+if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smaller.blob) (generated with icu4x 2.3).
 :::
 
 ## 5. Slimming the data pack ... again
@@ -200,7 +200,7 @@ wc -c *.blob
 Rerun your app with `ccp_smallest.blob` to make sure it still works!
 
 :::note
-if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/2_3/tutorials/ccp_smallest.blob) (generated with icu4x 2.3).
+if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob) (generated with icu4x 2.3).
 :::
 
 Does the locale `en-u-ca-hebrew` still use the Hebrew calendar? Why is that?

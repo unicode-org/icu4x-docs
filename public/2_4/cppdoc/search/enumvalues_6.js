@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['gaf_0',['Gaf',['../classicu4x_1_1JoiningGroup.html#a778c641b194b2e4ac3d9d9be619f080caaf661bc1a9a9a0ae9f9ea2f9d127c41e',1,'icu4x::JoiningGroup']]],
+  ['gamal_1',['Gamal',['../classicu4x_1_1JoiningGroup.html#a778c641b194b2e4ac3d9d9be619f080ca38f0b1a12bd5d00079b92644843b0139',1,'icu4x::JoiningGroup']]],
+  ['garay_2',['garay',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9ab561ab494ffbe94a4c1d187b168a3dfa',1,'icu4x::Block::Garay'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ae421e8b1414afdc3f992d211865f7100',1,'icu4x::Script::Garay']]],
+  ['geminationmark_3',['GeminationMark',['../classicu4x_1_1IndicSyllabicCategory.html#a59a0ee28dee104c40b344ef35b1897bfa050ddd1b4448e17e46b76258990fe3ba',1,'icu4x::IndicSyllabicCategory']]],
+  ['generalpunctuation_4',['GeneralPunctuation',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a23d48daf111d0655e7be66e6a4dc8aa0',1,'icu4x::Block']]],
+  ['geometricshapes_5',['GeometricShapes',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a36f408844d8df4b31d18db8fc9870ef0',1,'icu4x::Block']]],
+  ['geometricshapesextended_6',['GeometricShapesExtended',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a64972430959e009b69173dc391867268',1,'icu4x::Block']]],
+  ['georgian_7',['georgian',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a8e0e11b4798cc51ef5020d2708bf5bf4',1,'icu4x::Block::Georgian'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a01bb3cb8d7894880557fe1b4d9cfbca1',1,'icu4x::Script::Georgian']]],
+  ['georgianextended_8',['GeorgianExtended',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9acc9daf99110ce7f9b0f4b869d439e579',1,'icu4x::Block']]],
+  ['georgiansupplement_9',['GeorgianSupplement',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9af9575b269649e4b6f79c15af26809e2f',1,'icu4x::Block']]],
+  ['glagolitic_10',['glagolitic',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9aca7cb633e5cbfe8adaa22b9ae5b5cf17',1,'icu4x::Block::Glagolitic'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ab78bf1710b926774086afbefd3325800',1,'icu4x::Script::Glagolitic']]],
+  ['glagoliticsupplement_11',['GlagoliticSupplement',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9ab68709f5728081804f9ebf1b3396d632',1,'icu4x::Block']]],
+  ['glue_12',['Glue',['../classicu4x_1_1LineBreak.html#a8a115c449eeaca94c408ace59f7e4347a88a0c2a2cb5664be880ea93ca5d013a5',1,'icu4x::LineBreak']]],
+  ['glueafterzwj_13',['glueafterzwj',['../classicu4x_1_1WordBreak.html#abacdff404e46ea946a9625b970513c67af3f71b070c5d78c83f58c1247d4e9ac7',1,'icu4x::WordBreak::GlueAfterZwj'],['../classicu4x_1_1GraphemeClusterBreak.html#a6a546d1b6f25d0ca0bd2311c19c3e2e4afeb0902553e0a89f6d0087b02b082891',1,'icu4x::GraphemeClusterBreak::GlueAfterZwj']]],
+  ['gothic_14',['gothic',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a093c5ccaee73062f1c7c32523a53e415',1,'icu4x::Block::Gothic'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a87652a6f9047f27cc4a511684627a186',1,'icu4x::Script::Gothic']]],
+  ['grantha_15',['grantha',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9ab6ab59ac16b9ef19173cc25cd180235c',1,'icu4x::Block::Grantha'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4af0e5ca533c0d773da3fbc2d32409c4d0',1,'icu4x::Script::Grantha']]],
+  ['greek_16',['Greek',['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a5f284f85c251a106de32e8120789e877',1,'icu4x::Script']]],
+  ['greekandcoptic_17',['GreekAndCoptic',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9ae3e78dc47df7beec4d55c0a995ba5380',1,'icu4x::Block']]],
+  ['greekextended_18',['GreekExtended',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a43c0351c0170cdd414a9b0e2352246dd',1,'icu4x::Block']]],
+  ['gregorian_19',['Gregorian',['../classicu4x_1_1CalendarKind.html#a8a004cf243970dd46f25688150787a07a418e3d891ce258ee3e40ab0175113edf',1,'icu4x::CalendarKind']]],
+  ['gujarati_20',['gujarati',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a953ccaa65837f11f8e02867b31de0dbb',1,'icu4x::Block::Gujarati'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a70a56d80f2e3a322c38f8a9e85259e71',1,'icu4x::Script::Gujarati']]],
+  ['gunjalagondi_21',['gunjalagondi',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a07d4280114d197ce5e61615e14fda2ce',1,'icu4x::Block::GunjalaGondi'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4adf535d2b803e36e5c891af5d047233c8',1,'icu4x::Script::GunjalaGondi']]],
+  ['gurmukhi_22',['gurmukhi',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a7de1e79e5cba6c5cf7ec46eec504bd0c',1,'icu4x::Block::Gurmukhi'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4a1191a0b10463afd8ab78ba6b2dcd7e28',1,'icu4x::Script::Gurmukhi']]],
+  ['gurungkhema_23',['gurungkhema',['../classicu4x_1_1Block.html#aae51cda06407e76a6b7abf1d8f07aff9a196aa35e5ac438ad1772629c0767f716',1,'icu4x::Block::GurungKhema'],['../classicu4x_1_1Script.html#ae10a36d33bb9ddd8c9b47cdfa18b5aa4ad96fd64cec6769acaac57eaf13aeb2df',1,'icu4x::Script::GurungKhema']]]
+];

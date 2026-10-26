@@ -163,7 +163,7 @@ if you're having technical difficulties, this file is available [here](https://i
 
 ## 5. Slimming the data pack ... again
 
-The last datagen invocation still produced a lot of markers, as you saw in its output. This is because we used the `DateTimeFormatter` API, which can format dates for a lot of different calendars (remember `en-u-ca-hebrew`). However, if we were only using it with a Gregorian calendar date, we wouldn't need Coptic, Indian, etc. date formatting data. Now, how do we communicate this to `--markers-for-bin`? Turns out, `icu::datetime` also exposes a `FixedCalendarDateTimeFormatter`, which is generic in a single calendar type. If you use this API instead, `--markers-for-bin` will only include the markers for that one calendar type.
+The last datagen invocation still produced a lot of markers, as you saw in its output. This is because we used the `DateTimeFormatter` API, which looks up the locale's preferred calendar (via `CalendarPreferredV1`) or `-u-ca-` keyword at runtime and can format dates for a lot of different calendars (remember `en-u-ca-hebrew`). However, if we were only using it with a Gregorian calendar date, we wouldn't need calendar resolution or Coptic, Indian, etc. date formatting data. Now, how do we communicate this to `--markers-for-bin`? Turns out, `icu::datetime` also exposes a `FixedCalendarDateTimeFormatter`, which is generic in a single calendar type. If you use this API instead, `--markers-for-bin` will only include the markers for that one calendar type.
 
 Replace the `DateTimeFormatter::try_new` calls with `FixedCalendarDateTimeFormatter::try_new`, and change the `format` invocation to convert the input to the Gregorian calendar:
 
@@ -171,7 +171,7 @@ Replace the `DateTimeFormatter::try_new` calls with `FixedCalendarDateTimeFormat
     println!("Date: {}", date_formatter.format(&iso_date.to_calendar(Gregorian)));
 ```
 
-The generic type of `FixedCalendarDateTimeFormatter` will be inferred from the input, which now has type `&Date<Gregorian>` now. Unlike `DateTimeFormatter`, `FixedCalendarDateTimeFormatter` never applies calendar conversions on its input, so it will be a `FixedCalendarDateTimeFormatter<Gregorian, ...>`.
+The generic type of `FixedCalendarDateTimeFormatter` will be inferred from the input, which now has type `&Date<Gregorian>`. Unlike `DateTimeFormatter`, `FixedCalendarDateTimeFormatter` never resolves a calendar from the locale or applies calendar conversions on its input, so it will always format in the `Gregorian` calendar as a `FixedCalendarDateTimeFormatter<Gregorian, ...>`.
 
 :::note
 In JavaScript, replace `DateFormatter` with [`DateFormatterGregorian`](https://icu4x.unicode.org/2_3/tsdoc/classes/DateFormatterGregorian.html) (the JavaScript counterpart to `FixedCalendarDateTimeFormatter<Gregorian, ...>`) in your `import` and `createYmd`.
@@ -194,7 +194,7 @@ The output will be much shorter:
 2025-05-14T14:26:52.325Z INFO  [icu_provider_export::export_impl] Generated marker DecimalSymbolsV1
 ```
 
-And the blob will also be much smaller at the sizes:
+Notice that in addition to dropping the formatting markers for non-Gregorian calendars, `ccp_smallest.blob` also omits `CalendarPreferredV1`, since the calendar is already fixed to `Gregorian` at compile time. And the blob will also be much smaller at the sizes:
 
 ```shell
 wc -c *.blob
@@ -213,4 +213,18 @@ if you're having technical difficulties, this file is available [here](https://i
 
 Run the program with `en-u-ca-hebrew`. What happens? Why?
 
-Try using `ccp_smallest.blob` with regular `DateTimeFormatter`. What happens? Why?
+<details>
+<summary>Answer</summary>
+
+The date is still formatted using the Gregorian calendar instead of the Hebrew calendar. Because `FixedCalendarDateTimeFormatter<Gregorian, ...>` (and `DateFormatterGregorian` in JavaScript) is fixed to the Gregorian calendar, it ignores the `-u-ca-hebrew` Unicode extension keyword in the locale and does not convert the input date to another calendar system.
+
+</details>
+
+Try using `ccp_smallest.blob` with regular `DateTimeFormatter` (or `DateFormatter` in JavaScript). What happens? Why?
+
+<details>
+<summary>Answer</summary>
+
+Creating the formatter fails with a `DataMarkerNotFound` error for `CalendarPreferredV1` (`calendar/preferred/v1`). Regular `DateTimeFormatter` (and `DateFormatter` in JavaScript) loads `CalendarPreferredV1` from the data provider to determine the default calendar for `ccp`, but `--markers-for-bin` excluded that marker from `ccp_smallest.blob` because `FixedCalendarDateTimeFormatter` does not need it.
+
+</details>

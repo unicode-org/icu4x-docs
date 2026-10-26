@@ -173,15 +173,9 @@ Replace the `DateTimeFormatter::try_new` calls with `FixedCalendarDateTimeFormat
 
 The generic type of `FixedCalendarDateTimeFormatter` will be inferred from the input, which now has type `&Date<Gregorian>` now. Unlike `DateTimeFormatter`, `FixedCalendarDateTimeFormatter` never applies calendar conversions on its input, so it will be a `FixedCalendarDateTimeFormatter<Gregorian, ...>`.
 
-In JavaScript, because `ccp_smallest.blob` only contains markers for the Gregorian calendar, replace `DateFormatter` with [`DateFormatterGregorian`](https://icu4x.unicode.org/2_3/tsdoc/classes/DateFormatterGregorian.html) (the JavaScript counterpart to `FixedCalendarDateTimeFormatter<Gregorian, ...>`) in your `import` and `createYmd` calls:
-
-```javascript
-let dateFormatter = DateFormatterGregorian.createYmdWithProvider(
-    DataProvider.fromByteSlice(blob),
-    locale,
-    DateTimeLength.Long,
-);
-```
+:::note
+In JavaScript, replace `DateFormatter` with [`DateFormatterGregorian`](https://icu4x.unicode.org/2_3/tsdoc/classes/DateFormatterGregorian.html) (the JavaScript counterpart to `FixedCalendarDateTimeFormatter<Gregorian, ...>`) in your `import` and `createYmd`.
+:::
 
 Now we can run datagen with `--markers-for-bin` again:
 
@@ -213,6 +207,10 @@ Rerun your app with `ccp_smallest.blob` to make sure it still works!
 
 :::note
 if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob) (generated with icu4x 2.3).
+:::
+
+:::note
+Because `ccp_smallest.blob` only contains markers for the Gregorian calendar, it will not work with `DateTimeFormatter`, even in locales that use the Gregorian calendar as the default.
 :::
 
 Does the locale `en-u-ca-hebrew` still use the Hebrew calendar? Why is that?

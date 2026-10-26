@@ -93,6 +93,8 @@ Try using `ccp` now!
 Update the formatting logic to load data from the blob if the locale is Chakma. Note that this code uses a callback, as it does an HTTP request:
 
 ```javascript
+// Add DataProvider to your import at the top of the file:
+import { Locale, DateFormatter, IsoDate, DateTimeLength, DataProvider } from "https://cdn.jsdelivr.net/npm/icu@2.3.2/lib/index.mjs";
 
 function load_blob(url, callback) {
     const req = new XMLHttpRequest();
@@ -108,19 +110,19 @@ function load_blob(url, callback) {
 
 if (localeStr == "ccp") {
     load_blob("https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp.blob", (blob) => {
-        let dateTimeFormatter = DateTimeFormatter.createYmdtWithProvider(
+        let dateFormatter = DateFormatter.createYmdWithProvider(
             DataProvider.fromByteSlice(blob),
             locale,
             DateTimeLength.Long,
         );
-        document.getElementById("output").innerText = dateTimeFormatter.formatIso(isoDate, time);
+        document.getElementById("output").innerText = dateFormatter.formatIso(isoDate);
     })
 } else {
-    let dateTimeFormatter = DateTimeFormatter.createYmdt(
-            locale,
-            DateTimeLength.Long,
+    let dateFormatter = DateFormatter.createYmd(
+        locale,
+        DateTimeLength.Long,
     );
-    document.getElementById("output").innerText = dateTimeFormatter.formatIso(isoDate, time);
+    document.getElementById("output").innerText = dateFormatter.formatIso(isoDate);
 }
 ```
 
@@ -202,5 +204,29 @@ Rerun your app with `ccp_smallest.blob` to make sure it still works!
 :::note
 if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob) (generated with icu4x 2.3).
 :::
+
+In JavaScript, because `ccp_smallest.blob` only contains markers for the Gregorian calendar, replace `DateFormatter` with [`DateFormatterGregorian`](https://icu4x.unicode.org/2_3/tsdoc/classes/DateFormatterGregorian.html) (the JavaScript counterpart to `FixedCalendarDateTimeFormatter<Gregorian, ...>`):
+
+```javascript
+// Replace DateFormatter with DateFormatterGregorian in your import:
+import { Locale, DateFormatterGregorian, IsoDate, DateTimeLength, DataProvider } from "https://cdn.jsdelivr.net/npm/icu@2.3.2/lib/index.mjs";
+
+if (localeStr == "ccp") {
+    load_blob("https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob", (blob) => {
+        let dateFormatter = DateFormatterGregorian.createYmdWithProvider(
+            DataProvider.fromByteSlice(blob),
+            locale,
+            DateTimeLength.Long,
+        );
+        document.getElementById("output").innerText = dateFormatter.formatIso(isoDate);
+    })
+} else {
+    let dateFormatter = DateFormatterGregorian.createYmd(
+        locale,
+        DateTimeLength.Long,
+    );
+    document.getElementById("output").innerText = dateFormatter.formatIso(isoDate);
+}
+```
 
 Does the locale `en-u-ca-hebrew` still use the Hebrew calendar? Why is that?

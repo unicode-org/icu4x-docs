@@ -22,9 +22,9 @@ export default defineConfig({
 		'/2_1/tutorials': '/2_1/tutorials/quickstart',
 		"/2_2": "/2_2/tutorials/quickstart",
 		'/2_2/tutorials': '/2_2/tutorials/quickstart',
-				"/2_3": "/2_3/tutorials/quickstart",
+		"/2_3": "/2_3/tutorials/quickstart",
 		'/2_3/tutorials': '/2_3/tutorials/quickstart',
-				"/2_4": "/2_4/tutorials/quickstart",
+		"/2_4": "/2_4/tutorials/quickstart",
 		'/2_4/tutorials': '/2_4/tutorials/quickstart',
 		// DO NOT DELETE: INSERT REDIRECTS HERE
 	},

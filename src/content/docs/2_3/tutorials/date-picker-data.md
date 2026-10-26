@@ -173,6 +173,8 @@ Replace the `DateTimeFormatter::try_new` calls with `FixedCalendarDateTimeFormat
 
 The generic type of `FixedCalendarDateTimeFormatter` will be inferred from the input, which now has type `&Date<Gregorian>` now. Unlike `DateTimeFormatter`, `FixedCalendarDateTimeFormatter` never applies calendar conversions on its input, so it will be a `FixedCalendarDateTimeFormatter<Gregorian, ...>`.
 
+In JavaScript, replace `DateFormatter` with [`DateFormatterGregorian`](https://icu4x.unicode.org/2_3/tsdoc/classes/DateFormatterGregorian.html) in your `import` and `createYmd` calls.
+
 Now we can run datagen with `--markers-for-bin` again:
 
 ```shell
@@ -204,29 +206,5 @@ Rerun your app with `ccp_smallest.blob` to make sure it still works!
 :::note
 if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob) (generated with icu4x 2.3).
 :::
-
-In JavaScript, because `ccp_smallest.blob` only contains markers for the Gregorian calendar, replace `DateFormatter` with [`DateFormatterGregorian`](https://icu4x.unicode.org/2_3/tsdoc/classes/DateFormatterGregorian.html) (the JavaScript counterpart to `FixedCalendarDateTimeFormatter<Gregorian, ...>`):
-
-```javascript
-// Replace DateFormatter with DateFormatterGregorian in your import:
-import { Locale, DateFormatterGregorian, IsoDate, DateTimeLength, DataProvider } from "https://cdn.jsdelivr.net/npm/icu@2.3.2/lib/index.mjs";
-
-if (localeStr == "ccp") {
-    load_blob("https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob", (blob) => {
-        let dateFormatter = DateFormatterGregorian.createYmdWithProvider(
-            DataProvider.fromByteSlice(blob),
-            locale,
-            DateTimeLength.Long,
-        );
-        document.getElementById("output").innerText = dateFormatter.formatIso(isoDate);
-    })
-} else {
-    let dateFormatter = DateFormatterGregorian.createYmd(
-        locale,
-        DateTimeLength.Long,
-    );
-    document.getElementById("output").innerText = dateFormatter.formatIso(isoDate);
-}
-```
 
 Does the locale `en-u-ca-hebrew` still use the Hebrew calendar? Why is that?

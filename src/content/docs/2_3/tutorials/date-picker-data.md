@@ -209,8 +209,8 @@ Rerun your app with `ccp_smallest.blob` to make sure it still works!
 if you're having technical difficulties, this file is available [here](https://icu4x.unicode.org/files/tutorials-2026-10-21/ccp_smallest.blob) (generated with icu4x 2.3).
 :::
 
-:::note
-Because `ccp_smallest.blob` only contains markers for the Gregorian calendar, it will not work with `DateTimeFormatter`, even in locales that use the Gregorian calendar as the default.
-:::
+### Experimenting with the smallest blob file
 
-Does the locale `en-u-ca-hebrew` still use the Hebrew calendar? Why is that?
+Run the program with `en-u-ca-hebrew`. What happens? Why?
+
+Try using `ccp_smallest.blob` with regular `DateTimeFormatter`. What happens? Why?

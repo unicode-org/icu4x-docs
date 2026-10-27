@@ -122,6 +122,12 @@ function transformMdBody(body: string, ctx: Context) {
     "https://cdn.jsdelivr.net/npm/icu@" + icu4xVersion + ".0/lib/index.mjs"
   )
 
+  // changes unpkg icu links to the specific ICU4X version
+  replacementBody = replacementBody.replace(
+    /https:\/\/unpkg\.com\/icu@[0-9.]+/g,
+    "https://unpkg.com/icu@" + icu4xVersion + ".0"
+  )
+
   // changes tsdoc links to the specific ICU4X version
   replacementBody = replacementBody.replace(
     /https:\/\/icu4x\.unicode\.org\/[0-9_]+\/tsdoc/g,
@@ -411,7 +417,7 @@ try {
     if (configContent.includes(redirectMarker) && !configContent.includes(`"/${webDirName}":`)) {
       configContent = configContent.replace(
         redirectMarker,
-        `${redirectEntriesSnippet}\n\t\t${redirectMarker}`
+        `${redirectEntriesSnippet.trim()}\n\t\t${redirectMarker}`
       );
     }
 
